@@ -3,13 +3,13 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle: ''
-description: ''
+title: Milvelas
+subtitle: 'Life is immersive.'
+description: 'Blog for sharing'
 keywords:
-author: John Doe
-language: en
-timezone: ''
+author: zhongwei Gu
+language: zh
+timezone: 'Asia/shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
@@ -49,7 +49,7 @@ highlight:
   auto_detect: false
   tab_replace: ''
   wrap: true
-  hljs: false
+  hljs: true
 prismjs:
   preprocess: true
   line_number: true
@@ -96,7 +96,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: kira
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
