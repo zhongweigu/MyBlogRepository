@@ -7,7 +7,7 @@ title: Milvelas
 subtitle: 'Life is immersive.'
 description: 'Blog for sharing'
 keywords:
-author: zhongwei Gu
+author: Milvelas
 language: zh
 timezone: 'Asia/shanghai'
 
@@ -96,7 +96,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: kira
+theme: jelly
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
