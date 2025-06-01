@@ -7,7 +7,8 @@
     "clean": "hexo clean",
     "deploy": "hexo deploy",
     "server": "hexo server",
-    "netlify": "npm run clean && npm run build"
+    "netlify": "npm run clean && npm run build",
+    "postinstall": "patch-package"
   },
   "hexo": {
     "version": "7.3.0"
@@ -30,6 +31,10 @@
     "hexo-theme-landscape": "^1.0.0",
     "hexo-theme-next": "^8.23.0",
     "hexo-toc": "^1.1.0",
-    "markdown-it-katex": "^2.0.3"
+    "markdown-it-katex": "^2.0.3",
+    "markdown-it-named-headings": "^1.1.0"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.0"
   }
 }
