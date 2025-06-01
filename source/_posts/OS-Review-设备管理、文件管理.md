@@ -3,9 +3,9 @@ title: OS-Review-设备管理、文件管理
 date: 2025-06-01 15:21:27
 tags: [操作系统]
 categories: "课程复习"
+toc: true
 ---
 
-<!-- toc -->
 # 四、设备管理
 
 ## 基础

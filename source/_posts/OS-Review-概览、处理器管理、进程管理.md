@@ -3,9 +3,9 @@ title: OS-Review-概览、处理器管理、进程管理
 date: 2025-05-29 22:42:00
 tags: [操作系统]    
 categories: "课程复习"
+toc: true
 ---
 
-<!-- toc -->
 # 计算机操作系统
 
 

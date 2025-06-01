@@ -5,15 +5,15 @@
 # Site
 title: Milvelas
 subtitle: 'Life is immersive.'
-description: 'Blog for sharing'
+description: '醉后不知天在水'
 keywords:
 author: Milvelas
-language: zh
+language: zh-CN
 timezone: 'Asia/shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: http://milvelas.cn
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -96,7 +96,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: flexblock
+theme: butterfly
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
@@ -142,3 +142,12 @@ markdown:
     permalinkSymbol: "¶"
     case: 0
     separator: "-"
+
+kramed:
+  gfm: true
+  pedantic: false
+  sanitize: false
+  tables: true
+  breaks: true
+  smartLists: true
+  smartypants: true
