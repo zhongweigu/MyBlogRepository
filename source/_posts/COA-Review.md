@@ -1,7 +1,8 @@
 ---
 title: COA-Review
 date: 2025-04-06 19:50:01
-tags: "review"
+categories:   "课程复习"
+tags: [计算机组成原理]
 ---
 
 # 一.计算机系统概述
