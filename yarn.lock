@@ -1241,7 +1241,7 @@ hasown@^2.0.0, hasown@^2.0.2:
 
 "hexo-asset-image@https://github.com/xcodebuild/hexo-asset-image.git":
   version "0.0.5"
-  resolved "git+ssh://git@github.com/xcodebuild/hexo-asset-image.git#3c114cf0c0343ab28469635085b225fcae7fb9d3"
+  resolved "git+https://github.com/xcodebuild/hexo-asset-image.git#3c114cf0c0343ab28469635085b225fcae7fb9d3"
   dependencies:
     cheerio "^0.19.0"
     entities "^1.1.2"
@@ -1333,14 +1333,6 @@ hexo-i18n@^2.0.0:
   dependencies:
     sprintf-js "^1.1.2"
 
-hexo-kira-toc@1.4.9:
-  version "1.4.9"
-  resolved "https://registry.npmmirror.com/hexo-kira-toc/-/hexo-kira-toc-1.4.9.tgz"
-  integrity sha512-FhqGpAR0RfRaUu2Sb69O2iRIr2dZpwyyR+sfmCINnH7aSsgur++HScLOJopImA8qqFQY3pLW2vWzLD3+I73QZQ==
-  dependencies:
-    cheerio "^1.0.0"
-    markdown-toc "^1.2.0"
-
 hexo-log@^0.2.0:
   version "0.2.0"
   resolved "https://registry.npmmirror.com/hexo-log/-/hexo-log-0.2.0.tgz"
@@ -1427,15 +1419,6 @@ hexo-tag-aplayer@^3.0.4:
     hexo-log "^0.2.0"
     hexo-util "^0.1.7"
     meting "^1.2.0"
-
-hexo-theme-kira@^1.4.9:
-  version "1.4.9"
-  resolved "https://registry.npmmirror.com/hexo-theme-kira/-/hexo-theme-kira-1.4.9.tgz"
-  integrity sha512-iSGx/cb+TBqTnHbKSvrCUlt71/o67D/ypIlU7wxsgSAIoeLiIc0gTOffnkXasmPxdRKWMTj13acriZeGT5HOdg==
-  dependencies:
-    hexo-kira-toc "1.4.9"
-    hexo-tag-aplayer "^3.0.4"
-    hexo-wordcount "^6.0.1"
 
 hexo-theme-landscape@^1.0.0:
   version "1.1.0"
