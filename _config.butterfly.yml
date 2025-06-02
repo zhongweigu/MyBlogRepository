@@ -19,8 +19,8 @@ nav:
 menu:
   首页: / || fas fa-home
   归档: /archives/ || fas fa-archive
+  标签: /tags || fas fa-tags
   分类: /categories/ || fas fa-folder-open
-  标签: /tags/ || fas fa-tags
   # List: / ||fas fa-list
   # Music: /music/ || fas fa-music
   # Movie: /movies/ || fas fa-video
@@ -31,8 +31,8 @@ menu:
 
 code_blocks:
   # Code block theme: darker / pale night / light / ocean / false
-  theme: false
-  macStyle: false
+  theme: light
+  macStyle: true
   # Code block height limit (unit: px)
   height_limit: false
   word_wrap: true
@@ -90,7 +90,8 @@ category_img:
 category_per_img:
 
 # The background image of footer
-footer_img: false
+footer_img: https://tomato-mall-milvelas.oss-cn-nanjing.aliyuncs.com/QQ20250601-211630.png
+
 
 # Website Background
 # Can set it to color or image url
@@ -102,7 +103,7 @@ cover:
   archives_enable: true
   # When cover is not set, the default cover is displayed
   default_cover:
-    # - xxx.jpg
+  # - xxx.jpg
 
 # Replace Broken Images
 error_img:
@@ -212,12 +213,12 @@ reward:
   enable: false
   text:
   QR_code:
-    # - img: /img/wechat.jpg
-    #   link:
-    #   text: wechat
-    # - img: /img/alipay.jpg
-    #   link:
-    #   text: alipay
+  # - img: /img/wechat.jpg
+  #   link:
+  #   text: wechat
+  # - img: /img/alipay.jpg
+  #   link:
+  #   text: alipay
 
 # Post edit
 # Easily browse and edit blog source code online.
@@ -262,7 +263,7 @@ footer:
     since: 2019
   custom_text:
   # Copyright of theme and framework
-  copyright: true
+  copyright: false
 
 # --------------------------------------
 # Aside Settings
@@ -726,10 +727,10 @@ ad:
 # --------------------------------------
 
 site_verification:
-  # - name: google-site-verification
-  #   content: xxxxxx
-  # - name: baidu-site-verification
-  #   content: xxxxxxx
+# - name: google-site-verification
+#   content: xxxxxx
+# - name: baidu-site-verification
+#   content: xxxxxxx
 
 # --------------------------------------
 # Beautify / Effect
@@ -795,14 +796,14 @@ beautify:
   # Specify the field to beautify (site or post)
   field: post
   # Specify the icon to be used as a prefix for the title, such as '\f0c1'
-  title_prefix_icon:
+  title_prefix_icon: '\f863'
   # Specify the color of the title prefix icon, such as '#F47466'
-  title_prefix_icon_color:
+  title_prefix_icon_color: '#F47466'
 
 # Global font settings
 # Don't modify the following settings unless you know how they work
 font:
-  global_font_size:
+  global_font_size: 15px
   code_font_size:
   font_family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"
   code_font_family: consolas
@@ -963,7 +964,7 @@ pjax:
   enable: false
   # Exclude the specified pages from pjax, such as '/music/'
   exclude:
-    # - /xxxxxx/
+  # - /xxxxxx/
 
 # Inject the css and script (aplayer/meting)
 aplayerInject:
@@ -1009,13 +1010,13 @@ pwa:
 Open_Graph_meta:
   enable: true
   option:
-    # twitter_card:
-    # twitter_image:
-    # twitter_id:
-    # twitter_site:
-    # google_plus:
-    # fb_admins:
-    # fb_app_id:
+  # twitter_card:
+  # twitter_image:
+  # twitter_id:
+  # twitter_site:
+  # google_plus:
+  # fb_admins:
+  # fb_app_id:
 
 # Structured Data
 # https://developers.google.com/search/docs/guides/intro-structured-data
@@ -1028,10 +1029,9 @@ css_prefix: true
 # Insert the code to head (before '</head>' tag) and the bottom (before '</body>' tag)
 inject:
   head:
-    - <link rel="stylesheet" href="/self/kimbie-light.css">
-    # - <link rel="stylesheet" href="/xxx.css">
+  # - <link rel="stylesheet" href="/xxx.css">
   bottom:
-    # - <script src="xxxx"></script>
+  # - <script src="xxxx"></script>
 
 # CDN Settings
 # Don't modify the following settings unless you know how they work
@@ -1051,58 +1051,58 @@ CDN:
   custom_format:
 
   option:
-    # abcjs_basic_js:
-    # activate_power_mode:
-    # algolia_js:
-    # algolia_search:
-    # aplayer_css:
-    # aplayer_js:
-    # artalk_css:
-    # artalk_js:
-    # blueimp_md5:
-    # busuanzi:
-    # canvas_fluttering_ribbon:
-    # canvas_nest:
-    # canvas_ribbon:
-    # chartjs:
-    # click_heart:
-    # clickShowText:
-    # disqusjs:
-    # disqusjs_css:
-    # docsearch_css:
-    # docsearch_js:
-    # egjs_infinitegrid:
-    # fancybox:
-    # fancybox_css:
-    # fireworks:
-    # fontawesome:
-    # gitalk:
-    # gitalk_css:
-    # giscus:
-    # instantpage:
-    # instantsearch:
-    # katex:
-    # katex_copytex:
-    # lazyload:
-    # local_search:
-    # main:
-    # main_css:
-    # mathjax:
-    # medium_zoom:
-    # mermaid:
-    # meting_js:
-    # prismjs_autoloader:
-    # prismjs_js:
-    # prismjs_lineNumber_js:
-    # pjax:
-    # sharejs:
-    # sharejs_css:
-    # snackbar:
-    # snackbar_css:
-    # translate:
-    # twikoo:
-    # typed:
-    # utils:
-    # valine:
-    # waline_css:
-    # waline_js:
+  # abcjs_basic_js:
+  # activate_power_mode:
+  # algolia_js:
+  # algolia_search:
+  # aplayer_css:
+  # aplayer_js:
+  # artalk_css:
+  # artalk_js:
+  # blueimp_md5:
+  # busuanzi:
+  # canvas_fluttering_ribbon:
+  # canvas_nest:
+  # canvas_ribbon:
+  # chartjs:
+  # click_heart:
+  # clickShowText:
+  # disqusjs:
+  # disqusjs_css:
+  # docsearch_css:
+  # docsearch_js:
+  # egjs_infinitegrid:
+  # fancybox:
+  # fancybox_css:
+  # fireworks:
+  # fontawesome:
+  # gitalk:
+  # gitalk_css:
+  # giscus:
+  # instantpage:
+  # instantsearch:
+  # katex:
+  # katex_copytex:
+  # lazyload:
+  # local_search:
+  # main:
+  # main_css:
+  # mathjax:
+  # medium_zoom:
+  # mermaid:
+  # meting_js:
+  # prismjs_autoloader:
+  # prismjs_js:
+  # prismjs_lineNumber_js:
+  # pjax:
+  # sharejs:
+  # sharejs_css:
+  # snackbar:
+  # snackbar_css:
+  # translate:
+  # twikoo:
+  # typed:
+  # utils:
+  # valine:
+  # waline_css:
+  # waline_js:
