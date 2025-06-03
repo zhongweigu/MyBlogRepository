@@ -60,9 +60,9 @@ toc : true
 
 ### 信号量与进程状态转换模型及其队列模型
 
-​	<img src="操作系统知识点整理/QQ20250531-214655.png" style="zoom: 33%;" />
+​	<img src="OS-Review-并发程序设计/QQ20250531-214655.png" style="zoom: 33%;" />
 
-​	<img src="操作系统知识点整理/QQ20250531-214726.png" style="zoom: 33%;" />
+​	<img src="OS-Review-并发程序设计/QQ20250531-214726.png" style="zoom: 33%;" />
 
 > 推论
 >
@@ -725,7 +725,7 @@ L2：
 - 防止进程的**违法同步**操作
 - 便于**高级语言**编程
 
-<img src="操作系统知识点整理/image-20250602150634279.png" alt="image-20250602150634279" style="zoom:33%;" />
+<img src="OS-Review-并发程序设计/image-20250602150634279.png" alt="image-20250602150634279" style="zoom:33%;" />
 
 定义：管程是由局部于自己的若干**公共变量**及其说明和所有访问这些公共变量的过程所组成的软件模块
 
@@ -878,11 +878,11 @@ coend
 
 #### 生产者消费者问题
 
-<img src="操作系统知识点整理/image-20250602161234408.png" alt="image-20250602161234408" style="zoom:50%;" />
+<img src="OS-Review-并发程序设计/image-20250602161234408.png" alt="image-20250602161234408" style="zoom:50%;" />
 
 #### 苹果橘子问题
 
-<img src="操作系统知识点整理/image-20250602161633779.png" alt="image-20250602161633779" style="zoom:50%;" />
+<img src="OS-Review-并发程序设计/image-20250602161633779.png" alt="image-20250602161633779" style="zoom:50%;" />
 
 ## 进程通信
 
@@ -910,11 +910,11 @@ coend
 
 ​	消息不是直接从发送者发送到接收者，而是发送到由临时保存这些消息的队列组成的一个**共享数据结构**，这些队列通常成为**信箱(mailbox)**。
 
-​	<img src="操作系统知识点整理/image-20250602164130727.png" alt="image-20250602164130727" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602164130727.png" alt="image-20250602164130727" style="zoom:50%;" />
 
 #### 生产者消费者问题
 
-​	<img src="操作系统知识点整理/image-20250602164804312.png" alt="image-20250602164804312" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602164804312.png" alt="image-20250602164804312" style="zoom:50%;" />
 
 ### 消息缓冲通信
 
@@ -922,7 +922,7 @@ coend
 
 ​	**接收原语Receive**：执行P(sm)查看有否信件；执行互斥操作P(mutex)，从消息队列中摘下第一个消息， 执行V(mutex)；把消息缓冲区内容复制到接收区， 释放消息缓冲区。
 
-​	<img src="操作系统知识点整理/image-20250602165146788.png" alt="image-20250602165146788" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602165146788.png" alt="image-20250602165146788" style="zoom:50%;" />
 
 ### 管道和套接字
 
@@ -942,7 +942,7 @@ coend
 
 ​	采用**客户/服务器**计算模式，实现跨越机器边界的通信目标
 
-​	<img src="操作系统知识点整理/image-20250602165818119.png" alt="image-20250602165818119" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602165818119.png" alt="image-20250602165818119" style="zoom:50%;" />
 
 ## 死锁
 
@@ -1021,13 +1021,13 @@ $$
 
 > 即进程k**还需的资源i的数量Cki-Aki**不超过**在它之前的所有进程回收的资源数加上一开始剩余的资源数**
 
-<img src="操作系统知识点整理/image-20250602172651842.png" alt="image-20250602172651842" style="zoom:50%;" />
+<img src="OS-Review-并发程序设计/image-20250602172651842.png" alt="image-20250602172651842" style="zoom:50%;" />
 
 > Available=(V1,V2,…,Vn) 表示各资源剩余数；Allocation和Available对应项相加就是资源总数。
 >
 > 对比Claim和Available可知：P1、P3是完全可以先分配的，因为可分配资源数大于声明数。
 
-​	<img src="操作系统知识点整理/image-20250602172750107.png" alt="image-20250602172750107" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602172750107.png" alt="image-20250602172750107" style="zoom:50%;" />
 
 > 分析：
 >
@@ -1049,9 +1049,9 @@ $$
 
 约定Pi→Rj为请求边，Rj→Pi为分配边。
 
-​	<img src="操作系统知识点整理/image-20250602173704321.png" alt="image-20250602173704321" style="zoom:33%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602173704321.png" alt="image-20250602173704321" style="zoom:33%;" />
 
-​	<img src="操作系统知识点整理/image-20250602173838301.png" alt="image-20250602173838301" style="zoom:33%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602173838301.png" alt="image-20250602173838301" style="zoom:33%;" />
 
 > 1. 如果进程-资源分配图中无环路，则此时系统没有发生死锁；
 > 2. 如果进程-资源分配图中有环路，且**每个资源类中仅有一个资源**，则系统中发生了**死锁**；
