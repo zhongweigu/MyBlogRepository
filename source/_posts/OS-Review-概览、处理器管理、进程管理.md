@@ -4,6 +4,7 @@ date: 2025-05-29 22:42:00
 tags: [操作系统]    
 categories: "课程复习"
 toc: true
+cover: "c27b9f2b-b329-4dc3-b312-441229bdfd66.png"
 ---
 
 # 计算机操作系统

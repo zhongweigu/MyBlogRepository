@@ -4,6 +4,7 @@ date: 2025-06-01 15:21:27
 tags: [操作系统]
 categories: "课程复习"
 toc: true
+cover: "bd45c237-18d0-4cca-a3c7-f8431f825635.png"
 ---
 
 # 四、设备管理
