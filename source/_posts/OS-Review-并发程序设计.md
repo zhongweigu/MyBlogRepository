@@ -834,10 +834,14 @@ void signal(semaphore &x_sem, int &x_count,  InterfaceModule &IM) {
 ```
 
 > next信号量与资源无关，是为了防止错误设立的临时队列
+>
+> 不能简单把wait，signal和P，V对应。**wait操作是真正的等待**，而**P操作是有则过、无则阻**。
+>
+> wait的条件一般要显式地**通过if语句指明**，而P操作本身暗含判断逻辑。
 
 ### 解决互斥与同步问题
 
-#### 读者写者问题
+#### 管程-读者写者问题
 
 ```c
 TYPE  read-write=monitor
@@ -850,13 +854,13 @@ DEFINE  start_read, end_read, start_write, end_write;
 USE  wait,signal,enter,leave;
 ```
 
-<img src="操作系统知识点整理/image-20250602151833249.png" alt="image-20250602151833249" style="zoom:50%;" />
+<img src="OS-Review-并发程序设计/image-20250602151833249.png" alt="image-20250602151833249" style="zoom:50%;" />
 
 > 这个解法偏袒写进程，`if(wc>0) signal(W,W_count,IM);`如果一直写就没得读。
 
-#### 哲学家就餐问题
+#### 管程-哲学家就餐问题
 
-<img src="操作系统知识点整理/image-20250602153044669.png" alt="image-20250602153044669" style="zoom:50%;" />
+<img src="OS-Review-并发程序设计/image-20250602153044669.png" alt="image-20250602153044669" style="zoom:50%;" />
 
 **调用方式：**
 
@@ -877,11 +881,11 @@ coend
 >
 > **❗强烈建议结合具体演算步骤理解**
 
-#### 生产者消费者问题
+#### 管程-生产者消费者问题
 
 <img src="OS-Review-并发程序设计/image-20250602161234408.png" alt="image-20250602161234408" style="zoom:50%;" />
 
-#### 苹果橘子问题
+#### 管程-苹果橘子问题
 
 <img src="OS-Review-并发程序设计/image-20250602161633779.png" alt="image-20250602161633779" style="zoom:50%;" />
 
@@ -969,9 +973,7 @@ coend
 
 ​	资源被分成多个层次，当进程得到某一层的一个资源后，它只能再申请**较高层次**的资源；当进程要释放某层的一个资源时，必须**先释放占有的较高层次**的资源；当进程得到某一层的一个资源后，它想申请该层的另一个资源时，必须先释放该层中的已占资源。
 
-### ⭐死锁的避免
-
-**银行家算法**
+### ⭐死锁的避免-银行家算法
 
 ​	银行家比喻操作系统，周转资金是资源，贷款人就是进程
 
@@ -1026,7 +1028,7 @@ $$
 
 > Available=(V1,V2,…,Vn) 表示各资源剩余数；Allocation和Available对应项相加就是资源总数。
 >
-> 对比Claim和Available可知：P1、P3是完全可以先分配的，因为可分配资源数大于声明数。
+> 对比Claim和Available可知：**P1、P3是完全可以先分配的，因为可分配资源数大于声明数**。
 
 ​	<img src="OS-Review-并发程序设计/image-20250602172750107.png" alt="image-20250602172750107" style="zoom:50%;" />
 
