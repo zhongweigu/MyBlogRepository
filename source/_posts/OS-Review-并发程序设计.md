@@ -7,8 +7,15 @@ toc : true
 cover : "QQ20250531-214655.png"
 ---
 
-
 # 六、并发程序设计
+
+> 1. 了解程序的并发性与并发程序设计 
+> 2. 掌握临界区互斥及其解决方案 
+> 3. 熟练使用PV进行程序设计 
+> 4. 掌握Hoare管程 
+> 5. 掌握消息传递
+
+​	<img src="OS-Review-并发程序设计/image-20250607165938977.png" alt="image-20250607165938977" style="zoom: 33%;" />
 
 ## 并发进程
 
@@ -18,7 +25,7 @@ cover : "QQ20250531-214655.png"
 
 多道程序设计允许多个进程**并发执行**。OS 保证按照“顺序程序设计”方法编制的程序在并发执行时不受影响，如同独占计算机。这些按照顺序程序设计思想编制的进程在中并发执行属于**无关的并发进程**。
 
-使一个程序分成若干个可同时执行的程序模块的方法称 **并发程序设计(concurrent programming)**
+==使一个程序分成若干个可同时执行的程序模块的方法称 **并发程序设计(concurrent programming)**==
 
 ​	并发性、共享性、交往性
 
@@ -27,24 +34,60 @@ cover : "QQ20250531-214655.png"
 **无关**的并发进程：一组并发进程分别在**不同的变量集合**上运行
 
 > 并发进程的无关性是进程的执行与时间无关的一个充 分条件，又称为 **Bernstein 条件**
+>
+> Pi：进程，R：读，W：写
 > $$
 > ((R(p1)∩W(p2))∪(R(p2)∩W(p1))∪(W(p1)∩W(p2))= \emptyset
 > $$
->  则并发进程的执行与时间无关
+> 则并发进程的执行与时间无关
 
 **交往**的并发进程：一组并发进程**共享某些变量**， 一个进程的执行可能影响其他并发进程的结果
 
-1. 时间相关的错误：结果错误、永远等待
-2. **竞争：互斥**（死锁和饥饿）
-3. **协作：同步**
+**时间相关的错误：结果错误、永远等待**
+
+### 竞争与协作
+
+进程之间存在两种基本关系：**竞争关系和协作关系**
+
+第一种是竞争关系，一个进程的执行可能影响到同其竞争资源的其他进程，如果两个进程要访问同一资源，那么，一个进程通过操作系统分配得到该资源，另一个将不得不等待
+
+> 竞争带来的问题：**死锁和饥饿**
+>
+> ==进程的互斥(mutual exclusion) 是解决进程间竞争关系(间接制约关系 )的手段。==
+
+第二种是协作关系，某些进程为完成同一任务需要分工协作，由于合作的每一个进程都是独立地以不可预知的速度推进，这就需要相互协作的进程在某些协调点上协调各自的工作。当合作进程中的一个到达协调点后，在尚未得到其伙伴进程发来的消息或信号之前**应阻塞自己**，直到其他合作进程发来协调信号或消息后方被唤醒并继续执行。
+
+> ==进程的同步(Synchronization)是解决进程间协作关系(直接制约关系)的手段。==
+>
+> 进程互斥关系是一种特殊的进程同步关系， 即逐次使用互斥共享资源，是对进程使用资源次序上的一种协调
 
 ## 临界区管理
 
-**临界资源：互斥共享变量所代表的资源**
+==**临界资源：互斥共享变量所代表的资源**，即一次只能被一个进程使用的资源==
 
-1. 关中断：最简单，直接在访问临界区时禁止中断
-2. 测试并建立指令
-3. 互换指令
+**临界区指并发进程中与互斥共享变量相关的程序段**
+
+### 临界区管理的尝试
+
+​	<img src="OS-Review-并发程序设计/image-20250607164411622.png" alt="image-20250607164411622" style="zoom:33%;" />
+
+​	<img src="OS-Review-并发程序设计/image-20250607164421498.png" alt="image-20250607164421498" style="zoom:33%;" />
+
+### Peterson算法
+
+​	<img src="OS-Review-并发程序设计/image-20250607164456324.png" alt="image-20250607164456324" style="zoom:33%;" />
+
+只能交替进入临界区，不能连续进入
+
+## 临界区管理实现的硬件方式
+
+1. **关中断**：最简单，直接在访问临界区时禁止中断
+2. **测试并建立指令**
+
+   ​	<img src="OS-Review-并发程序设计/image-20250607165645848.png" alt="image-20250607165645848" style="zoom:33%;" />
+3. **互换指令**
+
+   ​	<img src="OS-Review-并发程序设计/image-20250607165741777.png" alt="image-20250607165741777" style="zoom:33%;" />
 
 ## ⭐⭐**信号量与PV操作**
 
@@ -115,14 +158,14 @@ coend
    ```c
    P(fork[i]); 
    P(fork[(i+1) % 5]);
-   或
+   
    P(fork[(i+1) % 5]); 
    P(fork[i]);	// 邻座二人必然对抗
    ```
 
    也可以简单一点，只让**其中一个哲学家先取右手**，这样也不会陷入死锁。
 
-3. **(AND型信号量)**每个哲学家取到手边的两把叉子才吃，否则一把叉子也不取
+3. **(AND型信号量)**每个哲学家取到手边的两把叉子才吃，否则一把叉子也不取(**管程求解**)
 
 ### **生产者与消费者问题**
 
@@ -165,12 +208,12 @@ coend
    
    P(sput);  	
    B[putptr]=product;	
-   putptr = (putptr+1)%k	
+   putptr = (putptr+1)%k;	
    V(sget);	
    
    P(sget);  	
    product=B[getptr];
-   getptr = (getptr+1)%k
+   getptr = (getptr+1)%k;
    V(sput);	
    ```
 
@@ -183,17 +226,17 @@ coend
    
    P(sput);  	
    	p(s1);	// 拒绝其他写进程使用putptr
-   		B[putptr] = product;	
-   		putptr = (putptr+1)%k	
+   	B[putptr] = product;	
+   	putptr = (putptr+1)%k;
    	V(s1);
    V(sget);	
    
    
    P(sget);  	
    	p(s2);	// 拒绝其他读进程使用getptr
-   		product = B[getptr];
-   		getptr = (getptr+1)%k
-       V(s2);
+   	product = B[getptr];
+   	getptr = (getptr+1)%k;
+   	V(s2);
    V(sput);
    ```
 
@@ -251,36 +294,7 @@ end;
 
 读之间不互斥，读与写、写与写之间互斥
 
-```c
-rmutex=1; wmutex=1; S=1;
-int readcount = 0 // 记录有几个进程正在读文件
-
-process reader_i(  ) {
- 	while (true)  {
-    P(s);    					// 解决“读者优先”问题
- 		P(rmutex);					// 维护readcount临界区
- 			if (readcount==0) P(wmutex);	// 第一个读进程申请资源
-			readcount++;			// 非第一个读进程直接进入
- 		V(rmutex);
-    V(s);    
-        读文件；
-		P(rmutex);
- 			readcount--;
- 			if(readcount==0)  V(wmutex);
- 		V(rmutex);
- 	}
- }
- 
-process writer_i(  ) {
- 	while(true) {
-    P(s);
- 		P(wmutex);
-			写文件；
-		V(wmutex);
-    V(s);
-	}
-}
-```
+​	<img src="OS-Review-并发程序设计/image-20250607170352219.png" alt="image-20250607170352219" style="zoom:50%;" />
 
 > 一个混淆性极强的例子。可以这样想：
 > **假设读读、读写、写写都互斥**，读和写应该都共用**一个**信号量**rw=1**，有：
@@ -305,7 +319,7 @@ process writer_i(  ) {
 > 	读;
 > 	count--;			// 读完就退出
 > 	if(count==0) V(rw);  // 没有读进程正在读了，释放资源，允许写
-> 	
+> 
 > Writing:
 > 	P(rw);
 > 	写;
@@ -317,14 +331,14 @@ process writer_i(  ) {
 > ```c
 > Reading:
 > 	P(mutex);
->         if(count==0) P(rw);  
->         count++;		
->     V(mutex);
->         读;
->     P(mutex);
->         count--;			
->         if(count==0) V(rw);  
->     V(mutex);
+>      if(count==0) P(rw);  
+>      count++;		
+>  V(mutex);
+>      读;
+>  P(mutex);
+>      count--;			
+>      if(count==0) V(rw);  
+>  V(mutex);
 > ```
 >
 > 这就是混淆的地方，课件里给出的两个信号量是rmutex和wmutex，很容易让人以为一个处理读、一个处理写。事实上，最终决定读写资源分配的只有wmutex（也就是这里的rw），rmutex是用来保护count的！
@@ -336,66 +350,36 @@ process writer_i(  ) {
 > ```c
 > Reading:
 > 	P(S);
-> 		P(mutex);
->        		...		
->     	V(mutex);
+> 	P(mutex);
+> 	...		
+>  	V(mutex);
 > 	V(S);
-> 		读;
-> 		P(mutex);
->        		...		
->     	V(mutex);
->     	
+> 	读;
+> 	P(mutex);
+> 	...		
+>  	V(mutex);
+> 
 > Writing:
 > 	P(S);
-> 		P(rw);
-> 		写;
-> 		V(rw);
+> 	P(rw);
+> 	写;
+> 	V(rw);
 > 	V(S);
 > ```
 >
 > 加上这一个S的效果是什么呢？就是**让所有读和写进程按申请顺序一起排队**，当一个写进程前面的读进程执行完了，就立马执行这个写进程。至于在该写进程之后申请的读进程呢，因为被P(S)拦截，不能再进入读的过程，只有当它前面的写进程结束了释放S的时候，才会轮到它再次去读。这样就保证了**公平性**。
 >
 > **最终代码如课件所示。**
+>
+> 补充：**写者优先**
+>
+> ​	<img src="OS-Review-并发程序设计/image-20250607171255047.png" alt="image-20250607171255047" style="zoom:33%;" />	
 
 ### **睡眠的理发师问题**
 
-理发店理有一位理发师、一把理发椅和n把供等候 理发的顾客坐的椅子。如果没有顾客，理发师便在理发椅上睡觉。一个顾客到来时，叫醒理发师。如果理发师正在理发时又有顾客来到，则如果有空椅子可坐，就坐下来等待，否则就离开。
+理发店理有一位理发师、一把理发椅和n把供等候理发的顾客坐的椅子。如果没有顾客，理发师便在理发椅上睡觉。一个顾客到来时，叫醒理发师。如果理发师正在理发时又有顾客来到，则如果有空椅子可坐，就坐下来等待，否则就离开。
 
-```c
-int waiting=0;              //等候理发顾客坐的椅子数
-int CHAIRS=N;               //为顾客准备的椅子数
-
- customers=0; barbers=0; mutex=1;
- 
-process barber( ) {
- while(true) {
- 	P(customers);	 
-		//有顾客吗?若无顾客,理发师睡眠
-	P(mutex);           
-			//若有顾客时，进入临界区
-		waiting--;  //等候顾客数少一个
-        V(barbers); //理发师准备为顾客理发
-	V(mutex);                     
-		//退出临界区
-	cut_hair(); 
-	//理发师正在理发(非临界区)
- 	}
-}
-
-process customer_i( ) {
- P(mutex);
-	if(waiting<CHAIRS) {     
-		//有空椅子吗
-		waiting++;  //等候顾客数加1
- 		V(customers);  //唤醒理发师
-		V(mutex);      //退出临界区
-		P(barbers);  
-			//理发师忙，顾客坐下等待
-		get_haircut(); //否则顾客坐下理发
-   	}
- 	else  V(mutex); //人满了,走吧！
- }
-```
+​	<img src="OS-Review-并发程序设计/image-20250607170512265.png" alt="image-20250607170512265" style="zoom:50%;" />
 
 > **生产者-消费者模型**的一个变体
 >
@@ -445,83 +429,25 @@ process customer_i( ) {
 
 有一个铁笼子，每次只能放入一个动物。猎手向笼中放入老虎，农夫向笼中放入羊；动物园等待取笼中的老虎，饭店等待取笼中的羊。
 
+​	<img src="OS-Review-并发程序设计/image-20250607170604054.png" alt="image-20250607170604054" style="zoom:50%;" />
+
 > 典型的苹果-橘子问题，不多说
 
 ### **银行业务问题**
 
 某大型银行办理人民币储蓄业务，由n个储蓄员负责。每个顾客进入银行后先至取号机取一个号，并且在等待区找到空沙发坐下等着叫号。取号机给出的号码依次递增，并假定有足够多的空沙发容纳顾客。当一个储蓄员空闲下来，就叫下一个号。
 
-```c
- customer_count=0; server_count=0; mutex=1; 
-
-process customer_i (i=1,2, …)
-begin
- 	take a number;
- 	P(mutex);
-		等待区找到空沙发坐下;
- 	V(mutex);
- 	V(customer_count);	// 拿到号了
- 	P(server_count);	// 是否已满，排队
-end;
-
-Process servers_j (j=1,2, …)
-begin
- 	L: P(customer_count);	// 叫下一位
- 		P(mutex);
-			被呼号顾客离开沙发走出等待区;
- 		V(mutex);
-		V(server_count);	// 服务完，该储蓄员空闲
-		为该号客人服务;
-		客人离开;
- 	go to L;
-end;
-```
+​	<img src="OS-Review-并发程序设计/image-20250607170706379.png" alt="image-20250607170706379" style="zoom:50%;" />
 
 > 和睡眠的理发师问题一样，只不过这次理发师（储蓄员）有多个，但是这个多个体现在进程多可能并行，不影响代码结构。代码几乎和理发师模型一样。
 >
-> 还是要注意长时间作业尽量不要放临界区里。
+> 还是要注意**长时间作业尽量不要放临界区里**。
 
 ### **缓冲区管理**
 
 有n个进程将字符逐个读入到一个容量为80的缓冲区 中(n>1)，当缓冲区满后，由输出进程Q负责**一次性取走**这80个字符。
 
-```c
-count,in:integer
-buffer:array[0..79] of char;
-mutex=1;empty=80;full=0;
-count=0;in=0;
-
-process Pi(i=1,...,n))
-begin
- 	L: 读入一字符到 x;
-	P(empty);
-		P(mutex);
- 			Buffer[in]=x;
- 			in=(in+1) % 80;
- 			count++;
- 			if (count==80)  {	// 直到满80再full++
- 				count=0; 
-                V(mutex); 
-                V(full);  
-            }else 
-            	V(mutex);
-    goto L;
- end;
-
-process Q
-begin
- 	while(true) {
- 		P(full);
- 		P(mutex);
- 		for(int j=0; j< 80;j++) 
-				read buffer[j];
- 		in=0;
-		V(mutex);
- 		for (int j=0; j< 80;j++) 
-				V(empty);		// ！empty要释放80次返回初值
- 	}
-end;
-```
+​	<img src="OS-Review-并发程序设计/image-20250607170726772.png" alt="image-20250607170726772" style="zoom:50%;" />
 
 > 依然是交叉式的生产者-消费者模型，只不过加了限制条件。根据条件设置信号量值。
 
@@ -529,33 +455,7 @@ end;
 
 汽车司机与售票员之间必须协同工作，一方面只有售票员把车门关好了司机才能开车，因此，售票员关好门应通知司机开车，然后售票员进行售票。另一方面，只有当汽车已经停下，售票员才能开门上下客，故司机停车后应该通知售票员。假定某辆公共汽车上有一名司机与两名售票员，汽车当前正在始发站停车上客。
 
-```c
-run1=0; run2=0; stop1=0; stop2=0;
-
-void Driver() {
-   while (true) 
-   {
-       P(run1); 	// 确认售票员1处门是否关好
-       P(run2); 	// 确认售票员2处门是否关好
-       开车; 
-       停车; 
-       V(stop1); 	// 通知售票员1停车了
-       V(stop2); 	// 通知售票员2停车了
-     }
- }
- 
-void Seller_i() {	// i = 1,2
-   while (true)   {
-       上乘客; 
-       关车门; 
-        V(runi); 	// 售票员i通知司机门关好了
-        售车票; 
-       P(stopi); 	// 确认司机有没有通知自己停车了
-        开车门; 
-        下乘客; 
-     }
- } 
-```
+​	<img src="OS-Review-并发程序设计/image-20250607170747073.png" alt="image-20250607170747073" style="zoom:50%;" />
 
 > 简单的同步问题
 
@@ -563,156 +463,36 @@ void Seller_i() {	// i = 1,2
 
 三个吸烟者在一个房间内，还有一个香烟供应者。为了制造并抽掉香烟，每个吸烟者需要三样东西：烟草、纸和火柴， 供应者有丰富货物提供。三个吸烟者中，第一个有自己的烟草，第二个有自己的纸和第三个有自己的火柴。供应者随机地将两样东西放在桌子上，允许一个吸烟者进行对健康不利的吸烟。当吸烟者完成吸烟后唤醒供应者， 供应者再把两样东西放在桌子上，唤醒另一个吸烟者。
 
-```c
-sput=1;sget[i]=0; //i=0, 1, 2
-
-Process businessman {        
-//供应者进程
-L1:	 i=RAND( ) mod 3;
- 	 j=RAND( ) mod 3;
- 	 If  (i==j)  then goto L1;
- 	 
- 	 P(Sput);
- 	 Put_items [i]_on_table;
- 	 Put_items [j]_on_table;
- 	 if (i=0 and j=1) or (i=1 and j=0) V(sget[2]);
- 	 if (i=1 and j=2) or (i=2and j=1)  V(sget[0]);
- 	 if (i=0 and j=2) or (i=2 and j=0) V(sget[1]);
- goto L1;
-}
-
-Process consumer (k) {    
-//吸烟者进程，k=0,1,2
-L2：
-	P(sget[k]);
- 	take_one_item_from_table;
- 	take_one_item_from_table;
- 	V(sput);
- 	make_cigarette_and_smoking
- goto L2;
-}
-```
+​	<img src="OS-Review-并发程序设计/image-20250607170815875.png" alt="image-20250607170815875" style="zoom:50%;" />
 
 > 题目很复杂，代码很简单。也是生产者-消费者问题的变种，只不过**生产者会选择消费者**。
 
 ### **独木桥问题**
 
-1. 东西向汽车过独木桥，为了保证安全，只要桥上无车，则允许一方的汽车过桥，待一方的车全部过完后， 另一方的车才允许过桥。
+1. 东西向汽车过独木桥，为了保证安全，只要桥上无车，则允许一方的汽车过桥，**待一方的车全部过完后**， 另一方的车才允许过桥。
 
-   ```c
-   process P东() {
-    while(true) {
-    	P(mutex1); 
-   		count1++; 
-   		if (count1==1) P(wait); 
-   	V(mutex1); 
-   		过独木桥;
-    	P(mutex1); 
-   		count1--;  
-   		if (count1==0) V(wait); 
-   	V(mutex1); 
-   	}
-   } 
+   ​	<img src="OS-Review-并发程序设计/image-20250607170902468.png" alt="image-20250607170902468" style="zoom:50%;" />
    
-   process P西() {
-    while(true) {
-    	P(mutex2); 
-   		count2++; 
-   		if (count2==1) P(wait); 
-   	V(mutex2); 
-   		过独木桥;
-    	P(mutex2); 
-   		count2--;  
-   		if (count2==0) V(wait); 
-   	V(mutex2); 
-   	}
-   } 
-   ```
-
-   > 一个双向的读者-写者问题
-
+   > 一个双向的读者-写者问题。“待一方的车全部过完后”就是指**需要偏袒**正在运行的进程。
+   
 2. 在独木桥问题1中，**限制桥面上最多可以有k辆汽车通过**。
 
-   ```c
-   bridge = k
+   ​	<img src="OS-Review-并发程序设计/image-20250607171023085.png" alt="image-20250607171023085" style="zoom:50%;" />
    
-   process P东() {
-   	...
-   	P(bridge)
-   	过桥;
-   	V(bridge)
-   	...
-   }
+   > 限制同步进程的数量，只要给过桥设立一个信号量bridge=k即可
    
-   process P西(){
-   	...
-   }
-   ```
-
-   > 限制同步进程的数量，只要给过桥设立一个信号量即可
-
 3. 在独木桥问题1中，以**三辆汽车为一组**，要求保证东方和西方以组为单位**交替**通过汽车。
 
-   ```c
-   Process P东() {
-    while(true) {
-      P(S1)  	
-          P(mutex1);  
-             countu1++; 
-             if (countu1==1)&&(countd1==0)  P(wait); 
-          V(mutex1);   
-             过独木桥;
-      V(S2)
-          P(mutex1); 
-         	  countu1--;     countd1++;	 // countd1用于成组分析
-         	  if ((countu1==0)&&(countd1==3)){countd1=0; V(wait); }
-          V(mutex1); 
-       }
-    }
+   ​	<img src="OS-Review-并发程序设计/image-20250607171113811.png" alt="image-20250607171113811" style="zoom:50%;" />
    
-   Process P西() {
-    while(true) {
-      P(S2)   
-          P(mutex2); 
-             countu2++; 
-             if (countu2==1)&&(countd2==0) P(wait); 
-          V(mutex2); 
-             过独木桥;
-      V(S1)
-          P(mutex2); 
-            countu2--;  countd2++;
-          	 if ((countu2==0)&&(countd2==3)) {countd2=0; V(wait); }
-          V(mutex2); 
-       }
-    } 
-   ```
-
    > 三辆一组，就在if条件里再加一条判断有没有经过三辆
    >
    > 交替：设立互斥量S1,S2，交替PV
-
+   
 4. 在独木桥问题1中，要求各方向的汽车**串行**过桥，但当另一方提出过桥时， 应能**阻止对方未上桥**的后继车辆，待桥面上的汽车过完桥后，另一方的汽车开始过桥。
 
-   ```c
-   process P东() {
-    while(true) {
-     P(S)				// 设立互斥量S管理队列，确认公平性
-    	P(mutex1); 
-   		count1++; 
-   		if (count1==1) P(wait); 
-   	V(mutex1); 
-     V(S)
-   		过独木桥;
-    	P(mutex1); 
-   		count1--;  
-   		if (count1==0) V(wait); 
-   	V(mutex1); 
-   	}
-   } 
+   ​	<img src="OS-Review-并发程序设计/image-20250607171156523.png" alt="image-20250607171156523" style="zoom:50%;" />
    
-   ...
-   ```
-
    > 仔细推敲，发现其实这就是一个**公平性问题**。要求东西两方向的车辆按到来的顺序排队，先来的车先上。
 
 ## ⭐⭐**管程**
@@ -726,7 +506,7 @@ L2：
 - 防止进程的**违法同步**操作
 - 便于**高级语言**编程
 
-<img src="OS-Review-并发程序设计/image-20250602150634279.png" alt="image-20250602150634279" style="zoom:33%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602150634279.png" alt="image-20250602150634279" style="zoom:33%;" />
 
 定义：管程是由局部于自己的若干**公共变量**及其说明和所有访问这些公共变量的过程所组成的软件模块
 
@@ -854,13 +634,13 @@ DEFINE  start_read, end_read, start_write, end_write;
 USE  wait,signal,enter,leave;
 ```
 
-<img src="OS-Review-并发程序设计/image-20250602151833249.png" alt="image-20250602151833249" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602151833249.png" alt="image-20250602151833249" style="zoom:50%;" />
 
 > 这个解法偏袒写进程，`if(wc>0) signal(W,W_count,IM);`如果一直写就没得读。
 
 #### 管程-哲学家就餐问题
 
-<img src="OS-Review-并发程序设计/image-20250602153044669.png" alt="image-20250602153044669" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602153044669.png" alt="image-20250602153044669" style="zoom:50%;" />
 
 **调用方式：**
 
@@ -883,26 +663,26 @@ coend
 
 #### 管程-生产者消费者问题
 
-<img src="OS-Review-并发程序设计/image-20250602161234408.png" alt="image-20250602161234408" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602161234408.png" alt="image-20250602161234408" style="zoom:50%;" />
 
 #### 管程-苹果橘子问题
 
-<img src="OS-Review-并发程序设计/image-20250602161633779.png" alt="image-20250602161633779" style="zoom:50%;" />
+​	<img src="OS-Review-并发程序设计/image-20250602161633779.png" alt="image-20250602161633779" style="zoom:50%;" />
 
 ## 进程通信
 
-1. 进程直接通信
-2. 进程间接通信
+1. **进程直接通信**
+2. **进程间接通信**
 
-消息传递原语
+**消息传递原语**
 
-- send  发送消息的原语
-- receive 接收消息的原语
+- **send**  发送消息的原语
+- **receive** 接收消息的原语
 
 ### 进程直接通信
 
-1. **对称直接寻址**，发送进程和接收进程必须**命名**对方以便通信。
-2. **非对称直接寻址**，只要**发送者命名**接收者，而接收者不需要命名发送者
+1. **对称直接寻址**，发送进程和接收进程必须**命名**对方以便通信。` send(P, messsage) `,` receive(Q, message) `
+2. **非对称直接寻址**，只要**发送者命名**接收者，而接收者不需要命名发送者`send(P, messsage)`,`receive(id, message)`
 
 本质上是要**内核**开辟存储空间，发出方写到指定区域再由内核转到接收方
 
@@ -933,7 +713,7 @@ coend
 
 管道(pipeline)是Unix和C的传统通信方式
 
-管道和套接字都是基于信箱的消息传递方式的一种变体，它们与传统的信箱方式等价，区别在于**没有预先设定消息的边界**。
+**管道和套接字都是基于信箱的消息传递方式的一种变体**，它们与传统的信箱方式等价，区别在于**没有预先设定消息的边界**。
 
 ### 高级进程通信机制
 
@@ -962,7 +742,7 @@ coend
 
 ### 死锁的防止
 
-​	死锁产生的四大**必要条件**：
+​	**死锁产生**的四大**必要条件**：
 
 1. **互斥**条件（解决：**同时访问**，但某些资源天然互斥）
 2. **占有和等待**条件（解决：**静态分配**，但是很浪费）
