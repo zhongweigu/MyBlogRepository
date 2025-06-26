@@ -55,17 +55,17 @@ social:
 # Image Settings
 # --------------------------------------
 
-favicon: https://tomato-mall-milvelas.oss-cn-nanjing.aliyuncs.com/avatar.png
+favicon: https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/avatar.png
 
 avatar:
-  img: https://tomato-mall-milvelas.oss-cn-nanjing.aliyuncs.com/avatar.png
+  img: https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/avatar.png
   effect: false
 
 # Disable all banner images
 disable_top_img: false
 
 # If the banner of page not setting, it will show the default_top_img
-default_top_img:  https://tomato-mall-milvelas.oss-cn-nanjing.aliyuncs.com/QQ20250601-211630.png
+default_top_img:  https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/background.png
 
 # The banner image of index page
 index_img:
@@ -90,19 +90,36 @@ category_img:
 category_per_img:
 
 # The background image of footer
-footer_img: https://tomato-mall-milvelas.oss-cn-nanjing.aliyuncs.com/QQ20250601-211630.png
+footer_img: https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/background.png
 
 
 # Website Background
 # Can set it to color or image url
-background: https://tomato-mall-milvelas.oss-cn-nanjing.aliyuncs.com/coolbackgrounds-gradient-cucumber.png
+background: https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/coolbackgrounds-gradient-cucumber%20%281%29.png
 cover:
   # Disable the cover or not
   index_enable: true
   aside_enable: true
   archives_enable: true
   # When cover is not set, the default cover is displayed
+  suffix: 1
   default_cover:
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/155255-ji_chu_she_shi-chuang_kou-jian_zhu-cheng_shi_she_ji-3840x2160.png
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/03e4292b2d23ab9d015f3d19799ec5c939beb8fa.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/141980-liang_ge_ling-zi_se_de-jian_zhu-pin_hong_se-kuai_zhao-3840x2160.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/588bdb191e90dfac31f23240521e31af.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/590fe42eb0a62be32ec819d02f5d1352.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/921e2fd5030410b4164b57072afa52f2.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/969c2622ceadc19734df68e0aaefca59.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/Liberty.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/Sunset%20Cat.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/a3332ce15ba8e6a5a0efa574a59d7c7c.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/a8d7f4823cdcffe95d9aacf63e392af6.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/b6ca5d0a94a375c12adc6a09808735bb.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/dcbe1c7a6e8f304a37ef80d9f6607d0a.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/e46598132131ea29c8057285376eee15.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/f81844574b6e1c9901caeeb26f218c0f.jpg
+    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/%E6%9C%9D%E6%97%A9.jpg
   # - xxx.jpg
 
 # Replace Broken Images

@@ -1,5 +1,5 @@
 ---
-title: COA-Review
+title: 计算机组成与系统结构Review
 date: 2025-04-06 19:50:01
 categories:   "课程复习"
 tags: [计算机组成原理]
