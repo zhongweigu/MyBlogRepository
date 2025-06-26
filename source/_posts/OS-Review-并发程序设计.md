@@ -1,5 +1,5 @@
 ---
-title: OS-Review-并发程序设计
+title: 操作系统-并发程序设计
 date: 2025-06-01 18:06:21
 tags: [操作系统]
 categories: "课程复习"
