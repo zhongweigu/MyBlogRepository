@@ -1,0 +1,10 @@
+- class_name: 友情链接
+  link_list:
+    - name: -UNSWEAR-
+      link: https://frakenation.github.io/
+      avatar: https://s21.ax1x.com/2025/06/24/pVeefKS.png
+      descr: SJTU,BME
+    - name: EagleBear2002
+      link: https://eaglebear2002.github.io/
+      avatar: https://eaglebear2002.github.io/images/avatar.jpg
+      descr: NJU,SE

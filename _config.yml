@@ -152,3 +152,9 @@ kramed:
   breaks: true
   smartLists: true
   smartypants: true
+
+#本地搜索开启
+search:
+  path: search.xml
+  field: post
+  content: true
