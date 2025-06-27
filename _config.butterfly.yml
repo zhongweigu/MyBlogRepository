@@ -489,7 +489,7 @@ search:
   # Choose: algolia_search / local_search / docsearch
   # leave it empty if you don't need search
   use: local_search
-  placeholder: 输入搜索内容
+  placeholder: Search for Posts
 
   # Algolia Search
   algolia_search:
