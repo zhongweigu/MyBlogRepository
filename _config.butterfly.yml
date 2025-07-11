@@ -1075,7 +1075,7 @@ inject:
   head:
     - <link rel="stylesheet" href="https://ai.tianli0.top/static/public/tianli_gpt.min.css">
   bottom:
-    - <script>let tianliGPT_postSelector = '\#post \#article-container';let tianliGPT_key = 'S-JAT32UG03QW9UT4W';</script>
+    - <script>let tianliGPT_postSelector = '\#post \#article-container';let tianliGPT_key = 'EFiHJL1lTzJJd6z4';</script>
     - <script src="https://ai.tianli0.top/static/public/tianli_gpt.min.js"></script>
 
 # CDN Settings
