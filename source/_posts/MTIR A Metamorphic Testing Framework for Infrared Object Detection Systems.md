@@ -1,6 +1,6 @@
 ---
 title: (MTIR)A Metamorphic Testing Framework for Infrared Object Detection Systems
-date: 2025-06-24 19:50:01
+date: 2025-07-10 19:50:01
 categories:   "科研"
 tags: [红外传感模拟,融合感知]
 toc : true
