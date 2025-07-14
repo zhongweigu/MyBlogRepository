@@ -59,17 +59,17 @@ social:
 # Image Settings
 # --------------------------------------
 
-favicon: https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/avatar.png
+favicon: https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/images/avatar.png
 
 avatar:
-  img: https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/avatar.png
+  img: https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/images/avatar.png
   effect: false
 
 # Disable all banner images
 disable_top_img: false
 
 # If the banner of page not setting, it will show the default_top_img
-default_top_img:  https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/background.png
+default_top_img:  https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/images/background.png
 
 # The banner image of index page
 index_img:
@@ -94,12 +94,12 @@ category_img:
 category_per_img:
 
 # The background image of footer
-footer_img: https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/background.png
+footer_img: https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/images/background.png
 
 
 # Website Background
 # Can set it to color or image url
-background: https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/images/coolbackgrounds-gradient-cucumber%20%281%29.png
+background: https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/images/coolbackgrounds-gradient-cucumber%20%281%29.png
 cover:
   # Disable the cover or not
   index_enable: true
@@ -108,39 +108,39 @@ cover:
   # When cover is not set, the default cover is displayed
   suffix: 1
   default_cover:
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/155255-ji_chu_she_shi-chuang_kou-jian_zhu-cheng_shi_she_ji-3840x2160.png
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/03e4292b2d23ab9d015f3d19799ec5c939beb8fa.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/141980-liang_ge_ling-zi_se_de-jian_zhu-pin_hong_se-kuai_zhao-3840x2160.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/588bdb191e90dfac31f23240521e31af.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/590fe42eb0a62be32ec819d02f5d1352.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/921e2fd5030410b4164b57072afa52f2.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/969c2622ceadc19734df68e0aaefca59.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/Liberty.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/Sunset%20Cat.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/a3332ce15ba8e6a5a0efa574a59d7c7c.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/a8d7f4823cdcffe95d9aacf63e392af6.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/b6ca5d0a94a375c12adc6a09808735bb.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/dcbe1c7a6e8f304a37ef80d9f6607d0a.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/e46598132131ea29c8057285376eee15.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/f81844574b6e1c9901caeeb26f218c0f.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/%E6%9C%9D%E6%97%A9.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/0e5b1b7f9b7e42112568fe3c2e174ad1.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/5a32deb971cc3cf28c7173abded2ed0b.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/5f54ee4c0e7159bae2ec259e4443cb07.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/79e322fb827a446f66685774ee2e0ec9.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/971c9c4e83c9d5a6279638a9c4f79e52.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/b0883dbc0693b63a561e68c8579adddc.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/b98beabc3f3af32b6d5803efb916e15a.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/c1426fb05f86f4f0ba4bde76451ade8b.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/c1705c838d1761428da9d7a5f089d983.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/c36638a05ed3bd93641582879ffc486a.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/e0c2929a9891105747f8abc60a4164a4.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/e30f39d03962f4d08bc1f2504f079f79.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/e333245ee4104cd78d7f34e8aadbfd23.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/1dff1fa6b627af39adf865389cf0b080.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/3ac52235fbedb17cdb5b537c8121c85b.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/45c8ebf9f9edad2969c4e109edb66cc6.jpg
-    - https://blog-milvelas.oss-cn-nanjing.aliyuncs.com/covers/img/6580f0dda3d887bfc453e46e1b829459.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/155255-ji_chu_she_shi-chuang_kou-jian_zhu-cheng_shi_she_ji-3840x2160.png
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/03e4292b2d23ab9d015f3d19799ec5c939beb8fa.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/141980-liang_ge_ling-zi_se_de-jian_zhu-pin_hong_se-kuai_zhao-3840x2160.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/588bdb191e90dfac31f23240521e31af.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/590fe42eb0a62be32ec819d02f5d1352.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/921e2fd5030410b4164b57072afa52f2.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/969c2622ceadc19734df68e0aaefca59.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/Liberty.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/Sunset%20Cat.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/a3332ce15ba8e6a5a0efa574a59d7c7c.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/a8d7f4823cdcffe95d9aacf63e392af6.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/b6ca5d0a94a375c12adc6a09808735bb.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/dcbe1c7a6e8f304a37ef80d9f6607d0a.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/e46598132131ea29c8057285376eee15.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/f81844574b6e1c9901caeeb26f218c0f.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/%E6%9C%9D%E6%97%A9.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/0e5b1b7f9b7e42112568fe3c2e174ad1.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/5a32deb971cc3cf28c7173abded2ed0b.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/5f54ee4c0e7159bae2ec259e4443cb07.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/79e322fb827a446f66685774ee2e0ec9.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/971c9c4e83c9d5a6279638a9c4f79e52.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/b0883dbc0693b63a561e68c8579adddc.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/b98beabc3f3af32b6d5803efb916e15a.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/c1426fb05f86f4f0ba4bde76451ade8b.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/c1705c838d1761428da9d7a5f089d983.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/c36638a05ed3bd93641582879ffc486a.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/e0c2929a9891105747f8abc60a4164a4.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/e30f39d03962f4d08bc1f2504f079f79.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/e333245ee4104cd78d7f34e8aadbfd23.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/1dff1fa6b627af39adf865389cf0b080.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/3ac52235fbedb17cdb5b537c8121c85b.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/45c8ebf9f9edad2969c4e109edb66cc6.jpg
+    - https://blog-milvelas-new.oss-cn-hangzhou.aliyuncs.com/covers/img/6580f0dda3d887bfc453e46e1b829459.jpg
   # - xxx.jpg
 
 # Replace Broken Images
