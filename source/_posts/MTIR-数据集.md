@@ -38,7 +38,7 @@ cover: ""
 
 ## 2.3 基准模型
 
-使用针对640 X 640图像设计的YOLOX-m神经网络建立目标检测的基线精度。RGB和热探测器都在MSCOCO数据https://arxiv.org/abs/2107.08430和https://github.com/Megvii-BaseDetection/YOLOX上进行了预训练。基础神经网络在该数据集中提供的训练集数据上进行训练，并在该数据集中提供的视频测试数据上进行测试。准确性评估标准使用http://cocodataset.org/#detection-eval。
+使用针对640 X 640图像设计的YOLOX-m神经网络建立目标检测的基线精度。RGB和热探测器都在MSCOCO数据[YOLOX: Exceeding YOLO Series in 2021](https://arxiv.org/abs/2107.08430)和[YOLOX工具](https://github.com/Megvii-BaseDetection/YOLOX)上进行了预训练。基础神经网络在该数据集中提供的训练集数据上进行训练，并在该数据集中提供的视频测试数据上进行测试。准确性评估标准使用[detection-eval](http://cocodataset.org/#detection-eval)。
 
 AP @ IoU=0.5分如下:
 
@@ -56,7 +56,7 @@ AP @ IoU=0.5分如下:
 数据集包括带统计偏差的50个视频对（以灰度图片-热红外图片对的序列）、视频对应的每帧GroundTruth注释、两个评估指标。
 
 - 视频对是对齐的灰度图片和热红外图。视频拍摄场景有16个，包括实验室、校园道路、操场、水池等等。
-- ![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/830cf3052425ca93973fa7b3014d8cb9.png)
+- ![1](https://i-blog.csdnimg.cn/blog_migrate/830cf3052425ca93973fa7b3014d8cb9.png)
 
 ## 3.1 统计特征
 
@@ -80,7 +80,7 @@ AP @ IoU=0.5分如下:
 
 (i)所有帧中目标高度
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/0dce0523c715c36e687324e0bf62cceb.png)
+![2](https://i-blog.csdnimg.cn/blog_migrate/0dce0523c715c36e687324e0bf62cceb.png)
 
 由(b)©特性可知这个数据集大多是小目标。
 
@@ -112,7 +112,7 @@ AP @ IoU=0.5分如下:
 标注序列第一帧的真值格式(x,y,box-width,box-height)
 一个有5个评估指标，其中包括了VOT中的评估指标。（1）Maximum Precision Rate (MPR)：Precision 还是那个Precision，只是考虑到对齐的误差问题，所以用MPR代替PR，就是说RGB图片的预测边界框和热力图的预测边界框的中心距离取更小的那个。(2) Maximum Success Rate (MSR)：Success Rate还是那个Success Rate，是考虑到对齐的误差问题，所以用MSR代替SR。再用AUC计算SR的曲线下面积。(3) Accuracy：衡量预测为真的这些帧的平均IOU。(4) Robustness：衡量追踪器追到（预测框与真值框之间IOU大于阈值）的频率。(5) Expected Average Overlap (EAO)：期望平均IOU结合了追踪器的准确度与鲁棒性两个评估指标。具体公式计算见[这篇博客](https://blog.csdn.net/qq_42312574/article/details/124137464)。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/74fba4a89f7e9b3bf086dd16eebfbd9c.png)
+![3](https://i-blog.csdnimg.cn/blog_migrate/74fba4a89f7e9b3bf086dd16eebfbd9c.png)
 
 图中第一行的RGB图像，下一行是对应的热红外图。
 
@@ -132,7 +132,7 @@ AP @ IoU=0.5分如下:
 因为两个传感器是分开的电子设备，靠软件进行对齐，所以在同一帧的图片对中给出的GroundTruth真值框可能不一致。
 为了解决以上的同步问题，论文中定义红外线channel作为主模态，可见光channel作为辅助模态。所以GT以红外线channel的为准。这样的同步问题使得多模态追踪的性能上限降低为EAO=0.75。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/e45446075ad8b23c7c5088c09e6e9e58.png)
+![4](https://i-blog.csdnimg.cn/blog_migrate/e45446075ad8b23c7c5088c09e6e9e58.png)
 
 # 7. LasHeR
 
@@ -151,23 +151,23 @@ AP @ IoU=0.5分如下:
 
 （2） 热红外成像相机的内置矫正器，用于矫正拍摄照片中温度信息，所以会发生帧丢失。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/7658f548cad04d14970b7c9d0aa4d195.png)
+![5](https://i-blog.csdnimg.cn/blog_migrate/7658f548cad04d14970b7c9d0aa4d195.png)
 
 ## 7.2 测试
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/704d4e1db82d470274cf107885123c4c.png)
+![6](https://i-blog.csdnimg.cn/blog_migrate/704d4e1db82d470274cf107885123c4c.png)
 
 量化实验：在9个深度追踪器上，测试3个非常具有挑战的序列*bluebuscoming*、*leftbasketball*、*dotat43* 上的结果。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/e4ce39e63951c6a3f5778fc20b627c86.png)
+![7](https://i-blog.csdnimg.cn/blog_migrate/e4ce39e63951c6a3f5778fc20b627c86.png)
 
 从LasHeR选出训练集和测试集（文中并没有说怎么选），对深度RGBT追踪器重新训练再测试。效果如下：
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/6371285d5fd8657dcc4eb86aeee832f2.png)
+![8](https://i-blog.csdnimg.cn/blog_migrate/6371285d5fd8657dcc4eb86aeee832f2.png)
 
 测试LasHeR的挑战性，所以用RGB追踪器在RGB的benchmark *LaSOT*、*TrackingNet* 对比效果：可以看到这个准确度都不太高说明LasHeR的挑战性还是比这俩强一点的。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/3c38a84db68e3e9c3559b08f54a33edc.png)
+![9](https://i-blog.csdnimg.cn/blog_migrate/3c38a84db68e3e9c3559b08f54a33edc.png)
 
 # 8. VTUAV
 
@@ -184,7 +184,7 @@ AP @ IoU=0.5分如下:
 7. 粗粒度（序列属性的标注——这个序列里面含不含遮挡、尺度变化等待）到细粒度（帧属性的标注——这一帧里面含不含遮挡、尺度变化等待）的全方位标注。13个挑战属性。
 8. 边界框的评价指标是Maximum Precision Rate (MPR) 和 Maximum Success Rate (MSR) ; mask的评价指标是Jaccard index（衡量像素级别的IOU）和 F-score（像素级别的准确率和召回率）。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/06a2ea1ebdf7bf0f060bde48cb9433b3.png)
+![10](https://i-blog.csdnimg.cn/blog_migrate/06a2ea1ebdf7bf0f060bde48cb9433b3.png)
 
 ## 8.2 VTUAV与LasHeR
 
@@ -195,15 +195,15 @@ AP @ IoU=0.5分如下:
 
 ## 8.3 详解与对比
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/6348c5ad4d69d2619d9331fca5fe4c87.png)
+![11](https://i-blog.csdnimg.cn/blog_migrate/6348c5ad4d69d2619d9331fca5fe4c87.png)
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/9386ffe0476631f383150176c6fc2f2d.png)
+![12](https://i-blog.csdnimg.cn/blog_migrate/9386ffe0476631f383150176c6fc2f2d.png)
 
 # 9. MFNet
 
 作者构建并公开了一个全新的RGB-热红外（RGB-Thermal）语义分割数据集，以支持自动驾驶场景下多光谱图像的语义理解研究。该数据集共包含 1569 张城市道路场景图像，其中 820 张为白天拍摄，749 张为夜间拍摄，每张图像均具备像素级别的语义标注，涵盖了 8 类常见障碍物（如汽车、行人、自行车、弯道、停车标志、护栏、交通锥和减速带）。图像采集使用的是 InfRec R500 设备，分别获取了可见光（RGB）和热红外（IR）图像，均具有 480×640 的空间分辨率。为保证视场一致性，作者对RGB图像进行裁剪以与红外图像对齐。该数据集是首个公开的用于自动驾驶语义分割的 RGB-热红外多光谱数据集，有助于提升在低照度或夜间条件下的环境感知能力，并对图像分割算法的鲁棒性提出更高要求。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/b3a9c1188a3a41ce8860481b1061f59f.png#pic_center)
+![13](https://i-blog.csdnimg.cn/direct/b3a9c1188a3a41ce8860481b1061f59f.png#pic_center)
 
 # 参考与引用
 
