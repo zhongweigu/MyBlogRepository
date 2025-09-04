@@ -946,7 +946,7 @@ entities@1.0:
   resolved "https://registry.npmmirror.com/entities/-/entities-1.0.0.tgz#b2987aa3821347fcde642b24fdfc9e4fb712bf26"
   integrity sha512-LbLqfXgJMmy81t+7c14mnulFHJ170cM6E+0vMXR9k/ZiZwgX8i5pNgjTCX3SO4VeUsFLV+8InixoretwU+MjBQ==
 
-entities@^1.1.1, entities@^1.1.2, entities@~1.1.1:
+entities@^1.1.1, entities@~1.1.1:
   version "1.1.2"
   resolved "https://registry.npmmirror.com/entities/-/entities-1.1.2.tgz#bdfa735299664dfafd34529ed4f8522a275fea56"
   integrity sha512-f2LZMYl1Fzu7YSBKg+RoROelpOaNrcGmE9AZubeDfrCEia483oW4MI4VyFd5VNHIgQ/7qm1I0wUHK1eJnn2y2w==
@@ -1408,14 +1408,6 @@ hasown@^2.0.0, hasown@^2.0.2:
   dependencies:
     function-bind "^1.1.2"
 
-hexo-asset-image@v0.0.5:
-  version "0.0.5"
-  resolved "https://registry.npmmirror.com/hexo-asset-image/-/hexo-asset-image-0.0.5.tgz#f59e97b6ab1f16e876d02d1ad0a6698294282b1d"
-  integrity sha512-sBEmnsKzPlhv2NED92T4yimDqR/xp6H1VUGik2IQAlVTHABwkkJan6e99hPwTpAogfF9RnNPGY4dSAGXn2Wjjw==
-  dependencies:
-    cheerio "^0.19.0"
-    entities "^1.1.2"
-
 hexo-bunyan@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmmirror.com/hexo-bunyan/-/hexo-bunyan-1.0.0.tgz#b2106b26547b232f0195db863cb5d5ff8527fd36"
@@ -1637,10 +1629,10 @@ hexo-theme-landscape@^1.0.0:
   resolved "https://registry.npmmirror.com/hexo-theme-landscape/-/hexo-theme-landscape-1.1.0.tgz#756335efcc8abd240170f16f36c4af5c4c51c739"
   integrity sha512-nszjixBEiEDZjf7glAGbHg0nKGHZdUDwzFVVdRDeu4FeHfGcY5CZNl9sF4vSligjnD8IwFXpDfx5E+GRmNKvWg==
 
-hexo-theme-next@^8.23.0:
-  version "8.24.1"
-  resolved "https://registry.npmmirror.com/hexo-theme-next/-/hexo-theme-next-8.24.1.tgz#37aa3080a1788724ecfdd7e70b0347e3ea727347"
-  integrity sha512-DTa+umV5XTDa8XEtiLkaKDzgHqlnrj5HXi+6auI690TJdbIULm9sgaUQFkriDr2jeeGQDUV4ptsvgTTRaZjiGw==
+hexo-theme-next@^8.25.0:
+  version "8.25.0"
+  resolved "https://registry.yarnpkg.com/hexo-theme-next/-/hexo-theme-next-8.25.0.tgz#723913e95e454988e1e22f3f9f977aa3bf92b144"
+  integrity sha512-ZboBoswarJAjGKnQxtepD3ZaOYJAQFj+SaIL8l7w/FcDZpqFPeBerVd861YMujQW4XRHiREh+dEjdJQeArhvkg==
 
 hexo-toc@^1.1.0:
   version "1.1.0"
