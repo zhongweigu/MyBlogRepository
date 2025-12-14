@@ -1518,13 +1518,540 @@ private:
 singleton* singleton::m_instance = NULL;
 ```
 
+## 11. 继承
+
+```cpp
+class Base {
+public:
+    void func();
+};
+
+class Derived : public Base {
+    // Derived “继承自” Base
+};
+```
+
+**构造顺序**：
+
+1. **父类构造函数先执行**
+2. **再执行子类构造函数**
+
+```
+Base() -> Derived()
+```
+
+**析构顺序（相反）**：
+
+1. **子类析构函数先执行**
+2. **再执行父类析构函数**
+
+```
+~Derived() -> ~Base()
+```
+
+**基类构造函数的调用**
+
+- 缺省执行基类默认构造函数
+
+- 如果要执行基类的**非默认构造函数**，则必须在派生类构造函数的**成员初始化表**中指出
+
+```cpp
+class A
+{    int x;
+  public:
+     A() { x = 0; }
+     A(int i) { x = i; }
+};
+class B: public A
+{   int y;
+public:
+   B() { y = 0; }
+   B(int i) { y = i; }
+   B(int i, int j):A(i) 
+   {   y = j;  }
+};
+
+B b1; 			//执行A::A()和B::B()
+B b2(1); 	   //执行A::A()和B::B(int)
+B b3(0,1); 		//执行A::A(int)和B::B(int,int)
+```
+
+**虚函数**
+
+``` cpp
+class Base {
+public:
+    virtual void show() { std::cout << "Base show\n"; }
+};
+
+class Derived : public Base {
+public:
+    void show() override { std::cout << "Derived show\n"; }
+};
+
+Base* p = new Derived();
+p->show();   // 输出 Derived show（动态绑定）
+
+```
+
+典型使用场景：
+
+1. 多态接口
+
+```cpp
+class Shape {
+public:
+    virtual void draw() = 0; // 纯虚函数
+};
+```
+
+2. 统一处理不同子类对象
+
+```cpp
+std::vector<Shape*> shapes;
+shapes.push_back(new Circle());
+shapes.push_back(new Square());
+
+for (auto s : shapes)
+    s->draw();   // 自动调用正确对象的 draw
+```
+
+3. 用于析构函数（必须 virtual）
+
+如果父类作为多态基类，其析构函数必须是 virtual：
+
+```cpp
+class Base {
+public:
+    virtual ~Base() {}
+};
+```
+
+这样 delete Base* 指向 Derived 时，才会调用 Derived 的析构。
+
+![image-20251203185505065](C++/image-20251203185505065.png)
+
+> 类的成员函数才可以是虚函数
+>
+> 静态成员函数不能是虚函数
+>
+> 内联成员函数不能是虚函数
+>
+> 构造函数不能是虚函数
+>
+> 析构函数可以（往往）是虚函数
+
+![image-20251203185819682](C++/image-20251203185819682.png)
+
+**友元（friend）与 protected 的关系**
+
+- protected 成员对子类和友元开放
+- 一个类的 friend 只能访问该类的 private/protected
+- 无法访问基类的 protected（除非该基类也声明其为 friend）
+
+## 12. 多继承
+
+```cpp
+class D : public B1, public B2 {
+public:
+    D() : B1(), B2() {}
+};
+```
+
+构造顺序：B1 → B2 → D，析构相反
+
+如果两个基类都有同名成员，会冲突，例如：
+
+```cpp
+class B1 { public: void f(); };
+class B2 { public: void f(); };
+
+class D : public B1, public B2 { };
+```
+
+调用时必须显式指定：
+
+```cpp
+D d;
+d.B1::f();
+d.B2::f();
+```
+
+**重复基类问题**：
+
+```
+    A
+   / \
+  B   C
+   \ /
+    D
+```
+
+虚继承（virtual inheritance），虚基类**只保留一份副本**，不会重复
+
+```cpp
+class B : virtual public A { };
+class C : virtual public A { };
+class D : public B, public C { };
+```
+
+虚基类的构造函数由**最新派生类**调用
+ 虚基类构造函数总是优先于非虚基类构造函数执行
+
+```cpp
+class A {};
+class B : virtual public A {};
+class C : virtual public A {};
+class D : public B, public C { };
+```
+
+构造 D 时，A 的构造由 D 负责：A → B → C → D，只构造一次，确保唯一 A
 
 
 
 
 
+```
+外卖骑手
+题目描述
+小A是一名大学生，由于经常给游戏充值，导致生活费不足，于是决定通过送外卖来补贴生活。
+
+他收到了一批外卖订单，总共有 n 条，每条订单包含两个位置：商家位置 rest[i]和顾客位置cust[i]，分别表示取餐和送餐的地点。小A需要先前往商家取餐，再将外卖送到对应的顾客。小A的电动车上可以装无限数量的外卖，任务是找到一个最优路线，使得小A花费的送外卖时间最少。
+
+小A初始在1号点，你需要帮助小A安排最短的送外卖路线，求出他完成所有订单所需的最短时间。
+
+地图以距离矩阵的形式给出，矩阵中的值表示每两个位置之间的距离。若某些位置之间没有道路相连，则用 -1 表示。
+
+请注意，每条订单必须先取餐再送餐，允许取多个餐以后再送餐。
+
+输入格式
+第一行包含两个整数 n和 m，分别表示外卖订单的数量和城市中地点的总数。
+
+接下来是一个 m * m 的距离矩阵，矩阵中的第 i行第 j 列表示从地点 i 到地点 j 之间的行驶时间。若两个地点之间没有直接相连的道路，则值为 -1​，注意这里的道路都是单向道路。
+
+接着是 n​ 行，每行包含两个整数 rest[i] 和 cust[i]，分别表示第 i 条外卖单中商家和顾客的位置。
+
+输出格式
+输出一个整数，表示完成所有外卖订单的最短时间。
+
+输入样例 #1
+2 4
+0 2 -1 1
+-1 0 3 2
+-1 -1 0 1
+6 -1 -1 0
+1 3
+2 4
+输出样例 #1
+6
+解释:
+
+小A有两条外卖订单：
+第一条订单商家在位置 1，顾客在位置 3。
+第二条订单商家在位置 2，顾客在位置 4。
+距离矩阵表示：
+从 1 到 2 的距离为 2。
+从 1 到 4 的距离为 1。
+从 2 到 3 的距离为 3。
+从 2 到 4 的距离为 2。
+从 3 到 4 的距离为 1。
+从 4 到 1 的距离为 6。
+最短路径可以是从初始点 1 号点开始，先到1号和2号地点取餐，然后送到3号和4号地点。路径总长度为 2 + 3 + 1 = 7。
+
+输入样例 #2
+3 9
+0 7 6 3 -1 -1 -1 -1 -1
+-1 0 2 -1 -1 -1 -1 -1 -1
+-1 2 0 -1 -1 4 -1 -1 10
+-1 5 -1 0 2 -1 -1 -1 -1
+-1 20 -1 -1 0 -1 -1 -1 -1
+-1 -1 -1 -1 -1 0 -1 -1 2
+20 -1 -1 -1 -1 -1 0 10 3
+-1 -1 -1 3 8 4 -1 0 -1
+-1 -1 -1 -1 -1 -1 -1 6 0
+2 3
+9 8
+6 5
+输出样例 #2
+26
+数据范围与说明
+对于50%的数据，1 <= n <= 3, 1 <= m <= 10, 1 <= dist[i][j] <= 1000​
+
+对于100%的数据，1 <= n <= 6, 1 <= m <= 100, 1 <= dist[i][j] <= 10^6, 1 <= rest[i], cust[i] <= m​
+
+对于100%的数据，保证每个商家和顾客的位置在送货单中只出现一次，也就是不存在一个位置上有多个顾客/商家，也不存在一个位置既有顾客也有商家。
+
+所有数据保证地图中小A能送完所有外卖，至于送完外卖出不出得来，我们就不管了。
+
+提示
+运用《数据结构与算法》中的知识，思考如何计算任意两个地点之间的最短距离
+
+可以使用深度优先搜索（递归、回溯）算法，尝试所有可能的送外卖顺序，求解最短时间。
 
 
+//
+// Created by 1 on 2025/11/3.
+//
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int n,m;
+    cin>>n>>m;
+    int arr[m+1][m+1];
+    for (int i = 1; i <= m; i++)
+    {
+        for (int j = 1; j <= m; j++)
+        {
+            cin>>arr[i][j];
+        }
+    }
+    int rest[n+1];
+    int cust[n+1];
+    for (int i = 1; i <= n; i++)
+    {
+        cin>>rest[i]>>cust[i];
+    }
+
+    return 0;
+}
+```
+
+
+
+
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+const int INF = 1e9;
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> dist(m + 1, vector<int>(m + 1));
+
+    for (int i = 1; i <= m; i++)
+        for (int j = 1; j <= m; j++)
+            cin >> dist[i][j];
+
+    // Floyd-Warshall
+    for (int k = 1; k <= m; k++)
+        for (int i = 1; i <= m; i++)
+            for (int j = 1; j <= m; j++) {
+                if (dist[i][k] == -1 || dist[k][j] == -1) continue;
+                int nd = dist[i][k] + dist[k][j];
+                if (dist[i][j] == -1 || dist[i][j] > nd)
+                    dist[i][j] = nd;
+            }
+
+    vector<int> rest(n), cust(n);
+    for (int i = 0; i < n; i++) cin >> rest[i] >> cust[i];
+
+    // 构建关键点列表：商家+顾客
+    vector<int> loc;
+    for (int i = 0; i < n; i++) loc.push_back(rest[i]);
+    for (int i = 0; i < n; i++) loc.push_back(cust[i]);
+    int tot = 2 * n;
+
+    vector<vector<int>> dp(tot, vector<int>(1 << tot, INF));
+
+    // 初始：从 1 号点出发，访问任意商家
+    for (int i = 0; i < n; i++) {
+        if (dist[1][loc[i]] != -1)
+            dp[i][1 << i] = dist[1][loc[i]];
+    }
+
+    // 状态转移
+    for (int mask = 0; mask < (1 << tot); mask++) {
+        for (int u = 0; u < tot; u++) {
+            if (!(mask & (1 << u))) continue;
+            if (dp[u][mask] == INF) continue;
+            for (int v = 0; v < tot; v++) {
+                if (mask & (1 << v)) continue;
+                // 如果v是顾客，则其对应商家必须已访问
+                if (v >= n && !(mask & (1 << (v - n)))) continue;
+                int d = dist[loc[u]][loc[v]];
+                if (d == -1) continue;
+                dp[v][mask | (1 << v)] = min(dp[v][mask | (1 << v)], dp[u][mask] + d);
+            }
+        }
+    }
+
+    // 答案：mask全满时的最小值
+    int ans = INF;
+    for (int i = 0; i < tot; i++)
+        ans = min(ans, dp[i][(1 << tot) - 1]);
+    cout << ans << endl;
+    return 0;
+}
+
+```
+
+
+
+
+
+```
+BF 解释器
+Brainfuck 是一种极小化的程序语言，可以模拟图灵机进行工作。它基于一个简单的机器模型，除了指令，这个机器还包括：一个以字节为单位、元素全部被初始化为零并且大小无限的数组、一个指向该数组的指针（初始时指向数组的第一个字节，后文称为“数据指针”）以及用于输入输出的两个字节流。
+
+基本知识
+可将 8 个指令分为两类：数据操纵指令和控制流指令。
+
+数据操纵指令定义如下：
+
+指令	含义
+>	数据指针向右移动一个位置
+<	数据指针向左移动一个位置
++	数据指针指向的字节的值加一
+-	数据指针指向的字节的值减一
+,	从输入流中读取一个字节，将其存入数据指针指向的位置
+.	将数据指针指向的字节写入输出流中
+上述指令均为顺序执行。对于 , 指令，如果遇到 EOF，应当将数据指针所指的字节的值改为 0.
+
+控制流包含两个：[ 和 ]，这类指令不会影响数据指针和数据指针指向的字节的值，只会影响下一条需要执行的指令。
+
+指令	含义
+[	如果数据指针指向的单元值为 0，向后跳转到对应的 ] 指令的下一条指令处
+]	如果数据指针指向的单元值不为 0，向前跳转到对应的 [ 指令的下一条指令处
+输入描述
+输入包含若干行，第一行为 BF 程序，其余行为该 BF 程序所需要的输入（若有）。
+
+保证 BF 程序一定是有意义、正确且能够结束的。保证模拟的数组长度不大于 1000.
+
+输出描述
+输出所有 . 命令的结果。
+
+示例
+示例 1
+读取一个字符并输出。
+
+输入
+
+,.
+a
+输出
+
+a
+示例 2
+打印“Hello”，五个字符的 ASCII 码分别是 72 101 108 108 111.
+
+输入
+
++++++++++[->++++++++<]>.[[-]<]++++++++++[->++++++++++<]>+.[[-]<]+++++++++[->++++++++++++<]>.[[-]<]+++++++++[->++++++++++++<]>.[[-]<]+++++++++[->++++++++++++<]>+++.
+输出
+
+Hello
+注：末尾没有换行符
+
+解释
+
+将上述 BF 程序第一个输出命令 . 之前的命令取出分解为为如下
+
++++++++++
+[->++++++++<]
+>.
+在 +++++++++ 之后数组变为如下状态：
+
+9	0	0	...
+[->++++++++<] 的意思是：如果数据指针指向的字节的值不为 0，将该值减 1，然后将数据指针右移一个位置，将当前位置加 8，数据指针再左移一个位置。其实就是循环了 9 次，每次给数组第二个位置加 8，这段命令执行结束之后，数据指针指向第一个位置，数组如下：
+
+0	72	0	...
+然后 >. 将数据指针右移一个位置（在此之前数据指针指向数组的第一个位置），输出当前的内容，即 72，是字母 H 的 ASCII 码。
+
+[[-]<] 这段命令的作用就相当于重置了第二个位置的内容为0，后面的逻辑类似。
+
+提示
+处理 [ 和 ] 命令不一定需要使用栈这种数据结构。
+
+可使用如下方式读入 BF 程序（在 C++ 中，char 类型的变量可以用来表示一个字节，不过在输入以外的场景更推荐使用 <cstdint> 头文件中的 uint8_t）:
+
+#include <iostream>
+#include <string>
+
+// 读取 BF 程序
+string cmd;
+std::getline(std::cin, cmd);
+可参考如下方式处理 , 指令：
+
+#include <cstdint>
+
+char c;
+uint8_t byte;
+if (std::cin.get(c)) {
+    byte = 0;
+}
+```
+
+
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string cmd;
+    getline(cin, cmd);  // 读取 Brainfuck 程序
+
+    // 逐字读取输入（保留所有字节，包括换行）
+    string input;
+    char c;
+    while (cin.get(c)) input.push_back(c);
+
+    // 预处理括号匹配
+    int len = cmd.size();
+    vector<int> match(len, -1);
+    stack<int> st;
+    for (int i = 0; i < len; i++) {
+        if (cmd[i] == '[') st.push(i);
+        else if (cmd[i] == ']') {
+            int j = st.top(); st.pop();
+            match[i] = j;
+            match[j] = i;
+        }
+    }
+
+    vector<uint8_t> tape(1000, 0);
+    int ptr = 0, pc = 0;
+    int input_pos = 0;
+    string output;
+
+    while (pc < len) {
+        char op = cmd[pc];
+        switch (op) {
+            case '>': if (ptr < 999) ptr++; break;
+            case '<': if (ptr > 0) ptr--; break;
+            case '+': tape[ptr]++; break;
+            case '-': tape[ptr]--; break;
+            case '.': output.push_back((char)tape[ptr]); break;
+            case ',':
+                if (input_pos < (int)input.size())
+                    tape[ptr] = (uint8_t)input[input_pos++];
+                else
+                    tape[ptr] = 0;
+                break;
+            case '[':
+                if (tape[ptr] == 0)
+                    pc = match[pc];
+                break;
+            case ']':
+                if (tape[ptr] != 0)
+                    pc = match[pc];
+                break;
+        }
+        pc++;
+    }
+
+    cout << output;
+    return 0;
+}
+
+```
 
 
 
