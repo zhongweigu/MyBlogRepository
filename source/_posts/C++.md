@@ -1707,6 +1707,555 @@ class D : public B, public C { };
 
 构造 D 时，A 的构造由 D 负责：A → B → C → D，只构造一次，确保唯一 A
 
+## 13. 运算符重载
+
+### 基本规则
+
+**可以被重载的运算符**：
+
+<img src="./C++/image-20251224174601042.png" alt="image-20251224174601042" style="zoom:50%;" />
+
+**不能被重载的运算符**：
+
+<img src="./C++/image-20251224174733479.png" alt="image-20251224174733479" style="zoom:50%;" />
+
+重载运算符方法可以说是成员函数，此时指的是`this`和传入的参数做运算（ `const String String::operator+ (const string& that)`表示this和that做加运算）
+
+也可以是全局方法，此时要写完整的传入参数
+
+对于作为**成员函数**的重载运算符方法来说，存在一个隐式的第一参数（即`this`），比如说：
+
+```
+Integer x(1),y(2),z;
+x+y	====> x.operator+(y)
+```
+
+此时x为**receiver**，对receiver是不做type conversion（类型转换）的，因此形如`z=3+y`的方法是错误的，因为3不会被类型转换成Integer；而`z=y+3`是可行的，因为3可以被初始化成Integer
+
+一元的运算符重载类似，只不过不接受参数，只有一个隐式的this作为参数
+
+```Cpp
+const Integer operator-() const{
+	return Integer(-i);
+}
+
+z = -x // z.operator=(x.operator-())
+```
+
+作为**全局函数**时，需要显式地保留所有参数（注意如果要访问类的private变量需要声明友元或者给出getter和setter）
+
+```Cpp
+const Integer operator+(const Integer& rhs, const Integer& lhs);
+
+z = x + y // opperator+(x, y)
+```
+
+此时，类型转换会发生在所有参数上，也就是说，形如`z=3+y`的函数在这里是可行的
+
+特殊的，形如`z=3+7`也是可行的，只不过这里的`+`是默认的int的加号，而不是自定义的重载的加号。但是`=`是重载的，因此结果10会被类型转换成Integer，依然是成立的。
+
+> Tips.
+>
+> 对于Unary运算符（如！、-等），建议作为成员函数完成，直接对this操作
+>
+> 对于`=、()、[]、->、->*`**必须**作为成员函数完成
+>
+> 对于其他的一般的二元运算符，推荐作为全局函数完成
+
+对于不修改算子的操作符，一定要加const；修改算子的操作符（如`++,--,+=,-=`等），不能加const
+
+### 原型
+
+运算符重载的返回类型：
+
+- `+ = * / % ^ & | ~`
+  - `const T operatorX(const T& l, const T& r) const`
+
+- `! && || < <= == > >=`
+  - `bool operatorX(const T& l, const T& r) const`
+
+- `[]`
+  - `T& T::operator[](int index)`
+  - `operator[]` 的目标是**模拟内置数组的行为**，如果是`T operator[](int index)`，那么对于`a[i] = value`，语义上等价于`operator[](a, i) = value`，然而`operator[](a, i)`返回的是一个**临时对象**而不是左值，临时对象是不能赋值的，因此要加上`&`；至于加不加`const`，取决于你希不希望有`a[0] = 3`这样的行为
+
+那么对于`++,--`，返回值和原型是怎样的呢？
+
+我们规定：
+
+1. **前置**自增/自减（prefix:`++a`,`--a`）
+
+   ```
+   T& operator++();   // ++x
+   T& operator--();   // --x
+   ```
+
+2. **后置**自增/自减（postfix:`a++`,`a--`）
+
+   ```
+   T operator++(int); // x++
+   T operator--(int); // x--
+   ```
+
+后置中的多出来的`int`参数是用于区分两种重载的，不会实际使用
+
+prefix返回`T&`，是因为prefix返回的是**被修改后的那个对象本身**，是先修改再赋值；而postfix返回`T`，是因为postfix返回的是**被修改前的旧值**，是先赋值再修改，自然不可能返回引用
+
+实际实现如下：
+
+```cpp
+class Counter {
+    int value;
+public:
+    Counter(int v = 0) : value(v) {}
+
+    // prefix ++
+    Counter& operator++() {
+        ++value;
+        return *this;
+    }
+
+    // postfix ++
+    Counter operator++(int) {
+        Counter old(*this);	// 拷贝构造
+        ++(*this);	// 用prefix来构造postfix
+        return old;
+    }
+};
+```
+
+### 类型转换
+
+```cpp
+class PathName {
+public:
+    PathName(const std::string&);
+};
+
+std::string abc("abc");
+PathName xyz;
+
+xyz = abc;
+```
+
+上述赋值是可行的，`xyz=abc`等价于`xyz.operator=(abc)`，于是编译器会寻找`PathName`类的`operator=`，没有定义，但C++会**自动生成一个拷贝赋值运算符**
+
+```cpp
+PathName& operator=(const PathName&);
+```
+
+于是问题的核心就在于`string`能否类型转换成`PathName`，这一点在构造函数里是实现了的，因此这样的赋值成立
+
+因此下述代码是可以发生的：
+
+```cpp
+class One{
+public:
+	One(){}
+};
+
+class Two{
+public:
+	Two(const One&){}
+};
+
+void f(Two){};
+
+int main(){
+	One one;
+	f(one);	//可以正常运行，因为One可以类型转换成Two
+}
+```
+
+**那如果我不希望这样的自动转换呢？**
+
+New keyword：`explicit`
+
+```cpp
+class PathName {
+public:
+    explicit PathName(const std::string&);	// 禁止类型转换
+};
+
+std::string abc("abc");
+PathName xyz;
+
+xyz = abc;	// error！！
+```
+
+```cpp
+class One{
+public:
+	One(){}
+};
+
+class Two{
+public:
+	explicit Two(const One&){}
+};
+
+void f(Two){};
+
+int main(){
+	One one;
+	// f(one);	错误！
+	f(Two(one))	// 正确，但是这就不是类型转换了，而是重新构造了一个Two的临时变量
+}
+```
+
+此外还有一种方法，就是直接定义**类型转换成员函数**
+
+```cpp
+operator T() const;	// 将 this 转换成 T 的方法
+```
+
+没有参数、explicit和返回类型
+
+**总结：C++里的类型转换：**
+
+<img src="./C++/image-20251224212244528.png" alt="image-20251224212244528" style="zoom:50%;" />
+
+```cpp
+#include <iostream>
+using namespace std;
+class A
+{
+public:
+    operator int() { return 1; }
+    operator char*() { return NULL; }
+};
+int main()
+{
+    A a;
+    int n;
+    char* p = "New Dragon Inn";
+    n = static_cast <int> (3.14);  // n 的值变为 3
+    n = static_cast <int> (a);  //调用 a.operator int，n 的值变为 1
+    p = static_cast <char*> (a);  //调用 a.operator char*，p 的值变为 NULL
+    n = static_cast <int> (p);  //编译错误，static_cast不能将指针转换成整型
+    p = static_cast <char*> (n);  //编译错误，static_cast 不能将整型转换成指针
+    return 0;
+}
+```
+
+### 自我赋值检查
+
+```cpp
+class String {
+    char* data;
+public:
+    String(const char* s) {
+        data = new char[strlen(s) + 1];
+        strcpy(data, s);
+    }
+
+    ~String() {
+        delete[] data;
+    }
+
+    String& operator=(const String& rhs) {
+        delete[] data;
+        data = new char[strlen(rhs.data) + 1];
+        strcpy(data, rhs.data);
+        return *this;
+    }
+};
+```
+
+此时出现问题，如果有：
+
+```cpp
+String s("hello");
+s = s;   // 自我赋值
+```
+
+`delete[] data`导致产生悬空指针，因此，赋值号重载时一定要检查rhs是不是自身（看地址是否相同）
+
+```cpp
+String& operator=(const String& rhs) {
+    if (this == &rhs)
+        return *this;
+
+    delete[] data;
+    data = new char[strlen(rhs.data) + 1];
+    strcpy(data, rhs.data);
+    return *this;
+}
+```
+
+### 二维数组
+
+```cpp
+Matrix m;
+m[1][2] = 42;
+```
+
+语义上等价于：
+
+```cpp
+(m.operator).operator
+```
+
+此时`int& operator[](int i, int j)`的写法就是错误的，要用一个**代理**隔开
+
+```cpp
+#include <vector>
+#include <cstddef>
+
+class Matrix {
+    std::vector<int> data;
+    std::size_t rows, cols;
+
+public:
+    Matrix(std::size_t r, std::size_t c)
+        : data(r * c), rows(r), cols(c) {}
+
+    class RowProxy {
+        int* row;
+    public:
+        RowProxy(int* r) : row(r) {}
+
+        int& operator[](std::size_t j) {
+            return row[j];
+        }
+    };	// 在类里在定义一个代理类
+
+    RowProxy operator[](std::size_t i) {
+        return RowProxy(&data[i * cols]);
+    }
+};
+```
+
+
+
+## 14. 模板
+
+程序设计中经常会用到一些程序实体：它们的实现和所完成的功能基本相同，不同的仅仅是所涉及的数据类型不同。而模板正是一种专门处理不同数据类型的机制。
+
+模板是泛型程序设计的基础（泛型generic type——通用类型之意）。
+
+```
+template<typename T1, typename T2,......,typename Tn>
+返回值类型 函数名(参数列表)
+{
+    //……
+}
+注意：typename是用来定义模板参数关键字，也可以使用class(切记：不能使用struct代替class)
+```
+
+因此，Swap可以这样写：
+
+```cpp
+template<typename T>
+void Swap(T& left, T& right)
+{
+	T temp = left;
+	left = right;
+ 	right = temp;
+} 
+```
+
+这样，编译器就会检查你的代码，如果你的代码中用到了该方法，编译器就会实例化一个当前类型的函数
+
+比如，你在后面的代码里写道到了`Swap(a,b)`，这里的a和b是int类型，那么编译器就会实例化一个`void Swap(int& left, int& right)`；如果此时又有`Swap(c,d)`，而c和d是double类型的，就会再实例化一个`void Swap(double& left, double& right)`，只有在“用到”时才会生成代码
+
+并且，对于模板生成的函数，所有的类型检查都发生在编译器而不是动态检查，因此模板是很安全的
+
+一般来说，不指定类型的情况下，模板函数是**隐式实例化**的：
+
+```cpp
+
+template<class T>
+T Add(const T& left, const T& right)
+{
+	return left + right;
+}
+int main()
+{
+	int a1 = 10, a2 = 20;
+	double d1 = 10.0, d2 = 20.0;
+	Add(a1, a2); //编译器推出T是int
+	Add(d1, d2); //编译器推出T是double
+    return 0;
+}
+```
+
+然而，这样调用时就会出错：
+
+```cpp
+    int a1 = 10, a2 = 20;
+	double d1 = 10.0, d2 = 20.0;
+	Add(a1, d1); //err 编译器推不出来
+```
+
+对此，我们可以采用**显式实例化**的方式
+
+```cpp
+
+template<class T>
+T Add(const T& left, const T& right)
+{
+	return left + right;
+}
+int main()
+{
+	int a1 = 10, a2 = 20;
+	double d1 = 10.0, d2 = 20.0;
+    //显示实例化
+	Add<int>(a1, d1); //double隐式类型转换成int 
+	Add<double>(a1, d2); 
+    return 0;
+}
+```
+
+当然，模板支持**多参数**：
+
+```cpp
+
+template<class K, class V> //两个模板参数
+void Func(const K& key, const V& value)
+{
+	cout << key << ":" << value << endl;
+}
+int main()
+{
+	Func(1, 1); //K和V均int
+	Func(1, 1.1);//K是int，V是double
+	Func<int, char>(1, 'A'); //多个模板参数也可指定显示实例化不同类型
+}
+```
+
+类模板里的每一个函数都是函数模板：
+
+<img src="./C++/image-20251225002442229.png" alt="image-20251225002442229" style="zoom:50%;" />
+
+<img src="./C++/image-20251225003228048.png" alt="image-20251225003228048" style="zoom:50%;" />
+
+```cpp
+template <class A> 
+class Derived: public List<A>{}
+```
+
+“定义一个类模板 `Derived`，它以类型 `A` 作为模板参数；对于任意给定的 `A`，`Derived<A>` 都是一个**公有继承自 `List<A>` 的类**。”
+
+### 例
+
+```cpp
+#include <vector>
+#include <cstddef>
+
+template <class T>
+class Box {
+    T value;
+
+public:
+    /* ---------- 构造 ---------- */
+
+    Box() : value{} {}
+
+    explicit Box(const T& v) : value(v) {}
+
+    /* ---------- 显式类型转换 ---------- */
+
+    explicit operator T() const {
+        return value;
+    }
+
+    /* ---------- 复合赋值 ---------- */
+
+    Box& operator+=(const Box& rhs) {
+        value += rhs.value;
+        return *this;
+    }
+
+    Box& operator+=(const T& rhs) {
+        value += rhs;
+        return *this;
+    }
+
+    /* ---------- 前置 ++ ---------- */
+
+    Box& operator++() {
+        ++value;
+        return *this;
+    }
+
+    /* ---------- 后置 ++ ---------- */
+
+    Box operator++(int) {
+        Box old(*this);
+        ++value;
+        return old;
+    }
+
+    /* ---------- 下标运算符 ---------- */
+
+    auto operator[](std::size_t i)
+        -> decltype(value[i]) {
+        return value[i];
+    }
+
+    auto operator[](std::size_t i) const
+        -> decltype(value[i]) {
+        return value[i];
+    }
+
+    /* ---------- 非成员运算符需要访问 value ---------- */
+
+    template<class U>
+    friend Box<U> operator+(const Box<U>&, const Box<U>&);
+
+    template<class U>
+    friend Box<U> operator+(const Box<U>&, const U&);
+
+    template<class U>
+    friend Box<U> operator+(const U&, const Box<U>&);
+
+    template<class U>
+    friend bool operator==(const Box<U>&, const Box<U>&);
+
+    template<class U>
+    friend bool operator==(const Box<U>&, const U&);
+
+    template<class U>
+    friend bool operator==(const U&, const Box<U>&);
+};
+
+/* ---------- 非成员 + ---------- */
+
+template<class T>
+Box<T> operator+(const Box<T>& lhs, const Box<T>& rhs) {
+    return Box<T>(lhs.value + rhs.value);
+}
+
+template<class T>
+Box<T> operator+(const Box<T>& lhs, const T& rhs) {
+    return Box<T>(lhs.value + rhs);
+}
+
+template<class T>
+Box<T> operator+(const T& lhs, const Box<T>& rhs) {
+    return Box<T>(lhs + rhs.value);
+}
+
+/* ---------- 非成员 == ---------- */
+
+template<class T>
+bool operator==(const Box<T>& lhs, const Box<T>& rhs) {
+    return lhs.value == rhs.value;
+}
+
+template<class T>
+bool operator==(const Box<T>& lhs, const T& rhs) {
+    return lhs.value == rhs;
+}
+
+template<class T>
+bool operator==(const T& lhs, const Box<T>& rhs) {
+    return lhs == rhs.value;
+}
+
+```
+
 
 
 
