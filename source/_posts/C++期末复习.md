@@ -174,19 +174,19 @@ const可以用来修饰数据类型，指针，函数，对象等
 
 * `union` 是一种特殊的数据结构，它**允许在相同的内存位置存储不同的数据类型**。`union` 的大小是其成员中最大的成员的大小。其核心思想就是**共享内存**。如果某一组合体最近被写入为某一个成员变量的类型，那么就只能按这一类型读取，否则会出现未定义行为。
 
-  * ```cpp
-    union Data {
-        int i;
-        float f;
-        char c;
-    };
-    
-    int main() {
-        Data d;
-        d.i = 10;     // 当前有效成员是 i
-        d.f = 3.14f; // 覆盖同一内存，此时 i 的值不再有效
-    }
-    ```
+  ```cpp
+  union Data {
+      int i;
+      float f;
+      char c;
+  };
+  
+  int main() {
+      Data d;
+      d.i = 10;     // 当前有效成员是 i
+      d.f = 3.14f; // 覆盖同一内存，此时 i 的值不再有效
+  }
+  ```
 
 * `struct` 是一种用户自定义的数据类型，它可以包含不同类型的数据成员。和 `class` 一样，`struct` 也是类关键词。但 `struct` 的**默认访问权限**（成员访问和基类访问）是 `public`，而 `class` 的默认访问权限是 `private`。除此之外，`struct` 和 `class` 在 C++ 中是相同的。
 
@@ -327,22 +327,22 @@ _多态：同一论域中一个元素可有多种解释，或者同一接口在�
 
 ### 如何利用->操作符重载将堆上对象封装在栈上的自定义对象里，实现RAII？
 
-- ```cpp
-  class A{
-  public:
-    	void f();
-    	int g(double);
-    	void h(char);
-  };
-  
-  class AWrapper{
-    	A* p;
-  public:
-    	AWrapper(A *p){ this->p = p;}
-    	~AWrapper(){ delete p;}
-    	A* operator->(){ return p;}
-  };
-  ```
+```cpp
+class A{
+public:
+  	void f();
+  	int g(double);
+  	void h(char);
+};
+
+class AWrapper{
+  	A* p;
+public:
+  	AWrapper(A *p){ this->p = p;}
+  	~AWrapper(){ delete p;}
+  	A* operator->(){ return p;}
+};
+```
 
 - 让栈上的对象包含一个指向堆上资源的指针，初始化时分配堆，析构时删除，实现资源获取即初始化
 
@@ -355,17 +355,17 @@ _多态：同一论域中一个元素可有多种解释，或者同一接口在�
   * 析构函数可以（往往）是虚函数
 * 非虚函数：即一般的成员函数
 
-- > ```cpp
-  > struct Base {
-  >  void f();                 // 非虚函数
-  >  virtual void g();         // 虚函数
-  >  virtual void h() = 0;     // 纯虚函数
-  > };
-  > 
-  > Base* p = new Derived;
-  > p->f();   // 调用 Base::f(),调用的是指针类型的方法(Base),不看真实类型
-  > p->g();   // 调用 Derived::g(),调用的是真实类型的方法(Derived)
-  > ```
+```cpp
+struct Base {
+void f();                 // 非虚函数
+virtual void g();         // 虚函数
+virtual void h() = 0;     // 纯虚函数
+};
+
+Base* p = new Derived;
+p->f();   // 调用 Base::f(),调用的是指针类型的方法(Base),不看真实类型
+p->g();   // 调用 Derived::g(),调用的是真实类型的方法(Derived)
+```
 
 ### 如果虚函数是有效的，为什么不把所有函数都设为虚函数？
 
@@ -385,14 +385,14 @@ _多态：同一论域中一个元素可有多种解释，或者同一接口在�
 
 - 菱形继承是指在多重继承中，**两个派生类继承自同一个基类，而又有一个更派生的类同时继承这两个派生类**，继承关系图呈菱形结构，因此称为菱形继承。
 
-- > ```
-  >       Base
-  >      /    \
-  >   Derived1  Derived2
-  >      \    /
-  >       Final
-  > ```
-  >
+  ```
+     Base
+    /    \
+  Derived1  Derived2
+    \    /
+     Final
+  ```
+
   > `Final` 中将包含 **两份 `Base` 子对象**，分别来自`Derived1`和`Derived2`，此时访问`final.baseFunc()`会产生二义性
 
 * 继承：一个类可以继承另一个类的属性和方法；与内嵌类在内存上相同，区别在与基类在逻辑上可以表示派生类
@@ -441,7 +441,7 @@ _多态：同一论域中一个元素可有多种解释，或者同一接口在�
 
 * 可以利用_静态成员可以被所有该类的对象所共享_的性质来控制该类创建实例的个数
 
-* ```cpp
+  ```cpp
   class singleton{ 
   protected: 
       singleton(){ } 
@@ -477,7 +477,7 @@ _多态：同一论域中一个元素可有多种解释，或者同一接口在�
 
 - 在 C++ 中需要同时提供**常量版本和非常量版本的下标运算符 `operator[]`**，是为了**保持 const 正确性（const-correctness）**，既保证常量对象不能被修改，又允许非常量对象进行读写操作。
 
-- ```cpp
+  ```cpp
   class Array {
   public:
       // 非常量版本：可读可写
