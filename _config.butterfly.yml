@@ -1098,6 +1098,8 @@ CDN:
   custom_format:
 
   option:
+    # 锁定 mermaid 版本，避免 CDN 上 "latest" 变动导致渲染结果/换行行为不一致
+    mermaid: https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js
   # abcjs_basic_js:
   # activate_power_mode:
   # algolia_js:
