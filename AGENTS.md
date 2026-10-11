@@ -159,3 +159,21 @@ mermaid 只能给**整个节点**配色。要让标签里**某几个词**有颜�
 - 实测**不行**的两种写法：`<font color="...">`（表现属性优先级最低）、只写 `class` 靠外部 CSS（选择器拼不过 mermaid 的 `!important`）。
 - 约定配色：关键字 `typedef` → `#1f4e79`（深蓝）；`struct` 之类 → `#2e7d32`（绿）；类型名（`LNode`/`ElemType`/`LinkList`）→ `#0f7b6c`（青绿）；变量名（`data`/`next`）→ `#7a3e9d`（紫）。
 - 首次用例：2026-10-11「单链表的定义」那张图里的 `typedef struct LNode{...}` 代码节点。
+
+### 12. 按层级配色（层次感）
+
+所有节点都一个白底蓝框会显得「没有层次」。每张图按深度分配样式：
+
+| 层级 | classDef |
+| --- | --- |
+| 根节点 | `root`：`fill:#5b9bd5,stroke:#41719c,color:#fff,font-weight:bold` |
+| 一层 | `lvl1`：`fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d` |
+| 二层 | `lvl2`：`fill:#ffffff,stroke:#5b9bd5,stroke-width:2px,color:#000000` |
+| 三层 | `lvl3`：`fill:#ffffff,stroke:#9dc3e6,stroke-width:2px,color:#333333` |
+| 四层及更深 | `lvl4`：`fill:#ffffff,stroke:#cfe2f3,stroke-width:1.5px,color:#555555` |
+| 重点 | `key`：白底红框，**覆盖**层级色 |
+
+写法：每个图的 `classDef` 区加上 lvl1~lvl4，再 `class <该层所有节点id> lvlN;`（节点 id 按 `-->` 边算深度）。
+
+- **一层给实色底、往下逐级变白、边线逐级变浅**。实测更细的渐变（例如一层只给 `#bdd7ee`）肉眼几乎看不出差别，必须拉开对比度。
+- 节点一多手写 class 容易漏（踩过：漏写一个节点，它掉了 mermaid 默认蓝底）。可以用脚本从边表算深度后自动分配；副本见临时目录的 `assign-levels.js`（2026-10-11 用它一次性改了全部 8 张图）。
