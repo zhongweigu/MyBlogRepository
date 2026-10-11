@@ -107,7 +107,32 @@ style N1 fill:#f4faf0,stroke:#70ad47,color:#000000,font-size:12px
 ```
 
 - 框太窄时 mermaid 会把标题压掉、或者让节点盖住标题 → 必须**把框开得够宽**（把整条分支包进来，而不是只包一个节点）。
-- 注释框标题统一 `font-size:12px`。
+- 注释框标题统一 `font-size:12px`（注意：这条会引出下面 5.1 那个 200px 的坑）。
+
+#### 5.1 标题宽度：mermaid 写死 200px，已用 CSS 解除（2026-10-11）
+
+**症状**：注释框标题「显示不全」——文字在框边缘被硬生生截断（不是换行，是右边少了一截）。
+
+**机制**（读 `mermaid@11.4.1` 源码 + 实测 DOM 确认）：subgraph 标题由 `createText(..., width)` 生成，**`width` 默认硬编码 200**，`style N1 ...` 里给的 `font-size` 是**量完尺寸之后**才套上去的（`et(e)` → `m.labelStyle`，在 `C.attr('width', ...)` 之后）。也就是说：
+
+- mermaid 先按**默认字号（约 18~20px）**量标题宽度，超 200px 就把 div 改成 `display:table; white-space:break-spaces; width:200px`（折行分支），否则保持 `display:table-cell; white-space:nowrap; max-width:200px`（不折分支）；
+- 量完才把标题改成 12px。于是这个 200px 的上限是按「18~20px 的标题」定的，**按 12px 显示时早就不够用了**；
+- 折行分支下多出来的行会被节点盖住，不折分支下文字直接溢出 200px 被 `foreignObject` 裁掉。**同一份 markdown 在不同浏览器/缩放比下走哪个分支都可能不一样**，所以用户那边看到截断、我本地却是两行——这正是「本地正常不代表没问题」的又一处。
+
+**解法**（已写进 `_config.butterfly.yml` 的 `inject.head`，全站生效，改动只有这一行 CSS）：
+
+```css
+.cluster-label foreignObject > div{max-width:none !important;display:table !important;margin:0 auto !important}
+```
+
+- `max-width:none` → mermaid 量到的宽度就是文字真实宽度，永远不会等于 200，**折行分支再也不会被触发**（不再有折行/裁字的二选一）；
+- `display:table` + `margin:0 auto` → 让文字在 `foreignObject` 里水平居中。**少了这句文字会偏左** `(FO宽-文字宽)/2`；（实测基线里「注意审题：带头否？」就偏左了 30 多像素）
+- **选择器绝对不能加 `.mermaid-wrap` 前缀**：量尺寸时标签还在 mermaid 的临时容器（挂在 `body` 下）里，加前缀匹配不到，量完再套上就晚了。
+- 副作用：框会按「18~20px 量出来的标题宽」撑宽一点点（比文字实际需要的宽），所以标题两侧留白对称，看着正常。
+
+**有了这条 CSS 之后，注释框标题仍然建议 ≤ 20 个汉字**：标题现在是**单行铺开**，太长会把框撑得很宽，整张图缩小得更多。
+
+**验证方式**（可复用）：`npx hexo generate` 之后，把 `public/<文章路径>/index.html` 复制一份、在 `</body>` 前插一段测量脚本，起 `python -m http.server` 指向 `public/`，再用 headless Chrome `--dump-dom` 读结果。每条标题要看的指标：`offCenter`（文字中心 − 框中心，应为 0）、`divH`（一行应为 1 个行高）、以及 `foW` 与 `textW`。截图渲染注意 `--no-proxy-server`、`--virtual-time-budget=30000`，窗口给足高度。
 
 ### 6. 配色约定
 
