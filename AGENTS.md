@@ -143,3 +143,15 @@ npx hexo clean
 - 只给真正需要澄清的地方加，不要每张图都加。
 
 首次这么用的例子：2026-10-11「顺序表」那张图下的补注——「物理上也相邻」在引入分页/虚拟存储后的准确含义（指的是地址空间连续，不是内存物理页框连续）。
+
+### 11. 标签内按词上色（代码高亮那种）
+
+mermaid 只能给**整个节点**配色。要让标签里**某几个词**有颜色（比如代码块的关键字/类型/变量，或强调某个词），在标签里直接写内联 `span`，**并且必须带 `!important`**：
+
+`C1["<span style='color:#1f4e79 !important'>typedef</span> <span style='color:#0f7b6c !important'>LNode</span>{"]`
+
+- **必须加 `!important`**：mermaid 生成的 `<style>` 用 `!important` 把标签颜色钉死了，不加就被压回黑色（实测：HTML 保留下来了，但颜色不生效）。
+- 属性用**单引号**（mermaid 标签本身是双引号括起来的）。
+- 实测**不行**的两种写法：`<font color="...">`（表现属性优先级最低）、只写 `class` 靠外部 CSS（选择器拼不过 mermaid 的 `!important`）。
+- 约定配色：关键字 `typedef` → `#1f4e79`（深蓝）；`struct` 之类 → `#2e7d32`（绿）；类型名（`LNode`/`ElemType`/`LinkList`）→ `#0f7b6c`（青绿）；变量名（`data`/`next`）→ `#7a3e9d`（紫）。
+- 首次用例：2026-10-11「单链表的定义」那张图里的 `typedef struct LNode{...}` 代码节点。
