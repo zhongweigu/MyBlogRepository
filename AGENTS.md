@@ -36,17 +36,20 @@ graph LR
     "fontFamily": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", sans-serif"
   },
   "flowchart": {
-    "nodeSpacing": 10,
+    "nodeSpacing": 8,
     "rankSpacing": 26,
     "curve": "basis",
     "htmlLabels": true,
-    "subGraphTitleMargin": { "top": 0, "bottom": 14 }
+    "subGraphTitleMargin": { "top": 0, "bottom": 14 },
+    "padding": 4
   }
 }}%%
 ```
 
 - `fontFamily` 里的双引号必须转义成 `\"`。写成单引号会让**整段 `%%{init}%%` 静默失效**——主题色全丢，节点变成 mermaid 默认的淡紫色，且不报错。
 - `fontFamily` 要与站点字体对齐，否则「量字宽」和「实际渲染」用两套字体，尺寸会算错。
+- **节点高度靠 `flowchart.padding` 控制**（默认 15）。用户觉得图「太高、太空」时就是它。实测：`padding: 15` 单行节点高 54px，`padding: 8` → 40px，`padding: 4` → 32px，`padding: 2` → 28px（2 已经明显局促，不建议）。当前用 **4**，配 `nodeSpacing: 8`。
+- 注意这样改**必须走 init 配置**：mermaid 在渲染时就把节点尺寸算死了，事后用 CSS 调 `line-height` / `p{margin}` 完全无效（实测四种 CSS 方案尺寸一模一样）。
 
 ### 3. 换行：这是最容易翻车的地方
 
