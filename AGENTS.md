@@ -41,7 +41,9 @@ graph LR
     "curve": "basis",
     "htmlLabels": true,
     "subGraphTitleMargin": { "top": 0, "bottom": 14 },
-    "padding": 4
+    "padding": 4,
+    "useMaxWidth": false,
+    "wrappingWidth": 1000
   }
 }}%%
 ```
@@ -51,19 +53,34 @@ graph LR
 - **节点高度靠 `flowchart.padding` 控制**（默认 15）。用户觉得图「太高、太空」时就是它。实测：`padding: 15` 单行节点高 54px，`padding: 8` → 40px，`padding: 4` → 32px，`padding: 2` → 28px（2 已经明显局促，不建议）。当前用 **4**，配 `nodeSpacing: 8`。
 - 注意这样改**必须走 init 配置**：mermaid 在渲染时就把节点尺寸算死了，事后用 CSS 调 `line-height` / `p{margin}` 完全无效（实测四种 CSS 方案尺寸一模一样）。
 
-### 3. 换行：这是最容易翻车的地方
+- **`useMaxWidth: false`：让图按原始尺寸渲染，不要随容器缩放。** 默认（true）时 mermaid 给 SVG 加 `width="100%" max-width:<原始宽>px`，图越复杂原始宽越大、被缩得越小，于是「复杂图的字看着比简单图小」。设成 false 后 SVG 固定为原始宽，**不同复杂度的图字号一致**，宽图靠容器横向滚动承接。
+  配套 CSS 已写在 `_config.butterfly.yml` 的 `inject.head` 里：
+  `.mermaid-wrap{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}` + `.mermaid-wrap > svg{display:block;height:auto}`（`display:block` 是必须的——SVG 是 inline 时会被 `text-align:center` 居中，横向滚动会出现「左边滚不到」的问题）。
+- **标签行距**同样写在那段注入 CSS 里：`.nodeLabel,.nodeLabel p,.nodeLabel span{line-height:1.8;margin:0}`。注意必须**不加作用域**，因为 mermaid 量文字尺寸用的临时元素挂在 body 上，加了 `.mermaid-wrap` 前缀就影响不到它（实测无效）。
+- 每行字数的限制（≤11 汉字）来自「量出来的宽度 < 实际渲染宽度」这个误差，**跟节点高矮无关**，所以 `padding` 调小并不代表每行能放更多字（反而余量更小）。这条规则不要放松。
 
-mermaid 量出来的字宽比实际渲染窄约 **15%**，而节点内边距只有约 **30px**。所以：
+### 3. 换行：机制已查清（2026-10-11）
 
-- 所有长标签都**手写 `<br>` 断行**，不要指望自动换行——用户的浏览器上它经常完全不换行，字直接顶出框被裁掉。
-- **每行不超过约 11 个汉字**（西文约 18 个字符）。超过这个长度，15% 的误差就撑破内边距：能自动换行的浏览器里那行会再折一次（看起来莫名其妙），不换行的浏览器里则直接裁掉。
-- 长标签不要用带 `font-weight:bold` 的 class，加粗会让实际宽度再涨一截，更容易溢出。
+**折行阈值由 `flowchart.wrappingWidth` 决定，与 `padding` 无关。** 实测（同一批节点，只改 padding：4 / 6 / 8 / 10 / 15）：
 
-> **已实测**：`flowchart.wrappingWidth`（自动折行）在用户的环境里**不生效**——2026-10-11 用「时间复杂度」那张图做过对比实验，设了 `wrappingWidth: 176` 之后，本地渲染正常折行，但用户在浏览器上看仍然不折行、文字被裁。同一次实验里前两张图（手写 `<br>`）显示正常。
->
-> 又试了「HTML 标签」这条路：同一天在第三张图的 init 里加了 `"securityLevel": "loose"`（`strict` 会限制 HTML 标签，本来怀疑是它让标签退化成 SVG `<text>`、从而无法按容器宽度折行），去掉手写 `<br>` 后推上去——**用户那边依然不折行**。
->
-> 结论：**必须手写 `<br>`**，`wrappingWidth` 和 `securityLevel: loose` 两条路都已实测无效，不要再试了。真要根治得从主题渲染脚本或 mermaid 版本层面查（当前进度到此为止）。
+- 五种 padding 下「不折行的最大单行长度」**全都是 12 个汉字**。
+
+默认 `wrappingWidth: 200` ≈ 12 个汉字（16px 字号）。mermaid 在**排版阶段**就按这个宽度把标签切成行，然后**按切完的行算框宽**。用户浏览器里标签不会被再折一次（整行渲染），所以行一旦超过 200px，渲染宽度就超出框 → **被裁**；我这边的浏览器会自动折一次，反而把这个 bug 掩盖了。所以**「本地看着正常」不代表没问题**，真正的判据是「我手写的每一行有没有在本地被再折一次」。
+
+实测不同 `wrappingWidth` 下的上限：
+
+| wrappingWidth | 200（默认） | 320 | 400 | 560 |
+| --- | --- | --- | --- | --- |
+| 不折行的最大单行长度 | 12 字 | 20 字 | 24 字 | 32 字 |
+
+**现在的做法**：`"wrappingWidth": 1000` + **仍然手写 `<br>` 断行**，两者配合才安全：
+
+- `wrappingWidth` 调大 → mermaid 不再自作主张切行，框严格按我写的行长算宽；
+- 手写 `<br>` → 在「浏览器不折行」的环境里换行位置也一定正确。
+
+实测单行写到 16 字（约 256px）没问题；建议**控制在 18 字以内**——`padding: 4` 只留 8px 余量，行越长，量宽误差的绝对值越大，越容易擦边。想让图更宽（更好占满正文栏）就加大行长；别指望动 padding，它只影响框与文字的留白，不影响折行。
+
+> 归档两条**已实测无效**的路，别再试：给单张图设 `wrappingWidth: 176`（只会让框更窄、更早裁字）、在 init 里加 `"securityLevel": "loose"`（对折行没有任何影响）。
 
 ### 4. 特殊字符
 
