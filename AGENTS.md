@@ -127,6 +127,7 @@ npx hexo clean
 
 ### 9. 提交与推送
 
-- 只提交本次任务相关的文件；工作区里用户自己的未提交改动**不要顺手带上**，除非用户明确说「一并推送」。
-- 只有用户明确说「推送」时才 commit + push（`origin` = `git@github.com:zhongweigu/MyBlogRepository.git`，分支 `main`）。
+- **改完直接 commit + push，不用再问**（用户 2026-10-11 明确要求「以后记得自动推送」）。`origin` = `git@github.com:zhongweigu/MyBlogRepository.git`，分支 `main`。
+- 推送前跑一次 `npx hexo generate` 确认无报错，推送后 `npx hexo clean`。
+- 只提交本次任务相关的文件；工作区里用户自己的未提交改动**不要顺手带上**（除非用户说「一并推送」）。
 - 临时文件（截图、生成脚本、`public/`、`db.json`）用完清理掉。
