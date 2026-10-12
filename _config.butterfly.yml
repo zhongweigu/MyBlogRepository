@@ -1079,7 +1079,9 @@ inject:
     # mermaid：按原始尺寸渲染（不随容器缩放），横向滚动；并适当拉开标签行距
     # .cluster-label 那条：解除 mermaid 对 subgraph 标题写死的 max-width:200px（超长标题会被裁掉、或被折成多行压到节点），
     # 改成「按文字实际宽度、居中」——注意选择器不能加 .mermaid-wrap 前缀，因为量尺寸时标签还在 mermaid 的临时容器里
-    - '<style>.mermaid-wrap{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}.mermaid-wrap > svg{display:block;height:auto;max-width:100%}.nodeLabel,.nodeLabel p,.nodeLabel span{line-height:1.8;margin:0}.cluster-label foreignObject > div{max-width:none !important;display:table !important;margin:0 auto !important}</style>'
+    # .edgeLabel 那条：mermaid 用 primaryTextColor(#ffffff) 生成 `#mermaid-N span{color:#ffffff}`，把「边上分支标签」的文字也染成白色，
+    # 而边标签底色又是白的 → 白字白底看不见（2026-10-12 画红黑树插入流程图时踩到）；这里用 !important 把颜色改回深蓝
+    - '<style>.mermaid-wrap{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}.mermaid-wrap > svg{display:block;height:auto;max-width:100%}.nodeLabel,.nodeLabel p,.nodeLabel span{line-height:1.8;margin:0}.cluster-label foreignObject > div{max-width:none !important;display:table !important;margin:0 auto !important}.edgeLabel,.edgeLabel span,.edgeLabel p{color:#1f4e79 !important}</style>'
   bottom:
     - <script>let tianliGPT_postSelector = '\#post \#article-container';let tianliGPT_key = 'S-XGVJ34X5Z3YYFC6N';</script>
     - <script src="https://ai.tianli0.top/static/public/tianli_gpt.min.js"></script>
