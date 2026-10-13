@@ -286,13 +286,15 @@ markdown-it 本身不认识数学公式，会把 `$...$` / `$$...$$` 当普通�
 2. `_` `*` `^` `~` 被强调 / `markdown-it-sub` / `markdown-it-sup` 抢走（`p_k^2`、`\sum_{k=1}^{K}` 会被拆出 `<sup>`）；
 3. 多行 `$$...$$` 的换行被插成 `<br>`，公式被拆成多个文本节点，MathJax 认不出来。
 
-**做法**：站点根目录的 `scripts/math-guard.js` 往 markdown-it 里挂了一条行内规则（经由 `markdown-it:renderer` 过滤器注入——`hexo-renderer-markdown-it` 每次渲染前都会 `execFilterSync` 这个过滤器），遇到 `$...$` / `$$...$$` 就**整段吞掉**，直接产出一个 `<script type="math/tex">…</script>`（显示公式是 `; mode=display`）的原始 HTML token。公式内容完全不经过 markdown，转义和拆分都不存在了；浏览器里交给主题的 MathJax 渲染（`themes/butterfly/layout/includes/third-party/math/mathjax.pug` 里本来就有专门的 `findScript` 处理 `script[type^="math/tex"]`）。
+**做法**：站点根目录的 `scripts/math-guard.js` 往 markdown-it 里挂了一条行内规则（经由 `markdown-it:renderer` 过滤器注入——`hexo-renderer-markdown-it` 每次渲染前都会 `execFilterSync` 这个过滤器），遇到 `$...$` / `$$...$$` 就**整段吞掉**，原样吐成一个「原始 HTML」token（只做 HTML 转义：`&` `<` `>` `"` 换实体，其余字符不动）。这段内容于是完全不经过 markdown：不会被转义、不会被 sub/sup 抢走、也不会被插 `<br>`；定界符照旧，浏览器里仍由主题的 MathJax 按 `$...$` / `$$...$$` 渲染。
 
-**现在写公式可以放心用**：`\,` `\;` `\%` `\{` `\}`、`^` `_` `~`、`\\`（aligned 里的换行）、跨行 `$$...$$`、引用块里的 `> $$`，全都原样送进 MathJax。围栏代码块和行内代码里的 `$` 不会被当成公式。
+> 也试过（并且能跑通）把它们转成 `<script type="math/tex">`（主题 `mathjax.pug` 里有专门处理这种写法的 `findScript`），但那条路一旦 MathJax 脚本没加载成功，公式会整段消失、页面只剩空白；保留文本定界符最差也能看到 `$x^2$` 原文，更稳。
+
+**现在写公式可以放心用**：`\,` `\;` `\%` `\{` `\}`、`^` `_` `~`、`\\`（aligned 里的换行）、跨行 `$$...$$`、引用块里的 `> $$`，全都原样送进 MathJax。围栏代码块和行内代码里的 `$` 不会被当成公式（markdown-it 的块级/行内代码规则先一步把它们吃掉了）。
 
 **注意**：
 
-- 定界符要成对；落单的 `$$` 认不出来，会原样显示成文字（`COA-Review.md` 里有一处空的 `$$\n\n$$`，页面上就露出两个字面 `$$`）。
+- 定界符要成对；落单的 `$$` 认不出来，会原样显示成文字（`COA-Review.md` 里原来有一处空公式，页面上露出两个字面 `$$`，2026-10-13 已清掉）。
 - 行内公式 `$...$` 的内容两侧不能有空格，否则不认——这是为了少误伤「$100 和 $200」这类写法。
 - **不要再往公式里塞 HTML 实体**（`&#92;` 之类）去绕转义：现在不需要，而且会被当字面文本显示出来。
-- 公式编号不一定从 (1) 开始（可能从 (3) 起）：侧边那个第三方「AI摘要」插件（`ai.tianli0.top` 的 `tianli_gpt`）会 clone 正文，MathJax 把克隆出来的副本也一并编号了。内容是对的，不用管。
+- 公式编号：`_config.butterfly.yml` 里 `math.mathjax.tags` 由 `all` 改成了 **`ams`**（2026-10-13）——现在只有 `\begin{equation}` / `\begin{align}` 这类 AMS 环境才编号，普通的 `$$...$$` **不再显示编号**。原因是侧边那个第三方「AI摘要」插件（`ai.tianli0.top` 的 `tianli_gpt`）会 clone 正文，MathJax 会把克隆出来的副本也一起编号，导致编号看着像从 (3) 开始；改用 `ams` 后这个现象就没了。

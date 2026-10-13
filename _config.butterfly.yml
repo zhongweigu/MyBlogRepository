@@ -494,7 +494,7 @@ math:
     # Enable the contextual menu
     enableMenu: true
     # Choose: all / ams / none, This controls whether equations are numbered and how
-    tags: all
+    tags: ams
 
   katex:
     # Enable the copy KaTeX formula

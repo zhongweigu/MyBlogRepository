@@ -237,10 +237,6 @@ $$
 P_i = X_i + Y_i
 $$
 $$
-
-$$
-
-$$
 C_i = G_i + P_iG_{i-1}+ P_iP_{i-1}G_{i-2}+ \dots + P_iP_{i-1}P_{i-2}\cdot \ldots \cdot C_0
 $$
 
