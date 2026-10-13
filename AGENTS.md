@@ -268,31 +268,31 @@ mermaid 只能给**整个节点**配色。要让标签里**某几个词**有颜�
 - `---` 单独一行 → `<hr>` 分割线，用来隔开同一节里的子话题。
 - 行内数学 `$...$`、独立公式 `$$...$$`（但有转义坑，见第 17 节）。
 
-⚠ **别用 `==高亮==`**：它只在 markdown-it 生效，而渲染器不稳定（第 16 节）。
+`==高亮==` 现在可以放心用（渲染器已固定为 markdown-it，见第 16 节）；`::: tips` / `::: warning` 这类容器也行。
 
 **当前做法**（`408考点强化-数据结构.md` 2026-10-13 起）：子话题之间用 `---` 分隔，子话题名写成一行 `<u>例题：【2011】</u>`——既分明，又因为不是标题而不会进目录。
 
-### 16. ⚠️ 没解决的坑：markdown 渲染器居然是不确定的（2026-10-13 实测）
+### 16. markdown 渲染器：已锁定为 markdown-it（2026-10-13 修复）
 
-`package.json` 里同时装了 `hexo-renderer-kramed` 和 `hexo-renderer-markdown-it`，两个都注册 `.md`，**谁最后加载谁生效，而加载顺序不稳定**。实测连续 7 次 `hexo clean; hexo generate`：4 次走 markdown-it、3 次走 kramed。同一份源码，两次构建出来的 HTML 可能不同。
+**踩过的坑**：`package.json` 里同时装了 `hexo-renderer-kramed` 和 `hexo-renderer-markdown-it`，两个都注册 `.md`。Hexo 加载插件是**并发**的（`node_modules/hexo/dist/hexo/load_plugins.js` 里用 `bluebird.map`，没限并发），**谁最后注册谁生效，顺序不稳定**——实测连续 7 次 `hexo clean; hexo generate`：4 次走 markdown-it、3 次走 kramed。后果是同一份源码两次构建的 HTML 可能不同：`==高亮==`、`::: tips` 容器、脚注这些 markdown-it 插件时好时坏，而 `$$` 公式在 markdown-it 下又会被当普通文本拆坏。
 
-| 语法 | markdown-it 生效 | kramed 生效 |
-| --- | --- | --- |
-| `==高亮==`、`::: tips` 容器、脚注、deflist 等（`_config.yml` 里 `markdown.plugins` 配的那批） | ✅ | ❌ 原样当文本显示 |
-| 独立公式 `$$...$$` | 当普通文本处理（`\\`→`\`、`&`→`&amp;`、换行被插 `<br>`）→ **多行 / 带 `\` 和 `&` 的公式会坏** | ✅ 转成 `<script type="math/tex">`，正常 |
-| 行内 HTML、标准 markdown、`---`、行内 `$...$` | ✅ | ✅ |
+**修法**：把 `hexo-renderer-kramed` 从 `package.json` 的 `dependencies` 里删掉即可——Hexo 只按 package.json 的依赖列表加载插件，`node_modules` 里的残留不影响；下次 `npm install` 会顺手清掉它。现在恒定走 markdown-it，`_config.yml` 里 `markdown.plugins` 配的那批插件（`==高亮==`、`::: tips/success/warning/danger`、`~下标~`、`^上标^`、脚注、deflist、emoji …）都稳定可用。
 
-**所以写文章只用「两边的交集」**：标准 markdown + 行内 HTML（第 15 节）+ 行内 `$...$`；独立公式写成**单行** `$$...$$`（实测 markdown-it 下也能被 MathJax 正常识别）。这也意味着：**任何一次 `hexo generate` 之后都必须本地看效果**，不能假设上一次的结果还成立。
+### 17. 数学公式由 `scripts/math-guard.js` 兜底（2026-10-13 修复）
 
-根治要二选一（**尚未做，等用户拍板**）：`_config.yml` 里 `markdown:`（markdown-it）配了一大堆插件、`kramed:` 只有一行，**大概率本想用 markdown-it** → 把 `hexo-renderer-kramed` 从 `package.json` 移除；但**必须同时给 markdown-it 补一个数学方案**，否则 `$$` 公式全废。最省事的补法是加一个 `before_post_render` 过滤器，把 `$$...$$` 先转成 `<script type="math/tex; mode=display">`（主题的 `mathjax.pug` 本来就认这种写法）。
+markdown-it 本身不认识数学公式，会把 `$...$` / `$$...$$` 当普通文本处理，出三类问题：
 
-### 17. ⚠️ 行内公式里别写 `\,`（2026-10-13 实测）
+1. 「反斜杠 + 标点」被转义吃掉：`\,` → `,`、`\;` → `;`、`\%` → `%`、`\{` → `{`（2026-10-13 用户看到 `2^{,t+1}` 这种「多余的逗号」就是这么来的）；
+2. `_` `*` `^` `~` 被强调 / `markdown-it-sub` / `markdown-it-sup` 抢走（`p_k^2`、`\sum_{k=1}^{K}` 会被拆出 `<sup>`）；
+3. 多行 `$$...$$` 的换行被插成 `<br>`，公式被拆成多个文本节点，MathJax 认不出来。
 
-markdown 的转义规则会吃掉「反斜杠 + 标点」：`\,` → `,`、`\;` → `;`、`\%` → `%`、`\{` → `{`、`\}` → `}`。这些宏本来只是排版用的间距或符号，被吃掉后公式里就**凭空多出一个逗号 / 分号**。2026-10-13 用户就是看到 `2^{,t+1}` 这种「多余的逗号」才发现——我当时写的是 `2^{\,t+1}`，只想给指数加一点空隙。
+**做法**：站点根目录的 `scripts/math-guard.js` 往 markdown-it 里挂了一条行内规则（经由 `markdown-it:renderer` 过滤器注入——`hexo-renderer-markdown-it` 每次渲染前都会 `execFilterSync` 这个过滤器），遇到 `$...$` / `$$...$$` 就**整段吞掉**，直接产出一个 `<script type="math/tex">…</script>`（显示公式是 `; mode=display`）的原始 HTML token。公式内容完全不经过 markdown，转义和拆分都不存在了；浏览器里交给主题的 MathJax 渲染（`themes/butterfly/layout/includes/third-party/math/mathjax.pug` 里本来就有专门的 `findScript` 处理 `script[type^="math/tex"]`）。
 
-两个渲染器吃掉的字符集还不一样：markdown-it 吃「反斜杠 + 任意 ASCII 标点」（`\,` `\;` `\%` `\{` 全中招），kramed（marked）只吃它自己那张表（`\\` `` \` `` `\*` `\_` `\{\}` `\[\]` `\(\)` `\#` `\+` `\-` `\.` `\!`）。既然渲染器本身不稳定，**最省事的做法就是：公式里一律不写「反斜杠 + 标点」**。
+**现在写公式可以放心用**：`\,` `\;` `\%` `\{` `\}`、`^` `_` `~`、`\\`（aligned 里的换行）、跨行 `$$...$$`、引用块里的 `> $$`，全都原样送进 MathJax。围栏代码块和行内代码里的 `$` 不会被当成公式。
 
-- 安全：纯字母的宏 `\log` `\sqrt` `\dfrac` `\dots` `\quad` `\cdot` `\times` `\sum` `\text` 等。
-- 要加空隙写 `\ `（反斜杠 + 空格，空格不是标点）或 `\quad`；花括号用 `\lbrace` / `\rbrace`。
+**注意**：
 
-已按此清掉 `408考点强化-数据结构.md` 里的 `\,`；`408数据结构.md` 还留着 3 处（`rg -n '\\,' source/_posts/408数据结构.md` 可定位）。
+- 定界符要成对；落单的 `$$` 认不出来，会原样显示成文字（`COA-Review.md` 里有一处空的 `$$\n\n$$`，页面上就露出两个字面 `$$`）。
+- 行内公式 `$...$` 的内容两侧不能有空格，否则不认——这是为了少误伤「$100 和 $200」这类写法。
+- **不要再往公式里塞 HTML 实体**（`&#92;` 之类）去绕转义：现在不需要，而且会被当字面文本显示出来。
+- 公式编号不一定从 (1) 开始（可能从 (3) 起）：侧边那个第三方「AI摘要」插件（`ai.tianli0.top` 的 `tianli_gpt`）会 clone 正文，MathJax 把克隆出来的副本也一并编号了。内容是对的，不用管。
