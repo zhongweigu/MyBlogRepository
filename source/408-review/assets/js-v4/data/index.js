@@ -5,9 +5,11 @@ import { DS_EXTRA_TOPICS } from './ds-extra.js';
 import { COA_EXTRA_TOPICS } from './coa-extra.js';
 import { DS_SUPPLEMENTS } from './supplements-ds.js';
 import { COA_SUPPLEMENTS } from './supplements-coa.js';
-import { QUESTIONS } from './questions.js';
+import { QUESTIONS as CURATED_QUESTIONS } from './questions.js';
+import { EXTRA_QUESTIONS } from './questions-extra.js';
+import { MANUAL_EXTRA_QUESTIONS } from './questions-manual-extra.js';
 
-export { META, SUBJECTS, CHAPTERS, CHAINS, QUESTIONS };
+export { META, SUBJECTS, CHAPTERS, CHAINS };
 
 const SUPPLEMENTS = { ...DS_SUPPLEMENTS, ...COA_SUPPLEMENTS };
 
@@ -36,6 +38,35 @@ export const TOPICS = [...DS_TOPICS, ...DS_EXTRA_TOPICS, ...COA_TOPICS, ...COA_E
 export const topicById = new Map(TOPICS.map((t) => [t.id, t]));
 export const chapterById = new Map(CHAPTERS.map((c) => [c.id, c]));
 export const subjectById = new Map(Object.values(SUBJECTS).map((s) => [s.id, s]));
+
+function questionFingerprint(q) {
+  const text = String(q.stem || '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/【20\d{2}】/g, '')
+    .replace(/&[a-z]+;/gi, ' ')
+    .replace(/\s+/g, '')
+    .slice(0, 64);
+  return `${q.year || ''}|${q.subject || ''}|${text}`;
+}
+
+// 手写题优先；自动抽取只补手写题没覆盖到的。按题干前 64 字去重。
+const seenQuestions = new Set();
+export const QUESTIONS = [...CURATED_QUESTIONS, ...EXTRA_QUESTIONS, ...MANUAL_EXTRA_QUESTIONS].filter((q) => {
+  const key = questionFingerprint(q);
+  if (seenQuestions.has(key)) return false;
+  seenQuestions.add(key);
+  return true;
+});
+
+// 把自动题挂回 topic，考点页和真题页共用同一份列表。
+for (const question of QUESTIONS) {
+  for (const topicId of question.topics || []) {
+    const topic = topicById.get(topicId);
+    if (!topic) continue;
+    topic.questions = [...new Set([...(topic.questions || []), question.id])];
+  }
+}
+
 export const questionById = new Map(QUESTIONS.map((q) => [q.id, q]));
 
 /** 科目 → 章节 → 考点 的完整有序结构 */

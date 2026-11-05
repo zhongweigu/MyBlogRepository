@@ -1,12 +1,11 @@
 <details class="article-toc">
-<summary>本页目录 <span>5 节</span></summary>
+<summary>本页目录 <span>4 节</span></summary>
 <div class="toc">
 <ul>
 <li><a href="#3-">考点3-卡特兰数</a><ul>
 <li><a href="#_1">公式与常见取值</a></li>
 <li><a href="#_2">什么时候用</a></li>
-<li><a href="#_3">为什么"先序 = 入栈序列、中序 = 出栈序列"</a></li>
-<li><a href="#_4">扩展：如果先序序列本身也不固定</a></li>
+<li><a href="#_3">扩展：如果先序序列本身也不固定</a></li>
 </ul>
 </li>
 </ul>
@@ -23,122 +22,12 @@
 <li>$n$ 个元素依次入栈（<strong>入栈序列已定</strong>），有多少种<strong>合法的出栈序列</strong>；</li>
 <li>先序序列含 $n$ 个不同元素时（<strong>先序序列已定</strong>），能确定多少种<strong>不同的二叉树</strong>。</li>
 </ol>
-<h4 id="2015">例题：【2015】</h4>
-<p>【2015】先序序列为 a, b, c, d 的不同二叉树的个数是</p>
-<ul>
-<li>A. 13</li>
-<li>B. 14</li>
-<li>C. 15</li>
-<li>D. 16</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B（14 个）。</strong> 关键是认出这题在考卡特兰数。</p>
-<p>中序 + 先序可以唯一确定一棵二叉树；再对着<strong>遍历的代码</strong>看：先序序列其实就是<strong>入栈序列</strong>，中序序列就是<strong>出栈序列</strong>（下面单独展开讲了原因）。所以"先序序列固定为 a, b, c, d，能确定多少棵二叉树"，等价于"给定入栈序列，有多少种合法的出栈序列"：</p>
-<p>$$C_4 = \frac{1}{4+1}\binom{8}{4} = \frac{70}{5} = 14$$</p>
-<p>所以选 B。</p>
-</details>
-<h3 id="_3">为什么"先序 = 入栈序列、中序 = 出栈序列"</h3>
-<p>把两个递归遍历并排看，每个结点都只有三句话：</p>
-<pre><code class="language-c">// 先序
-visit(p);
-preorder(p-&gt;lchild);
-preorder(p-&gt;rchild);
-
-// 中序
-inorder(p-&gt;lchild);
-visit(p);
-inorder(p-&gt;rchild);
-</code></pre>
-<p><strong>递归本身就是在用栈</strong>：想先钻进左子树，就得把当前结点<strong>暂存起来（压栈）</strong>；左子树办完、回到它，就是<strong>弹栈</strong>。这个"进入结点＝压栈、左子树归来＝弹栈"的对照，在两次遍历里是<strong>完全一样</strong>的——两段代码的唯一区别，只是 <code>visit(p)</code> 这一句放在了哪儿：</p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>遍历</th>
-<th><code>visit(p)</code> 的位置</th>
-<th>打印发生在什么时刻</th>
-<th>结论</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>先序</td>
-<td>第一句（还没进子树就打印）</td>
-<td>结点<strong>刚被压进栈</strong></td>
-<td>打印次序 = <strong>压栈</strong>次序</td>
-</tr>
-<tr>
-<td>中序</td>
-<td>第二句（<code>inorder(p-&gt;lchild)</code> 返回之后才打印）</td>
-<td>左子树办完、<strong>焦点重新回到 p</strong>，也就是 p <strong>弹出</strong>的时刻</td>
-<td>打印次序 = <strong>弹栈</strong>次序</td>
-</tr>
-</tbody>
-</table></div>
-<p>一句话：<strong>先序是"压栈即打印"，中序是"弹栈即打印"。</strong></p>
-<p>拿一棵小树验一下——<code>b</code> 带左孩子 <code>a</code>、右孩子 <code>c</code>：</p>
-<pre><code class="language-text">      b
-     / \
-    a   c
-</code></pre>
-<p>先序是 <code>b a c</code>，中序是 <code>a b c</code>。注意两次遍历的<strong>到达（压栈）次序是同一个</strong>：先到 b、再到 a（进 a 的左孩子时发现是空的），处理完回来；之后要去 c 再压 c。于是</p>
-<ul>
-<li>压栈次序 b, a, c —— 正是<strong>先序</strong>；</li>
-<li>弹栈次序 a, b, c —— 正是<strong>中序</strong>。</li>
-</ul>
-<p>极端形状上更好记：</p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>树的形状</th>
-<th>先序 / 中序</th>
-<th>栈的样子</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>一路向右斜（每个结点只有右孩子）</td>
-<td>先序 = 中序 = a b c</td>
-<td>压一个弹一个</td>
-</tr>
-<tr>
-<td>一路向左斜（每个结点只有左孩子）</td>
-<td>先序 c b a，中序 a b c（互为倒序）</td>
-<td>全压进去，再连着弹出</td>
-</tr>
-</tbody>
-</table></div>
-<p>（顺带澄清一个容易混的地方：这里的"出栈"对应的是<strong>"左子树办完"</strong>，不是"左右子树都办完"。如果把 <code>visit(p)</code> 放到最后一句——右子树之后——得到的是后序序列，那是"递归调用返回"的次序，和这里的出栈序列不是一回事。）</p>
-<p>所以"给定先序序列，能确定多少棵不同的二叉树"，就等价于"给定入栈序列，有多少种合法的出栈序列"——两者都是卡特兰数 $C_n$。</p>
 <hr/>
-<h3 id="_4">扩展：如果先序序列本身也不固定</h3>
+<h3 id="_3">扩展：如果先序序列本身也不固定</h3>
 <ul>
 <li><strong>先序序列可以是这 4 个元素的任意排列</strong>（元素和位置都不固定）：总数 = $C_4 \times 4! = 14 \times 24 = 336$。先挑一个先序序列（$4!$，也就是 $A_4^4$ 种），每一种再对应 $C_4$ 棵二叉树。</li>
 <li><strong>如果只问"不同的树形"</strong>（只看形状、与结点上的数值无关）：那还是卡特兰数 $C_4 = 14$ —— 4 个结点的二叉树形状恰好 14 种，先序序列是什么都不影响形状的计数。</li>
 </ul>
 <hr/>
-<h4 id="ooops">例题：先序、中序序列相同（都是 "ooops"）</h4>
-<p>【题目】具有 5 个结点的二叉树有着相同的先序和中序遍历序列 "ooops"，则这样的二叉树可以确定的不同形状有多少？</p>
-<ul>
-<li>A. 1</li>
-<li>B. 3</li>
-<li>C. 5</li>
-<li>D. 6</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 C（5 种）。</strong></p>
-<p><strong>坑在哪</strong>：前面刚说"先序 + 中序唯一确定一棵二叉树"，但那条结论有个前提——<strong>所有结点的值互不相同</strong>。这里 "ooops" 里有三个 o，它们<strong>是三个不同的结点，只是符号恰好都写成 o</strong>。字符串上分不清谁是谁，同一个字符串就可能对应好几棵树，所以不能张口就答"1 棵"。</p>
-<p><strong>怎么数</strong>：把三个 o <strong>编上号</strong>，记作 $O_1, O_2, O_3$（怎么编都行，反正符号都是 o，最后只数形状）。</p>
-<ol>
-<li>先序固定成 $O_1 O_2 O_3 p s$ —— 题目给的先序字符串就是"三个 o，然后 p，然后 s"。</li>
-<li>中序也必须形如「三个 o 的某个排列 + p + s」，因为中序字符串同样要等于 "ooops"：<strong>p 在第 4 位、s 在第 5 位，这两位已经钉死，不用管</strong>。</li>
-<li>于是只剩一件事：<strong>先序是 $O_1 O_2 O_3$ 时，前三个 o 能排出多少种合法的中序？</strong> 这正是栈模型里"入栈序列已定，有多少种合法出栈序列"——$n = 3$ 的卡特兰数：</li>
-</ol>
-<p>$$C_3 = \frac{1}{3+1}\binom{6}{3} = 5$$</p>
-<p><strong>为什么能把 p、s 直接忽略</strong>：中序要求 p、s 排在最后两位 ⇒ 弹出 p 之前，三个 o 必须<strong>全部</strong>弹完 ⇒ 也就是说 p 是在三个 o 都出栈之后才入栈的，全程栈里只折腾这三个 o。所以前面三个 o 的合法排列，恰好就是"3 个元素进出栈"的全部合法出栈序列，共 5 种。</p>
-<p><strong>为什么 5 种中序刚好对应 5 种形状</strong>：编号之后各结点互不相同，每个合法的中序都唯一确定一棵二叉树；而这 5 棵树的先序又完全一样（都是 $O_1O_2O_3ps$），<strong>形状相同 + 先序相同 ⇒ 只能是同一棵树</strong>，所以它们的形状两两不同。把编号擦掉，正是 5 种不同的树形。</p>
-<p>所以选 C。</p>
-</details>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

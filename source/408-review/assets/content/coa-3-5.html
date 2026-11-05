@@ -239,58 +239,10 @@
 <p>页缺失一定意味着 TLB 缺失、Cache 缺失；TLB 命中则页一定在主存。</p>
 </blockquote>
 <hr/>
-<h4 id="2011-44">例题：【2011】第 44 题</h4>
-<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="2011 年第 44 题：虚拟地址空间 16MB、主存 1MB、页大小 4KB，Cache 直接映射 8 行、块 32B；题中给出页表、Cache 和 TLB 的部分内容，要求求地址位数、Cache 字段、物理地址与命中情况，以及 TLB 查询" data-src="/408-review/assets/textbook/coa-2011-44-question.webp" href="/408-review/assets/textbook/coa-2011-44-question.webp"><img alt="2011 年第 44 题：虚拟地址空间 16MB、主存 1MB、页大小 4KB，Cache 直接映射 8 行、块 32B；题中给出页表、Cache 和 TLB 的部分内容，要求求地址位数、Cache 字段、物理地址与命中情况，以及 TLB 查询" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-2011-44-question.webp"/></a><figcaption>2011 年第 44 题：虚拟地址空间 16MB、主存 1MB、页大小 4KB，Cache 直接映射 8 行、块 32B；题中给出页表、Cache 和 TLB 的部分内容，要求求地址位数、Cache 字段、物理地址与命中情况，以及 TLB 查询</figcaption></figure>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>1. 虚拟地址 24 位，虚页号 12 位；物理地址 20 位，页框号 8 位。</strong></p>
-<p>$16\mathrm{MB}=2^{24}$，$1\mathrm{MB}=2^{20}$，页大小 $4\mathrm{KB}=2^{12}$，所以</p>
-<p>$$\text{虚页号}=24-12=12\text{ 位（第 23～12 位）}$$</p>
-<p>$$\text{页框号}=20-12=8\text{ 位（第 19～12 位）}$$</p>
-<p><strong>2. 标记 12 位、组号 3 位、块内地址 5 位。</strong></p>
-<p>Cache 共 8 行，直接映射 → 行号（组号）$\log_2 8=3$ 位（第 7～5 位）；块 32B → 块内地址 5 位（第 4～0 位）；剩下的标记</p>
-<p>$$20-3-5=12\text{ 位（第 19～8 位）}$$</p>
-<p><strong>3. 页面在主存，物理地址 <code>04C60H</code>，Cache 不命中。</strong></p>
-<p><code>001C60H</code> 的低 12 位是页内偏移 <code>C60H</code>，高 12 位是虚页号 <code>001H</code>。查页表，虚页 1 的有效位为 1，页框号为 <code>04H</code>，所以</p>
-<p>$$\text{PA}=04\mathrm{H}\times 2^{12}+\mathrm{C60H}=04\mathrm{C60H}$$</p>
-<p>用 <code>04C60H</code> 查 Cache：组号 $=(04\mathrm{C60H}\gg 5)\bmod 8=3$，标记 $=04\mathrm{C60H}\gg 8=04\mathrm{CH}$。Cache 第 3 行有效，但标记是 <code>105H</code>，与 <code>04CH</code> 不同，因此不命中。</p>
-<p><strong>4. 页面在主存。</strong></p>
-<p><code>024BACH</code> 的虚页号是 <code>024H</code>，页内偏移是 <code>BACH</code>。TLB 共 8 项、4 路 → 2 组，组号取虚页号的最低位：</p>
-<p>$$\text{组号}=024\mathrm{H}\bmod 2=0,\qquad \text{TLB 标记}=024\mathrm{H}\gg 1=012\mathrm{H}$$</p>
-<p>组 0 中存在有效项，标记恰好是 <code>012H</code>，所以 TLB 命中，页框号为 <code>1FH</code>，该页在主存（物理地址为 <code>1F BACH</code>）。</p>
-</details>
 <h2 id="5-">题型5-缺页异常与页面数量计算</h2>
 <p>页表项有效位为 0 时触发缺页异常，从磁盘调页、更新页表和 TLB 后重新执行。数组跨几个页，看首、尾地址各落在哪一页：</p>
 <p>$$N_{\text{页}}=\left\lfloor\frac{\text{末地址}}{\text{页大小}}\right\rfloor-\left\lfloor\frac{\text{首地址}}{\text{页大小}}\right\rfloor+1$$</p>
 <p>页框足够、页面不会被换出时，缺页次数等于被访问的页数；页框不够、发生页面置换时，同一页可能反复缺页。</p>
 <hr/>
-<h4 id="2025-43">例题：【2025】第 43 题</h4>
-<p>计算机 M 字长 32 位，按字节编址。数据 Cache 数据区 32KB，8 路组相联，主存块 64B；Cache 命中时间 2 个时钟周期，缺失损失 200 个时钟周期。M 采用页式虚拟存储，页面大小 4KB。数组 <code>d</code> 的起始地址为 <code>0180 0020H</code>：</p>
-<pre><code class="language-c">int x, d[2048], i;
-for (i = 0; i &lt; 2048; i++)
-    d[i] = d[i] / x;
-</code></pre>
-<ol>
-<li>主存地址中的 Cache 组号、块内地址各占几位？虚拟地址 VA 中哪些位可以作为 Cache 索引？</li>
-<li><code>d[100]</code> 的虚拟地址是多少？所在主存块对应的 Cache 组号是多少？</li>
-<li>设代码已在 Cache 中，<code>i</code>、<code>x</code> 已装入内存但不在 Cache 中。<code>d[0]</code> 在其主存块内的偏移量是多少？执行 <code>for</code> 循环时访问 <code>d</code> 的 Cache 缺失率和数组元素的平均访问时间各是多少？</li>
-<li><code>d</code> 分布在几个页中？若代码已在主存、<code>d</code> 不在主存，执行 <code>for</code> 循环时访问 <code>d</code> 引起的缺页次数是多少？</li>
-</ol>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>1. 组号 6 位，块内地址 6 位；VA 的第 11～6 位可作索引。</strong></p>
-<p>数据区 $32\mathrm{KB}$、块 $64\mathrm{B}$，共 $32\mathrm{K}/64=512$ 行；8 路 → $512/8=64$ 组，组号 $\log_2 64=6$ 位，块内地址 $\log_2 64=6$ 位。</p>
-<p>页大小 4KB → 页内偏移 12 位。Cache 索引加块内地址正好 $6+6=12$ 位，全部落在页内偏移里，所以虚拟地址的第 11～6 位可以直接当索引。</p>
-<p><strong>2. <code>d[100]</code> 的虚拟地址是 <code>0180 01B0H</code>，组号是 6。</strong></p>
-<p>$$0180\,0020\mathrm{H}+100\times4=0180\,01\mathrm{B0H}$$</p>
-<p>组号取地址的第 11～6 位：<code>1B0H</code> 的二进制为 <code>0001 1011 0000</code>，中间 6 位是 <code>000110</code>，即 6。</p>
-<p><strong>3. 偏移量 32B；缺失率 6.30%，平均访问时间 14.60 个时钟周期。</strong></p>
-<p>起始地址低 6 位是 <code>100000B</code>，即 32，所以 <code>d[0]</code> 在块内偏移 32B 处。</p>
-<p>数组 8KB，从偏移 32B 处开始，跨过 129 个主存块：首块放 8 个元素，中间 127 块各放 16 个，末块放 8 个。Cache 有 64 组、8 路，129 个块中每组最多 3 块，不会冲突，每个块只需调入一次：</p>
-<p>$$\text{缺失率}=\frac{129}{2048}=6.30\%$$</p>
-<p>$$T_a=2+6.30\%\times200=14.60\text{ 个时钟周期}$$</p>
-<p><strong>4. <code>d</code> 分布在 3 个页中，缺页 3 次。</strong></p>
-<p><code>d</code> 的地址范围是 <code>0180 0020H</code>～<code>0180 201FH</code>：第一页 <code>0180 0000H</code>～<code>0180 0FFFH</code>，第二页 <code>0180 1000H</code>～<code>0180 1FFFH</code>，末尾 32 字节落在第三页 <code>0180 2000H</code> 起。顺序访问时每页第一次访问触发一次缺页，共 3 次。</p>
-</details>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

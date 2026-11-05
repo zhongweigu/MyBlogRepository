@@ -21,58 +21,8 @@
 <blockquote>
 <p>地址从全 0 加到全 1，每次末位 +1。块内地址加满才进位到主存块号；面向 Cache 时，行内地址加满才进位到组号和 Tag。所以连续访问只改块内地址，跳行访问每次都会进位、换块。</p>
 </blockquote>
-<h4 id="2010-44">例题：【2010】第 44 题</h4>
-<p>主存地址空间 256MB，按字节编址。指令 Cache 与数据 Cache 分离，均有 8 行，行大小 64B，数据 Cache 采用直接映射。<code>int a[256][256]</code> 按行优先存放，首地址 320，<code>int</code> 占 32 位，<code>i</code>、<code>j</code>、<code>sum</code> 在寄存器中：</p>
-<pre><code class="language-c">// 程序 A
-for (i = 0; i &lt; 256; i++)
-    for (j = 0; j &lt; 256; j++)
-        sum += a[i][j];
-
-// 程序 B
-for (j = 0; j &lt; 256; j++)
-    for (i = 0; i &lt; 256; i++)
-        sum += a[i][j];
-</code></pre>
-<p>求两个程序的数据访问命中率，并说明哪个执行时间更短。</p>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>A 的命中率 15/16 = 93.75%，B 的命中率 0，A 更快。</strong></p>
-<p>一个块 64B、一个 <code>int</code> 4B，每块装 16 个元素；一行 256 个 <code>int</code> 占 1024B，正好 16 个主存块。</p>
-<p><strong>程序 A（按行）</strong>：<code>a[i][0..15]</code> 在同一个块里，访问 <code>a[i][0]</code> 时缺失并调入整块，接下来的 15 个元素连续命中，到 <code>a[i][16]</code> 才换下一块。每 16 次访问缺 1 次：</p>
-<p>$$H_A=\frac{15}{16}=93.75\%$$</p>
-<p><strong>程序 B（按列）</strong>：相邻两次访问 <code>a[i][j]</code> 和 <code>a[i+1][j]</code> 相差 1024B，即跨过 16 个主存块。数据 Cache 只有 8 行，块号相差 16 的两个块对 8 取模相同，映射到同一行，每次访问都把前一行刚调入的块换出去：</p>
-<p>$$H_B=0$$</p>
-<p>A 的访存次数远少于 B，执行时间更短。</p>
-</details>
 <hr/>
-<h4 id="2020-44-2">例题：【2020】第 44 题（第 2 问）</h4>
-<p>主存地址 32 位，按字节编址，8 路组相联，直写（Write Through），LRU，主存块 64B，数据区 32KB，开始时 Cache 为空：</p>
-<pre><code class="language-c">for (k = 0; k &lt; 1024; k++)
-    s[k] = 2 * s[k];
-</code></pre>
-<p><code>s</code> 为 <code>int</code>（4B），<code>k</code> 在寄存器中，<code>s</code> 的起始地址为 <code>0080 00C0H</code>，求访问 <code>s</code> 的数据 Cache 缺失次数。</p>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>缺失 64 次。</strong></p>
-<p>题中的 64B 是主存块大小，也就是 Cache 行里的数据块；Cache 行 = 64B 数据块 + Tag + 有效位 + LRU 位等，整行比 64B 大。算块数（行数）时只用数据块大小，只有问 Cache 总容量时，才把标记和控制位加进去。</p>
-<p>先算 Cache 的组数：数据区 $32\mathrm{KB}$、块 $64\mathrm{B}$，共 $32\mathrm{KB}/64\mathrm{B}=512$ 行；8 路组相联，组数 $=512/8=64$。</p>
-<p><code>s</code> 占 $1024\times4=4\mathrm{KB}$，共 $4\mathrm{KB}/64\mathrm{B}=64$ 个主存块。起始地址的低 6 位为 0，64 个块连续排列；64 个块对 64 组取模，正好各占一个组，不发生冲突。开始时 Cache 为空，每个块第一次访问都要调入，共缺失 64 次；每块装 16 个 <code>int</code>，调入后块内其余 15 次访问命中。</p>
-<blockquote>
-<p>这里能正好算 64 个块，是因为起始地址 <code>0080 00C0H</code> 的低 6 位为 0、正好落在块边界上。数组的起始地址不一定对齐到主存块：若起点在块中间，首块和末块都只被占一部分，4KB 会跨 65 个块，缺失次数要按实际跨过的块数算。</p>
-</blockquote>
-</details>
 <hr/>
-<h4 id="2023-43">例题：【2023】第 43 题</h4>
-<p>32 位计算机，请求分页，虚拟地址 32 位，页大小 4KB；Cache 采用 4 路组相联，主存块 32B，数据区 8KB。<code>int a[24][64]</code> 按行优先存放，<code>int</code> 占 4B，起始虚拟地址 <code>0042 2000H</code>。分别按行、按列执行 <code>a[i][j] = 10</code>，求数组共占多少主存块，以及两种访问方式的 Cache 命中率。</p>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>数组占 192 块；按行、按列的命中率都是 87.5%。</strong></p>
-<p>数组大小 $24\times64\times4=6144$ 字节，每块 32B，占 $6144/32=192$ 块；每块装 $32/4=8$ 个 <code>int</code>。Cache 共 $8\mathrm{K}/32=256$ 行，4 路 → 64 组。</p>
-<p><strong>按行访问</strong>：一块里的 8 个元素连续访问，首元素缺失、其余 7 次命中：</p>
-<p>$$H=\frac{7}{8}=87.5\%$$</p>
-<p><strong>按列访问</strong>：相邻两行同一列相差 256B，即相差 8 个主存块。第 <code>i</code> 行的块号是“起点 $+8i$”，$8i$ 对 64 取模只有 8 种结果，24 个块只落在 8 个组里，每组 3 块。4 路组相联每组能放 4 块，这 3 块可以同时驻留；每个块装的是同一行连续的 8 个 <code>j</code>，后续 7 次列访问都命中：</p>
-<p>$$H=\frac{7}{8}=87.5\%$$</p>
-</details>
 <h2 id="3-cache">题型3-Cache 访问过程（命中/缺失处理）</h2>
 <p>CPU 给出主存地址 AD 后：</p>
 <ol>
@@ -82,50 +32,6 @@ for (j = 0; j &lt; 256; j++)
 </ol>
 <p>有效位标记该行是否装有有效块；回写法的行还有脏位，替换到脏行时先写回主存。</p>
 <hr/>
-<h4 id="2020-44">例题：【2020】第 44 题</h4>
-<p>主存地址 32 位，按字节编址，指令 Cache 和数据 Cache 与主存之间均采用 8 路组相联、直写（Write Through）和 LRU 替换，主存块 64B，数据区容量各 32KB，开始时 Cache 均为空。</p>
-<ol>
-<li>Cache 每一行中 Tag、LRU 位各占几位？是否有修改位？</li>
-<li><code>for (k = 0; k &lt; 1024; k++) s[k] = 2 * s[k];</code> 中，<code>s</code> 为 <code>int</code>（4B），<code>k</code> 在寄存器中，<code>s</code> 的起始地址为 <code>0080 00C0H</code>，求访问 <code>s</code> 的数据 Cache 缺失次数。</li>
-<li>若 CPU 最先的访问是读取主存单元 <code>0001 0003H</code> 中的指令，简述从 Cache 中访问该指令的过程，包括缺失处理。</li>
-</ol>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>1. Tag 20 位，LRU 3 位，没有修改位。</strong></p>
-<p>$32\mathrm{K}/64=512$ 行，8 路 → $512/8=64$ 组，组号 6 位；块内地址 $\log_2 64=6$ 位。于是</p>
-<p>$$\text{Tag}=32-6-6=20\text{ 位}$$</p>
-<p>LRU 需区分组内 8 行的新旧，$\log_2 8=3$ 位。写策略是直写，Cache 与主存始终一致，不需要脏位。</p>
-<p><strong>2. 缺失 64 次。</strong>（过程见题型2 第 2 问。）</p>
-<p><strong>3. 取指过程。</strong></p>
-<p><code>0001 0003H</code> 按 Cache 字段拆开：</p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>字段</th>
-<th>位数</th>
-<th>该地址的值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Tag</td>
-<td>20</td>
-<td><code>00010H</code></td>
-</tr>
-<tr>
-<td>组号</td>
-<td>6</td>
-<td><code>00H</code></td>
-</tr>
-<tr>
-<td>块内地址</td>
-<td>6</td>
-<td><code>03H</code></td>
-</tr>
-</tbody>
-</table></div>
-<p>按组号 0 找到指令 Cache 的第 0 组，比较组内 8 行的有效位和 Tag。开始时 Cache 为空，有效位全为 0，判定缺失。于是选一个空闲行（若组已满则按 LRU 选一行；指令 Cache 只读，没有脏位，不需要写回），从主存地址 <code>0001 0000H</code> 开始读出一个 64B 主存块写入该行数据区，并置 Tag 为 <code>00010H</code>、有效位为 1。最后按块内地址 <code>03H</code> 从该行取出指令送 CPU。之后再访问这一块就能直接命中。</p>
-</details>
 <h2 id="6-cache-amat">题型6-Cache 性能分析（AMAT）</h2>
 <p>CPU 在 Cache-主存层次的平均访问时间：</p>
 <p>$$T_a=pT_c+(1-p)(T_c+T_m)=T_c+(1-p)T_m$$</p>
@@ -136,43 +42,8 @@ for (j = 0; j &lt; 256; j++)
 <p>算到程序执行时间：</p>
 <p>$$T_{\text{CPU}}=\text{指令数}\times\mathrm{CPI}\times T_{\text{clk}}+\text{缺失次数}\times\text{缺失代价}$$</p>
 <hr/>
-<h4 id="2013-43">例题：【2013】第 43 题</h4>
-<p>某 32 位计算机，CPU 主频 800MHz，Cache 命中时 CPI 为 4，Cache 块大小 32B。主存采用 8 体交叉存储，每个体的存储字长 32 位，存储周期 40ns；存储器总线宽度 32 位，总线时钟频率 200MHz，支持突发传送。每次读突发传送总线事务包括送首地址和命令、存储器准备数据、传送数据；每次突发传送 32B，传送地址或 32 位数据均需要一个总线时钟周期。</p>
-<ol>
-<li>CPU 和总线的时钟周期各是多少？总线带宽是多少？</li>
-<li>Cache 缺失时，需要几个读突发传送总线事务来完成一个主存块的读取？</li>
-<li>存储器总线完成一次读突发传送总线事务需要多少时间？</li>
-<li>程序 BP 共执行 100 条指令，平均每条指令访存 1.2 次，Cache 缺失率 5%，不考虑替换等开销，BP 的 CPU 执行时间是多少？</li>
-</ol>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>1. CPU 周期 1.25ns，总线周期 5ns，带宽 800MB/s。</strong></p>
-<p>$$T_{\text{CPU}}=\frac{1}{800\mathrm{MHz}}=1.25\,\mathrm{ns},\qquad T_{\text{bus}}=\frac{1}{200\mathrm{MHz}}=5\,\mathrm{ns}$$</p>
-<p>总线每个时钟传 32 位，即 4B：</p>
-<p>$$\text{带宽}=\frac{4\mathrm{B}}{5\,\mathrm{ns}}=800\,\mathrm{MB/s}$$</p>
-<p><strong>2. 1 个突发事务。</strong></p>
-<p>突发传送是“只送一次首地址和命令，随后连续传送一串地址相邻的数据”，地址由存储器内部自动递增，不必每个字都重新送地址。本题一次突发传送 32B，总线宽度 32 位（4B），即一次事务连续传 $32/4=8$ 个数据，正好覆盖一个 32B 的主存块，所以取一个块只需 1 个事务。</p>
-<p><strong>什么时候用。</strong> 搬一整段连续数据时才会用，典型场景是 Cache 缺失后调入一个主存块、DMA 成块搬运外设数据、磁盘按块读写主存。只读一个孤立的字、或地址不连续时，按普通单字传送算。</p>
-<p><strong>怎么判断。</strong> 看三点：①要搬的数据是连续的一整块；②题目明确“支持突发传送”或给出突发长度；③数据量是总线宽度的整数倍。本题三条都满足：Cache 缺块，32B 连续，每次突发 32B（即 8 个 32 位字），所以一个块只需一次事务。</p>
-<p><strong>3. 85ns。</strong></p>
-<p>准备数据和传送数据是重叠的，画成体-时间图：</p>
-<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="8 体交叉、突发传送的体-时间图：体0 在 5ns 启动，之后每隔 5ns 启动下一个体，体7 在 40ns 启动；体0 在 45ns 准备好第一个字，总线每隔 5ns 传送一个 32 位字；体7 在 80ns 准备好，最后一个字 80～85ns 传完" data-src="/408-review/assets/textbook/coa-bank-time-diagram.webp" href="/408-review/assets/textbook/coa-bank-time-diagram.webp"><img alt="8 体交叉、突发传送的体-时间图：体0 在 5ns 启动，之后每隔 5ns 启动下一个体，体7 在 40ns 启动；体0 在 45ns 准备好第一个字，总线每隔 5ns 传送一个 32 位字；体7 在 80ns 准备好，最后一个字 80～85ns 传完" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-bank-time-diagram.webp"/></a><figcaption>8 体交叉、突发传送的体-时间图：体0 在 5ns 启动，之后每隔 5ns 启动下一个体，体7 在 40ns 启动；体0 在 45ns 准备好第一个字，总线每隔 5ns 传送一个 32 位字；体7 在 80ns 准备好，最后一个字 80～85ns 传完</figcaption></figure>
-<ul>
-<li>0～5ns：送首地址和命令；</li>
-<li>体 0 在 5ns 启动，之后每隔 5ns 启动下一个体，体 7 在 $5+7\times5=40\mathrm{ns}$ 启动；</li>
-<li>每个体的存取周期是 40ns，体 0 在 $5+40=45\mathrm{ns}$ 准备好第一个字，总线从 45ns 起每隔 5ns 传送一个 32 位字；</li>
-<li>体 7 在 $40+40=80\mathrm{ns}$ 准备好，最后一个字在 80～85ns 传完。</li>
-</ul>
-<p>$$5+(8-1)\times5+40+5=85\,\mathrm{ns}$$</p>
-<p><strong>4. 1010ns。</strong></p>
-<p>$$100\times4\times1.25=500\,\mathrm{ns}$$</p>
-<p>CPI = 4 是 Cache 命中时的 CPI，取指和 1.2 次访存在命中情况下的时间已经包含在这 500ns 里；1.2 只用来数访存次数、求缺失次数，不能再乘一次命中时间。</p>
-<p>访存 $100\times1.2=120$ 次，缺失 $120\times5\%=6$ 次：</p>
-<p>$$6\times85=510\,\mathrm{ns}$$</p>
-<p>$$T_{\text{CPU}}=500+510=1010\,\mathrm{ns}$$</p>
-</details>
 <hr/>
 <p>回到题型5 的 2025 年第 43 题，数组跨 129 个块、共 2048 次访问，缺失率 6.30%，命中时间 2 个周期，缺失损失 200 个周期：</p>
 <p>$$T_a=2+0.0630\times200\approx14.60\text{ 个时钟周期}$$</p>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

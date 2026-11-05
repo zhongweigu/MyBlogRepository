@@ -355,5 +355,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 所有图片必须落地到 `assets/textbook/` 或 `assets/img/`，在正文对应段落插入；不要只堆文末。
 - 原帖图片可用 `python scripts/build-review-content.py` 生成（51 篇 + 图片）；手写长文直接写 `assets/content/<id>.html`。
 - 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。
-- 改完 `npx hexo clean && npx hexo generate`，桌面 + 390px 各验证，确认无 404；然后自动 commit + push。
+- **题目归题库**：完整例题/真题统一进 `questions.js` / `questions-extra.js` / `questions-manual-extra.js`；正文不保留例题和答案解析。存储专题里没有选项、没有分问的小例题不录。
+- 自动抽题：`python scripts/extract-questions.py`；正文去例题：`python scripts/build-review-content.py`。改完这两个脚本要同步跑。
+- 用户发图/知识点时：先判断是知识点还是完整题目；知识点要自行提取、总结、画 SVG 或贴截图并融入已有考点；完整题目入库并链接相关考点。
+- 验证提速：日常只查改动页 + 一个入口 + 390px，不每次全量 52 篇；只有改路由/schema/批量图片/模板时才全量。
+- 改完默认 `npx hexo generate`；只有改 `_config`、路由/schema、批量图片或生成异常时才 `npx hexo clean`。日常验证改动页 + 一个入口 + 390px，不全量跑 52 篇。
 - **缓存**：Netlify/Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 时必须递增 `assets/js-vN` 目录版本或 `app.css?v=...`，否则用户普通刷新仍会用旧文件。

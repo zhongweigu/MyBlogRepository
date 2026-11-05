@@ -7,10 +7,12 @@ export function questionCard(q, { compact = false, open = false } = {}) {
   const topicNames = (q.topics || []).map((id) => topicById.get(id)?.title).filter(Boolean);
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
   const diff = Array.from({ length: 5 }, (_, i) => `<i class="${i < q.difficulty ? 'on' : ''}"></i>`).join('');
+  const yearLabel = q.year || q.label || '例题';
+  const noLabel = q.no ? `第 ${escapeHtml(q.no)} 题` : '例题';
 
   return `<article class="q-card ${compact ? 'is-compact' : ''}" id="${q.id}" data-q="${q.id}" data-open="${open ? 'true' : 'false'}">
     <header class="q-head" data-action="toggle-question" role="button" tabindex="0" aria-expanded="${open ? 'true' : 'false'}">
-      <div class="q-year"><strong>${q.year}</strong><span>第 ${escapeHtml(q.no)} 题</span></div>
+      <div class="q-year"><strong>${yearLabel}</strong><span>${noLabel}</span></div>
       <div class="q-head-main">
         <div class="q-meta">
           ${tag(subject?.name || '', q.subject === 'coa' ? 'coa' : 'ds')}
@@ -53,8 +55,8 @@ function topicsChips(q) {
 export function questionRow(q) {
   const subject = subjectById.get(q.subject);
   return `<a class="question-row" href="#/questions?q=${q.id}">
-    <span class="qr-year">${q.year}</span>
-    <span class="qr-main"><strong>${escapeHtml(topicLabel(q))}</strong><small>${subject?.name || ''} · 第 ${q.no} 题 · ${q.type}</small></span>
+    <span class="qr-year">${q.year || q.label || '例题'}</span>
+    <span class="qr-main"><strong>${escapeHtml(topicLabel(q))}</strong><small>${subject?.name || ''} · ${q.no ? `第 ${q.no} 题` : '例题'} · ${q.type}</small></span>
     <span class="qr-diff">${Array.from({ length: 5 }, (_, i) => `<i class="${i < q.difficulty ? 'on' : ''}"></i>`).join('')}</span>
     <span class="qr-arrow">${icon('arrowRight', 16)}</span>
   </a>`;

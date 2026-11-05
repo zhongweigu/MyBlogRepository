@@ -130,85 +130,6 @@
 </tbody>
 </table></div>
 <p>一般地，$\text{ASL}_{\text{成功}} \approx \log_2(n+1) - 1$，$\text{ASL}_{\text{失败}} \approx \log_2(n+1)$，量级都是 $O(\log_2 n)$。</p>
-<h4 id="600">例题：600 个元素的最多比较次数</h4>
-<p>【题目】对含 600 个元素的有序顺序表进行折半查找，关键字间的比较次数最多是</p>
-<ul>
-<li>A. 9</li>
-<li>B. 10</li>
-<li>C. 30</li>
-<li>D. 300</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B（10 次）。</strong></p>
-<p>折半查找的最多比较次数就是判定树的高度：</p>
-<p>$$h = \lceil \log_2(n+1) \rceil$$</p>
-<p>代入 $n = 600$，得 $h = \lceil \log_2 601 \rceil$。因为</p>
-<p>$$2^9 = 512 &lt; 601 \le 1024 = 2^{10}$$</p>
-<p>所以 $9 &lt; \log_2 601 \le 10$，向上取整为 10，最多比较 10 次。</p>
-<p>为什么判定树的高度一定和同结点数的完全二叉树一样？每折半一次，查找区间就尽量对半分：</p>
-<ul>
-<li>除最后一次划分外，左右两边基本对称，树是一层层"对称生长"的；</li>
-<li>区间缩到最后，问题规模只会剩下 2 或 3：剩 3 个时，<code>mid</code> 正好取中间，左右各一个，仍是完全二叉树的形状；剩 2 个时，向下取整会让 <code>mid</code> 取左边那个，最后一次划分长出"只有右孩子"的不对称结构；</li>
-<li>所以只有最后一层可能不符合完全二叉树"从左到右填满"的规则，但<strong>高度不变</strong>，仍然等于同结点数完全二叉树的高度 $\lceil \log_2(n+1) \rceil$。</li>
-</ul>
-<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="折半查找判定树的生长：除最后一次划分外逐层对称展开，最后问题规模为 2 或 3，只有最后一层可能不满，但高度与同结点数的完全二叉树相同" data-src="/408-review/assets/textbook/ds-binary-search-height-growth.webp" href="/408-review/assets/textbook/ds-binary-search-height-growth.webp"><img alt="折半查找判定树的生长：除最后一次划分外逐层对称展开，最后问题规模为 2 或 3，只有最后一层可能不满，但高度与同结点数的完全二叉树相同" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-binary-search-height-growth.webp"/></a><figcaption>折半查找判定树的生长：除最后一次划分外逐层对称展开，最后问题规模为 2 或 3，只有最后一层可能不满，但高度与同结点数的完全二叉树相同</figcaption></figure>
-</details>
-<h4 id="2017">例题：【2017】（哪棵可能是折半查找判定树）</h4>
-<p>【2017】下列二叉树中，可能成为折半查找判定树（不含外部结点）的是</p>
-<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="2017 题图：四个不带关键字的二叉树选项 A、B、C、D，只比较树形" data-src="/408-review/assets/textbook/ds-binary-search-decision-2017-options.webp" href="/408-review/assets/textbook/ds-binary-search-decision-2017-options.webp"><img alt="2017 题图：四个不带关键字的二叉树选项 A、B、C、D，只比较树形" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-binary-search-decision-2017-options.webp"/></a><figcaption>2017 题图：四个不带关键字的二叉树选项 A、B、C、D，只比较树形</figcaption></figure>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 A。</strong></p>
-<p>先看根结点定下这棵树用的是哪种取整，再逐层检查有没有混用：</p>
-<ul>
-<li>每个结点左、右子树的结点数最多差 1；</li>
-<li>若 <code>mid = ⌊(low+high)/2⌋</code>（向下取整），则<strong>左子树不多于右子树</strong>；</li>
-<li>若 <code>mid = ⌈(low+high)/2⌉</code>（向上取整），则<strong>左子树不少于右子树</strong>。</li>
-</ul>
-<p>整棵树必须统一按其中一种来，不能有的结点左多、有的结点右多。</p>
-<ul>
-<li><strong>A</strong>：根左 5、右 4；根的左孩子左右各 2；根的右孩子左 2、右 1；再往下每棵 2 个结点的子树都是"左 1 右 0"。所有结点都满足"左 ≥ 右"，相当于统一按向上取整，<strong>可以</strong>。</li>
-<li><strong>B</strong>：根左右各 5，没问题；但左边两棵 2 结点子树是"左 1 右 0"（左多），右边两棵是"左 0 右 1"（右多）——同一棵树里混用了两种取整，<strong>不行</strong>。</li>
-<li><strong>C</strong>：根左右各 4；左孩子的子树是"左 1 右 2"（左少），右孩子的子树是"左 2 右 1"（左多），两种取整混用，<strong>不行</strong>。</li>
-<li><strong>D</strong>：根左 4、右 5（左少，按向下取整）；但它下面 2 结点的子树都是"左 1 右 0"（左多，按向上取整），同样混用，<strong>不行</strong>。</li>
-</ul>
-<p>所以选 A。</p>
-</details>
-<h4 id="2013">例题：【2013】（按概率排列，顺序查找反而更短）</h4>
-<p>【2013】设包含 4 个数据元素的集合 $S = \{\text{'do'}, \text{'for'}, \text{'repeat'}, \text{'while'}\}$，各元素的查找概率依次为 $p_1 = 0.35$、$p_2 = 0.15$、$p_3 = 0.15$、$p_4 = 0.35$。将 $S$ 保存在一个长度为 4 的顺序表中，采用折半查找法，查找成功时的平均查找长度为 2.2。</p>
-<p>1）若采用顺序存储结构保存 $S$，且要求平均查找长度更短，则元素应如何排列？应使用何种查找方法？查找成功时的平均查找长度是多少？</p>
-<p>2）若采用链式存储结构保存 $S$，且要求平均查找长度更短，则元素应如何排列？应使用何种查找方法？查找成功时的平均查找长度是多少？</p>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>两问答案相同：按查找概率从大到小排列，采用顺序查找，ASL = 2.1。</strong></p>
-<p><strong>先看题干的 2.2 是怎么来的。</strong> 折半查找要求表按关键字有序，字符串的自然顺序是字典序：</p>
-<p>$$\text{'do'} &lt; \text{'for'} &lt; \text{'repeat'} &lt; \text{'while'}$$</p>
-<p>所以顺序表只能排成 <code>do, for, repeat, while</code>，概率依次是 0.35、0.15、0.15、0.35。折半查找第一次取 <code>mid = 2</code>，判定树是：</p>
-<ul>
-<li>第 1 层：<code>for</code>（0.15），比较 1 次；</li>
-<li>第 2 层：<code>do</code>（0.35）、<code>repeat</code>（0.15），各比较 2 次；</li>
-<li>第 3 层：<code>while</code>（0.35），比较 3 次。</li>
-</ul>
-<p>不同元素概率不同，ASL 要按概率加权，不能直接除以 4（$c_i$ 是查找第 $i$ 个元素时的比较次数）：</p>
-<p>$$\text{ASL} = \sum_{i=1}^{n} p_i c_i$$</p>
-<p>代入：</p>
-<p>$$\text{ASL}_{\text{折半}} = 0.15 \times 1 + 0.35 \times 2 + 0.15 \times 2 + 0.35 \times 3 = 0.15 + 0.7 + 0.3 + 1.05 = 2.2$$</p>
-<p>这正是题干给出的 2.2。</p>
-<p><strong>为什么顺序查找能更短？</strong> 折半查找的比较次数由判定树决定，和概率无关：它把概率只有 0.15 的 <code>for</code> 放在根上（只比 1 次），却让概率 0.35 的 <code>do</code> 比 2 次、<code>while</code> 比 3 次。概率高的元素反而在深层，加权后 ASL 就被拉高了。</p>
-<p>把元素按概率从大到小排列：</p>
-<p><code>do(0.35), while(0.35), for(0.15), repeat(0.15)</code></p>
-<p>（两个 0.35 谁在前都行，两个 0.15 同理。）顺序查找的比较次数依次是 1、2、3、4：</p>
-<p>$$\text{ASL}_{\text{顺序}} = 0.35 \times 1 + 0.35 \times 2 + 0.15 \times 3 + 0.15 \times 4 = 0.35 + 0.7 + 0.45 + 0.6 = 2.1$$</p>
-<p>$2.1 &lt; 2.2$，所以<strong>顺序查找反而更优</strong>。</p>
-<p><strong>两问的区别只在存储结构：</strong></p>
-<p>1）顺序存储：可以顺序查找，也可以折半查找；但按概率排好序后表不再按字典序有序，不能再用折半。选顺序查找，ASL = 2.1。</p>
-<p>2）链式存储：本来就不能折半（链表无法随机访问 <code>mid</code>），只能顺序查找；同样按概率降序排列，ASL = 2.1。</p>
-<p>所以两问的排列、方法和结果完全一样：<strong>按概率降序 + 顺序查找 + ASL = 2.1</strong>。</p>
-<blockquote>
-<p>注：这里"顺序查找更优"的前提是<strong>各元素查找概率不相等</strong>。等概率时，折半查找的 $O(\log n)$ 仍然明显优于顺序查找的 $O(n)$，不能把这道题的结论推广成"顺序查找总比折半快"。</p>
-</blockquote>
-</details>
 <h3 id="_3">分块查找</h3>
 <p><strong>分块查找（索引顺序查找）</strong>：把表分成 $b$ 块、每块 $s$ 个记录，另建一张索引表。索引表的每一项存两样东西：<strong>该块的最大关键字</strong>和<strong>该块第一个元素的地址</strong>。查找分两步：先查索引表确定关键字可能落在哪一块，再到该块内顺序查找。</p>
 <figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="分块查找结构：18 个元素分成 3 块、每块 6 个；索引表记录各块的最大关键字 22、48、86 和起始地址 1、7、13" data-src="/408-review/assets/textbook/ds-block-search-structure.webp" href="/408-review/assets/textbook/ds-block-search-structure.webp"><img alt="分块查找结构：18 个元素分成 3 块、每块 6 个；索引表记录各块的最大关键字 22、48、86 和起始地址 1、7、13" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-block-search-structure.webp"/></a><figcaption>分块查找结构：18 个元素分成 3 块、每块 6 个；索引表记录各块的最大关键字 22、48、86 和起始地址 1、7、13</figcaption></figure>
@@ -268,4 +189,4 @@
 </ul>
 <p>失败时要看关键字落在哪个索引区间、块内又比较到哪，分支较多，一般不展开讨论；这里重点掌握成功时的 ASL。</p>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

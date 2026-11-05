@@ -11,7 +11,7 @@
 
 1. **不要编辑 `source/_posts/*.md`。** 帖子是历史归档；新内容只进复习台。
 2. **今日页只有一个模块**：每日知识点复习，默认 10 个考点。不要加回计划、每日一题、热力图、复习指引等模块。
-3. **考点页是长文，不是几条摘要；但顶部要先给背诵和答法。** 结构是：背诵清单 / 考场答法 → 理解长文 → 图解 → 关联真题。长文要接近一篇小教材：定义、推导、例子、表格、图、易错点都要有。
+3. **考点页是长文，不是几条摘要；但顶部要先给背诵和答法。** 结构是：背诵清单 / 考场答法 → 理解长文 → 图解 → 关联真题。长文要接近一篇小教材：定义、推导、示例片段、表格、图、易错点都要有；**完整例题不放在正文**。
 4. **图要放到对应位置。** 用户发的图、原帖里的图、自己画的图，都要落到 `assets/textbook/` 或 `assets/img/`，并在正文相应段落插入，不能只堆在文末；代表一类题型的图再收进 `data/diagrams.js`。
 5. **术语和图解是独立入口**：`#/glossary`、`#/diagrams`。不要加评论、路线 / 纲领、P0–P3 优先级、英文版——用户明确不要。
 
@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v3/
+│   ├── js-v4/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -34,7 +34,9 @@ source/408-review/
 │   │   │   ├── ds-extra.js        # 新增 DS 考点
 │   │   │   ├── coa-extra.js       # 新增 COA 考点
 │   │   │   ├── supplements-*.js   # 原有考点的补充点/图/题
-│   │   │   ├── questions.js       # 真题
+│   │   │   ├── questions.js       # 手写精选题
+│   │   │   ├── questions-extra.js # 自动抽取题（脚本生成，勿手改）
+│   │   │   ├── questions-manual-extra.js # 裸题手工补充
 │   │   │   ├── diagrams.js        # 图解库（代表题型）
 │   │   │   ├── glossary.js        # 术语（核心手写 + 自动抽取）
 │   │   │   └── index.js           # 合并、排序、索引
@@ -48,6 +50,8 @@ source/408-review/
 │   └── img/*.webp|*.svg           # 补充图 + 自绘 SVG（含地址翻译全链路）
 └── ...
 ```
+
+脚本：`scripts/build-review-content.py`（切长文、压图片、删正文例题）、`scripts/extract-questions.py`（抽取题库）。
 
 - 考点页只加载当前那篇 `content/<id>.html`，不会把 50 篇长文塞进主 JS。
 - 图片是普通静态文件，靠 `skip_render` 复制。
@@ -142,8 +146,8 @@ python scripts/build-review-content.py
 
 - 公式写 `$...$` / `$$...$$`，MathJax 会渲染；不要把公式转成图片。
 - Mermaid 写 `<pre class="mermaid">…</pre>`，页面会渲染；失败时保留代码。
-- 答案、例题解析用 `<details class="article-details"><summary>…</summary>`，默认折叠。
-- 标题层级：文章用 `h2`，小节用 `h3`，例题用 `h4`；TOC 会自动生成（手写时自己维护）。
+- 答案、例题解析**不进正文**；正文里只保留非题目的补充说明，用 `<details class="article-details"><summary>…</summary>` 折叠。
+- 标题层级：文章用 `h2`，小节用 `h3`；不再给例题留 `h4`。
 - 正文长度按内容需要，不要为了「结构统一」把内容压成 3 句话。
 
 ### 3.4 图片
@@ -160,20 +164,40 @@ python scripts/build-review-content.py
 
 ### 3.5 真题
 
-`data/questions.js` 里加题；字段：
+题库分三层：
+
+- `data/questions.js`：手写/早期的 29 道精选题，保留。
+- `data/questions-extra.js`：由 `scripts/extract-questions.py` 从两篇《408 考点强化》自动抽取，**不要手改**。
+- `data/questions-manual-extra.js`：源帖里没有 `<u>例题` 标记、但确实完整的“裸题”（例如 2010 队列、2025 复杂度、习题训练四题），手工补。
+
+字段：
 
 ```js
 {
-  id: 'q-2024-ds-xx', year: 2024, no: '12', subject: 'ds', chapter: 'ds-5',
-  topics: ['ds-5-2'], type: '选择', difficulty: 1~5, score: '2 分',
+  id: 'q-2024-ds-xx',
+  year: 2024,              // 没有年份就写 null，并用 label
+  no: '12',                // 没有题号就写 ''
+  label: '例题',            // 无年份/题号时显示
+  subject: 'ds', chapter: 'ds-5', topics: ['ds-5-2'],
+  type: '选择', difficulty: 1~5, score: '2 分',
   stem: '题干（可含 <code>、<pre>、图）',
-  options: ['A 选项', …],
-  answer: 'B',
+  options: ['A 选项', …],   // 综合题可省略
+  answer: 'B',             // 综合题可省略
   analysis: `<p>解析…</p>`
 }
 ```
 
-然后在对应 topic 的 `questions` 里加 id；真题库、考点页、搜索都会自动出现。
+规则：
+
+- **所有完整例题、真题都进题库**；知识点正文里**不再保留任何例题/解析**。生成器会自动删 `<u>例题` / `<u>练习` / `查看答案解析` / `## 习题训练` / “小例题”折叠块。
+- **“存储专题”里的小例题不记录**：没有选项、没有分问、篇幅很短的说明性小例，不是完整题目。自动抽取会跳过 `not year and not options and not numbered_parts and len(stem)<120` 的块；正文里也会删掉“小例题”折叠块。
+- 自动抽取的题会按 `topics` 自动挂回考点页；不需要再改 `topic.questions`。手写题仍保留原来的 id。
+- 每题必须有 `topics` 指向相关考点；解析里写清楚“怎么想到 / 易错点”，能链回考点。
+- 重新抽取：
+  ```powershell
+  python scripts/extract-questions.py
+  ```
+  然后重新生成正文（见 3.3），因为正文里的例题也要同步删除。
 
 ### 3.6 背诵清单 / 考场答法 / 图解（自动派生）
 
@@ -207,37 +231,32 @@ python scripts/build-review-content.py
 
 ## 5. 验证与发布
 
-每次改完：
+**默认只做快速验证，不每次跑全量：**
 
 ```powershell
-npx hexo clean
 npx hexo generate
+# 只有改了 _config / 路由 / 数据合并逻辑，或生成结果异常时才：
+# npx hexo clean && npx hexo generate
 ```
 
-检查：
+快速验证（2~3 个页面）：
 
-1. `public/408-review/assets/content/` 有所有 `content/<id>.html`；
-2. `public/408-review/assets/textbook/` 图片数量与源引用一致；
-3. 本地起 `python -m http.server 8765` 指向 `public/`（注意系统代理对 localhost 的干扰，Chrome 用 `--no-proxy-server`）；
-4. 打开 3~5 个 representative 考点：
-   - 长文加载出来，不是「正在展开全文」；
-   - TOC 可展开，标题层级正确；
-   - 公式渲染、Mermaid 渲染；
-   - 图在对应段落、能点开；
-   - 390px 手机宽度无横向溢出；
-5. 真题深链 `#/questions?q=<id>` 能定位；
-6. 全站搜索能搜到新考点；
-7. 无 404（尤其 `assets/content/<id>.html`、`assets/textbook/*`）。
+1. 打开本次改动的考点页：长文加载、公式/图正常、没有横向溢出；
+2. 如果改了题目：打开 `#/questions`，确认题数、题目和解析出现，再点一次对应考点链接；
+3. 390px 宽度看改动页；
+4. 只检查本次涉及的 `assets/content/<id>.html` 和图片是否 200，不需要遍历全部 52 篇。
+
+**全量 52 篇只在以下情况跑**：改了路由、数据 schema、批量图片重写、模板/CSS 大改。日常加一个知识点或一道题，不要跑全量。
 
 发布：
 
 ```powershell
-git add source/408-review docs/408-review-maintenance.md AGENTS.md scripts/build-review-content.py
+git add source/408-review docs/408-review-maintenance.md AGENTS.md scripts/build-review-content.py scripts/extract-questions.py
 git commit -m "…"
 git push origin main
 ```
 
-Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 `public`。推送后等 1~2 分钟，用无痕窗口验证线上。
+Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 `public`。推送后等 1~2 分钟，只验本次改动页 + 一个入口。
 
 > **缓存（重要）**：Netlify / Cloudflare 对 `/408-review/assets/*` 仍可能返回 `max-age=14400`，普通刷新会继续用旧 JS。**每次改 JS/CSS，必须递增版本**：把 `assets/js-vN` 改成下一个 `js-v(N+1)`（同时改 `index.html` 的入口、本手册与 `guide.js` 里的路径），或至少改 `index.html` 里 `app.css?v=...`。只改文件内容、不改 URL，用户很可能看不到更新。
 
@@ -259,10 +278,33 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 
 ---
 
-## 7. 不要做
+## 7. 用户发来图片 / 知识点 / 真题时
+
+用户以后只发图片、笔记或一句知识点，不再改帖子。收到后按这个顺序处理：
+
+1. **先归类**：是“知识点/图解”还是“完整题目”？
+   - 完整题目（有题干、选项或分问，能独立做）→ 进真题。
+   - 只是两三行的说明性小例 → 不记录；可以吸收成正文里的一句话。
+2. **提取与补全**：读图/读笔记，先写出一句结论和 3~6 个关键词；缺的背景自己补，但不要把猜的当原文。
+3. **画图或截图**：
+   - 结构、字段、流程、访问路径这类“要画得像课本”的图，用 SVG 重画（纸色/墨色/青红配色，参考 `coa-address-path.svg`）。
+   - 原图本身就是课件截图、指针链、带权图、代码截图的，直接压缩后放到 `assets/textbook/`，在对应段落插入；不要硬转 mermaid。
+   - 代表一类题型的图，同时加入 `data/diagrams.js` 和图解库。
+4. **融进已有体系**：先找它属于哪科、哪章、哪个考点；优先补现有 `points` / `content/<id>.html` / `supplements-*`，不要新建孤立页面。确实没有合适考点时才建新 topic，并补 `chapter/order/title/kicker/takeaway/points`。
+5. **写成学习卡**：背诵清单（能直接背的短句）→ 理解（推导、例子、表格、图）→ 考场答法（怎么开头、怎么收口、易错）。正文里**不放完整例题**。
+6. **题目入库**：能自动识别的走 `scripts/extract-questions.py`；裸题补到 `questions-manual-extra.js`。每题写 `topics`、答案和解析；解析最后一句尽量点出“这题在考哪个考点”。同时从正文里删掉这道题。
+7. **顺手更新术语/图解**：新术语加到 `CORE_TERMS` 或依赖自动抽取；新代表图加到 `DIAGRAMS`。
+8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 52 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
+9. **提交**：源帖不改；只提交复习台、脚本和手册相关文件。
+
+---
+
+## 8. 不要做
 
 - 不要编辑 `source/_posts/*.md`（用户明确说帖子不再改）。
 - 不要为了「统一」把详细内容压成 3 条要点。
+- **知识点正文里不要保留完整例题或答案解析**；完整题目一律进真题。存储专题里“没有选项、没有分问”的小例题不录。
+- 不要手改 `data/questions-extra.js`（重新抽取会覆盖）；裸题放 `questions-manual-extra.js`。
 - 不要把原帖图片只放文末；要放到对应段落。
 - 不要给今日页加回旧模块。
 - 不要改已有考点 id（真题、链路、进度都依赖它）。
@@ -275,7 +317,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 
 ---
 
-## 8. 已知取舍
+## 9. 已知取舍
 
 - 长文由帖子生成时，`points` 仍是速记层；两者不要求一一对应。
 - 背诵清单 / 考场答法由 `points` 自动派生，所以 `points` 的标题和一句线索要写清楚；特殊题型之后再手写覆盖。
@@ -283,4 +325,6 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - MathJax / Mermaid 走 jsDelivr CDN，**按需加载**（只有文章里出现公式 / mermaid 才注入脚本）；加载失败时公式/图退化为原始文本，正文仍可读。
 - `coa-5-2`（中断与 I/O）原帖没有对应长文，`content/coa-5-2.html` 是手写补充；后续可直接扩写该文件。
 - 今日队列是考点级，不是知识点级；`points` 用于搜索/速记，不单独记录 SRS 进度。
+- 题库是“完整题目”优先：自动抽取会跳过没有年份、没有选项、没有分问的短小例；如果发现漏题，先检查它是否有 `<u>例题`/`<u>练习` 标记，没有就补到 `questions-manual-extra.js`。
+- 自动抽取的题干和解析来自原帖；如果原帖解析太薄，先在 `questions-manual-extra.js` 补，或在源帖补充后再抽取。
 - Netlify / Cloudflare 对 `assets/*` 可能仍给 4 小时缓存；当前用 `js-vN` 目录 + CSS query 版本化绕过，发布后让用户走一次新 URL。

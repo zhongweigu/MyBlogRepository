@@ -361,19 +361,5 @@ graph TB
 </ul>
 <p>原码、补码、移码的表示范围、用途和考点：</p>
 <figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="n 位带符号数的原码、补码、移码对比：原码范围 -2^(n-1)+1 ~ +2^(n-1)-1，用于 IEEE 754 尾数；补码范围 -2^(n-1) ~ +2^(n-1)-1，用于所有带符号整数；移码范围相同，用于 IEEE 754 指数；表中还列出各自考点" data-src="/408-review/assets/textbook/coa-signed-number-codes-table.webp" href="/408-review/assets/textbook/coa-signed-number-codes-table.webp"><img alt="n 位带符号数的原码、补码、移码对比：原码范围 -2^(n-1)+1 ~ +2^(n-1)-1，用于 IEEE 754 尾数；补码范围 -2^(n-1) ~ +2^(n-1)-1，用于所有带符号整数；移码范围相同，用于 IEEE 754 指数；表中还列出各自考点" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-signed-number-codes-table.webp"/></a><figcaption>n 位带符号数的原码、补码、移码对比：原码范围 -2^(n-1)+1 ~ +2^(n-1)-1，用于 IEEE 754 尾数；补码范围 -2^(n-1) ~ +2^(n-1)-1，用于所有带符号整数；移码范围相同，用于 IEEE 754 指数；表中还列出各自考点</figcaption></figure>
-<h4 id="2021-13">例题：【2021】第 13 题</h4>
-<p>已知带符号整数用补码表示，变量 <code>x</code>、<code>y</code>、<code>z</code> 的机器数分别为 <code>FFFDH</code>、<code>FFDFH</code>、<code>7FFCH</code>，下列结论中正确的是（ ）。</p>
-<ul>
-<li>A. 若 x、y、z 为无符号整数，则 z &lt; x &lt; y</li>
-<li>B. 若 x、y、z 为无符号整数，则 x &lt; y &lt; z</li>
-<li>C. 若 x、y、z 为带符号整数，则 x &lt; y &lt; z</li>
-<li>D. 若 x、y、z 为带符号整数，则 y &lt; x &lt; z</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 D。</strong></p>
-<p>按无符号数看：<code>FFFDH</code> = 65533，<code>FFDFH</code> = 65503，<code>7FFCH</code> = 32764，所以 z &lt; y &lt; x，A、B 都不对。</p>
-<p>按带符号补码看：<code>FFFDH</code> = -3，<code>FFDFH</code> = -33，<code>7FFCH</code> = +32764，所以 y &lt; x &lt; z，D 对、C 错。</p>
-</details>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

@@ -4,14 +4,14 @@
 <ul>
 <li><a href="#1-">考点1-内部排序思想</a><ul>
 <li><a href="#_1">直接插入排序</a></li>
-<li><a href="#_3">折半插入排序</a></li>
-<li><a href="#_4">希尔排序</a></li>
-<li><a href="#_5">冒泡排序</a></li>
-<li><a href="#_6">快速排序</a></li>
-<li><a href="#_7">简单选择排序</a></li>
-<li><a href="#_8">堆排序</a></li>
-<li><a href="#_9">归并排序</a></li>
-<li><a href="#_12">基数排序</a></li>
+<li><a href="#_2">折半插入排序</a></li>
+<li><a href="#_3">希尔排序</a></li>
+<li><a href="#_4">冒泡排序</a></li>
+<li><a href="#_5">快速排序</a></li>
+<li><a href="#_6">简单选择排序</a></li>
+<li><a href="#_7">堆排序</a></li>
+<li><a href="#_8">归并排序</a></li>
+<li><a href="#_9">基数排序</a></li>
 </ul>
 </li>
 </ul>
@@ -221,24 +221,7 @@ void InsertSort(ElemType A[], int n) {
 <li><strong>移动次数里包含哨兵复制</strong>：最坏情况的 $(n+4)(n-1)/2$ 中，每趟有 2 次是哨兵相关的复制（存进去、取出来），只有 $i-1$ 次是真正的元素后移。题目若只问"元素后移次数"，答案是 $n(n-1)/2$，不要多算哨兵那两次。</li>
 <li><strong>链表上也能做</strong>：链式存储时不需要移动元素（只改指针），比较次数仍是 $O(n^2)$ 量级（具体次数会随查找方向不同而变化）；由于单链表不能从后往前，实现时通常从头结点开始找插入位置，思想相同、方向不同。</li>
 </ol>
-<h4 id="_2">例题：逆序序列的比较与移动次数</h4>
-<p>【题目】对含 6 个元素的逆序序列进行直接插入排序，关键字比较次数和元素移动次数分别是</p>
-<ul>
-<li>A. 15，21</li>
-<li>B. 15，25</li>
-<li>C. 30，25</li>
-<li>D. 21，15</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B（15，25）。</strong></p>
-<p>比较次数：$n=6$，最坏情况</p>
-<p>$$\frac{n(n-1)}{2}=\frac{6\times5}{2}=15$$</p>
-<p>移动次数：</p>
-<p>$$\frac{(n+4)(n-1)}{2}=\frac{10\times5}{2}=25$$</p>
-<p>也可以按趟数：第 $i$ 趟移动 $i+1$ 次，$i=2,\dots,6$，共 $3+4+5+6+7=25$ 次。其中每趟有 2 次是哨兵复制，真正的元素后移是 $1+2+3+4+5=15$ 次。</p>
-</details>
-<h3 id="_3">折半插入排序</h3>
+<h3 id="_2">折半插入排序</h3>
 <p><strong>折半插入排序 = 直接插入排序 + 折半查找找位置</strong>：有序区仍然是 <code>A[1..i-1]</code>，但不再从后往前逐个比较，而是先用折半查找确定 <code>A[i]</code> 该插到哪个位置，再统一后移、回填。</p>
 <p><strong>和直接插入最关键的区别：哨兵复制从"按需"变成"必做"。</strong></p>
 <div class="article-table"><table>
@@ -479,7 +462,7 @@ void BinaryInsertSort(ElemType A[], int n) {
 </table></div>
 <p><strong>为什么只适用顺序表</strong>：折半查找要能直接跳到 <code>A[mid]</code>，必须随机访问。链表找第 <code>mid</code> 个结点要从头走，折半一次就退化成 $O(n)$，优化就没了。</p>
 <p><strong>一句话总结</strong>：折半插入把<strong>最坏情况</strong>的比较次数从 $O(n^2)$ 压到了 $O(n\log n)$，但它的比较次数始终是 $\Theta(n\log n)$ 量级，不会像直接插入那样在正序时降到 $O(n)$——所以正序或接近正序时，直接插入的关键字比较次数反而更少。它的移动次数仍是 $O(n^2)$，总时间还是 $O(n^2)$；真正省下的是最坏情况的比较，不是移动。</p>
-<h3 id="_4">希尔排序</h3>
+<h3 id="_3">希尔排序</h3>
 <p><strong>希尔排序（缩小增量排序）</strong>：直接插入排序在"基本有序"时很快；希尔排序先用较大的增量把序列粗调到基本有序，再逐步缩小增量，最后一趟增量为 1，做一次完整的直接插入排序。</p>
 <p><strong>怎么分组</strong>：取一个增量 $dk$，把下标相差 $dk$ 的元素分到同一组——是"隔 $dk$ 个位置"取，不是把数组切成连续的几段。比如 $n=8$、$dk=4$ 时分成四组：<code>(1,5)</code>、<code>(2,6)</code>、<code>(3,7)</code>、<code>(4,8)</code>。每组内部做直接插入排序，然后缩小 $dk$，重复"分组 → 组内插入排序"，直到 $dk=1$。</p>
 <p>课件的增量序列：第一轮 $dk=n/2$，之后每轮 $dk=dk/2$，直到 $dk=1$。除法是整数除法（向下取整）：$n=7$ 时依次是 3、1，不是 3、2、1。增量序列不唯一，但<strong>最后一趟必须是 1</strong>，否则不能保证整体有序。</p>
@@ -571,7 +554,7 @@ void ShellSort(ElemType A[], int n) {
 <li><strong>只适用顺序表</strong>：需要随机访问相隔 $dk$ 的元素。</li>
 <li><strong>每趟不保证确定某个元素的最终位置</strong>：只有最后一趟结束，整体才有序；这一点和冒泡、选择、快速排序不同。</li>
 </ol>
-<h3 id="_5">冒泡排序</h3>
+<h3 id="_4">冒泡排序</h3>
 <p><strong>冒泡排序</strong>：反复比较相邻的两个元素，如果逆序就交换。每一趟都会把当前未排序部分的最大值（从左往右扫）或最小值（从右往左扫）"冒"到一端，并确定它的最终位置。</p>
 <p>课件的三条：</p>
 <ol>
@@ -720,7 +703,7 @@ void BubbleSort(ElemType A[], int n) {
 <li>两者都稳定，最坏都是 $O(n^2)$，最好都能到 $O(n)$（冒泡靠 <code>flag</code>，直接插入靠正序时一次都不移）。</li>
 <li>冒泡的一次交换要三次赋值，直接插入的后移通常更省；实际运行中直接插入一般更快。</li>
 </ul>
-<h3 id="_6">快速排序</h3>
+<h3 id="_5">快速排序</h3>
 <p><strong>快速排序</strong>：选一个元素作为<strong>枢轴</strong>（pivot，通常取表中第一个元素），通过一趟<strong>划分</strong>把表分成左右两部分——左边都不大于枢轴、右边都不小于枢轴，枢轴落到它的最终位置；然后对左右两个子表递归地重复同样的过程。</p>
 <p><strong>划分（挖坑填数）</strong>：以 <code>A[low..high]</code> 为例，先令 <code>pivot = A[low]</code>。此时 <code>A[low]</code> 空出来，像一个"坑"：</p>
 <ol>
@@ -840,7 +823,7 @@ void QuickSort(ElemType A[], int low, int high) {
 <blockquote>
 <p>408 说的"一趟排序"是对所有尚未确定最终位置的元素处理一遍；一次划分只确定枢轴一个元素。<strong>一次划分 ≠ 一趟排序</strong>；而"对子表调用一次 QuickSort"会递归处理整个子表，和一次划分也不是一回事。</p>
 </blockquote>
-<h3 id="_7">简单选择排序</h3>
+<h3 id="_6">简单选择排序</h3>
 <p><strong>简单选择排序</strong>：每一趟在无序区 <code>A[i..n]</code> 中找出最小的元素，和无序区的第一个元素 <code>A[i]</code> 交换；有序区从左边逐渐扩大，经过 $n-1$ 趟后整体有序。</p>
 <p><strong>一趟做什么</strong>（第 $i$ 趟，$i=1,\dots,n-1$）：</p>
 <ol>
@@ -983,7 +966,7 @@ void SelectSort(ElemType A[], int n) {
 </table></div>
 <p><strong>稳定性反例</strong>：<code>2a, 2b, 1</code>。第一趟最小值是 1，和 <code>A[1] = 2a</code> 交换，得到 <code>1, 2b, 2a</code>——两个 2 的次序反了，所以简单选择排序不稳定。</p>
 <p><strong>适用性</strong>：顺序表和链表都能用。链表上每趟遍历找最小结点，再交换数据（或调整指针）；它不需要随机访问。</p>
-<h3 id="_8">堆排序</h3>
+<h3 id="_7">堆排序</h3>
 <p><strong>堆</strong>：一棵完全二叉树，通常用数组顺序存储。1-based 时，结点 $i$ 的左孩子是 $2i$、右孩子是 $2i+1$、父结点是 $\lfloor i/2 \rfloor$；$i\le\lfloor n/2 \rfloor$ 的结点都是分支结点。大根堆要求每个结点都 $\ge$ 左右孩子，小根堆要求每个结点都 $\le$ 左右孩子。</p>
 <p><strong>建堆（以大根堆为例）</strong>：</p>
 <ol>
@@ -1117,109 +1100,7 @@ void HeapSort(ElemType A[], int len) {
 <li>删除堆顶：用堆底元素补到堆顶，堆长减 1，再从堆顶向下调整；</li>
 <li>插入：新元素放到堆底，堆长加 1，再与父结点比较，向上调整（大根堆中比父结点大就交换）。</li>
 </ul>
-<h4 id="2021">例题：【2021】（依次插入建大根堆）</h4>
-<p>【2021】将关键字 <code>6, 9, 1, 5, 8, 4, 7</code> 依次插入初始为空的大根堆 H，得到的 H 是</p>
-<ul>
-<li>A. 9,8,7,6,5,4,1</li>
-<li>B. 9,8,7,5,6,1,4</li>
-<li>C. 9,8,7,5,6,4,1</li>
-<li>D. 9,6,7,5,8,4,1</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B（9,8,7,5,6,1,4）。</strong></p>
-<p>每插入一个元素，先放到堆底（数组末尾），再和父结点比较、向上调整：</p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>插入</th>
-<th>插入后（调整前）</th>
-<th>调整后</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>6</td>
-<td><code>6</code></td>
-<td><code>6</code></td>
-</tr>
-<tr>
-<td>9</td>
-<td><code>6,9</code></td>
-<td><code>9,6</code>（9 上浮）</td>
-</tr>
-<tr>
-<td>1</td>
-<td><code>9,6,1</code></td>
-<td><code>9,6,1</code></td>
-</tr>
-<tr>
-<td>5</td>
-<td><code>9,6,1,5</code></td>
-<td><code>9,6,1,5</code>（5 &lt; 6）</td>
-</tr>
-<tr>
-<td>8</td>
-<td><code>9,6,1,5,8</code></td>
-<td><code>9,8,1,5,6</code>（8 与 6 交换）</td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>9,8,1,5,6,4</code></td>
-<td><code>9,8,4,5,6,1</code>（4 与 1 交换）</td>
-</tr>
-<tr>
-<td>7</td>
-<td><code>9,8,4,5,6,1,7</code></td>
-<td><code>9,8,7,5,6,1,4</code>（7 与 4 交换）</td>
-</tr>
-</tbody>
-</table></div>
-<p>所以最终是 <code>9,8,7,5,6,1,4</code>，选 B。</p>
-<blockquote>
-<p>注意：A、B、C 都是合法的大根堆，单看"是不是堆"选不出来；题目是"依次插入空堆"，必须按上浮过程走。不要用 <code>BuildMaxHeap</code> 的从后往前下坠法代替，两者可能得到不同的合法堆。</p>
-</blockquote>
-</details>
-<p><strong>复杂度和性质</strong>：</p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>指标</th>
-<th>结论</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>建堆</td>
-<td>$O(n)$（比较次数不超过 $4n$）</td>
-</tr>
-<tr>
-<td>每趟调整</td>
-<td>$O(\log n)$</td>
-</tr>
-<tr>
-<td>总时间</td>
-<td>$O(n\log n)$（最好 / 最坏 / 平均）</td>
-</tr>
-<tr>
-<td>空间</td>
-<td>$O(1)$</td>
-</tr>
-<tr>
-<td>稳定性</td>
-<td>不稳定</td>
-</tr>
-<tr>
-<td>存储</td>
-<td>仅顺序表</td>
-</tr>
-</tbody>
-</table></div>
-<p><strong>稳定性反例</strong>：<code>2a, 2b, 1</code> 建大根堆后仍是 <code>2a, 2b, 1</code>；排序时 2a 被换到堆底，最后得到 <code>1, 2b, 2a</code>，两个 2 的次序反了。</p>
-<p><strong>适用性</strong>：只适用顺序表。堆要用下标直接算 <code>2i</code>、<code>2i+1</code>、<code>i/2</code>，必须能随机访问；链表做不到。</p>
-<p><strong>大根堆 / 小根堆的排序结果</strong>：大根堆每次把最大值放到末尾，得到<strong>递增</strong>序列；小根堆每次把最小值放到末尾，得到<strong>递减</strong>序列。</p>
-<p><strong>和简单选择排序的区别</strong>：两者都是"每趟定一个最值"的选择类排序，但简单选择每趟扫描无序区，比较次数固定 $O(n^2)$；堆排序用堆把"找最大"降到 $O(\log n)$，总时间 $O(n\log n)$。简单选择的移动次数很少（最多 $3(n-1)$），堆排序的交换 / 移动更多，但渐进复杂度更好。</p>
-<h3 id="_9">归并排序</h3>
+<h3 id="_8">归并排序</h3>
 <p><strong>归并</strong>：把两个或多个有序子序列合并成一个有序序列。二路归并就是"二合一"：每次比较两个子序列当前的首元素，把较小的放进结果；一个子序列取完后，把另一个剩下的元素直接接上。</p>
 <p><strong>二路归并排序</strong>：</p>
 <ol>
@@ -1361,86 +1242,7 @@ void MergeSortAll(ElemType A[], int n) {
 <li>稳定：合并时相等元素先取左边；这是归并排序相对快速排序的一个重要优势。</li>
 </ul>
 <p><strong>和快速排序的对比</strong>：两者平均都是 $O(n\log n)$，但归并排序最坏也是 $O(n\log n)$、稳定、需要 $O(n)$ 辅助空间；快速排序原地划分、空间 $O(\log n)$，但不稳定、最坏会退化到 $O(n^2)$。</p>
-<h4 id="_10">例题：比较次数与初始状态无关的排序</h4>
-<p>【题目】下列排序算法中，排序过程中比较次数的数量级与序列初始状态无关的是</p>
-<ul>
-<li>A. 归并排序</li>
-<li>B. 插入排序</li>
-<li>C. 快速排序</li>
-<li>D. 冒泡排序</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 A（归并排序）。</strong></p>
-<p>归并排序总是把区间对半分，每层合并都要扫描这一层的全部元素，层数是 ⌈log₂ n⌉，所以最好、最坏、平均的比较次数数量级都是 Θ(n log n)，与初始序列无关。</p>
-<p>前面的"最多 m+n-1、最少 min{m,n}"说的是<strong>单次 Merge</strong> 的精确范围；它只影响常数因子，不改变 Θ(n log n) 这个数量级。</p>
-<p>其余三个都会随初始状态变化：</p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>算法</th>
-<th>最好</th>
-<th>最坏</th>
-<th>是否与初始状态有关</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>归并排序</td>
-<td>Θ(n log n)</td>
-<td>Θ(n log n)</td>
-<td>无关</td>
-</tr>
-<tr>
-<td>插入排序</td>
-<td>n-1</td>
-<td>n(n-1)/2</td>
-<td>有关</td>
-</tr>
-<tr>
-<td>快速排序</td>
-<td>Θ(n log n)</td>
-<td>O(n²)</td>
-<td>有关</td>
-</tr>
-<tr>
-<td>冒泡排序</td>
-<td>n-1（带 <code>flag</code>）</td>
-<td>n(n-1)/2</td>
-<td>有关</td>
-</tr>
-</tbody>
-</table></div>
-<blockquote>
-<p>注意：题目问的是"数量级"。插入排序最好 O(n)、最坏 O(n²)，冒泡同理；快速排序最好/平均 O(n log n)、最坏 O(n²)，所以都不能说与初始状态无关。</p>
-<p>补充：简单选择排序的比较次数固定为 n(n-1)/2，数量级也与初始状态无关；本题选项里没有它，不要误以为只有归并排序一个。</p>
-</blockquote>
-</details>
-<h4 id="_11">例题：二路归并的第二趟结果</h4>
-<p>【题目】一组经过第一趟二路归并排序后的记录关键字为 <code>{25, 50, 15, 35, 80, 85, 20, 40, 36, 70}</code>，其中包含 5 个长度为 2 的有序表。用二路归并排序算法对该序列进行第二趟归并后的结果是</p>
-<ul>
-<li>A. 15,25,35,50,80,20,85,40,70,36</li>
-<li>B. 15,25,35,50,20,40,80,85,36,70</li>
-<li>C. 15,25,50,35,80,85,20,36,40,70</li>
-<li>D. 15,25,35,50,80,20,36,40,70,85</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B。</strong></p>
-<p>先把题干的 5 个有序表按相邻顺序排开：</p>
-<p><code>[25,50] [15,35] [80,85] [20,40] [36,70]</code></p>
-<p>第二趟相邻两两归并：</p>
-<ul>
-<li>第 1、2 个 → <code>15,25,35,50</code></li>
-<li>第 3、4 个 → <code>20,40,80,85</code></li>
-<li>第 5 个没有配对，原样保留 <code>36,70</code></li>
-</ul>
-<p>拼起来是 <code>15,25,35,50,20,40,80,85,36,70</code>，选 B。</p>
-</details>
-<blockquote>
-<p>注：题干给的是"5 个长度为 2 的有序表"，这是<strong>自底向上</strong>归并（宽度 1→2→4…）的说法。如果按递归代码 <code>mid=(low+high)/2</code> 去拆 10 个元素，递归树是 10→5+5→(2+3)+(2+3)…，第一层会出现 2+1、3+2 这样的合并，并不正好是 5 个长度 2 的表。题目既然已经给了第一趟后的状态，就按这个状态做第二趟；两种做法的最终结果相同，只是中间"第几趟"的分组可能不同。考试时按题目给的当前有序表相邻两两合并即可，不用回到代码重新推。</p>
-</blockquote>
-<h3 id="_12">基数排序</h3>
+<h3 id="_9">基数排序</h3>
 <p><strong>基数排序不比较关键字的大小</strong>，而是把关键字拆成 $d$ 位，按每一位的值把记录分配到 $r$ 个队列中，再按队列顺序收集；从最低位到最高位做 $d$ 趟，最后整个序列有序。这是它和前面所有基于比较的排序最本质的区别；在 408 常考的这几大排序里，它就是"不需要比较关键字"的那一个（计数排序也不比较，但通常作为扩展）。</p>
 <p><strong>LSD（低位优先）</strong>：先按个位分配/收集，再按十位、百位……。之所以从低位开始，是因为每一趟的分配和收集都是<strong>稳定</strong>的：低位排好的相对次序会被高位保留下来；等最高位处理完，整个关键字就有序了。若从高位开始（MSD），每个桶还要递归处理，通常不作为默认做法，408 默认 LSD。</p>
 <p><strong>一趟分配 + 收集</strong>：</p>
@@ -1532,4 +1334,4 @@ void RadixSort(int A[], int n, int d, int r) {
 <li>适合 $n$ 较大、$d$ 较小、$r$ 较小的场景；如果 $d$ 很大（关键字很长）或 $r$ 很大（每一位取值很多），$d(n+r)$ 不一定比 $O(n\log n)$ 的排序快。</li>
 </ul>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

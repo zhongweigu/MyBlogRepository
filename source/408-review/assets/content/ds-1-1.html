@@ -1,9 +1,8 @@
 <details class="article-toc">
-<summary>本页目录 <span>7 节</span></summary>
+<summary>本页目录 <span>5 节</span></summary>
 <div class="toc">
 <ul>
 <li><a href="#1-">题型1-单层循环</a><ul>
-<li><a href="#2017">练习：【2017】</a></li>
 <li><a href="#_1">小结：单层循环怎么分析</a></li>
 </ul>
 </li>
@@ -12,109 +11,12 @@
 <li><a href="#_3">层层制约</a></li>
 </ul>
 </li>
-<li><a href="#_4">习题训练</a></li>
 </ul>
 </div>
 
 </details><div class="article-content">
 <h2 id="1-">题型1-单层循环</h2>
-<h4 id="2011">例题：【2011】</h4>
-<p>设 $n$ 是描述问题规模的非负整数，下面程序片段的时间复杂度是</p>
-<pre><code class="language-c">x = 2;
-while(x &lt; n/2)
-    x = 2 * x;
-</code></pre>
-<p><strong>第 1 步，找出基本运算。</strong> <code>x = 2 * x</code>，设其执行次数为 $t$。</p>
-<p><strong>第 2 步，列表找规律。</strong> 看 $t = 1, 2, 3, \dots$ 时 $x$ 的取值：</p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>执行次数 $t$</th>
-<th>$x$ 的取值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>$2^2 = 4$</td>
-</tr>
-<tr>
-<td>2</td>
-<td>$2^3 = 8$</td>
-</tr>
-<tr>
-<td>3</td>
-<td>$2^4 = 16$</td>
-</tr>
-<tr>
-<td>⋮</td>
-<td>⋮</td>
-</tr>
-<tr>
-<td>$t$</td>
-<td>$2^{t+1}$</td>
-</tr>
-</tbody>
-</table></div>
-<p>可见 $x$ 随 $t$ 指数增长，第 $t$ 次执行后 $x = 2^{t+1}$。</p>
-<p><strong>第 3 步，列式子。</strong> 循环的跳出条件是 $x \ge n/2$，于是在临界处有 $2^{t+1} &lt; n/2$，解得 $t &lt; \log_2 n - 2$——执行次数 $t$ 与 $\log_2 n$ 同数量级，故 $T(n) = O(\log_2 n)$。</p>
-<blockquote>
-<p>注：$2^{t+1} &lt; n/2$ 这个式子其实并不严谨，它假设的是“第 $t$ 轮算出来的 $x$ 仍然小于 $n/2$”。不过研究时间复杂度不需要这么严谨，只要能得到 $t$ 和 $n$ 的数量级关系就够了。</p>
-</blockquote>
-<p><strong>简单方法</strong>：联系归并排序——每次都把长为 $n$ 的表除以 2，一共 $k$ 层，直到长度都为 1（$n / 2^k = 1$，即 $k = \log_2 n$）。本题就类似归并操作里的“合并”部分，循环次数自然是 $O(\log_2 n)$。</p>
-<p>完整的方法流程要熟练使用：<strong>跳出条件往往是 $n$ 和 $x$ 的关系</strong>，而 $x$ 和 $t$ 之间的关系可以列表求得，两者一联立就得到 $t$ 和 $n$ 的关系，也就是执行次数与问题规模的关系。</p>
 <hr/>
-<h3 id="2017">练习：【2017】</h3>
-<p>下列函数的时间复杂度是</p>
-<pre><code class="language-c">int func(int n){
-    int i = 0, sum = 0;
-    while(sum &lt; n) sum += ++i;
-    return i;
-}
-</code></pre>
-<p>这道题的变量不止一个，<strong><code>i</code> 和 <code>sum</code> 都要在表格里列出来</strong>（这里 <code>++i</code> 还是 <code>i++</code> 都一样）：</p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>执行次数 $t$</th>
-<th>$i$</th>
-<th>$sum$</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>1</td>
-<td>$0 + 1 = 1$</td>
-</tr>
-<tr>
-<td>2</td>
-<td>2</td>
-<td>$1 + 2 = 3$</td>
-</tr>
-<tr>
-<td>3</td>
-<td>3</td>
-<td>$3 + 3 = 6$</td>
-</tr>
-<tr>
-<td>4</td>
-<td>4</td>
-<td>$6 + 4 = 10$</td>
-</tr>
-<tr>
-<td>⋮</td>
-<td>⋮</td>
-<td>⋮</td>
-</tr>
-<tr>
-<td>$t$</td>
-<td>$t$</td>
-<td>$1 + 2 + \dots + t = \dfrac{t(t+1)}{2}$</td>
-</tr>
-</tbody>
-</table></div>
-<p>循环的跳出条件是 $sum \ge n$，即 $\dfrac{t(t+1)}{2} \ge n$，也就是 $t \approx \sqrt{2n}$。所以 $T(n) = O(\sqrt n)$。</p>
 <hr/>
 <h3 id="_1">小结：单层循环怎么分析</h3>
 <p>单层循环的复杂度分析，本质上只有一句话——<strong>数清循环体到底执行了多少次</strong>。落到流程上：</p>
@@ -156,13 +58,6 @@ while(x &lt; n/2)
 </table></div>
 <h2 id="3-for">题型3-for循环嵌套</h2>
 <h3 id="_2">层层无关</h3>
-<p>【2014】下列程序段的时间复杂度是</p>
-<pre><code class="language-c">count = 0;
-for(k = 1; k &lt;= n; k *= 2)
-    for(j = 1; j &lt;= n; j++)
-        count++;
-</code></pre>
-<p>直接两层的循环次数相乘。此处 for 的循环条件又可以联系到题型1——这里最外层的 for 就是题型1里那个「类归并合并」的算法，是 $O(\log_2 n)$；内层 for 从 1 累加到 $n$、每次加 1，是 $O(n)$。两层相乘即 $O(n \log n)$。</p>
 <h3 id="_3">层层制约</h3>
 <p>两层的循环次数<strong>不独立</strong>（内层跑多少次由外层变量决定）时，就不能像「层层无关」那样直接相乘了，得改用<strong>列表求和</strong>。表格按「外层的一轮作一行」来列：</p>
 <ul>
@@ -173,166 +68,5 @@ for(k = 1; k &lt;= n; k *= 2)
 <p><strong>和单层循环最大的区别是「要不要对 $t$ 求和」。</strong> 单层循环里一行就是一层的全部工作，表上的 $t$ 本身就是「到这一轮为止一共执行了多少次」，所以取最后一行就够了，<strong>不用求和</strong>；这里每一行的 $t$ 只代表「第 $i$ 轮这一轮内部执行了多少次」，所以<strong>必须把各行的 $t$ 全部加起来</strong>，才是总的执行次数。</p>
 <p>求和的结果通常是等差或等比数列，能直接套公式；算完会发现数量级基本由<strong>最外层循环的次数与 $n$ 的关系</strong>决定——而最外层往往正是我们熟悉的结构（每次 <code>*2</code> → $\log_2 n$；每次 <code>i++</code> 而条件是 $i^2 \le n$ → $\sqrt n$）。</p>
 <p>一句话：<strong>列表 → 对 $t$ 求和 → 用最外层次数与 $n$ 的关系定数量级。</strong></p>
-<p>【2022】下列程序段的时间复杂度是</p>
-<pre><code class="language-c">int sum = 0;
-for(int i = 1; i &lt; n; i *= 2)
-    for(int j = 0; j &lt; i; j++)
-        sum++;
-</code></pre>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>轮次</th>
-<th>$i$</th>
-<th>内层 $j$ 的范围</th>
-<th>本轮的 $t$</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>1</td>
-<td>$0 \le j &lt; 1$</td>
-<td>1</td>
-</tr>
-<tr>
-<td>2</td>
-<td>2</td>
-<td>$0 \le j &lt; 2$</td>
-<td>2</td>
-</tr>
-<tr>
-<td>3</td>
-<td>4</td>
-<td>$0 \le j &lt; 4$</td>
-<td>4</td>
-</tr>
-<tr>
-<td>4</td>
-<td>8</td>
-<td>$0 \le j &lt; 8$</td>
-<td>8</td>
-</tr>
-<tr>
-<td>⋮</td>
-<td>⋮</td>
-<td>⋮</td>
-<td>⋮</td>
-</tr>
-<tr>
-<td>$k+1$</td>
-<td>$2^k$</td>
-<td>$0 \le j &lt; 2^k$</td>
-<td>$2^k$</td>
-</tr>
-</tbody>
-</table></div>
-<p>外层每次 <code>i *= 2</code>，所以 $i = 1, 2, 4, \dots, 2^k$，一共约 $\log_2 n$ 轮。把最后一列加起来：</p>
-<p>$$t = 1 + 2 + 4 + \dots + 2^k = 2^{k+1} - 1$$</p>
-<p>这是个等比数列，又因为 $2^k &lt; n$，所以 $t &lt; 2n$。数量级由最外层决定，故 $T(n) = O(n)$。</p>
-<hr/>
-<p>练习：【2025】下列程序段的时间复杂度是</p>
-<pre><code class="language-c">int count = 0;
-for(int i = 1; i * i &lt;= n; i++)
-    for(int j = 1; j &lt;= i; j++)
-        count++;
-</code></pre>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>轮次</th>
-<th>$i$</th>
-<th>内层 $j$ 的范围</th>
-<th>本轮的 $t$</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>1</td>
-<td>$1 \le j \le 1$</td>
-<td>1</td>
-</tr>
-<tr>
-<td>2</td>
-<td>2</td>
-<td>$1 \le j \le 2$</td>
-<td>2</td>
-</tr>
-<tr>
-<td>3</td>
-<td>3</td>
-<td>$1 \le j \le 3$</td>
-<td>3</td>
-</tr>
-<tr>
-<td>⋮</td>
-<td>⋮</td>
-<td>⋮</td>
-<td>⋮</td>
-</tr>
-<tr>
-<td>$m$</td>
-<td>$m$</td>
-<td>$1 \le j \le m$</td>
-<td>$m$</td>
-</tr>
-</tbody>
-</table></div>
-<p>外层的条件是 $i \cdot i \le n$，即 $i \le \sqrt n$，所以外层一共 $\sqrt n$ 轮。求和：</p>
-<p>$$t = 1 + 2 + \dots + \sqrt n = \frac{\sqrt n(\sqrt n + 1)}{2} = \frac{n + \sqrt n}{2}$$</p>
-<p>所以 $T(n) = O(n)$。</p>
-<h2 id="_4">习题训练</h2>
-<p>下面四题都是求时间复杂度，可以拿前面几个题型里的方法练手。</p>
-<p><strong>1.</strong> 下列算法的时间复杂度为</p>
-<pre><code class="language-c">void fun(int n){
-    for(int i = 1; i &lt; n; i *= 2)
-        for(int j = 0; j &lt; n; j++)
-            printf("A");
-
-    for(int i = 0; i &lt; n; i++)
-        for(int j = 0; j &lt; n; j++)
-            printf("B");
-}
-</code></pre>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p>两段循环是<strong>并列</strong>关系，工作量要<strong>相加</strong>而不是相乘：前一段外层 <code>i *= 2</code> 是 $O(\log_2 n)$、内层固定 $n$ 次，即 $O(n \log_2 n)$；后一段两层都跑满 $n$，即 $O(n^2)$。两者取大的，所以 $T(n) = O(n^2)$。</p>
-</details>
-<p><strong>2.</strong> 下列算法的时间复杂度为</p>
-<pre><code class="language-c">void fun(int n){
-    for(int i = 0; i &lt; n; i++)
-        for(int j = 1; j &lt; n; j *= 2)
-            printf("everything's gonna BOK!");
-}
-</code></pre>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p>内外层<strong>互相独立</strong>（层层无关），次数直接相乘：外层 $i$ 从 0 到 $n-1$ 共 $n$ 次；内层 <code>j *= 2</code> 从 1 翻倍到 $n$ 共 $\log_2 n$ 次。所以 $T(n) = O(n \log n)$。</p>
-</details>
-<p><strong>3.</strong> 下列算法的时间复杂度为</p>
-<pre><code class="language-c">int fun(int n){
-    if(n &lt;= 1)
-        return 1;
-    else
-        return fun(n - 1) + 1;
-}
-</code></pre>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p>单分支递归，正是题型2里的第一种结构：每次只递归调用一次、$n$ 每次减 1，调用次数就是 $n$；每次调用只做一次比较加一次加法，$O(1)$。相乘得 $T(n) = O(n)$。</p>
-</details>
-<p><strong>4.</strong> 下列算法的时间复杂度为</p>
-<pre><code class="language-c">int count = 1;
-for(int i = 1; i &lt;= n; i++)
-{
-    for(int j = 2*i; j &lt;= n; j++)
-        count = count + j;
-}
-</code></pre>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p>外层 $i$ 从 1 到 $n$；内层 $j$ 从 $2i$ 到 $n$，只有 $i \le n/2$ 时才有内层，这一轮是 $n - 2i + 1$ 次。按「层层制约」把每轮的次数加起来：$t = \sum_{i=1}^{n/2}(n - 2i + 1) = \frac{n}{2}\left(n - \frac{n}{2}\right) = \frac{n^2}{4}$，所以 $T(n) = O(n^2)$。</p>
-</details>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

@@ -312,30 +312,5 @@ void BFSTraverse(Graph G)
 </code></pre>
 <p><strong>和前面遍历的写法差在哪</strong>：这里<strong>只从 0 号顶点出发一次</strong>，不再"对每个未访问的顶点重新开始"——判连通看的就是这一趟能不能走遍全图。走完扫一遍 <code>visited</code>，只要还剩 <code>false</code> 的顶点，就说明从 0 号到不了它，图不连通。</p>
 </details>
-<h4 id="2020">例题：【2020】（输出语句挪到退出递归前，得到什么序列）</h4>
-<p>【2020】修改递归方式实现的图的深度优先搜索（DFS）算法，将输出（访问）顶点信息的语句移到退出递归前（执行输出语句后立刻退出递归）。采用修改后的算法遍历有向无环图 G，若输出结果中包含 G 中的全部顶点，则输出的顶点序列是 G 的</p>
-<ul>
-<li>A. 拓扑有序序列</li>
-<li>B. 逆拓扑有序序列</li>
-<li>C. 广度优先搜索序列</li>
-<li>D. 深度优先搜索序列</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B（逆拓扑有序序列）。</strong> 输出语句挪到递归返回之前，等于<strong>谁先走完谁先输出</strong>。改完的 DFS 是这样：</p>
-<pre><code class="language-c">void DFS(Graph G, int v)
-{
-    for (w = FirstAdjVex(G, v); w &gt;= 0; w = NextAdjVex(G, v, w))
-    {
-        if (!visited[w])
-            DFS(G, w);
-    }
-    cout &lt;&lt; v;                          // 所有后继都回来了，才输出自己
-    visited[v] = true;
-}
-</code></pre>
-<p>顶点 $v$ 能到达的顶点全在它这次递归里，会先于 $v$ 输出——所以每条边 $u \to v$ 在输出序列里都是"$v$ 在前、$u$ 在后"。而拓扑序要求"$u$ 在前、$v$ 在后"，这正好是它的<strong>逆序</strong>。</p>
-<p>换成前面 <code>finishTime</code> 的说法就是：输出顺序是 <code>finishTime</code> <strong>从小到大</strong>，而拓扑序要按 <code>finishTime</code> 从大到小排，两者互为逆序。</p>
-</details>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

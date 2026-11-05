@@ -15,9 +15,9 @@ export function questionsView(store, query = {}) {
   if (chapter !== 'all') list = list.filter((q) => q.chapter === chapter);
   if (year !== 'all') list = list.filter((q) => q.year === year);
   if (type !== 'all') list = list.filter((q) => q.type === type);
-  list.sort((a, b) => b.year - a.year || String(a.no).localeCompare(String(b.no)));
+  list.sort((a, b) => (b.year || 0) - (a.year || 0) || String(a.no).localeCompare(String(b.no)));
 
-  const years = [...new Set(QUESTIONS.map((q) => q.year))].sort((a, b) => b - a);
+  const years = [...new Set(QUESTIONS.map((q) => q.year).filter(Boolean))].sort((a, b) => b - a);
   const chapterOptions = CHAPTERS.filter((c) => subject === 'all' || c.subject === subject);
   const groups = groupQuestions(list, group);
 
@@ -107,7 +107,7 @@ export function questionsView(store, query = {}) {
 
     <div class="q-footnote">
       ${icon('info', 14)}
-      <span>真题按站内笔记《408 真题分类 · 数据结构》与《408 考点强化》整理；解析保留原笔记的思路，补充了易错提示。当前为样张，持续补充中。</span>
+      <span>从站内《408 考点强化》与《408 真题分类》整理：例题、真题统一归档，解析保留原笔记思路；每题都能回到对应考点。当前共 ${QUESTIONS.length} 道。</span>
     </div>
 
     ${footer()}
@@ -142,11 +142,11 @@ function groupQuestions(list, group) {
     map.get(q.year).push(q);
   }
   return [...map.entries()]
-    .sort((a, b) => b[0] - a[0])
+    .sort((a, b) => (b[0] || 0) - (a[0] || 0))
     .map(([year, items]) => ({
       key: String(year),
       kicker: 'YEAR',
-      title: `${year} 年`,
+      title: year ? `${year} 年` : '未编年例题',
       items,
     }));
 }

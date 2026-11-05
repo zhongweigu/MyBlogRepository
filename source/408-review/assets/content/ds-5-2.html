@@ -201,21 +201,6 @@
 <p>注：LL/RR 是单旋，LR/RL 是双旋；双旋的第一步旋的是"不平衡结点的孩子"，第二步才是"不平衡结点"。</p>
 </blockquote>
 <p><strong>有序插入的特殊结论</strong>：按 $1,2,\dots,2^n-1$ 的顺序依次插入空 AVL，最终会得到一棵高度为 $n$ 的<strong>满二叉树</strong>；根是 $2^{n-1}$，左右子树分别由前一半和后一半递归构成。</p>
-<h4 id="2013-17bf0">例题：【2013】（有序插入 1~7，BF=0 的分支结点）</h4>
-<p>【2013】若将关键字 1, 2, 3, 4, 5, 6, 7 依次插入初始为空的平衡二叉树 T，则 T 中平衡因子为 0 的分支结点的个数是</p>
-<ul>
-<li>A. 0</li>
-<li>B. 1</li>
-<li>C. 2</li>
-<li>D. 3</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 D（3 个）。</strong></p>
-<p>$7 = 2^3 - 1$，由上面的结论，1~7 依次插入后是一棵高度为 3 的满二叉树：根是 4，左孩子 2（左右孩子 1、3），右孩子 6（左右孩子 5、7）。</p>
-<p>分支结点（非叶结点）是 4、2、6，它们的左右子树高度都相等，BF 全为 0。叶子 1、3、5、7 的 BF 也是 0，但题目问的是<strong>分支结点</strong>，不算叶子。</p>
-<p>所以 BF=0 的分支结点有 3 个，选 D。</p>
-</details>
 <h3 id="avl_2">AVL删除</h3>
 <p>先按 BST 的删除规则处理，再检查平衡。按被删结点的孩子情况分四种：</p>
 <div class="article-table"><table>
@@ -286,32 +271,6 @@
 <blockquote>
 <p>注：插入只需要调整最小不平衡子树一次；删除可能在调整后让更高层的祖先继续失衡，所以要沿路径继续检查，可能需要多次旋转。</p>
 </blockquote>
-<h4 id="2019t1-t3">例题：【2019】（删除后重新插入，T1 与 T3 是否相同）</h4>
-<p>【2019】在任意一棵非空平衡二叉树（AVL 树）T1 中，删除某结点 v 之后形成平衡二叉树 T2，再将 v 插入 T2 形成平衡二叉树 T3。下列关于 T1 与 T3 的叙述中，正确的是</p>
-<ul>
-<li>Ⅰ. 若 v 是 T1 的叶结点，则 T1 与 T3 可能不相同</li>
-<li>Ⅱ. 若 v 不是 T1 的叶结点，则 T1 与 T3 一定不相同</li>
-<li>
-<p>Ⅲ. 若 v 不是 T1 的叶结点，则 T1 与 T3 一定相同</p>
-</li>
-<li>
-<p>A. 仅 Ⅰ</p>
-</li>
-<li>B. 仅 Ⅱ</li>
-<li>C. 仅 Ⅰ、Ⅱ</li>
-<li>D. 仅 Ⅰ、Ⅲ</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 A（仅 Ⅰ）。</strong></p>
-<p>AVL 的删除和插入不是互逆操作：删除可能触发旋转，插入又可能触发新的旋转，所以 T3 不一定回到 T1。下面用 <code>根(左, 右)</code> 简写树形，<code>_</code> 表示空。</p>
-<ul>
-<li><strong>例①（v 是叶子）</strong>：T1 = <code>2(1, 4(3,5))</code>。删 1 后根 2 右重，左旋得 T2 = <code>4(2(_,3),5)</code>；重插 1 得 T3 = <code>4(2(1,3),5)</code>。T1 根 2、T3 根 4，<strong>可能不同</strong>，Ⅰ 对。</li>
-<li><strong>例②（v 不是叶子，会变）</strong>：T1 = <code>3(1(_,2), 5(4,6))</code>。删 1（只有右孩子 2）得 T2 = <code>3(2,5(4,6))</code>；重插 1 得 T3 = <code>3(2(1,_),5(4,6))</code>，与 T1 <strong>不同</strong>，Ⅲ 错。</li>
-<li><strong>例③（v 不是叶子，不变）</strong>：T1 = <code>2(1,3)</code>。删根 2（用前驱 1 代替）得 T2 = <code>1(_,3)</code>；重插 2 后经 RL 旋转回到 <code>2(1,3)</code>，与 T1 <strong>相同</strong>，Ⅱ 错。</li>
-</ul>
-<p>因此只有 Ⅰ 正确，选 A。</p>
-</details>
 <h3 id="avl_3">AVL的性质</h3>
 <p>下面的 $h$ 都按<strong>层数</strong>算，根为第 1 层。</p>
 <p><strong>① 最少结点数</strong>：设 $n_h$ 表示高度为 $h$ 的 AVL 树最少需要的结点数，则</p>
@@ -355,24 +314,5 @@
 <p><strong>合起来看</strong>：同样高度 $h$，AVL 的结点数在 $[n_h,\ 2^h-1]$ 之间；同样 $n$ 个结点，AVL 的高度在 $[\lceil \log_2(n+1) \rceil,\ h_{\max}]$ 之间（$h_{\max}$ 是 $n$ 个结点时 AVL 可能达到的最大高度）。令 $m_h = n_h + 1$，则 $m_h = m_{h-1} + m_{h-2}$，所以 $n_h$ 按 Fibonacci 速度增长，$h_{\max} = O(\log_2 n)$——这正是 AVL 查找最坏仍为 $O(\log_2 n)$ 的原因。</p>
 <p>例如 $n=8$：$h_{\min} = \lceil \log_2 9 \rceil = 4$；高度 4 的 AVL 最少 7 个结点、最多 15 个结点，8 个结点正好能构成高度 4 的 AVL。</p>
 <p><strong>记忆</strong>：高度固定时，<strong>非叶结点的 BF 全为 $\pm 1$（没有 $0$）$\Leftrightarrow$ 结点数取最少 $n_h$</strong>。只要有一个非叶结点的 BF 为 $0$，说明它左右子树一样高，这棵子树比"最少"更满，总结点数就会大于 $n_h$。</p>
-<h4 id="2012-1">例题：【2012】（非叶结点平衡因子全为 1）</h4>
-<p>【2012】若平衡二叉树的高度为 6，且所有非叶结点的平衡因子均为 1，则该平衡二叉树的结点总数为</p>
-<ul>
-<li>A. 12</li>
-<li>B. 20</li>
-<li>C. 32</li>
-<li>D. 33</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B（20）。</strong></p>
-<p>所有非叶结点的 BF 都是 1（没有 0），说明每个内部结点左右子树高度都差 1，整棵树取到了高度 6 时的<strong>最少结点数</strong>。</p>
-<p>由性质①：</p>
-<p>$$n_6 = n_5 + n_4 + 1$$</p>
-<p>查前面的数列，$n_4 = 7$、$n_5 = 12$，所以</p>
-<p>$$n_6 = 12 + 7 + 1 = 20$$</p>
-<p>选 B。</p>
-<p>选项里的 12 正好是 $n_5$、33 是 $n_7$，32 是 $2^5$，都是按相邻高度或满二叉树设的干扰项。</p>
-</details>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

@@ -4,13 +4,13 @@
 <ul>
 <li><a href="#6-">考点6-哈夫曼树和哈夫曼编码</a></li>
 <li><a href="#7-">考点7-并查集的基本操作</a><ul>
-<li><a href="#_2">初始化</a></li>
-<li><a href="#_3">查找</a></li>
-<li><a href="#_4">合并</a></li>
-<li><a href="#_5">并查集的应用</a></li>
-<li><a href="#_6">检测图中是否有环</a></li>
+<li><a href="#_1">初始化</a></li>
+<li><a href="#_2">查找</a></li>
+<li><a href="#_3">合并</a></li>
+<li><a href="#_4">并查集的应用</a></li>
+<li><a href="#_5">检测图中是否有环</a></li>
 <li><a href="#kruskal">实现 Kruskal 算法</a></li>
-<li><a href="#_7">判断无向图的连通性</a></li>
+<li><a href="#_6">判断无向图的连通性</a></li>
 </ul>
 </li>
 </ul>
@@ -47,164 +47,6 @@
 <li><strong>同一组权值构造出的哈夫曼树可能不唯一</strong>。</li>
 </ul>
 <p><strong>m 叉哈夫曼树</strong>：只有度为 0 和 m 的结点。设初始有 $n_0$ 个结点，先算 $k = (n_0 - 1) \bmod (m - 1)$，若 $k \ne 0$ 就补充 $m - 1 - k$ 个权值为 0 的结点凑数；然后照二叉的老办法，每次合并 <strong>m 个权值最小</strong>的结点，重复到只剩一个。</p>
-<h4 id="2015">例题：【2015】（两条根到叶的路径能否同属一棵哈夫曼树）</h4>
-<p>【2015】下列选项给出的是从根分别到达两个叶结点路径上的权值序列，能属于同一棵哈夫曼树的是</p>
-<ul>
-<li>A. 24, 10, 5 和 24, 10, 7</li>
-<li>B. 24, 10, 5 和 24, 12, 7</li>
-<li>C. 24, 10, 10 和 24, 14, 11</li>
-<li>D. 24, 10, 5 和 24, 14, 6</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 D。</strong> 哈夫曼树里每个非终端结点的值 = 它两个孩子值之和，所以两条从根出发的路径必须处处对得上这个加法。</p>
-<ul>
-<li><strong>A</strong>：两条路径在 10 处才分叉，说明 10 的两个孩子是 5 和 7，可 $5 + 7 = 12 \ne 10$；</li>
-<li><strong>B</strong>：两条路径在根处分叉，根的两个孩子是 10 和 12，可 $10 + 12 = 22 \ne 24$；</li>
-<li><strong>C</strong>：第一条路径是 24 → 10 → 10，结点不可能等于自己孩子的值（那兄弟就得是 0 权值）；</li>
-<li><strong>D</strong>：根的孩子是 10 和 14（$10 + 14 = 24$）、10 的孩子是 5 和 5（$5 + 5 = 10$）、14 的孩子是 6 和 8（$6 + 8 = 14$）——三个加法全对；而且 5、5、6、8 按哈夫曼的合并顺序（$5+5$、$6+8$、$10+14$）正好能构造出来。</li>
-</ul>
-</details>
-<h4 id="2018">例题：【2018】（哪组编码可能是哈夫曼编码）</h4>
-<p>【2018】已知字符集 {a, b, c, d, e, f}，若各字符出现的次数分别为 6, 3, 8, 2, 10, 4，则对应字符集中各字符的哈夫曼编码可能是</p>
-<ul>
-<li>A. <code>00, 1011, 01, 1010, 11, 100</code></li>
-<li>B. <code>00, 100, 110, 00, 0010, 01</code></li>
-<li>C. <code>10, 1011, 11, 0011, 00, 010</code></li>
-<li>D. <code>0011, 10, 11, 0010, 01, 000</code></li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 A。</strong> 先把哈夫曼树构出来定编码长度：按频率合并 $2 + 3 = 5$、$4 + 5 = 9$、$6 + 8 = 14$、$9 + 10 = 19$、$14 + 19 = 33$（每一步取的都是当前最小的两个，顺序唯一），于是各字符的位数是 <strong>a 2 位、c 2 位、e 2 位、f 3 位、b 4 位、d 4 位</strong>。</p>
-<p>据此看选项：</p>
-<ul>
-<li><strong>A</strong> 的长度正好是「6→2 位、3→4 位、8→2 位、2→4 位、10→2 位、4→3 位」，逐个核对也没有谁是谁的前缀；</li>
-<li><strong>B</strong> 里 <code>00</code> 出现了两次（a 和 d），本身还和 <code>0010</code> 冲突；</li>
-<li><strong>C</strong> 里 <code>00</code>（e）是 <code>0011</code>（d）的前缀，前缀编码被破坏；</li>
-<li><strong>D</strong> 把 a 排成 4 位、b 排成 2 位，和「频率高的编码短」正好拧着。</li>
-</ul>
-</details>
-<h4 id="2023">例题：【2023】（哈夫曼编码的加权平均长度）</h4>
-<p>【2023】在由 6 个字符组成的字符集 s 中，各字符出现的频次分别为 3, 4, 5, 6, 8, 10，为 s 构造的哈夫曼编码的加权平均长度为</p>
-<ul>
-<li>A. 2.4</li>
-<li>B. 2.5</li>
-<li>C. 2.67</li>
-<li>D. 2.75</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B（2.5）。</strong> 先按频次构造哈夫曼树，合并过程是 $3+4=7$、$5+6=11$、$7+8=15$、$10+11=21$、$15+21=36$。</p>
-<p>WPL 用累加式直接读：$7+11+15+21+36 = 90$（换成定义式核一下也对：频次 3、4、5、6 的四个字符都占 3 位，8、10 的占 2 位，$3\times3+4\times3+5\times3+6\times3+8\times2+10\times2 = 90$）。</p>
-<p>加权平均长度就是 WPL 平均到每个字符上：$90 \div (3+4+5+6+8+10) = 90 \div 36 = 2.5$，选 B。</p>
-</details>
-<h4 id="2012">例题：【2012】（多个有序表两两归并，最坏比较次数最少）</h4>
-<p>【2012】设有 6 个有序表 A、B、C、D、E、F，分别含有 10、35、40、50、60 和 200 个数据元素，各表中的元素按升序排列。要求通过 5 次两两合并，将 6 个表最终合并为 1 个升序表，并使最坏情况下比较的总次数达到最小。请回答下列问题：</p>
-<p>1）给出完整的合并过程，并求出最坏情况下比较的总次数。
-2）根据你的合并过程，描述 n（$n \ge 2$）个不等长升序表的合并策略，并说明理由。</p>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>1）按"每次挑最短的两个"合并：</strong></p>
-<div class="article-table"><table>
-<thead>
-<tr>
-<th>步骤</th>
-<th>合并</th>
-<th>合并后长度</th>
-<th>最坏比较次数</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>①</td>
-<td>10 + 35</td>
-<td>45</td>
-<td>44</td>
-</tr>
-<tr>
-<td>②</td>
-<td>40 + 45</td>
-<td>85</td>
-<td>84</td>
-</tr>
-<tr>
-<td>③</td>
-<td>50 + 60</td>
-<td>110</td>
-<td>109</td>
-</tr>
-<tr>
-<td>④</td>
-<td>85 + 110</td>
-<td>195</td>
-<td>194</td>
-</tr>
-<tr>
-<td>⑤</td>
-<td>195 + 200</td>
-<td>395</td>
-<td>394</td>
-</tr>
-</tbody>
-</table></div>
-<p>两个长度分别为 m、n 的有序表归并，最坏要比较 $m+n-1$ 次（每比较一次输出一个元素，只剩最后一个时不用再比），所以最坏情况下比较的总次数是</p>
-<p>$$44+84+109+194+394 = 825$$</p>
-<p><strong>2）策略：把各个表的长度当作权值，照哈夫曼树的构造过程来合并</strong>——每次从当前所有表里选<strong>长度最短的两个</strong>合并，重复 $n-1$ 次到只剩一个表。</p>
-<p><strong>理由</strong>：这个总次数可以改写成 $\sum(\text{每次合并后新表的长度}) - (n-1)$，而"每次合并后新表的长度之和"正是这棵合并树的 <strong>WPL</strong>（各表长度 × 它参与合并的层数，加起来）。$n-1$ 是固定的，所以要让总次数最小，就等价于让这棵合并树的 WPL 最小——而 WPL 最小的二叉树正是哈夫曼树，也就是"每次合并最短的两个"。</p>
-</details>
-<h4 id="2020">例题：【2020】（前缀编码的数据结构、译码与判定）</h4>
-<p>【2020】若任意一个字符的编码都不是其他字符编码的前缀，则称这种编码具有前缀特性。现有某字符集（字符个数 $\ge 2$）的不等长编码，每个字符的编码均为二进制的 0、1 序列，最长为 L 位，且具有前缀特性。请回答以下问题：</p>
-<p>1）哪种数据结构适宜保存上述具有前缀特性的不等长编码？
-2）基于你所设计的数据结构，简述从 0/1 串到字符串的译码过程。
-3）简述判定某字符集的不等长编码是否具有前缀特性的过程。</p>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>1）一棵二叉树。</strong> 每个结点带左、右两个孩子指针，字符存放在叶子上：一个字符的编码就是一条从根出发的路径，编码的 0 表示往左孩子走、1 表示往右孩子走，路径的终点存放该字符。因为编码满足前缀特性，任何一条这样的路径都不会中途撞上别的字符，整组编码正好铺成这棵树。（这种树不必是哈夫曼树——前缀编码只要求"编码互不为前缀"，哈夫曼树只是其中<strong>比较常用</strong>的一种。）</p>
-<p><strong>2）译码过程</strong>：把一个指针放在根结点上，从左往右扫描 0/1 串——读到 0 就沿左孩子走一步，读到 1 就沿右孩子走一步；走到存放字符的结点时输出该字符，并把指针<strong>退回根结点</strong>，接着读后面的位。0/1 串扫完，也就译出了完整的字符串。</p>
-<p><strong>3）判定过程</strong>：就是反过来"把这组编码填进一棵二叉树"，边走边建。</p>
-<ul>
-<li>先准备一棵只有根结点的空树；</li>
-<li>依次处理每个字符的编码：指针回到根，从左往右逐位扫描——遇到 0 就往左孩子走，左孩子不存在就新建一个；遇到 1 就往右孩子走，右孩子不存在就新建一个；编码扫完之后，在指针停留的那个结点上写下这个字符；</li>
-<li>处理过程中只要出现下面任意一种情况，就说明这组编码<strong>不具备</strong>前缀特性：一是扫描某个编码时<strong>从头到尾没有新建过任何结点</strong>，说明这条路径之前已经被别的编码走完了——这个编码要么和某个字符的编码完全相同，要么是某个更长编码的前缀；二是扫描<strong>中途走到了一个已经写着字符的结点</strong>，说明前面那个字符的编码是它的前缀；</li>
-<li>所有编码都这样顺利处理完、上面两种情况都没出现，则说明这组编码<strong>具有</strong>前缀特性。</li>
-</ul>
-</details>
-<h4 id="_1">例题：哪种编码方案不可能是哈夫曼编码</h4>
-<p>对字符进行哈夫曼编码时，不可能的方案是</p>
-<ul>
-<li>A. <code>00, 01, 10, 11</code></li>
-<li>B. <code>00, 010, 011, 100, 101, 11</code></li>
-<li>C. <code>00, 100, 101, 110, 111</code></li>
-<li>D. <code>0000, 0001, 001, 01, 1</code></li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 C。</strong> 哈夫曼树里<strong>不可能有度为 1 的结点</strong>——构造时每次都是拿两个结点合并成一个新的，所以每个非叶结点必定左右孩子齐全。把每组编码展开成二叉树，逐个看内部结点：</p>
-<ul>
-<li><strong>A</strong>：根分出 <code>0</code>、<code>1</code> 两支，每支再各分两个叶子（<code>00/01</code> 和 <code>10/11</code>），内部结点都是两个孩子 ✓；</li>
-<li><strong>B</strong>：<code>0</code> 这支出 <code>00</code> 和 <code>01</code>，其中 <code>01</code> 再分出 <code>010</code>、<code>011</code>；<code>1</code> 这支出 <code>10</code>（再分出 <code>100</code>、<code>101</code>）和 <code>11</code>——每处也都是两个孩子 ✓；</li>
-<li><strong>C</strong>：以 <code>0</code> 开头的只有 <code>00</code> 一条，也就是说 <code>0</code> 那个结点<strong>只有左孩子、没有右孩子</strong>，出现了<strong>度为 1</strong> 的结点 ✗——这不是哈夫曼树该有的形状，所以不可能；</li>
-<li><strong>D</strong>：<code>1</code> 是叶子；<code>0</code> 这支出 <code>01</code> 和 <code>00</code>，<code>00</code> 再出 <code>001</code> 和 <code>000</code>，<code>000</code> 再出 <code>0000</code>、<code>0001</code>，从头到尾每个内部结点都是两个孩子 ✓。</li>
-</ul>
-</details>
-<h4 id="4-0-10">例题：编码长度不超过 4，已有 0 和 10，最多还能编码几个字符</h4>
-<p>如果要求哈夫曼编码的长度小于等于 4，并且现在已经对 2 个字符编码为 <code>0</code> 和 <code>10</code>，则最多还可以对多少个字符进行编码？</p>
-<ul>
-<li>A. 3</li>
-<li>B. 4</li>
-<li>C. 5</li>
-<li>D. 6</li>
-</ul>
-<details class="article-details">
-<summary class="article-summary">查看答案解析</summary>
-<p><strong>选 B（4）。</strong> 已经用掉 <code>0</code> 和 <code>10</code> 之后，还能用的编码必须同时躲开这两条：</p>
-<ul>
-<li>不能以 <code>0</code> 开头——否则 <code>0</code> 就是它的前缀；</li>
-<li>不能以 <code>10</code> 开头——否则 <code>10</code> 是它的前缀。</li>
-</ul>
-<p>两条合起来，剩下的编码<strong>只能以 <code>11</code> 开头</strong>。从 <code>11</code> 这个结点往下算，长度上限 4 位、已经用掉 2 位，还剩 $4-2=2$ 层可供分叉，最多放得下 $2^2 = 4$ 个字符，取满就是 <code>1100</code>、<code>1101</code>、<code>1110</code>、<code>1111</code> 这四个四位编码。</p>
-<p>（反过来，如果图省事用 <code>11</code>、<code>110</code> 这种更短的编码，它自己会占掉一整片位置，能放的字符反而更少——想让数量最多，就要把可用位置都用最深的编码填满。）</p>
-</details>
 <h2 id="7-">考点7-并查集的基本操作</h2>
 <p>并查集（Disjoint Set）管理的是<strong>若干互不相交的集合</strong>，每个集合用一棵树表示，<strong>树根就是集合的代表元</strong>。它对外只提供三种操作：</p>
 <div class="article-table"><table>
@@ -230,7 +72,7 @@
 </tbody>
 </table></div>
 <p>用起来就是「<strong>先查后并</strong>」：合并之前必须先用 <code>Find</code> 查到 x、y 各自的根，再把其中一个根挂到另一个根下面，两个集合这才开始共用同一个根。</p>
-<h3 id="_2">初始化</h3>
+<h3 id="_1">初始化</h3>
 <p>存储是<strong>双亲表示法</strong>的数组：下标就是元素本身，<code>S[i]</code> 里存的是 i 的<strong>父结点下标</strong>，顺着它一路往上走。初始时每个元素各自成一个集合，即每个元素都当根，双亲一律置成 <code>-1</code>：</p>
 <pre><code class="language-c">#define MAXSIZE 10
 void Initial(int S[])
@@ -240,7 +82,7 @@ void Initial(int S[])
 }
 </code></pre>
 <p><code>-1</code> 表示<strong>没有父结点</strong>——也就是这个元素自己就是所在树的根。</p>
-<h3 id="_3">查找</h3>
+<h3 id="_2">查找</h3>
 <p>从 x 出发，顺着双亲一路往上走，走到双亲为负数的那个结点，它就是根：</p>
 <pre><code class="language-c">int Find(int S[], int x)
 {
@@ -263,7 +105,7 @@ void Initial(int S[])
     return root;
 }
 </code></pre>
-<h3 id="_4">合并</h3>
+<h3 id="_3">合并</h3>
 <p>传进来的直接是<strong>两个根</strong>（合并前先用 <code>Find</code> 各查一次）。把一个根挂到另一个根下面，同时把两个集合的规模累加到新根上：</p>
 <pre><code class="language-c">void Union(int S[], int root1, int root2)
 {
@@ -319,7 +161,7 @@ void Initial(int S[])
 <li>注意它<strong>不是单次的界</strong>。单次 <code>Find</code> 最坏仍然是 $O(\log_2 n)$（就是上面那条树高），$O(\alpha(n))$ 说的是<strong>把一连串操作摊开之后每次的均摊代价</strong>：路径压缩把整条查找路径上的结点都挂到根下面，这些结点下次再查一步就到根，节省下来的正好抵消掉走长链的开销；严格的界由摊还分析给出（把每个结点「被压缩掉的深度」记成一笔总账，摊到每次操作上）。</li>
 <li>所以优化后的基本操作是「<strong>先 <code>Find</code> 再 <code>Union</code></strong>」，写开就是 <code>Union(Find(x), Find(y))</code>，整体记 $O(\alpha(n))$。</li>
 </ul>
-<h3 id="_5">并查集的应用</h3>
+<h3 id="_4">并查集的应用</h3>
 <p>三个应用走的是<strong>同一个循环骨架</strong>：初始化并查集 → 遍历所有边 → 对每条边 (u, v) 先 <code>Find</code> 出 u、v 所在集合的根，再判断这两个根是不是同一个。区别只在"两个根相同 / 不同"时各自做什么：</p>
 <div class="article-table"><table>
 <thead>
@@ -347,7 +189,7 @@ void Initial(int S[])
 </tr>
 </tbody>
 </table></div>
-<h3 id="_6">检测图中是否有环</h3>
+<h3 id="_5">检测图中是否有环</h3>
 <ol>
 <li>初始化并查集，每个顶点各自成一个集合；</li>
 <li>遍历所有边 (u, v)，分别 <code>Find</code> 出 u、v 所在集合的根：
@@ -367,7 +209,7 @@ void Initial(int S[])
    - 两个根不同 → 加上 (u, v) 不会成环，把这条边加入最小生成树，再用 <code>Union</code> 合并两个集合；</li>
 <li>最小生成树的边数达到 $|V| - 1$ 就可以停；边还不够却已经没有边可选，说明原图<strong>不连通</strong>，生成不出最小生成树。</li>
 </ol>
-<h3 id="_7">判断无向图的连通性</h3>
+<h3 id="_6">判断无向图的连通性</h3>
 <ol>
 <li>初始化并查集；</li>
 <li>遍历所有边 (u, v)，分别 <code>Find</code> 出 u、v 所在集合的根：
@@ -376,4 +218,4 @@ void Initial(int S[])
 <li>边遍历完，再遍历图中所有顶点，用 <code>Find</code> 找出各自所属集合的根：<strong>所有顶点的根相同</strong>，图就是连通的。</li>
 </ol>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
+<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

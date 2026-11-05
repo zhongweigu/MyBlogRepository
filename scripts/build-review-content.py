@@ -307,7 +307,54 @@ def rewrite_images(md: str, source_key: str) -> tuple[str, list[tuple[Path, Path
     return re.sub(r"!\[(.*?)\]\(([^)]+)\)", repl, md, flags=re.S), copies
 
 
+def strip_example_blocks(md_text: str) -> str:
+    """把 <u>例题 / <u>练习 整块移出长文；题目已由 extract-questions.py 收进真题。"""
+    lines = md_text.splitlines()
+    out: list[str] = []
+    i = 0
+    example = re.compile(r"^<u>(例题|练习)[：:]")
+    heading = re.compile(r"^#{1,6}\s+")
+    while i < len(lines):
+        if example.match(lines[i].strip()):
+            j = i + 1
+            while j < len(lines):
+                s = lines[j].strip()
+                if example.match(s) or heading.match(s) or s == "---":
+                    break
+                j += 1
+            i = j
+            continue
+        out.append(lines[i])
+        i += 1
+    return "\n".join(out)
+
+
+def strip_loose_examples(md_text: str) -> str:
+    """清掉没被 <u> 包起来的裸题、习题训练和“小例题”折叠块。"""
+    md_text = re.sub(
+        r"\{%\s*hideToggle\s+小例题.*?%\}.*?\{%\s*endhideToggle\s*%\}",
+        "",
+        md_text,
+        flags=re.S,
+    )
+    md_text = re.sub(r"(?ms)^练习：.*?(?=^#{1,2}\s+|---\s*$)", "", md_text)
+    md_text = re.sub(r"(?ms)^##\s+习题训练\s*$.*?(?=^#{1,2}\s+|\Z)", "", md_text)
+    md_text = re.sub(r"(?ms)^【20\d{2}】.*?\{%\s*endhideToggle\s*%\}", "", md_text)
+    # 没有折叠答案、直接接解法的裸例题（复杂度题型里各有一道）。
+    md_text = re.sub(r"(?ms)^【2014】下列程序段.*?(?=^### )", "", md_text)
+    md_text = re.sub(r"(?ms)^【2022】下列程序段.*?(?=^## |\Z)", "", md_text)
+    md_text = re.sub(
+        r"\{%\s*hideToggle\s+查看答案解析\s*%\}.*?\{%\s*endhideToggle\s*%\}",
+        "",
+        md_text,
+        flags=re.S,
+    )
+    return md_text
+
+
 def convert_article(md_text: str, slots: list[str], mermaid_slots: list[str], source_key: str) -> tuple[str, list[tuple[Path, Path]]]:
+    md_text = strip_example_blocks(md_text)
+    md_text = strip_loose_examples(md_text)
     md_text, image_copies = rewrite_images(md_text, source_key)
 
     # 原帖用 <u>...</u> 单独成行表示小节标题，转成真正的标题，长文才有层级。
@@ -418,7 +465,7 @@ def convert_article(md_text: str, slots: list[str], mermaid_slots: list[str], so
         + '<div class="article-content">\n'
         + body_html
         + "\n</div>\n"
-        + '<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>'
+        + '<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>'
     ), image_copies
 
 
