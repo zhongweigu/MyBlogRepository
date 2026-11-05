@@ -58,7 +58,7 @@ export function startRunner(store, queue, { title = '今日复习', onClose = nu
     const topic = item.topic;
     const chapter = chapterById.get(topic.chapter);
     const subject = subjectById.get(chapter?.subject);
-    const kindLabel = item.kind === 'new' ? '新考点' : item.kind === 'chapter' ? '本章滚动' : '到期复习';
+    const kindLabel = item.kind === 'new' ? '新考点' : item.kind === 'chapter' ? '本章滚动' : item.kind === 'extra' ? '抽查' : '到期复习';
     progress();
     stage.innerHTML = `<article class="runner-card ${chapter?.subject === 'coa' ? 'is-coa' : 'is-ds'}">
       <div class="runner-card-top">

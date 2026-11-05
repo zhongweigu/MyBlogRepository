@@ -1,0 +1,543 @@
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc">
+<ul>
+<li><a href="#2-">考点2-内部排序总结</a><ul>
+<li><a href="#_1">稳定性</a></li>
+<li><a href="#_2">时空复杂度</a></li>
+<li><a href="#_3">一趟排序能确定一个元素最终位置的算法</a></li>
+<li><a href="#_4">比较次数与初始状态无关的算法</a></li>
+<li><a href="#_5">移动次数与初始状态无关的算法</a></li>
+<li><a href="#_6">总趟数与序列初始状态有关的算法</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</details><div class="article-content">
+<h2 id="2-">考点2-内部排序总结</h2>
+<h3 id="_1">稳定性</h3>
+<p><strong>稳定性</strong>：如果表中有两个关键字相同的元素，排序前 A 在 B 前面，排序后 A 仍然在 B 前面，就说这个排序算法是<strong>稳定</strong>的；否则是不稳定的。</p>
+<blockquote>
+<p>稳定性看的是<strong>相同关键字的相对次序</strong>，不是"排序结果是否唯一"，也不是"算法快不快"。同一个算法换一种实现，稳定性也可能变——比如把严格比较改成带等号的比较，就可能把相等元素换过去。</p>
+</blockquote>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>算法</th>
+<th>稳定性</th>
+<th>关键原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接插入排序</td>
+<td>稳定</td>
+<td>只有严格小于才后移，相等元素停在它右边</td>
+</tr>
+<tr>
+<td>折半插入排序</td>
+<td>稳定</td>
+<td>相等时走右半区，插入点在相等元素之后</td>
+</tr>
+<tr>
+<td>希尔排序</td>
+<td>不稳定</td>
+<td>跨组移动，相等元素可能被分到不同组</td>
+</tr>
+<tr>
+<td>冒泡排序</td>
+<td>稳定</td>
+<td>只有严格大于才交换，相等不换</td>
+</tr>
+<tr>
+<td>快速排序</td>
+<td>不稳定</td>
+<td>划分时相等元素可能被跨位置搬走</td>
+</tr>
+<tr>
+<td>简单选择排序</td>
+<td>不稳定</td>
+<td>最小值与前面交换时可能越过相等元素</td>
+</tr>
+<tr>
+<td>堆排序</td>
+<td>不稳定</td>
+<td>堆顶 / 堆底远距离交换，顺序可能被打乱</td>
+</tr>
+<tr>
+<td>归并排序</td>
+<td>稳定</td>
+<td>相等时先取左边子表</td>
+</tr>
+<tr>
+<td>基数排序</td>
+<td>稳定</td>
+<td>队列 FIFO，入队尾、出队头</td>
+</tr>
+</tbody>
+</table></div>
+<p>本章这 9 个排序里：<strong>稳定的有 5 个</strong>（直接插入、折半插入、冒泡、归并、基数），<strong>不稳定的有 4 个</strong>（希尔、快速、简单选择、堆）。</p>
+<p><strong>口诀</strong>：不稳定的只有四个——<strong>希、快、选、堆</strong>（"希快选堆"）。课件把它编成"选艾希堆攻速"：选 = 简单选择，希 = 希尔，堆 = 堆，速 = 快速（"艾""攻"是凑句子的字）。</p>
+<p><strong>几个容易错的点</strong>：</p>
+<ol>
+<li><strong>稳定性不是"排序结果唯一"</strong>：有重复关键字时，稳定和不稳定的算法都能得到有序序列，区别只在相同关键字的先后。</li>
+<li><strong>直接插入 / 折半插入 / 冒泡的稳定性依赖严格比较</strong>：把 <code>A[j] &gt; temp</code> 改成 <code>&gt;=</code>、把 <code>A[mid] &gt; A[0]</code> 改成 <code>&gt;=</code>、把 <code>A[j] &gt; A[j+1]</code> 改成 <code>&gt;=</code>，相等元素就会被换过去，稳定性被破坏。</li>
+<li><strong>归并的稳定性依赖 <code>&lt;=</code></strong>：相等时先取左边；写成 <code>&lt;</code> 就可能先取右边。</li>
+<li><strong>基数排序的稳定性依赖队列 FIFO</strong>：分配挂队尾、收集从队头；顺序反了就不稳定。</li>
+<li><strong>简单选择排序不稳定</strong>：虽然每趟最多交换一次，但交换可能跨过相等元素；不要因为"交换少"就误以为稳定。</li>
+<li><strong>快速排序不稳定，但通常很快</strong>：稳定性和平均性能是两件事，不能因为快排不稳定就否定它。</li>
+</ol>
+<h3 id="_2">时空复杂度</h3>
+<p>各算法的最好 / 最坏 / 平均时间复杂度和空间复杂度，直接看课件这张表：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="内部排序时空复杂度总表：直接插入、冒泡最好 O(n)、最坏/平均 O(n²)、空间 O(1)；简单选择全 O(n²)、空间 O(1)；快速最好/平均 O(n log n)、最坏 O(n²)、空间 O(log n)~O(n)；堆全 O(n log n)、空间 O(1)；归并全 O(n log n)、空间 O(n)；基数 O(d(n+r))、空间 O(r)；表底注明时间复杂度与初始状态无关的是简单选择、堆、归并、基数" data-src="/408-review/assets/textbook/ds-sorting-complexity-summary.webp" href="/408-review/assets/textbook/ds-sorting-complexity-summary.webp"><img alt="内部排序时空复杂度总表：直接插入、冒泡最好 O(n)、最坏/平均 O(n²)、空间 O(1)；简单选择全 O(n²)、空间 O(1)；快速最好/平均 O(n log n)、最坏 O(n²)、空间 O(log n)~O(n)；堆全 O(n log n)、空间 O(1)；归并全 O(n log n)、空间 O(n)；基数 O(d(n+r))、空间 O(r)；表底注明时间复杂度与初始状态无关的是简单选择、堆、归并、基数" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-sorting-complexity-summary.webp"/></a><figcaption>内部排序时空复杂度总表：直接插入、冒泡最好 O(n)、最坏/平均 O(n²)、空间 O(1)；简单选择全 O(n²)、空间 O(1)；快速最好/平均 O(n log n)、最坏 O(n²)、空间 O(log n)~O(n)；堆全 O(n log n)、空间 O(1)；归并全 O(n log n)、空间 O(n)；基数 O(d(n+r))、空间 O(r)；表底注明时间复杂度与初始状态无关的是简单选择、堆、归并、基数</figcaption></figure>
+<blockquote>
+<p>注：课件这张表只列了 7 个代表算法，没列折半插入和希尔排序——折半插入最好 O(n log n)、最坏 / 平均 O(n²)、空间 O(1)；希尔依赖增量序列，最坏 O(n²)、平均约 O(n^1.3)、空间 O(1)，且不稳定。</p>
+</blockquote>
+<h3 id="_3">一趟排序能确定一个元素最终位置的算法</h3>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>算法</th>
+<th>能否保证一趟定死一个？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接插入排序</td>
+<td>不能</td>
+</tr>
+<tr>
+<td>折半插入排序</td>
+<td>不能</td>
+</tr>
+<tr>
+<td>希尔排序</td>
+<td>不能</td>
+</tr>
+<tr>
+<td>冒泡排序</td>
+<td>能</td>
+</tr>
+<tr>
+<td>简单选择排序</td>
+<td>能</td>
+</tr>
+<tr>
+<td>快速排序</td>
+<td>能（一次划分定死枢轴）</td>
+</tr>
+<tr>
+<td>堆排序</td>
+<td>能（建堆后每趟交换定死当前最大值）</td>
+</tr>
+<tr>
+<td>归并排序</td>
+<td>不能</td>
+</tr>
+<tr>
+<td>基数排序</td>
+<td>不能</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>注：这里按课件的"一趟"口径——快速排序指一次划分（只定死枢轴），堆排序指建堆后的每一趟交换；408 严格定义的"一趟排序"可能一次确定多个元素，别和"一次划分"混。</p>
+</blockquote>
+<details class="article-details">
+<summary class="article-summary">展开：③ 的原因</summary>
+<ul>
+<li><strong>冒泡</strong>：每趟把当前未排序部分的最大（或最小）值冒到一端，位置确定。</li>
+<li><strong>简单选择</strong>：每趟选出无序区最小值放到最前面，位置确定。</li>
+<li><strong>快速</strong>：一次划分把枢轴放到最终位置；左右子表还要递归。</li>
+<li><strong>堆</strong>：建好大根堆后，每趟把堆顶最大值换到当前堆底，最大值到位；建堆阶段本身不算。</li>
+<li><strong>直接插入 / 折半插入</strong>：只保证有序区内部有序，后面的更小元素还可能插到前面。</li>
+<li><strong>希尔</strong>：中间趟只按增量局部有序，只有最后一趟 $dk=1$ 才整体有序。</li>
+<li><strong>归并</strong>：合并只让子表有序，单个元素要等最后一次合并才定死。</li>
+<li><strong>基数</strong>：一趟只按一位分配/收集，高位还会改变次序。</li>
+</ul>
+</details>
+<h3 id="_4">比较次数与初始状态无关的算法</h3>
+<p>这张表要特别注意括号里的条件：折半插入和归并的"无关"只指<strong>数量级</strong>；冒泡的"无关"只指<strong>未优化</strong>版本。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>算法</th>
+<th>是否无关</th>
+<th>条件 / 口径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>折半插入排序</td>
+<td>数量级无关</td>
+<td>精确次数随插入空隙变化</td>
+</tr>
+<tr>
+<td>冒泡排序（未优化）</td>
+<td>无关</td>
+<td>不带 <code>flag</code>；带 <code>flag</code> 时最好 O(n)，有关</td>
+</tr>
+<tr>
+<td>简单选择排序</td>
+<td>无关</td>
+<td>固定 n(n-1)/2</td>
+</tr>
+<tr>
+<td>归并排序</td>
+<td>数量级无关</td>
+<td>精确次数随合并交错变化</td>
+</tr>
+<tr>
+<td>基数排序</td>
+<td>无关</td>
+<td>不比较关键字，比较次数为 0</td>
+</tr>
+<tr>
+<td>直接插入排序</td>
+<td>有关</td>
+<td>最好 n-1，最坏 n(n-1)/2</td>
+</tr>
+<tr>
+<td>希尔排序</td>
+<td>有关</td>
+<td>与增量序列、初始顺序有关</td>
+</tr>
+<tr>
+<td>快速排序</td>
+<td>有关</td>
+<td>最好 / 平均 O(n log n)，最坏 O(n²)</td>
+</tr>
+<tr>
+<td>堆排序</td>
+<td>有关</td>
+<td>精确次数随建堆/下坠路径变化（数量级仍 O(n log n)）</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>所以"与初始状态无关"不能一句话套：先看它说的是<strong>精确次数</strong>还是<strong>数量级</strong>，再看冒泡有没有带 <code>flag</code>。</p>
+</blockquote>
+<details class="article-details">
+<summary class="article-summary">展开：④ 的条件与原因</summary>
+<ul>
+<li><strong>折半插入</strong>：比较次数的上界由有序区长度决定，总量级 Θ(n log n)；但待插入关键字落在不同空隙，实际次数会变。</li>
+<li><strong>冒泡（未优化）</strong>：没有 <code>flag</code>，永远比较 n-1+…+1 = n(n-1)/2 次；带 <code>flag</code> 后最好一趟就停，最好 O(n)。</li>
+<li><strong>简单选择</strong>：每趟都要把无序区扫完，比较次数固定 n(n-1)/2。</li>
+<li><strong>归并</strong>：每层合并总比较次数 Θ(n)，层数固定 ⌈log₂ n⌉，所以量级 Θ(n log n)；单次 Merge 在 min{m,n} 到 m+n-1 之间。</li>
+<li><strong>基数</strong>：不比较关键字，比较次数为 0。</li>
+<li><strong>直接插入 / 希尔 / 快速</strong>：最好与最坏的数量级不同（或依赖增量/枢轴），所以有关。</li>
+<li><strong>堆</strong>：建堆和下坠的路径随数据变化，精确次数会变；但数量级始终 O(n log n)。</li>
+</ul>
+</details>
+<h3 id="_5">移动次数与初始状态无关的算法</h3>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>算法</th>
+<th>是否无关</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>归并排序</td>
+<td>无关</td>
+<td>每层固定复制/写回 n 个元素</td>
+</tr>
+<tr>
+<td>基数排序</td>
+<td>无关</td>
+<td>每趟固定分配/收集 n 个记录</td>
+</tr>
+<tr>
+<td>直接插入排序</td>
+<td>有关</td>
+<td>最好 0，最坏 O(n²)</td>
+</tr>
+<tr>
+<td>折半插入排序</td>
+<td>有关</td>
+<td>最好 2(n-1) 次哨兵复制，最坏 O(n²)</td>
+</tr>
+<tr>
+<td>希尔排序</td>
+<td>有关</td>
+<td>与增量、初始顺序有关</td>
+</tr>
+<tr>
+<td>冒泡排序</td>
+<td>有关</td>
+<td>交换次数等于逆序对数</td>
+</tr>
+<tr>
+<td>简单选择排序</td>
+<td>有关</td>
+<td>交换 0~n-1 次</td>
+</tr>
+<tr>
+<td>快速排序</td>
+<td>有关</td>
+<td>划分位置影响交换/移动</td>
+</tr>
+<tr>
+<td>堆排序</td>
+<td>有关</td>
+<td>建堆/下坠路径随数据变化</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>移动次数和比较次数要分开看：简单选择比较次数固定，但交换次数会变；归并/基数的移动次数固定，不等于它们的比较次数也固定——归并的比较次数只固定量级，基数的比较次数恒为 0（不比较）。</p>
+</blockquote>
+<details class="article-details">
+<summary class="article-summary">展开：⑤ 的原因</summary>
+<ul>
+<li><strong>归并</strong>：每层把 n 个元素复制到 B、再写回 A，层数固定，总移动次数固定。</li>
+<li><strong>基数</strong>：每趟分配/收集都处理 n 个记录，d 趟固定。</li>
+<li><strong>直接插入</strong>：正序 0 次移动，逆序 O(n²)。</li>
+<li><strong>折半插入</strong>：正序也要每趟存哨兵/回填，共 2(n-1) 次；逆序 O(n²)。</li>
+<li><strong>希尔</strong>：组内后移次数随增量和初始顺序变化。</li>
+<li><strong>冒泡</strong>：交换次数等于逆序对数，正序 0、逆序 n(n-1)/2。</li>
+<li><strong>简单选择</strong>：每趟最多交换一次，交换次数 0~n-1。</li>
+<li><strong>快速</strong>：划分时元素搬移次数取决于枢轴位置。</li>
+<li><strong>堆</strong>：建堆和每次下坠的交换次数取决于数据。</li>
+</ul>
+</details>
+<h3 id="_6">总趟数与序列初始状态有关的算法</h3>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>算法</th>
+<th>总趟数是否有关</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接插入排序</td>
+<td>无关</td>
+<td>固定 n-1 趟</td>
+</tr>
+<tr>
+<td>折半插入排序</td>
+<td>无关</td>
+<td>固定 n-1 趟</td>
+</tr>
+<tr>
+<td>希尔排序</td>
+<td>无关</td>
+<td>固定增量序列的轮数，由 n 和增量决定</td>
+</tr>
+<tr>
+<td>冒泡排序（优化后的）</td>
+<td>有关</td>
+<td>本趟无交换就提前停；最好 1 趟，最坏 n-1 趟</td>
+</tr>
+<tr>
+<td>简单选择排序</td>
+<td>无关</td>
+<td>固定 n-1 趟</td>
+</tr>
+<tr>
+<td>快速排序</td>
+<td>有关</td>
+<td>划分均匀时约 log n 层，极端时 n 层</td>
+</tr>
+<tr>
+<td>堆排序</td>
+<td>无关</td>
+<td>建堆一次 + n-1 趟取堆顶</td>
+</tr>
+<tr>
+<td>归并排序</td>
+<td>无关</td>
+<td>固定 ⌈log₂ n⌉ 趟</td>
+</tr>
+<tr>
+<td>基数排序</td>
+<td>无关</td>
+<td>固定 d 趟</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>注意：冒泡排序只有<strong>优化后</strong>（带 <code>flag</code>、无交换就提前停）才与初始状态有关；不带 <code>flag</code> 的冒泡永远做 n-1 趟。希尔排序是跟<strong>增量序列</strong>有关，不是跟初始排列有关——增量序列固定时，趟数只由 n 决定。</p>
+<p>这里说的是"趟数"（扫描/划分的轮数），不是时间复杂度；趟数固定不代表每趟的代价相同。快速排序的"趟数"按递归层数算，不是总划分次数。</p>
+</blockquote>
+<details class="article-details">
+<summary class="article-summary">展开：⑥ 的原因</summary>
+<ul>
+<li><strong>直接插入 / 折半插入</strong>：外层 i 从 2 到 n，固定 n-1 趟，和输入无关。</li>
+<li><strong>希尔</strong>：趟数等于增量序列的长度；固定序列时只由 n 决定。</li>
+<li><strong>冒泡（优化后）</strong>：本趟无交换就 break；正序 1 趟，逆序 n-1 趟。</li>
+<li><strong>简单选择</strong>：i 从 1 到 n-1，固定 n-1 趟。</li>
+<li><strong>快速</strong>：每次划分的枢轴位置决定子问题大小；均匀时约 log n 层，极端时 n 层。</li>
+<li><strong>堆</strong>：建堆一次，之后 n-1 次"交换堆顶 + 下坠"，趟数固定。</li>
+<li><strong>归并</strong>：每层对半分，固定 ⌈log₂ n⌉ 层。</li>
+<li><strong>基数</strong>：按 d 位做 d 趟，固定。</li>
+</ul>
+</details>
+<h4 id="2009">例题：【2009】（第二趟排序后的结果）</h4>
+<p>【2009】若数据元素序列 <code>{11, 12, 13, 7, 8, 9, 23, 4, 5}</code> 是采用下列排序算法之一得到的第二趟排序后的结果，则该排序算法只能是</p>
+<ul>
+<li>A. 冒泡排序</li>
+<li>B. 插入排序</li>
+<li>C. 选择排序</li>
+<li>D. 二路归并排序</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（插入排序）。</strong></p>
+<p>插入排序前两趟只处理前三个元素：先放入 11，再插入 12、13，得到 <code>11,12,13</code>，后面的元素原封不动——正好是题干的序列。</p>
+<p>其余三个都对不上：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>算法</th>
+<th>两趟后的特征</th>
+<th>本题序列</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>插入排序</td>
+<td>前 3 个有序，后面不动</td>
+<td><code>11,12,13</code> 有序，符合</td>
+</tr>
+<tr>
+<td>冒泡排序</td>
+<td>左→右：末尾是最大两个 13、23；右→左：开头是最小两个 4、5</td>
+<td>末尾是 4、5、开头是 11、12，不符合</td>
+</tr>
+<tr>
+<td>选择排序</td>
+<td>前两个是最小的两个 4、5</td>
+<td>开头是 11、12，不符合</td>
+</tr>
+<tr>
+<td>二路归并排序</td>
+<td>第二趟后每 4 个一组应有序</td>
+<td><code>11,12,13,7</code> 不是有序，不符合</td>
+</tr>
+</tbody>
+</table></div>
+<p>所以只能是插入排序，选 B。</p>
+<blockquote>
+<p>注：二路归并这里按自底向上的口径（第一趟长度 2、第二趟长度 4）；递归实现的中间分组可能不同，但这道题按考试口径判断。</p>
+</blockquote>
+</details>
+<h4 id="2022">例题：【2022】（为什么选直接插入而不是快排）</h4>
+<p>【2022】对数据进行排序时，若采用直接插入排序而不采用快速排序，则可能的原因是</p>
+<ul>
+<li><strong>I.</strong> 大部分元素已有序</li>
+<li><strong>II.</strong> 待排序元素数量很少</li>
+<li><strong>III.</strong> 要求空间复杂度为 O(1)</li>
+<li>
+<p><strong>IV.</strong> 要求排序算法是稳定的</p>
+</li>
+<li>
+<p>A. 仅 I、II</p>
+</li>
+<li>B. 仅 III、IV</li>
+<li>C. 仅 I、II、IV</li>
+<li>D. I、II、III、IV</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D（I、II、III、IV）。</strong></p>
+<ul>
+<li><strong>I 大部分元素已有序</strong>：直接插入排序接近 O(n)；快排如果枢轴取得不好（例如总取首元素），在基本有序时容易退化。</li>
+<li><strong>II 元素数量很少</strong>：插入排序常数小、没有递归开销，通常比快排更合适。</li>
+<li><strong>III 要求空间 O(1)</strong>：直接插入是 O(1)；快排的递归栈平均 O(log n)、最坏 O(n)。</li>
+<li><strong>IV 要求稳定</strong>：直接插入稳定；标准原地快排不稳定。</li>
+</ul>
+<p>四条都可能，选 D。</p>
+<blockquote>
+<p>注：这里讨论的是标准原地快排；如果允许额外空间或特殊实现，稳定性和空间结论可能改变。</p>
+</blockquote>
+</details>
+<h4 id="2017">例题：【2017】（为什么选归并而不是插入）</h4>
+<p>【2017】在内部排序时，若选择了归并排序而未选择插入排序，则可能的理由是</p>
+<ul>
+<li><strong>I.</strong> 归并排序的程序代码更短</li>
+<li><strong>II.</strong> 归并排序的占用空间更少</li>
+<li>
+<p><strong>III.</strong> 归并排序的运行效率更高</p>
+</li>
+<li>
+<p>A. 仅 II</p>
+</li>
+<li>B. 仅 III</li>
+<li>C. 仅 I、II</li>
+<li>D. 仅 I、III</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（仅 III）。</strong></p>
+<ul>
+<li><strong>I 错</strong>：归并排序要写递归、合并和辅助数组，代码通常比直接插入长。</li>
+<li><strong>II 错</strong>：归并排序需要 O(n) 的辅助数组，插入排序只要 O(1)。</li>
+<li><strong>III 对</strong>：归并排序是 O(n log n)，插入排序最坏 / 平均是 O(n²)。</li>
+</ul>
+<p>所以只有 III，选 B。</p>
+<blockquote>
+<p>注：如果数据已经基本有序，插入排序可能达到 O(n)，这时它可能更快；但题目问的是一般理由，III 成立。</p>
+</blockquote>
+</details>
+<h4 id="2019">例题：【2019】（快排第二趟不可能的结果）</h4>
+<p>【2019】排序过程中，对尚未确定最终位置的所有元素进行一遍处理称为一趟。下列序列中，不可能是快速排序第二趟结果的是</p>
+<ul>
+<li>A. 5, 2, 16, 12, 28, 60, 32, 72</li>
+<li>B. 2, 16, 5, 28, 12, 60, 32, 72</li>
+<li>C. 2, 12, 16, 5, 28, 32, 72, 60</li>
+<li>D. 5, 2, 12, 28, 16, 32, 72, 60</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D。</strong></p>
+<p>题干说的"一趟"是：把所有尚未确定最终位置的元素处理一遍。快排第一趟定下第一个枢轴；第二趟要把第一趟分出的<strong>每个当前子表</strong>都划分一次（如果第一趟枢轴在端点，就只有一边）。</p>
+<p>最终有序序列是 <code>2,5,12,16,28,32,60,72</code>。逐个看：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>选项</th>
+<th>可作第一枢轴</th>
+<th>第二趟</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>72</td>
+<td>左段以 28 为枢轴</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>B</td>
+<td>2</td>
+<td>右段以 28 为枢轴</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>C</td>
+<td>28</td>
+<td>左段以 2、右段以 32 为枢轴</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>D</td>
+<td>12 或 32</td>
+<td>12 的左侧 <code>[5,2]</code> 没有到位元素；32 的右侧 <code>[72,60]</code> 没有到位元素</td>
+<td>不可能</td>
+</tr>
+</tbody>
+</table></div>
+<p>D 无论第一枢轴选 12 还是 32，都会有一侧的非空子表找不到能当枢轴的到位元素，所以不可能，选 D。</p>
+<blockquote>
+<p>注：判断"能不能"时，枢轴可以选任意元素，只要存在一种选法即可；A、B、C 都能找到对应的枢轴安排。</p>
+</blockquote>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

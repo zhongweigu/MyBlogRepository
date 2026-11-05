@@ -1,0 +1,130 @@
+<div class="article-content">
+<h2 id="41">4.1 指令系统</h2>
+<p>一条指令通常由操作码和地址码组成；地址码可以只有一个，也可以有多个。按指令字长和字段划分，可以先把基本结构理清。</p>
+<p><strong>基本字段。</strong></p>
+<ul>
+<li><strong>操作码 OP</strong>：决定执行何种操作；操作码占 $n$ 位时，最多可表示 $2^n$ 条指令。</li>
+<li><strong>寄存器编号字段</strong>：指定源寄存器或目的寄存器；编号字段占 $n$ 位时，最多可表示 $2^n$ 个寄存器。</li>
+<li><strong>寻址方式字段</strong>：决定如何解释操作数地址。</li>
+<li><strong>立即数或偏移量字段</strong>：常用补码表示；使用前通常需要符号扩展。</li>
+</ul>
+<p><strong>根据指令字长推断硬件参数。</strong></p>
+<ul>
+<li>MAR 的位数由主存地址空间决定：按字节编址且地址空间为 $2^n$ B 时，MAR 至少 $n$ 位。</li>
+<li>MDR 的位数通常等于一次存取的数据位数。</li>
+<li>指令条数上限、寄存器个数上限都按相应字段的位数计算。</li>
+</ul>
+<p><strong>定长与变长指令。</strong></p>
+<ul>
+<li><strong>定长指令</strong>：每条指令长度相同，便于取指和译码，常见于 RISC。</li>
+<li><strong>变长指令</strong>：不同指令所占字节数不同，地址递增量必须按实际机器码字节数计算，常见于 CISC/x86。</li>
+</ul>
+<p><strong>指令地址与机器码长度。</strong></p>
+<ul>
+<li>某条指令的长度 $=$ 下一条指令地址 $-$ 当前指令地址；最后一条指令没有“下一条”，按机器码实际字节数判断。</li>
+<li>一段机器级代码的总字节数 $=$ 末指令的下一地址 $-$ 首指令地址，或逐条累加各指令的机器码字节数。</li>
+<li>由机器码判断字节序：多字节立即数或地址在机器码中低字节在前是小端，高字节在前是大端；判断时找一个数值已知、字节顺序明确的多字节字段。</li>
+</ul>
+<p><strong>零、一、二、三、四地址指令。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>格式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>零地址</td>
+<td><code>OP</code></td>
+<td>无显式操作数：<code>NOP</code>、<code>HLT</code>，或栈操作隐含栈顶</td>
+</tr>
+<tr>
+<td>一地址</td>
+<td><code>OP A1</code></td>
+<td>单目：<code>OP(A1) -&gt; A1</code>；双目：<code>(ACC) OP (A1) -&gt; ACC</code></td>
+</tr>
+<tr>
+<td>二地址</td>
+<td><code>OP A1, A2</code></td>
+<td><code>(A1) OP (A2) -&gt; A1</code>（结果也可放 A2）</td>
+</tr>
+<tr>
+<td>三地址</td>
+<td><code>OP A1, A2, A3</code></td>
+<td><code>(A1) OP (A2) -&gt; A3</code></td>
+</tr>
+<tr>
+<td>四地址</td>
+<td><code>OP A1, A2, A3, A4</code></td>
+<td><code>(A1) OP (A2) -&gt; A3</code>；<code>A4</code> 为下条指令地址</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>扩展操作码。</strong></p>
+<p>操作码长度不固定：常用指令给短操作码，少用指令给长操作码。以 4 位操作码为例：</p>
+<ul>
+<li><code>0000</code>～<code>1110</code> 表示 15 条指令；</li>
+<li><code>1111</code> 不单独表示指令，而作为扩展标志；</li>
+<li><code>1111 0000</code>～<code>1111 1110</code> 再表示 15 条指令；</li>
+<li><code>1111 1111</code> 继续向下扩展。</li>
+</ul>
+<p>这样任何短操作码都不会成为长操作码的前缀，译码时不会产生歧义。代价是：指令字长固定时，操作码多占一位，地址字段就少一位——扩展操作码本质上是拿地址位换操作码位。</p>
+<h2 id="42">4.2 寻址方式</h2>
+<p>寻址方式分两类：<strong>指令寻址</strong>决定下一条指令的地址（通常由 PC 给出），<strong>数据寻址</strong>决定操作数的地址。下面主要是数据寻址。</p>
+<p><strong>寄存器直接寻址。</strong> 操作数就在寄存器中，形式为 <code>Rn</code>；不涉及主存地址计算，也不需要访存取操作数。</p>
+<p><strong>寄存器间接寻址。</strong> 寄存器中存放的是操作数的有效地址，形式为 <code>(Rn)</code> 或 <code>[Rn]</code>：</p>
+<p>$$\mathrm{EA}=(R_n)$$</p>
+<p><strong>寄存器间接并自增。</strong> 先按寄存器内容访问操作数，再修改寄存器，形式为 <code>(Rn)+</code>：</p>
+<ul>
+<li>取操作数：$\mathrm{EA}=(R_n)$；</li>
+<li>更新：$(R_n)+d\to R_n$，$d$ 通常为操作数所占字节数。</li>
+</ul>
+<p><strong>相对寻址。</strong> 常用于分支或跳转，基准是当前指令执行后的 PC，也就是下一条指令地址：</p>
+<p>$$\text{目标地址}=\text{下一条指令地址}+\text{符号扩展}(\text{偏移量})\times\text{比例因子}$$</p>
+<p><strong>基址/变址/比例变址寻址。</strong></p>
+<ul>
+<li>常见形式：<code>位移量(基址寄存器, 变址寄存器, 比例因子)</code>；</li>
+<li>x86 常见形式：<code>[base + index × scale + displacement]</code>；</li>
+<li>数组访问本质：$\text{元素地址}=\text{数组首地址}+\text{下标}\times\text{元素大小}$；</li>
+<li>二维数组按行优先：<code>a[i][j]</code> 的地址 $=\text{首地址}+(i\times\text{列数}+j)\times\text{元素大小}$。</li>
+</ul>
+<p><strong>这三项怎么配合访问数组。</strong> 以 x86 的 <code>[base + index × scale + displacement]</code> 为例：</p>
+<ul>
+<li><code>base</code>：数组首地址，循环中不变；</li>
+<li><code>index</code>：下标，循环中递增；</li>
+<li><code>scale</code>：元素大小，把下标换算成字节偏移（1/2/4/8）；</li>
+<li><code>displacement</code>：常量偏移，如结构体字段偏移或某一行的起始偏移。</li>
+</ul>
+<p>于是 <code>a[i]</code> 的地址就是</p>
+<p>$$\text{base}+\text{index}\times\text{scale}+\text{displacement}$$</p>
+<p>例如 <code>int a[100]</code>，<code>base=&amp;a[0]</code>、<code>scale=4</code>、<code>displacement=0</code>；<code>a[i]</code> 就是 <code>[base + i*4]</code>。循环每轮只把 <code>index</code> 加 1，地址自动加 4，不用改指令，也不用重新算地址。</p>
+<blockquote>
+<p>基址寻址和变址寻址的分工：基址寻址 $\mathrm{EA}=(\text{基址寄存器})+A$ 中基址不变、形式地址可变，常用于程序重定位；变址寻址 $\mathrm{EA}=A+(\text{变址寄存器})$ 中形式地址不变、变址寄存器可变，适合数组和循环；比例变址再乘上元素大小。</p>
+</blockquote>
+<p><strong>补充：隐含寻址与立即数寻址。</strong></p>
+<ul>
+<li><strong>隐含寻址</strong>：操作数地址隐含在指令或硬件中，如累加器、栈顶；指令中不出现地址字段。</li>
+<li><strong>立即数寻址</strong>：操作数直接写在指令中，形式 <code>#A</code>，操作数就是 A；不需要再访存取操作数。</li>
+</ul>
+<p><strong>补充：直接寻址与间接寻址。</strong></p>
+<ul>
+<li><strong>直接寻址</strong>：地址字段就是有效地址，$\mathrm{EA}=A$；取操作数访问一次主存。</li>
+<li><strong>间接寻址</strong>：地址字段指向的存储单元里存放有效地址，$\mathrm{EA}=(A)$；取操作数要访问两次主存（先取 EA，再取操作数）。</li>
+</ul>
+<p><strong>补充：PC 的自增。</strong></p>
+<p>取指后 PC 自动增加当前指令所占的编址单位数：</p>
+<p>$$\Delta\mathrm{PC}=\frac{\text{指令长度}}{\text{编址单位}}$$</p>
+<p>按字节编址时，PC 增加指令的字节数；按字编址时，增加指令的字数。例如按字节编址、指令长 4B，PC 加 4；按字编址、字长 32 位，同一条指令 PC 加 1。定长指令的增量固定，变长指令的增量随当前指令长度变化。</p>
+<p><strong>补充：堆栈寻址。</strong></p>
+<p>堆栈是主存中一块连续区域，栈底固定、栈顶浮动，栈指针 SP 始终指向栈顶。堆栈寻址属于隐含寻址：指令里不出现地址字段，操作数地址由 SP 隐含给出，访存一次就能取到栈顶单元。</p>
+<p>x86 的栈向低地址增长，SP 指向最后压入的元素：</p>
+<ul>
+<li><code>push src</code>：先 <code>ESP = ESP - 4</code>，再把 src 写到 <code>[ESP]</code>；</li>
+<li><code>pop dst</code>：先从 <code>[ESP]</code> 读到 dst，再 <code>ESP = ESP + 4</code>。</li>
+</ul>
+<p>压栈是「先减指针、后写内存」，弹栈是「先读内存、后加指针」，顺序不能颠倒；栈空时弹栈（下溢）、栈满时压栈（上溢）都是错误。</p>
+<p>栈寻址常用于过程调用、保存/恢复寄存器、表达式求值；操作数宽度由指令或寄存器决定。</p>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

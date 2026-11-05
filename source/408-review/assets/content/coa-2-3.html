@@ -1,0 +1,189 @@
+<div class="article-content">
+<h2 id="5-">考点5-浮点数加减运算</h2>
+<p>浮点数不能直接对齐最低位相加，因为阶码不同意味着两个数的数量级不同。标准流程是：</p>
+<ol>
+<li><strong>对阶</strong>；</li>
+<li><strong>尾数加减</strong>；</li>
+<li><strong>规格化</strong>；</li>
+<li><strong>舍入</strong>。</li>
+</ol>
+<hr/>
+<p><strong>对阶。</strong> 比较两个数的实际指数，使<mark>小阶向大阶看齐</mark>。阶差为</p>
+<p>$$\Delta E=E_{\text{大}}-E_{\text{小}}$$</p>
+<p>小阶数的尾数向右移动 $\Delta E$ 位，同时把它的阶码增加 $\Delta E$。</p>
+<p>右移会移出有效数字。设两个单精度尾数相差很大，小数的尾数可能要右移几十位，真正影响最终结果的只有最前面的几位，而更靠后的位只能通过辅助位概括。</p>
+<blockquote>
+<p>对阶只能把小阶改成大阶。若反过来把大阶改小，会主动降低大数的精度，还可能使数值直接越界。</p>
+</blockquote>
+<hr/>
+<p><strong>尾数加减。</strong> 对阶完成后，两个数的阶码相同，可以只对尾数做定点加或减。</p>
+<p>结果可能出现两类不规范形式：</p>
+<ul>
+<li>加法进位，尾数变成 <code>1x.xxx</code> 或更高，需要<strong>右规</strong>：尾数右移，阶码增加；</li>
+<li>减法抵消，尾数最高位变成 0，需要<strong>左规</strong>：尾数左移，阶码减少。</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">补充：左规改变尾数和阶码的例子</summary>
+<p>$$0.0101_2\times2^{-124}
+\rightarrow
+1.01_2\times2^{-126}$$</p>
+<p>这里尾数左移 2 位、阶码减 2，数值不变。</p>
+</details>
+<blockquote>
+<p>前面的阶码临界例子说明：若阶码已经降到底，而尾数仍未左移到 1 开头，就必须停止左规并转入非规格化表示。</p>
+</blockquote>
+<hr/>
+<p><strong>舍入的三个辅助位。</strong> 为了在不保存完整被移出尾数的前提下正确舍入，运算时可以在正常尾数右侧保留三位：</p>
+<blockquote>
+<p>辅助位用于保存“正常尾数右侧被移出的信息”。</p>
+</blockquote>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>辅助位</th>
+<th>名称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$G$</td>
+<td>保护位 Guard</td>
+<td>第一个正常尾数之外的位，决定是否已经达到半个最低保留单位</td>
+</tr>
+<tr>
+<td>$R$</td>
+<td>舍入位 Round</td>
+<td>第二个额外位，用于区分“恰好一半”和“略多一半”</td>
+</tr>
+<tr>
+<td>$S$</td>
+<td>粘滞位 Sticky</td>
+<td>第二个额外位之后所有残余位的逻辑或，只要有任意一个 1 就置 1</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>$R$ 不是额外凭空制造的一位：在扩展尾数中，它就是紧跟在 $G$ 后面的那一位，也就是原中间尾数中的真实二进制位。每经过一次左移或右移，各有效位的位置会变化，因此最终哪一位落到 $G,R$ 的位置，要按移位完成后的扩展尾数来确定。</p>
+<p>对阶和规格化都需要<strong>保留</strong> $G,R,S$，但都不应各自先做一次最终舍入：</p>
+<ul>
+<li>对阶右移时，被移出的第一位进入 $G$，第二位进入 $R$，其余位统一压入 $S$；</li>
+<li>规格化左移或右移时，整个扩展尾数随之移动，$G,R,S$ 也跟着重新确定；</li>
+<li>真正舍入只放在最后一次规格化之后。</li>
+</ul>
+<p>这样做是为了避免“对阶时舍入一次、规格化时又舍入一次”造成误差累积。若最终舍入又导致尾数进位，才需要再做一次右规，并修正阶码。</p>
+<p>$S$ 位不是某一个原始位，而是<mark>把后面所有无法完整保留的位压缩成一个信息</mark>。它能保证判断舍入方向时不会把“略大于一半”误认为“恰好一半”。</p>
+</blockquote>
+<hr/>
+<p><strong>四种舍入模式。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>舍入模式</th>
+<th>规则</th>
+<th>典型特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>就近舍入到偶数</td>
+<td>取最近的表示；正好位于两数中间时取最低保留位为 0 的那个</td>
+<td>IEEE 754 默认模式，误差较小且不易累积偏向</td>
+</tr>
+<tr>
+<td>向零舍入</td>
+<td>直接丢弃多余位，结果向数轴原点方向靠近</td>
+<td>等价于截断</td>
+</tr>
+<tr>
+<td>向正无穷舍入</td>
+<td>始终向数轴正方向取可表示数</td>
+<td>正数可能进位，负数可能直接截断</td>
+</tr>
+<tr>
+<td>向负无穷舍入</td>
+<td>始终向数轴负方向取可表示数</td>
+<td>负数绝对值可能增大，正数可能直接截断</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>除“就近舍入”外，其余三种都属于定向舍入。题目如果没有特别说明，通常默认<mark>就近舍入、并列时取偶数</mark>。</p>
+</blockquote>
+<hr/>
+<p><strong>就近舍入的判断方法。</strong></p>
+<p>设正常尾数最低保留位为 $L$，三个辅助位为 $G,R,S$：</p>
+<ol>
+<li>$G=0$：丢弃部分不足半个最低单位，直接截断；</li>
+<li>$G=1$ 且 $R\lor S=1$：丢弃部分大于一半，正常尾数末位加 1；</li>
+<li>$G=1,R=0,S=0$：恰好一半，按“偶数优先”处理：
+   - 最低保留位 $L=0$，已经是偶数，直接舍去；
+   - 最低保留位 $L=1$，加 1 后变偶数。</li>
+</ol>
+<p>可写成：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th style="text-align: right;">$G$</th>
+<th style="text-align: right;">$R$</th>
+<th style="text-align: right;">$S$</th>
+<th>丢弃部分与半个单位的关系</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">任意</td>
+<td style="text-align: right;">任意</td>
+<td>小于一半</td>
+<td>截断</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">任意</td>
+<td style="text-align: right;">1</td>
+<td>大于一半</td>
+<td>末位加 1</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td>大于一半</td>
+<td>末位加 1</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>恰好一半</td>
+<td>使最低保留位成为偶数</td>
+</tr>
+</tbody>
+</table></div>
+<details class="article-details">
+<summary class="article-summary">自检：就近舍入到偶数怎么做？</summary>
+<p>假设准备舍去三位 <code>GRS</code>，正常尾数最低保留位为 $L$。</p>
+<p><strong>（1）丢弃 <code>011</code></strong></p>
+<p>它小于半个保留单位，直接截断：</p>
+<p>$$1.010\,011\rightarrow1.010$$</p>
+<p><strong>（2）丢弃 <code>101</code></strong></p>
+<p>它大于一半，末位加 1：</p>
+<p>$$1.010\,101\rightarrow1.011$$</p>
+<p><strong>（3）丢弃 <code>100</code>，发生正好一半</strong></p>
+<ul>
+<li>$L=0$：<code>1.010100</code> 舍入为 <code>1.010</code>，保留偶数；</li>
+<li>$L=1$：<code>1.011100</code> 舍入为 <code>1.100</code>，向偶数靠近。</li>
+</ul>
+<p>若末位加 1 后又产生进位，例如 <code>1.111... + 1 ulp = 10.000...</code>，要再右规一次并增加阶码。</p>
+</details>
+<hr/>
+<p>舍入完成后还要再检查两点：</p>
+<ol>
+<li>尾数是否因舍入再次产生进位；</li>
+<li>阶码是否越过最大值或最小值。</li>
+</ol>
+<p>若舍入把阶码推到全 1，结果为无穷大；若结果持续向左进入非规格化区间，则逐渐切换到 $0.f$ 形式，直至舍入为 0。</p>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

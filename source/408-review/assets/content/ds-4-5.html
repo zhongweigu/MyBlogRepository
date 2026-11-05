@@ -1,0 +1,151 @@
+<div class="article-content">
+<h2 id="10-">考点10-十字链表和邻接多重表</h2>
+<p>有向图里一条弧是<strong>从弧尾（tail）指向弧头（head）</strong>的。十字链表存<strong>有向图</strong>、邻接多重表存<strong>无向图</strong>，两者的结点都拆成"顶点结点 + 边/弧结点"两套。</p>
+<h3 id="_1">节点结构</h3>
+<p><strong>十字链表的顶点结点</strong>：<code>data | firstin | firstout</code></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>用于存放数据</td>
+</tr>
+<tr>
+<td><code>firstin</code></td>
+<td>指向以 data 为<strong>弧头</strong>的第一条弧</td>
+</tr>
+<tr>
+<td><code>firstout</code></td>
+<td>指向以 data 为<strong>弧尾</strong>的第一条弧</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>十字链表的弧结点</strong>：<code>tailvex | headvex | hlink | tlink | (info)</code></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tailvex</code></td>
+<td>弧尾指向的顶点的编号</td>
+</tr>
+<tr>
+<td><code>headvex</code></td>
+<td>弧头指向的顶点的编号</td>
+</tr>
+<tr>
+<td><code>hlink</code></td>
+<td>弧头相同的下一条弧</td>
+</tr>
+<tr>
+<td><code>tlink</code></td>
+<td>弧尾相同的下一条弧</td>
+</tr>
+<tr>
+<td><code>info</code></td>
+<td>弧的信息，一般省略</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>邻接多重表的顶点结点</strong>：<code>data | firstedge</code></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>用于存放数据</td>
+</tr>
+<tr>
+<td><code>firstedge</code></td>
+<td>指向第一条依附于该顶点的边</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>邻接多重表的边结点</strong>：<code>ivex | ilink | jvex | jlink | (info)</code></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ivex</code></td>
+<td>该边依附的两个顶点的编号之一</td>
+</tr>
+<tr>
+<td><code>ilink</code></td>
+<td>指向下一条依附于 ivex 的边</td>
+</tr>
+<tr>
+<td><code>jvex</code></td>
+<td>该边依附的另一个顶点的编号</td>
+</tr>
+<tr>
+<td><code>jlink</code></td>
+<td>指向下一条依附于 jvex 的边</td>
+</tr>
+<tr>
+<td><code>info</code></td>
+<td>边的信息，一般省略</td>
+</tr>
+</tbody>
+</table></div>
+<p>把这些字段串起来，十字链表存一张有向图就是下面这个样子（有向图 $G_3$）：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="十字链表存有向图 G₃ 的完整结构：4 个顶点结点用 firstout、firstin 分别串起同弧尾、同弧头的弧结点，弧结点之间再按 hlink、tlink 相连，末端为 ^" data-src="/408-review/assets/textbook/ds-cross-linked-list-g3.webp" href="/408-review/assets/textbook/ds-cross-linked-list-g3.webp"><img alt="十字链表存有向图 G₃ 的完整结构：4 个顶点结点用 firstout、firstin 分别串起同弧尾、同弧头的弧结点，弧结点之间再按 hlink、tlink 相连，末端为 ^" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-cross-linked-list-g3.webp"/></a><figcaption>十字链表存有向图 G₃ 的完整结构：4 个顶点结点用 firstout、firstin 分别串起同弧尾、同弧头的弧结点，弧结点之间再按 hlink、tlink 相连，末端为 ^</figcaption></figure>
+<p>邻接多重表存一张无向图，就是下面这个样子（无向图 $G_2$）：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="邻接多重表存无向图 G₂ 的完整结构：5 个顶点结点各指向第一条依附于它的边，每条边只占一个边结点，再分别沿 ilink、jlink 挂在两端的顶点上" data-src="/408-review/assets/textbook/ds-adjacency-multilist-g2.webp" href="/408-review/assets/textbook/ds-adjacency-multilist-g2.webp"><img alt="邻接多重表存无向图 G₂ 的完整结构：5 个顶点结点各指向第一条依附于它的边，每条边只占一个边结点，再分别沿 ilink、jlink 挂在两端的顶点上" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-adjacency-multilist-g2.webp"/></a><figcaption>邻接多重表存无向图 G₂ 的完整结构：5 个顶点结点各指向第一条依附于它的边，每条边只占一个边结点，再分别沿 ilink、jlink 挂在两端的顶点上</figcaption></figure>
+<p>两种结构各自擅长的地方：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>结构</th>
+<th>它擅长什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>十字链表</td>
+<td>结合了<strong>邻接表和逆邻接表</strong>：能方便地算出 $v_i$ 的<strong>入度和出度</strong>，也能找齐依附于某个顶点的所有弧</td>
+</tr>
+<tr>
+<td>邻接多重表</td>
+<td>每条边<strong>只存一次</strong>，依附于同一顶点的边串成一条链：便于算<strong>结点的度</strong>、找齐依附于某个顶点的所有边</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="2024">例题：【2024】（邻接多重表里求顶点的度）</h4>
+<p>【2024】若无向图 $G = (V, E)$ 的邻接多重表如下图所示，则 G 中顶点 b 与 d 的度分别是</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="2024 题图：邻接多重表，左边是 5 个顶点结点 a~e，右边是 7 个边结点，每个边结点依次存 ivex、ilink、jvex、jlink" data-src="/408-review/assets/textbook/ds-adjacency-multilist-2024.webp" href="/408-review/assets/textbook/ds-adjacency-multilist-2024.webp"><img alt="2024 题图：邻接多重表，左边是 5 个顶点结点 a~e，右边是 7 个边结点，每个边结点依次存 ivex、ilink、jvex、jlink" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-adjacency-multilist-2024.webp"/></a><figcaption>2024 题图：邻接多重表，左边是 5 个顶点结点 a~e，右边是 7 个边结点，每个边结点依次存 ivex、ilink、jvex、jlink</figcaption></figure>
+<ul>
+<li>A. 0, 2</li>
+<li>B. 2, 4</li>
+<li>C. 2, 5</li>
+<li>D. 3, 4</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（2, 4）。</strong> 邻接多重表里<strong>每条边只占一个结点</strong>，结点里的两个编号字段（<code>ivex</code>、<code>jvex</code>）就是这条边两端的顶点。把表里 7 个边结点逐个读出来，图 G 的边是 $(0,1)$、$(1,3)$、$(2,0)$、$(2,3)$、$(2,4)$、$(0,3)$、$(3,4)$，也就是 a—b、b—d、c—a、c—d、c—e、a—d、d—e 这 7 条。</p>
+<ul>
+<li><strong>b（编号 1）</strong> 出现在 $(0,1)$、$(1,3)$ 这两条边里 → 度为 <strong>2</strong>；</li>
+<li><strong>d（编号 3）</strong> 出现在 $(1,3)$、$(2,3)$、$(0,3)$、$(3,4)$ 这四条边里 → 度为 <strong>4</strong>。</li>
+</ul>
+<p>所以是 2 和 4，选 B。也可以直接从 b、d 的 <code>firstedge</code> 出发，顺着各自那条链数边结点个数，结果一样——这正是邻接多重表「便于计算结点的度」的地方。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

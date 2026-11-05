@@ -1,0 +1,66 @@
+<div class="article-content">
+<h2 id="4-cpicpumips">考点4-主频、CPI、CPU时间与MIPS</h2>
+<p>主频 $f$ 表示 CPU 每秒钟产生多少个时钟周期，时钟周期 $T_c$ 是它的倒数：</p>
+<p>$$T_c=\frac{1}{f}$$</p>
+<details class="article-details">
+<summary class="article-summary">补充：时钟周期计算</summary>
+<p>主频为 $2\,\mathrm{GHz}$ 时：</p>
+<p>$$T_c=\frac{1}{2\times10^9}=0.5\,\mathrm{ns}$$</p>
+</details>
+<p>频率使用十进制单位：$1\,\mathrm{kHz}=10^3\,\mathrm{Hz}$，$1\,\mathrm{MHz}=10^6\,\mathrm{Hz}$，$1\,\mathrm{GHz}=10^9\,\mathrm{Hz}$。存储容量中的 K、M、G 则经常使用 $2^{10}$、$2^{20}$、$2^{30}$，两类单位不要混用。</p>
+<hr/>
+<p>CPI 是 clock cycles per instruction，即平均执行一条指令所需的时钟周期数。若程序共执行 $N$ 条指令，平均 CPI 为 $\overline{\mathrm{CPI}}$，则总时钟周期数和执行时间分别为</p>
+<p>$$C=N\times\overline{\mathrm{CPI}}$$</p>
+<p>$$T_{\mathrm{CPU}}=N\times\overline{\mathrm{CPI}}\times T_c
+=\frac{N\times\overline{\mathrm{CPI}}}{f}$$</p>
+<p>可以把这套关系压缩成一条“性能链”：</p>
+<pre><code class="language-text">指令条数 × 平均 CPI = 所需时钟周期数
+时钟周期数 × 时钟周期 = CPU 执行时间
+
+CPU 时间 = N × CPI × Tc
+         = N × CPI / f
+</code></pre>
+<p>不同指令的 CPI 可能不同，因此平均 CPI 必须按各类指令的条数加权：</p>
+<p>$$\overline{\mathrm{CPI}}
+=\frac{\sum_i (N_i\times\mathrm{CPI}_i)}{N}$$</p>
+<details class="article-details">
+<summary class="article-summary">补充：CPU 时间计算</summary>
+<p>一个程序执行 10 亿条指令，平均 CPI 为 2.5，主频为 2 GHz：</p>
+<p>$$T_{\mathrm{CPU}}
+=10^9\times2.5\times\frac{1}{2\times10^9}
+=1.25\,\mathrm{s}$$</p>
+</details>
+<p>若只提高主频，但 CPI 因流水线加深、访存等待等原因上升，执行时间不一定下降。考试中比较“优化前后”，必须重新把指令条数、CPI 和主频三项一起代入。</p>
+<hr/>
+<p>MIPS 表示每秒执行多少百万条指令，即</p>
+<p>$$\mathrm{MIPS}
+=\frac{\text{指令条数}}{\text{执行时间}\times10^6}$$</p>
+<details class="article-details">
+<summary class="article-summary">展开：从执行时间到 MIPS 的完整推导</summary>
+<p>把前面 CPU 时间公式 $T_{\mathrm{CPU}}=N\times\overline{\mathrm{CPI}}/f$ 代入：</p>
+<p>$$\mathrm{MIPS}
+=\frac{N}{\dfrac{N\times\overline{\mathrm{CPI}}}{f}\times10^6}
+=\frac{f}{\overline{\mathrm{CPI}}\times10^6}$$</p>
+<p>也可以先求每秒指令数 IPS：</p>
+<p>$$\mathrm{IPS}
+=\frac{1}{T_{\mathrm{CPU}}/N}
+=\frac{f}{\overline{\mathrm{CPI}}}$$</p>
+<p>再除以 $10^6$ 得到 MIPS。注意 $f$ 要使用 Hz，而不是 MHz 或 GHz；若 $f$ 取 GHz，则分母中的 $10^6$ 要相应换成 $10^3$。</p>
+<p>以上式为例，2 GHz 主频、平均 CPI 为 2.5 时：</p>
+<p>$$\mathrm{MIPS}
+=\frac{2\times10^9}{2.5\times10^6}
+=800$$</p>
+<p>反过来，若已知 MIPS 和指令条数 $N$，程序执行时间为</p>
+<p>$$T=\frac{N}{\mathrm{MIPS}\times10^6}$$</p>
+</details>
+<hr/>
+<p>两台机器的指令集不同，完成同一个任务所需的指令条数可能相差很多；同一条高级语言语句也可能编译成不同数量的机器指令。因此 MIPS 只能在指令集、编译器以及程序特征大致相同时作粗略参考，比较计算机性能的核心指标仍是 <mark>完成同一任务所需的执行时间</mark>。</p>
+<blockquote>
+<p>主频提高只缩短了 $T_c$。如果优化导致程序指令数增加，或流水线加深、访存等待使平均 CPI 上升，最终执行时间仍可能变长。比较性能时必须把三个量一起代入。</p>
+</blockquote>
+<p>若题目讨论流水线、访存缺失、Cache 等情况，所谓实际 CPI 还应包含这些停顿周期。可以把总周期拆为</p>
+<p>$$C=N\times\mathrm{CPI}_{\text{ideal}}+
+\text{停顿周期}$$</p>
+<p>再用总周期乘时钟周期求执行时间。这一思路会在 CPU 流水线部分继续使用。</p>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

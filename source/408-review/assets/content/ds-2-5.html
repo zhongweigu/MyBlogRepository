@@ -1,0 +1,286 @@
+<details class="article-toc">
+<summary>本页目录 <span>3 节</span></summary>
+<div class="toc">
+<ul>
+<li><a href="#8-kmpnextnextval">考点8-KMP中的next和nextval数组</a><ul>
+<li><a href="#nextvalnext">为什么需要 nextval：next 数组的冗余比较</a></li>
+<li><a href="#nextval">nextval 数组的求法</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</details><div class="article-content">
+<h2 id="8-kmpnextnextval">考点8-KMP中的next和nextval数组</h2>
+<p>朴素匹配失配后，主串指针要退回本趟起点、模式串指针回到开头，前面比过的全白比。KMP 的改进是<strong>主串指针永不回退</strong>，失配时只把模式串指针挪到某个合适位置继续比——挪到哪儿，查 next 数组即可。</p>
+<p>next 数组刻画的是模式串自身的结构：失配处<strong>前面那一段已经和主串匹配上了</strong>，而这段里前缀和后缀相等，所以能把前缀挪到后缀的位置接着比，不必从头来。</p>
+<p><strong>next 的算法</strong>（默认从 0 开始）：</p>
+<ul>
+<li>前两位固定是 <strong>0 和 1</strong>；</li>
+<li>从第三个字符起，next 值 = <strong>该字符之前那段子串的最长相等前后缀长度 + 1</strong>。</li>
+</ul>
+<p>两条注意事项：<strong>单个字符本身不能算作前后缀</strong>（前后缀都必须是真子串）；<strong>前缀和后缀都从左到右读</strong>。</p>
+<p>以模式串 <code>A B C A C</code> 为例（位序从 1 数）：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>位序</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模式串</td>
+<td>A</td>
+<td>B</td>
+<td>C</td>
+<td>A</td>
+<td>C</td>
+</tr>
+<tr>
+<td>next（从 0 开始）</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>next（从 −1 开始）</td>
+<td>−1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>逐位看：第 3 位 C 之前是 <code>AB</code>，最长相等前后缀长度为 0 → next = 1；第 4 位 A 之前是 <code>ABC</code>，也是 0 → 1；第 5 位 C 之前是 <code>ABCA</code>，前缀 <code>A</code> = 后缀 <code>A</code>，长度 1 → next = 1 + 1 = 2。</p>
+<p><strong>失配时怎么用</strong>（设在模式串下标为 $i$ 的位置失配）：</p>
+<ul>
+<li>next 从 0 开始：让模式串<strong>第 next[i] 个</strong>位置（"第几个"从 1 数）重新与主串当前位置比较；</li>
+<li>next 从 −1 开始：让模式串<strong>下标为 next[i]</strong> 的位置重新与主串当前位置比较（各值都减了 1，正好把"第几个"和"下标"对齐）。</li>
+</ul>
+<p>注意区分：所谓"从 0 开始 / 从 −1 开始"，说的是 <strong>next 数组第一个元素的值</strong>（0 还是 −1）；<strong>数组本身永远从下标 0 开始索引</strong>。</p>
+<hr/>
+<h3 id="nextvalnext">为什么需要 nextval：next 数组的冗余比较</h3>
+<p>模式串 <code>A B C A C</code> 的 next 数组是 <code>0 1 1 1 2</code>，下图是它和主串匹配到一半、第 4 位失配时的情形：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="引入 nextval 的原因：主串的 B 与模式串的 A 失配，按 next 值让模式串前进之后，仍然是 A 与主串的 B 相比，这一次比较注定再次失配" data-src="/408-review/assets/textbook/ds-nextval-motivation.webp" href="/408-review/assets/textbook/ds-nextval-motivation.webp"><img alt="引入 nextval 的原因：主串的 B 与模式串的 A 失配，按 next 值让模式串前进之后，仍然是 A 与主串的 B 相比，这一次比较注定再次失配" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-nextval-motivation.webp"/></a><figcaption>引入 nextval 的原因：主串的 B 与模式串的 A 失配，按 next 值让模式串前进之后，仍然是 A 与主串的 B 相比，这一次比较注定再次失配</figcaption></figure>
+<p>主串第 4 位是 <code>B</code>、模式串第 4 位是 <code>A</code>，两者不同，于是按 <code>next[4] = 1</code> 让模式串“前进”后接着比——可模式串第 1 位也是 <code>A</code>：上一步刚刚证明过主串这里不是 <code>A</code>，这一比注定再次失配。</p>
+<p>nextval 就是用来压掉这类“滑过去还是同一个字符”的冗余比较的。</p>
+<hr/>
+<h3 id="nextval">nextval 数组的求法</h3>
+<p>依次看 next 数组的每一位，拿<strong>本位字符</strong>和<strong>本位 next 值所指的那一位字符</strong>作比较：</p>
+<ul>
+<li>二者<strong>相同</strong> → nextval 值改为<strong>那一位的 nextval 值</strong>；</li>
+<li>二者<strong>不同</strong> → nextval 值和本位的 next 值相同。</li>
+</ul>
+<p>仍以 <code>A B C A C</code> 为例（位序从 1 数）：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>位序</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模式串</td>
+<td>A</td>
+<td>B</td>
+<td>C</td>
+<td>A</td>
+<td>C</td>
+</tr>
+<tr>
+<td>next</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>nextval</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+<p>只有第 4 位变了：<code>next[4] = 1</code> 指向的第 1 位字符 <code>A</code> 与本位字符 <code>A</code> 相同，于是 nextval 取那一位的 nextval（0）；其余各位两字符都不同，nextval 照抄 next。（换成从 −1 开始的约定，各位减 1：<code>−1 0 0 −1 1</code>。）</p>
+<hr/>
+<details class="article-details">
+<summary class="article-summary">展开：KMP 匹配与 next / nextval 的完整代码</summary>
+<p>字符串按下标从 1 开始存放，<code>ch[0]</code> 空着不用。</p>
+<p><strong>KMP 匹配</strong></p>
+<pre><code class="language-c">int Index_KMP(SString S, SString T, int next[]) {
+    int i = 1, j = 1;
+    while (i &lt;= S.length &amp;&amp; j &lt;= T.length) {
+        if (j == 0 || S.ch[i] == T.ch[j]) {
+            ++i; ++j;                        // 继续比较后继字符
+        } else {
+            j = next[j];                     // 模式串向右滑动（主串指针 i 不回溯）
+        }
+    }
+    if (j &gt; T.length)
+        return i - T.length;                 // 匹配成功
+    else
+        return 0;
+}
+</code></pre>
+<p><strong>求 next</strong></p>
+<pre><code class="language-c">void get_next(SString T, int next[]) {
+    int i = 1, j = 0;
+    next[1] = 0;
+    while (i &lt; T.length) {
+        if (j == 0 || T.ch[i] == T.ch[j]) {
+            ++i; ++j;
+            next[i] = j;
+        } else {
+            j = next[j];
+        }
+    }
+}
+</code></pre>
+<p><strong>求 nextval</strong></p>
+<pre><code class="language-c">void get_nextval(SString T, int nextval[]) {
+    int i = 1, j = 0;
+    nextval[1] = 0;
+    while (i &lt; T.length) {
+        if (j == 0 || T.ch[i] == T.ch[j]) {
+            ++i; ++j;
+            if (T.ch[i] != T.ch[j])
+                nextval[i] = j;              // 滑过去字符不同，没有冗余
+            else
+                nextval[i] = nextval[j];     // 滑过去还是同一个字符，继续往下退
+        } else {
+            j = nextval[j];
+        }
+    }
+}
+</code></pre>
+</details>
+<hr/>
+<h4 id="2015-i-j">例题：【2015】（首次失配后 i 和 j 的取值）</h4>
+<p>【2015】已知字符串 s 为 <code>abaabaabacacaabaabcc</code>，模式串 t 为 <code>abaabc</code>。采用 KMP 算法进行匹配，第一次出现"失配"（$s[i] \ne t[j]$）时，$i = j = 5$，则下次开始匹配时，i 和 j 的值分别为</p>
+<ul>
+<li>A. $i = 1$，$j = 0$</li>
+<li>B. $i = 5$，$j = 0$</li>
+<li>C. $i = 5$，$j = 2$</li>
+<li>D. $i = 6$，$j = 2$</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 C（i = 5，j = 2）。</strong> 模式串 <code>abaabc</code> 的 next 数组（从 0 开始）是：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>位序</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模式串</td>
+<td>a</td>
+<td>b</td>
+<td>a</td>
+<td>a</td>
+<td>b</td>
+<td>c</td>
+</tr>
+<tr>
+<td>next</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+</tr>
+</tbody>
+</table></div>
+<p>失配发生在 $j = 5$：KMP 让主串指针 i 原地不动，只把 j 改成 <code>next[5] = 2</code>，所以下次开始匹配时是 $i = 5$、$j = 2$。</p>
+</details>
+<h4 id="2024-next">例题：【2024】（修正后 next 数组的最大滑动距离）</h4>
+<p>【2024】KMP 算法使用修正后的 next 数组进行模式匹配，模式串 S 为 <code>aabaab</code>，当主串的某个字符与 S 的某个字符失配时，S 向右滑动的最长距离是</p>
+<ul>
+<li>A. 5</li>
+<li>B. 4</li>
+<li>C. 3</li>
+<li>D. 2</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 A（5）。</strong> "修正后的 next 数组"就是 nextval：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>位序</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模式串</td>
+<td>a</td>
+<td>a</td>
+<td>b</td>
+<td>a</td>
+<td>a</td>
+<td>b</td>
+</tr>
+<tr>
+<td>next</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>nextval</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>右滑距离 $j - \mathrm{nextval}[j]$</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>4</td>
+<td>5</td>
+<td>4</td>
+</tr>
+</tbody>
+</table></div>
+<p>第 $j$ 位失配时，模式串右滑 $j - \mathrm{nextval}[j]$ 格（滑完之后 nextval[j] 就是新的 j）。表里最大的是第 5 位失配时的 5，所以选 A。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

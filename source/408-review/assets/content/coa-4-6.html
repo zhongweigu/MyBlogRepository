@@ -1,0 +1,108 @@
+<div class="article-content">
+<h2 id="55">5.5 多处理器</h2>
+<p><strong>Flynn 分类。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>指令流 / 数据流</th>
+<th>典型例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SISD</td>
+<td>单指令流、单数据流</td>
+<td>传统的单核顺序执行</td>
+</tr>
+<tr>
+<td>SIMD</td>
+<td>单指令流、多数据流</td>
+<td>向量机、GPU、SIMD 指令</td>
+</tr>
+<tr>
+<td>MISD</td>
+<td>多指令流、单数据流</td>
+<td>基本不用</td>
+</tr>
+<tr>
+<td>MIMD</td>
+<td>多指令流、多数据流</td>
+<td>多核处理器、多处理器、集群</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>硬件多线程。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>方式</th>
+<th>切换时机</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>细粒度</td>
+<td>每个时钟周期切换线程</td>
+<td>交错执行，能隐藏短停顿；同一时刻只有一个线程在跑</td>
+</tr>
+<tr>
+<td>粗粒度</td>
+<td>线程遇到长停顿（如 Cache 缺失）才切换</td>
+<td>切换开销大，能隐藏长停顿</td>
+</tr>
+<tr>
+<td>同时多线程（SMT）</td>
+<td>一个周期内同时发射多个线程的指令</td>
+<td>共享一套流水线，多个线程真正并行</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>共享内存型与消息传递型。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>通信方式</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>共享内存型</td>
+<td>各处理器共享同一地址空间，用 load/store 访问共享变量</td>
+<td>UMA、NUMA 多处理器</td>
+</tr>
+<tr>
+<td>消息传递型</td>
+<td>各处理器有独立地址空间，显式 send/receive 传消息</td>
+<td>集群、多计算机</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>单核多线程与多核。</strong></p>
+<ul>
+<li>单核上的多线程（细粒度、粗粒度）只是<strong>时间上的交错</strong>：同一时刻只有一个线程占用流水线，不是真正并行；只有 SMT 能在同一周期同时发射多个线程的指令，才算真正并行。</li>
+<li>多核处理器在一个芯片上集成多个核，每个核有独立的执行资源，多个线程可以真正同时执行；核间通过共享内存或消息传递通信。</li>
+<li>多核属于 MIMD；SIMD（如 GPU）是数据级并行，和 MIMD 的线程级并行不是一回事。</li>
+</ul>
+<h2 id="56">5.6 高频易错点</h2>
+<ul>
+<li>相对寻址以「下一条指令地址」为基准，不是当前指令首地址。</li>
+<li>补码偏移必须先符号扩展，不能按无符号数解释。</li>
+<li>按字节编址时，PC 的增量是指令所占的字节数。</li>
+<li>变长指令不能用固定指令长度计算总字节数。</li>
+<li><code>cmp</code> 只改标志，不保存运算结果。</li>
+<li>无符号比较看 CF/ZF，有符号比较看 SF/OF/ZF。</li>
+<li>左移一位并非在所有情况下都等价于乘 2。</li>
+<li>二维数组地址计算必须考虑行长和元素大小。</li>
+<li>一个周期内不能让两个部件同时驱动单总线。</li>
+<li>寄存器的输出通常可直接读，写入必须受时钟和输入使能控制。</li>
+<li>主存读命令发出后，数据不会立即出现在 MDR。</li>
+<li>控制信号位数按「可选操作数」计算，注意题目用二进制编码还是独热编码。</li>
+<li><code>rd</code> 用于写寄存器选择时通常接译码器，<code>rs</code> 用于读寄存器选择时通常接多路选择器。</li>
+<li>计算时钟周期看相邻状态元件之间的最长组合逻辑路径。</li>
+</ul>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

@@ -1,0 +1,225 @@
+<div class="article-content">
+<h2 id="6-">考点6-数据存放、边界对齐与寻址</h2>
+<p><strong>大小端存储方式。</strong> 这个问题只出现在<strong>一个数据或指令占用多个字节</strong>时。它规定这些字节在内存中按什么顺序存放，而不改变每个字节内部的 0/1 位顺序。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>方式</th>
+<th>最低地址存放</th>
+<th>例子（32 位指令 <code>0x12345678</code>）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>大端 Big-endian</td>
+<td>最高有效字节</td>
+<td><code>12 34 56 78</code></td>
+</tr>
+<tr>
+<td>小端 Little-endian</td>
+<td>最低有效字节</td>
+<td><code>78 56 34 12</code></td>
+</tr>
+</tbody>
+</table></div>
+<details class="article-details">
+<summary class="article-summary">补充：32 位机器指令的大小端布局</summary>
+<p>假设一条 32 位机器指令从地址 <code>0x1000</code> 开始存放：</p>
+<pre><code class="language-text">地址        1000  1001  1002  1003
+大端内容     12    34    56    78
+小端内容     78    56    34    12
+</code></pre>
+<p>两种机器最终都能从连续 4 个字节拼出同一个 32 位指令字 <code>0x12345678</code>，区别只在于各字节落在哪个地址。CPU 的取指部件和总线会按体系结构规定的字节次序组装指令。</p>
+</details>
+<blockquote>
+<p>大小端不是“一个字节内部的 0/1 是否反过来”。字节内部的位序由硬件规定，大小端描述的是<mark>多字节数据的字节排列顺序</mark>。</p>
+</blockquote>
+<hr/>
+<p>边界对齐要求一个对象的起始地址通常能被它的对齐要求整除。在常见的 32 位数据模型中，设：</p>
+<ul>
+<li><code>int</code> 占 4 字节，要求 4 字节对齐；</li>
+<li><code>short</code> 占 2 字节，要求 2 字节对齐；</li>
+<li><code>char</code> 占 1 字节，不增加对齐限制。</li>
+</ul>
+<p>结构体成员会按声明顺序依次放置，但每个成员都要从满足自身对齐要求的地址开始，成员之间和结构体末尾可能需要填充字节。</p>
+<details class="article-details">
+<summary class="article-summary">补充：C 结构体成员顺序与填充</summary>
+<p><strong>顺序一：<code>struct A { int a; char b; short c; };</code></strong></p>
+<pre><code class="language-text">偏移  0  1  2  3 | 4 | 5 | 6  7
+内容  a  a  a  a | b |填充| c  c
+</code></pre>
+<ul>
+<li><code>a</code>：偏移 0～3；</li>
+<li><code>b</code>：偏移 4；</li>
+<li>为让 <code>short c</code> 从偶数地址开始，偏移 5 填充 1 字节；</li>
+<li><code>c</code>：偏移 6～7；</li>
+<li>最大对齐要求为 4，当前大小正好是 8，故 <code>sizeof(struct A)=8</code>。</li>
+</ul>
+<p><strong>顺序二：<code>struct B { char b; int a; short c; };</code></strong></p>
+<pre><code class="language-text">偏移  0 | 1  2  3 | 4  5  6  7 | 8  9 | 10 11
+内容  b |  填充   | a  a  a  a | c  c | 填充
+</code></pre>
+<ul>
+<li><code>b</code>：偏移 0；</li>
+<li>偏移 1～3 填充，让 <code>a</code> 从 4 的倍数开始；</li>
+<li><code>a</code>：偏移 4～7；</li>
+<li><code>c</code>：偏移 8～9；</li>
+<li>整个结构体大小必须是最大对齐要求的整数倍，因此末尾补到 12；</li>
+<li><code>sizeof(struct B)=12</code>。</li>
+</ul>
+<p><strong>顺序三：<code>struct C { char b; short c; int a; };</code></strong></p>
+<pre><code class="language-text">偏移  0 | 1 | 2  3 | 4  5  6  7
+内容  b |填充| c  c | a  a  a  a
+</code></pre>
+<p>该结构体占用 8 字节。成员内容完全相同，仅仅改变声明顺序，占用空间就可能从 8 字节变成 12 字节。</p>
+</details>
+<blockquote>
+<p>408 题默认使用自然对齐，不考虑 <code>#pragma pack</code> 等强制取消填充的措施；题目若给出结构体总大小，则用最大成员对齐要求检查末尾是否需要补齐。</p>
+</blockquote>
+<hr/>
+<blockquote>
+<p>对齐的主要目的是提高访存效率：</p>
+<ul>
+<li>CPU、总线和主存通常按存储字或 Cache 行成批访问；</li>
+<li>对齐的数据一般能在一个存储字或一次总线事务内取完；</li>
+<li>未对齐的数据可能横跨两个存储字，需要多次访存、拼接结果，某些体系结构甚至不允许直接访问。</li>
+</ul>
+<p>代价是结构中可能出现填充字节。因此边界对齐是在<mark>空间利用率与访问速度之间做取舍</mark>：通过牺牲少量空间，换取更简单的地址计算和更高的访存效率。</p>
+</blockquote>
+<hr/>
+<details class="article-details">
+<summary class="article-summary">补充：编址、寻址能力与 MDR</summary>
+<p><strong>“按什么编址”说的是地址粒度。</strong></p>
+<ul>
+<li>按字节编址：每个地址对应 1 个字节，地址加 1 移动到下一字节；</li>
+<li>按字编址：每个地址对应 1 个存储字，地址加 1 移动到下一存储字。</li>
+</ul>
+<p><strong>“按什么寻址”说的是 CPU 以什么粒度区分和访问内存。</strong></p>
+<p>严格来说，教材最常用的是“按字节编址 / 按字编址”；有些题目会写成“按字节寻址 / 按字寻址”，这时通常仍是在描述地址粒度。判断含义时抓住两件事：</p>
+<ul>
+<li>若题目问地址加 1、地址空间、每个地址对应多少位，看<strong>编址单位</strong>；</li>
+<li>若题目问一次访存能取多少位，看<strong>存储字长和 MDR</strong>，不能直接由编址单位推成机器字长。</li>
+</ul>
+<p><strong>寻址能力</strong>通常指 CPU 能区分多少个不同地址，也就是地址空间中有多少个可编号的位置：</p>
+<p>$$\text{地址数}=2^n$$</p>
+<p>其中 $n$ 是地址位数，也就是 MAR 的位数。若每个地址对应 1 字节，则总容量是 $2^n$ 字节；若每个地址对应 1 个 $w$ 位存储字，则总容量是 $2^n\times w$ 位。</p>
+<p>在 408 的简化模型中，<mark>MDR 长度等于存储字长</mark>。如果题目说按字节编址，通常就直接取存储字长为 8 位，因此 MDR 为 8 位；不要因为机器字长是 32 位，或现实中 CPU 一次可能取 4 字节，就把 MDR 改成 32 位。</p>
+<p>现实计算机确实可能按字节编址，却通过更宽的总线一次传送多个字节；但 408 的基础模型不把这种现代实现混进来。考试中遇到 MDR、MAR 和编址单位时，应按题目设定的简化模型分别判断：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>决定什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MAR 位数</td>
+<td>能编出多少个不同地址，即地址数上限</td>
+</tr>
+<tr>
+<td>编址单位</td>
+<td>每个地址对应 1 字节还是 1 个存储字</td>
+</tr>
+<tr>
+<td>存储字长</td>
+<td>主存一次读写的基本位数；408 中用于确定 MDR 长度</td>
+</tr>
+<tr>
+<td>MDR 长度</td>
+<td>在 408 模型中等于存储字长</td>
+</tr>
+<tr>
+<td>机器字长</td>
+<td>CPU 通用寄存器和 ALU 通常处理的位数，不能拿来直接替代 MDR 长度</td>
+</tr>
+</tbody>
+</table></div>
+<p>例如某机地址线为 20 位、按字节编址、机器字长为 32 位：</p>
+<ul>
+<li>可编址的字节地址数为 $2^{20}$，地址空间为 $1\,\mathrm{MB}$；</li>
+<li>408 模型中按字节编址对应存储字长 8 位，因此 MDR 为 8 位；</li>
+<li>“机器字长 32 位”描述的是 CPU 的数据处理宽度，不能据此把 MDR 写成 32 位；</li>
+<li>现实 CPU 可能一次从主存取 4 字节，但这不是 408 基础模型中的 MDR 长度结论。</li>
+</ul>
+</details>
+<h2 id="_1">强制类型转换</h2>
+<ul>
+<li><strong>位截断</strong>：长类型转短类型，丢弃高位、保留低位。</li>
+<li><strong>位扩展</strong>：短类型转长类型，按数据类型填充高位；无符号数用零扩展（高位补 0），补码表示的有符号数用符号扩展（高位补符号位）。</li>
+<li>相同位数之间转换，只改变解释方式。</li>
+<li>int→float：不会溢出，可能有数据被舍入。</li>
+<li>int/float→double：能保留精确值。</li>
+<li>double→float：可能发生溢出，可能被舍入。</li>
+<li>float/double→int：向 0 方向截断。</li>
+</ul>
+<h4 id="2016-13">例题：【2016】第 13 题</h4>
+<pre><code class="language-c">short si = -32767;
+unsigned short usi = si;
+</code></pre>
+<p>执行上述两条语句后，<code>usi</code> 的值为（ ）。</p>
+<ul>
+<li>A. -32767</li>
+<li>B. 32767</li>
+<li>C. 32768</li>
+<li>D. 32769</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D。</strong></p>
+<p><code>short</code> 是 16 位，$-32767$ 的补码为 $65536-32767=32769$，即 <code>8001H</code>。把它按 <code>unsigned short</code> 解释，值就是 32769。</p>
+</details>
+<h4 id="2012-13">例题：【2012】第 13 题</h4>
+<p>假定编译器规定 <code>int</code> 和 <code>short</code> 型长度分别为 32 位和 16 位，执行：</p>
+<pre><code class="language-c">unsigned short x = 65530;
+unsigned int y = x;
+</code></pre>
+<p>得到 <code>y</code> 的机器数为（ ）。</p>
+<ul>
+<li>A. <code>0000 7FFAH</code></li>
+<li>B. <code>0000 FFFAH</code></li>
+<li>C. <code>FFFF 7FFAH</code></li>
+<li>D. <code>FFFF FFFAH</code></li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B。</strong></p>
+<p><code>x</code> 是 16 位无符号数，$65530=\text{FFFAH}$；转成 32 位 <code>unsigned int</code> 做零扩展，高 16 位补 0，得到 <code>0000 FFFAH</code>。</p>
+</details>
+<h4 id="2024-12">例题：【2024】第 12 题</h4>
+<pre><code class="language-c">int i = 32777;
+short si = i;
+int j = si;
+</code></pre>
+<p>执行上述代码段后，<code>j</code> 的值是（ ）。</p>
+<ul>
+<li>A. -32777</li>
+<li>B. -32759</li>
+<li>C. 32759</li>
+<li>D. 32777</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B。</strong></p>
+<p><code>i=32777</code> 超过 16 位 <code>short</code> 的最大值 32767，赋给 <code>si</code> 时截断低 16 位：$32777-65536=-32759$。再把 <code>si</code> 赋给 <code>int</code>，做符号扩展，值仍为 $-32759$。</p>
+</details>
+<h4 id="2025-12">例题：【2025】第 12 题</h4>
+<p>在 32 位计算机上执行：</p>
+<pre><code class="language-c">short si = -32767;
+unsigned int ui = si;
+</code></pre>
+<p><code>ui</code> 的真值为（ ）。</p>
+<ul>
+<li>A. $2^{15}+1$</li>
+<li>B. $2^{15}$</li>
+<li>C. $2^{32}-2^{15}-1$</li>
+<li>D. $2^{32}-2^{15}+1$</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D。</strong></p>
+<p><code>si=-32767</code> 的 16 位补码是 <code>8001H</code>。转成 32 位 <code>unsigned int</code> 时先符号扩展为 <code>FFFF 8001H</code>，再按无符号数解释：</p>
+<p>$$2^{32}-2^{15}+1=4294934529$$</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

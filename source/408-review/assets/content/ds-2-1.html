@@ -1,0 +1,64 @@
+<div class="article-content">
+<h2 id="1-">考点1-线性表的基本操作</h2>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th><span style="white-space:nowrap">基本操作</span></th>
+<th>顺序表</th>
+<th>链表</th>
+<th>静态链表</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span style="white-space:nowrap">按位查找</span></td>
+<td>$O(1)$<br/>顺序表支持随机访问</td>
+<td>$O(n)$<br/>查找第 $i$ 个元素只能从头遍历</td>
+<td>$O(n)$<br/>查找第 $i$ 个元素只能从头遍历</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">按值查找</span></td>
+<td>$O(n)$<br/>需要一个个遍历元素、与查找值对比，才能确定是否成功</td>
+<td>$O(n)$<br/>需要一个个遍历元素、与查找值对比，才能确定是否成功</td>
+<td>$O(n)$<br/>需要一个个遍历元素、与查找值对比，才能确定是否成功</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">插入</span></td>
+<td>$O(n)$<br/>需要大量移动元素腾出空位；若剩余连续空间不够，还得把整个顺序表复制到一片新的更大的连续空间</td>
+<td>$O(n)+O(1)$<br/>需先遍历找到插入位置的前驱结点，再改指针插入</td>
+<td>$O(n)+O(1)$<br/>需先遍历找到插入位置的前驱结点，再改数组插入</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">删除</span></td>
+<td>$O(n)$<br/>需要大量移动元素覆盖被删元素</td>
+<td>$O(n)+O(1)$<br/>需先遍历找到删除位置的前驱结点，再改指针删除</td>
+<td>$O(n)+O(1)$<br/>需先遍历找到删除位置的前驱结点，再改数组删除</td>
+</tr>
+</tbody>
+</table></div>
+<hr/>
+<p><strong>链表的操作是常考题</strong>，而做插入 / 删除时最容易漏的就是<strong>边界情况</strong>：要动的结点是不是<strong>尾指针指向的那个</strong>。</p>
+<h4 id="2021">例题：【2021】</h4>
+<p>已知头指针 $h$ 指向一个带头结点的非空循环单链表，结点结构为 <code>data | next</code>，其中 <code>next</code> 是指向直接后继的指针；$p$ 是尾指针，$q$ 是临时指针。现要删除该链表的第一个元素，正确的语句序列是</p>
+<pre><code class="language-c">A. h-&gt;next = h-&gt;next-&gt;next; q = h-&gt;next; free(q);
+B. q = h-&gt;next; h-&gt;next = h-&gt;next-&gt;next; free(q);
+C. q = h-&gt;next; h-&gt;next = q-&gt;next; if (p != q) p = h; free(q);
+D. q = h-&gt;next; h-&gt;next = q-&gt;next; if (p == q) p = h; free(q);
+</code></pre>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D。</strong> 删带头结点链表的第一个元素，分「摘链」和「善后尾指针」两步：</p>
+<ul>
+<li><strong>摘链</strong>：<code>q = h-&gt;next</code> 先记住第一个元素（要删的就是它），<code>h-&gt;next = q-&gt;next</code> 让头结点直接指向第二个元素。</li>
+<li><strong>善后尾指针</strong>：如果被删的恰好就是 $p$ 指向的那个结点（也就是链表只剩这一个元素，此时 $p == q$），删完 $p$ 就是悬空指针，必须把它指回头结点 $h$；不是的话 $p$ 不用动。</li>
+</ul>
+<p>逐个看选项：</p>
+<ul>
+<li><strong>A</strong>：先改了 <code>h-&gt;next</code> 才取 <code>q</code>，<code>q</code> 拿到的是<strong>第二个</strong>结点，删错对象，而且完全没管 $p$。</li>
+<li><strong>B</strong>：摘链本身是对的，但没管 $p$——只剩一个元素时会留下悬空的尾指针。</li>
+<li><strong>C</strong>：判断写反了，<code>p != q</code>（不是尾结点）反而去改 $p$。</li>
+<li><strong>D</strong>：摘链正确，且只在 <code>p == q</code> 时把 $p$ 指回 $h$，正确。</li>
+</ul>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

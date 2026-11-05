@@ -1,0 +1,317 @@
+<div class="article-content">
+<h2 id="4-ieee-754">考点4-IEEE 754浮点数</h2>
+<p>浮点数的一般形式可以先写成：</p>
+<p>$$V=(-1)^S\times M\times2^E$$</p>
+<p>其中：</p>
+<ul>
+<li>$S$ 是符号位，0 表示正、1 表示负；</li>
+<li>$M$ 是有效数，也就是尾数；</li>
+<li>$E$ 是不带偏置的<strong>实际二进制指数</strong>。</li>
+</ul>
+<p>IEEE 754 并不直接存储 $E$，而是存储一个无符号阶码字段 $e$。由 $e$ 恢复实际指数时，要减去偏置：</p>
+<p>$$E=e-\mathrm{bias}$$</p>
+<p>规格化数的有效数为</p>
+<p>$$M=(1.f)_2$$</p>
+<p>其中实际存储的是小数点后的部分 $f$，最前面的 1 是<mark>隐藏位</mark>。因此完整的规格化数真值为</p>
+<p>$$V=(-1)^S\times(1.f)_2\times2^{e-\mathrm{bias}}$$</p>
+<p>单精度、双精度的字段划分如下：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>格式</th>
+<th style="text-align: right;">总位数</th>
+<th style="text-align: right;">符号 $S$</th>
+<th style="text-align: right;">阶码字段 $e$</th>
+<th style="text-align: right;">尾数字段 $f$</th>
+<th style="text-align: right;">偏置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单精度</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">127</td>
+</tr>
+<tr>
+<td>双精度</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">1023</td>
+</tr>
+</tbody>
+</table></div>
+<hr/>
+<p><strong>单精度的五种取值类型。</strong> 注意“阶码全 0”和“阶码全 1”都不是普通规格化数：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>值的类型</th>
+<th style="text-align: right;">符号 $S$</th>
+<th>阶码 $e$</th>
+<th>尾数 $f$</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正零、负零</td>
+<td style="text-align: right;">0 / 1</td>
+<td>全 0</td>
+<td>全 0</td>
+<td>$+0$、$-0$</td>
+</tr>
+<tr>
+<td>非规格化数</td>
+<td style="text-align: right;">0 / 1</td>
+<td>全 0</td>
+<td>非 0</td>
+<td>$(-1)^S\times(0.f)_2\times2^{-126}$</td>
+</tr>
+<tr>
+<td>规格化数</td>
+<td style="text-align: right;">0 / 1</td>
+<td>$1\sim254$</td>
+<td>任意</td>
+<td>$(-1)^S\times(1.f)_2\times2^{e-127}$</td>
+</tr>
+<tr>
+<td>正无穷、负无穷</td>
+<td style="text-align: right;">0 / 1</td>
+<td>全 1</td>
+<td>全 0</td>
+<td>$+\infty$、$-\infty$</td>
+</tr>
+<tr>
+<td>NaN</td>
+<td style="text-align: right;">0 / 1</td>
+<td>全 1</td>
+<td>非 0</td>
+<td>非数</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>双精度的五种取值类型。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>值的类型</th>
+<th style="text-align: right;">符号 $S$</th>
+<th>阶码 $e$</th>
+<th>尾数 $f$</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正零、负零</td>
+<td style="text-align: right;">0 / 1</td>
+<td>全 0</td>
+<td>全 0</td>
+<td>$+0$、$-0$</td>
+</tr>
+<tr>
+<td>非规格化数</td>
+<td style="text-align: right;">0 / 1</td>
+<td>全 0</td>
+<td>非 0</td>
+<td>$(-1)^S\times(0.f)_2\times2^{-1022}$</td>
+</tr>
+<tr>
+<td>规格化数</td>
+<td style="text-align: right;">0 / 1</td>
+<td>$1\sim2046$</td>
+<td>任意</td>
+<td>$(-1)^S\times(1.f)_2\times2^{e-1023}$</td>
+</tr>
+<tr>
+<td>正无穷、负无穷</td>
+<td style="text-align: right;">0 / 1</td>
+<td>全 1</td>
+<td>全 0</td>
+<td>$+\infty$、$-\infty$</td>
+</tr>
+<tr>
+<td>NaN</td>
+<td style="text-align: right;">0 / 1</td>
+<td>全 1</td>
+<td>非 0</td>
+<td>非数</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>记住两个关键例外：<mark>阶码全 0 时隐藏位变成 0，阶码全 1 时用来表示无穷大或 NaN</mark>。普通规格化数的阶码字段既不能全 0，也不能全 1。</p>
+</blockquote>
+<hr/>
+<p>真值转成 IEEE 754 浮点数，可以固定成五步：</p>
+<ol>
+<li><strong>确定符号位</strong>：负数 $S=1$，非负数 $S=0$；</li>
+<li><strong>把绝对值写成二进制</strong>；</li>
+<li><strong>规格化成 $1.xxx_2\times2^k$</strong>，从而确定实际指数 $E=k$；</li>
+<li><strong>求阶码字段</strong>：$e=E+\mathrm{bias}$；</li>
+<li><strong>填写尾数字段</strong>：删去隐藏位 1，只保留小数点后的位，并按目标格式舍入。</li>
+</ol>
+<p>编码排列始终是</p>
+<pre><code class="language-text">符号 S | 阶码 e | 尾数 f
+  1位  | 8位/11位| 23位/52位
+</code></pre>
+<details class="article-details">
+<summary class="article-summary">补充：12.75 转成单精度</summary>
+<p>$$12.75=(1100.11)_2=1.10011_2\times2^3$$</p>
+<p>于是：</p>
+<ul>
+<li>$S=0$；</li>
+<li>$e=3+127=130=10000010_2$；</li>
+<li>尾数字段删去隐藏位后是 <code>10011</code>，后面补 0 到 23 位。</li>
+</ul>
+<p>按 4 位一组写出：</p>
+<pre><code class="language-text">0 10000010 10011000000000000000000
+= 0100 0001 0100 1100 0000 0000 0000 0000
+= 0x414C0000
+</code></pre>
+</details>
+<details class="article-details">
+<summary class="article-summary">自检：IEEE 754 位模式怎样还原成真值？</summary>
+<p>把 <code>0x414C0000</code> 还原成单精度浮点数：</p>
+<pre><code class="language-text">0100 0001 0100 1100 0000 0000 0000 0000
+S  eeeeeeee fffffffffffffffffffffff
+0  10000010 10011000000000000000000
+</code></pre>
+<p>先判断类型：阶码字段</p>
+<p>$$e=10000010_2=130$$</p>
+<p>它位于 $1\sim254$，所以是规格化数：</p>
+<p>$$E=130-127=3$$</p>
+<p>尾数字段以 <code>10011</code> 开始，补上隐藏位：</p>
+<p>$$1.10011_2$$</p>
+<p>最后恢复符号和指数：</p>
+<p>$$V=(+1.10011)_2\times2^3=(1100.11)_2=12.75$$</p>
+<p>整个过程的顺序是：<mark>先看阶码判类型，再恢复隐藏位，最后乘实际指数</mark>。</p>
+</details>
+<p>IEEE 754 转真值时，则反过来做：</p>
+<ol>
+<li>按字段宽度拆出 $S,e,f$；</li>
+<li>根据 $e$ 是否为全 0、全 1 判断数值类型；</li>
+<li>规格化数在前面补隐藏位 1，非规格化数补 0；</li>
+<li>根据 $e-\mathrm{bias}$ 确定小数点移动方向和位数；</li>
+<li>最后根据 $S$ 加正负号。</li>
+</ol>
+<hr/>
+<details class="article-details">
+<summary class="article-summary">补充：阶码全 0、全 1 与左规临界</summary>
+<p>对阶码边界要特别小心，因为舍入可能使尾数产生进位，从而把阶码推入相邻区间。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>临界情况</th>
+<th>处理方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>尾数舍入后继续向整数位进位</td>
+<td>隐藏位变为 <code>10</code>，把尾数恢复成 <code>1.xxx</code>，同时令 $E\leftarrow E+1$</td>
+</tr>
+<tr>
+<td>阶码即将达到全 1</td>
+<td>如果再进位就进入保留编码，按舍入规则变成无穷大，而不是继续当普通数</td>
+</tr>
+<tr>
+<td>规格化数逐渐变小</td>
+<td>实际指数降到 $-126$（单精度）或 $-1022$（双精度）以后，切换成非规格化表示</td>
+</tr>
+<tr>
+<td>阶码字段已经全 0</td>
+<td>隐藏位从 1 变为 0，用 $0.f\times2^{1-\mathrm{bias}}$ 继续表示更小的数</td>
+</tr>
+<tr>
+<td>小于最小非规格化数的一半</td>
+<td>在就近舍入下可能变成零；更小的结果发生下溢</td>
+</tr>
+</tbody>
+</table></div>
+<p>这里“阶码即将全 0”不等于立即变成 0。以单精度为例：</p>
+<ul>
+<li>最小规格化正数是 $1.0\times2^{-126}$；</li>
+<li>更小的数可以进入非规格化区间 $0.f\times2^{-126}$；</li>
+<li>最小非规格化正数是 $2^{-149}$；</li>
+<li>再往下才会舍入到 0。</li>
+</ul>
+<blockquote>
+<p>IEEE 754 常用“就近舍入、偶数优先”。如果尾数原本全为 1，舍入进位会使 $1.111\cdots1$ 变成 $10.000\cdots0$。这时应把结果重新写成 $1.000\cdots0\times2^{E+1}$，并同步增加阶码。</p>
+<p>如果增加后阶码字段变成全 1，这个结果已经不再是普通规格化数，而应编码为无穷大。</p>
+</blockquote>
+<p>用单精度看两个“阶码即将全 0”的例子，差别在于<mark>尾数有没有在阶码耗尽前左移到 1 开头</mark>。</p>
+<p><strong>情形一：已经左规完成。</strong> 设尚未规格化的中间结果是</p>
+<p>$$0.0101_2\times2^{-124}$$</p>
+<p>尾数连续左移 2 位：</p>
+<p>$$0.0101_2\times2^{-124}
+\rightarrow
+1.01_2\times2^{-126}$$</p>
+<p>在阶码真正变成全 0 之前，尾数已经成为 $1.xxx$，所以仍按规格化数编码：</p>
+<pre><code class="language-text">S=0
+e = -126 + 127 = 1 = 00000001
+f = 01000000000000000000000
+
+0 | 00000001 | 01000000000000000000000
+= 0x00A00000
+</code></pre>
+<p><strong>情形二：尾数还没有左规完成。</strong> 设中间结果是</p>
+<p>$$0.000101_2\times2^{-123}$$</p>
+<p>尾数左移 3 位后：</p>
+<p>$$0.000101_2\times2^{-123}
+\rightarrow
+0.101_2\times2^{-126}$$</p>
+<p>此时阶码字段已经到达最低规格化状态，尾数却仍然是 $0.xxx$。如果继续左移，会得到</p>
+<p>$$1.01_2\times2^{-127}$$</p>
+<p>但单精度的实际指数不能再降为 $-127$ 后又使用隐藏位 1，因为阶码字段一旦变成全 0，就必须切换为非规格化规则。因此停止左规，改写为</p>
+<p>$$0.101_2\times2^{-126}=\frac58\times2^{-126}$$</p>
+<p>此时阶码字段填全 0，尾数字段保留 <code>101...</code>：</p>
+<pre><code class="language-text">S=0
+e = 00000000
+f = 10100000000000000000000
+
+0 | 00000000 | 10100000000000000000000
+= 0x00500000
+</code></pre>
+<p>两个例子的判断点可以概括成：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>停止时的形式</th>
+<th style="text-align: right;">阶码字段</th>
+<th style="text-align: right;">尾数隐藏位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>阶码耗尽前已左规完成</td>
+<td>$1.01\times2^{-126}$</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>阶码耗尽时仍未左规完成</td>
+<td>$0.101\times2^{-126}$</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>不再把 $1.01\times2^{-127}$ 写成普通规格化单精度数。它对应的可编码形式是 $0.101\times2^{-126}$，也就是非规格化数。</p>
+</blockquote>
+<p>如果阶码全 0 仍按</p>
+<p>$$1.f\times2^{1-\mathrm{bias}}$$</p>
+<p>解释，那么最小正数只能到 $2^{-126}$ 左右，无法表示更小的数。</p>
+<p>IEEE 754 把阶码全 0 单独规定成非规格化数：</p>
+<p>$$0.f\times2^{1-\mathrm{bias}}$$</p>
+<p>隐藏位从 1 变成 0 后，可以继续向右细分，形成“渐进下溢”：数值越靠近 0，可用的有效位逐渐减少，而不是直接从最小规格化数跳到 0。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

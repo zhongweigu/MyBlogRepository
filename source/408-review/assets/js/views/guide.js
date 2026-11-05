@@ -32,7 +32,7 @@ export function guideView(store) {
             </div>
             <div class="guide-step">
               <span class="gs-no">B</span>
-              <div><h3>再读考点，抓住一句话</h3><p>每个考点页最上面是“一句话抓手”。先读它，再展开知识点。展开是逐层的：知识点 → 补充 → 对比表 → 真题。一次只展开一层，屏幕就不会过载。</p></div>
+              <div><h3>再读考点，读成一篇小教材</h3><p>每个考点页最上面是“一句话抓手”。下面的正文按原帖整理成完整长文：定义、推导、例子、表格、插图和真题解析都在里面；先读完，再做题，不要只背抓手。</p></div>
             </div>
             <div class="guide-step">
               <span class="gs-no">C</span>
@@ -47,11 +47,11 @@ export function guideView(store) {
           <div class="guide-two-col">
             <div class="guide-note-card">
               <h3>${icon('play', 16)} 今日队列</h3>
-              <p>首页的“开始今日复习”会把<strong>到期考点</strong>和<strong>新考点</strong>排成一个队列。每次只显示一个考点，先回忆，再揭示，最后按 1–4 评分。</p>
+              <p>首页只保留一个模块“每日知识点复习”，默认排 <strong>10 个考点</strong>：到期优先，不足的用新考点补齐。每次只显示一个考点，先回忆，再揭示，最后按 1–4 评分。</p>
             </div>
             <div class="guide-note-card">
               <h3>${icon('rotate', 16)} 间隔排期</h3>
-              <p>评分后自动排下次复习：忘记 1 天、模糊 1 天、记得 3–7 天、熟练 7–15 天。到期考点会出现在首页和“复习指引”里。</p>
+              <p>评分后自动排下次复习：忘记 1 天、模糊 1 天、记得 3–7 天、熟练 7–15 天。到期考点会出现在首页的每日队列里。</p>
             </div>
             <div class="guide-note-card">
               <h3>${icon('layers', 16)} 本章滚动</h3>
@@ -79,7 +79,7 @@ export function guideView(store) {
         <section class="guide-section" id="extend">
           <p class="eyebrow">04 · EXTEND</p>
           <h2>怎么继续往里加内容</h2>
-          <p class="guide-p">页面是纯静态的，所有内容在 <code>source/408-review/assets/js/data/</code> 下。新增一个考点，只要在 <code>ds.js</code> 或 <code>coa.js</code> 的数组里加一项；新增真题，在 <code>questions.js</code> 里加一项。</p>
+          <p class="guide-p">页面是纯静态的：考点结构在 <code>source/408-review/assets/js/data/</code>，长文在 <code>source/408-review/assets/content/</code>，图片在 <code>assets/textbook/</code> 或 <code>assets/img/</code>。新增考点除了加数据，还要给这个 id 写一篇长文；维护步骤见仓库的 <code>docs/408-review-maintenance.md</code>。</p>
           <pre class="code guide-code"><code>{
   id: 'ds-2-6',              // 唯一 id
   chapter: 'ds-2',           // 所属章节

@@ -1,0 +1,379 @@
+<details class="article-toc">
+<summary>本页目录 <span>3 节</span></summary>
+<div class="toc">
+<ul>
+<li><a href="#1-">考点1-进位计数制及其转换</a></li>
+<li><a href="#_1">总览：真值与机器数</a></li>
+<li><a href="#_2">无符号数与带符号数</a></li>
+</ul>
+</div>
+
+</details><div class="article-content">
+<h2 id="1-">考点1-进位计数制及其转换</h2>
+<p>数值表示题最常见的错误，不是不会算，而是<mark>把不同层次的概念混在一起比较</mark>。先看一个总框架：</p>
+<ul>
+<li>按“有没有符号”先分成无符号数和有符号数；</li>
+<li>无符号数直接按二进制位权解释，常用于地址、计数和边界检查；</li>
+<li>有符号数才需要进一步指定原码、反码、补码或移码；</li>
+<li>同一个位模式在不同编码下可能得到完全不同的真值。</li>
+</ul>
+<p>因此，“原码”和“无符号数”并不是同一层的分类：<mark>无符号数是一类解释方式，原码是带符号数的一种具体编码</mark>。</p>
+<pre class="mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;primaryColor&quot;: &quot;#5b9bd5&quot;,
+    &quot;primaryTextColor&quot;: &quot;#ffffff&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#41719c&quot;,
+    &quot;lineColor&quot;: &quot;#41719c&quot;,
+    &quot;secondaryColor&quot;: &quot;#ffffff&quot;,
+    &quot;tertiaryColor&quot;: &quot;#e2f0d9&quot;,
+    &quot;fontSize&quot;: &quot;16px&quot;,
+    &quot;fontFamily&quot;: &quot;-apple-system, BlinkMacSystemFont, \&quot;Segoe UI\&quot;, Roboto, \&quot;Helvetica Neue\&quot;, Arial, \&quot;Noto Sans\&quot;, sans-serif&quot;
+  },
+  &quot;flowchart&quot;: {
+    &quot;nodeSpacing&quot;: 8,
+    &quot;rankSpacing&quot;: 26,
+    &quot;curve&quot;: &quot;basis&quot;,
+    &quot;htmlLabels&quot;: true,
+    &quot;subGraphTitleMargin&quot;: { &quot;top&quot;: 0, &quot;bottom&quot;: 14 },
+    &quot;padding&quot;: 4,
+    &quot;useMaxWidth&quot;: false,
+    &quot;wrappingWidth&quot;: 1000
+  }
+}}%%
+graph TB
+  ROOT[&quot;数值表示&quot;]
+  UNSIGNED[&quot;无符号数&lt;br&gt;直接按位权解释&lt;br&gt;常用于地址运算&quot;]
+  SIGNED[&quot;有符号数&lt;br&gt;先确定编码方式&lt;br&gt;再还原真值&quot;]
+  YUAN[&quot;原码&quot;]
+  FAN[&quot;反码&quot;]
+  BU[&quot;补码&quot;]
+  YI[&quot;移码&quot;]
+
+  ROOT --&gt; UNSIGNED
+  ROOT --&gt; SIGNED
+  SIGNED --&gt; YUAN
+  SIGNED --&gt; FAN
+  SIGNED --&gt; BU
+  SIGNED --&gt; YI
+
+  classDef root fill:#5b9bd5,stroke:#41719c,color:#ffffff,font-size:20px
+  classDef lvl1 fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d,font-size:19px
+  classDef lvl2d fill:#dbe8f6,stroke:#1f4e79,stroke-width:2px,color:#0d2f4d,font-size:16px
+
+  class ROOT root;
+  class UNSIGNED,SIGNED lvl1;
+  class YUAN,FAN,BU,YI lvl2d;</pre>
+<hr/>
+<p>机器数是在机器中实际存放的<strong>固定位宽位模式</strong>，真值是这个位模式按照某种编码解释后得到的<strong>数学意义上的数</strong>。</p>
+<p>两个概念不能用“二进制/十进制”来区分：</p>
+<ul>
+<li>机器数除了写成二进制，也常写成十六进制或一串位；</li>
+<li>真值不一定写成十进制，也可以写成 $+1100_2$、$-101_2$；</li>
+<li>真值的标志是用 $+$、$-$ 表示正负，而机器数用最高位等规则编码符号。</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">补充：同一个机器数 `1100` 的多种解释</summary>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>解释方式</th>
+<th style="text-align: right;">真值</th>
+<th>计算过程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无符号数</td>
+<td style="text-align: right;">$12$</td>
+<td>$8+4$</td>
+</tr>
+<tr>
+<td>原码</td>
+<td style="text-align: right;">$-4$</td>
+<td>符号位为 1，数值位 <code>100</code> 表示 4</td>
+</tr>
+<tr>
+<td>反码</td>
+<td style="text-align: right;">$-3$</td>
+<td>负数反码的数值位取反得 <code>100</code>，表示 3</td>
+</tr>
+<tr>
+<td>补码</td>
+<td style="text-align: right;">$-4$</td>
+<td>$-2^3+2^2=-8+4$</td>
+</tr>
+<tr>
+<td>4 位移码（偏置 8）</td>
+<td style="text-align: right;">$4$</td>
+<td>无符号值 $12-8=4$</td>
+</tr>
+</tbody>
+</table></div>
+</details>
+<p>所以，单说“<code>1100</code> 等于多少”是不完整的。必须先问：<mark>它按无符号数还是某种有符号编码解释？位宽是多少？</mark></p>
+<blockquote>
+<p>注：真值 <code>+1100</code> 与 4 位机器数 <code>1100</code> 看起来字符相同，但前者已经把正号单独写出来，是一个带符号真值；后者仍只是一个需要指定编码才能解释的位模式。</p>
+</blockquote>
+<hr/>
+<p><strong>无符号数</strong>没有符号位，所有位都按权值相加：</p>
+<p>$$V=\sum_{i=0}^{n-1}b_i2^i$$</p>
+<details class="article-details">
+<summary class="article-summary">补充：无符号数换算例子</summary>
+<p>8 位无符号数 <code>10110100</code>：</p>
+<p>$$V=128+32+16+4=180$$</p>
+</details>
+<p>无符号数的 $n$ 位表示范围是</p>
+<p>$$0\sim 2^n-1$$</p>
+<p>地址通常是非负整数，而且要覆盖整个地址空间，因此常按无符号数处理。例如比较两个地址大小时使用无符号比较；若误把它们当成有符号补码，地址最高位为 1 时就会被判成负数。</p>
+<hr/>
+<p><strong>原码</strong>的规则最直接：最高位表示符号，其余位直接表示绝对值。</p>
+<ul>
+<li>正数：符号位为 0，数值位就是真值的二进制；</li>
+<li>负数：符号位为 1，数值位仍写绝对值的二进制；</li>
+<li>由原码求真值：去掉符号位，把数值位直接转成十进制，再加上符号。</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">补充：原码如何表示正负数</summary>
+<p>$$[+5]_{\text{原}}=0101
+\qquad
+[-5]_{\text{原}}=1101$$</p>
+<p>零有两种表示：</p>
+<p>$$[+0]_{\text{原}}=0000
+\qquad
+[-0]_{\text{原}}=1000$$</p>
+</details>
+<blockquote>
+<p>原码的优点是符号和绝对值一目了然，缺点是加法和减法不能直接统一成补码加法，而且零有两种表示。</p>
+</blockquote>
+<hr/>
+<p><strong>反码</strong>由原码得到：</p>
+<ul>
+<li>正数的反码与原码相同；</li>
+<li>负数保持符号位不变，数值位逐位取反；</li>
+<li>由负数反码求真值时，把数值位再取反得到绝对值的二进制。</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">补充：原码和反码对照</summary>
+<p>$$[-5]_{\text{原}}=1101
+\qquad
+[-5]_{\text{反}}=1010$$</p>
+</details>
+<blockquote>
+<p>反码同样有正零和负零，实际运算中主要用于理解它与补码之间的关系。</p>
+</blockquote>
+<hr/>
+<p><strong>补码</strong>是现代计算机中最常用的定点整数编码。正数补码与原码相同；负数补码可由原码“数值位取反再加 1”得到，也可以由反码末位加 1 得到。</p>
+<p>更统一的理解是<mark>最高位带负权</mark>。对于 $n$ 位补码 $b_{n-1}\cdots b_1b_0$：</p>
+<p>$$V=-b_{n-1}2^{n-1}+\sum_{i=0}^{n-2}b_i2^i$$</p>
+<details class="article-details">
+<summary class="article-summary">补充：补码最高位负权计算</summary>
+<p>$$1100_{\text{补}}
+=-2^3+2^2
+=-8+4
+=-4$$</p>
+</details>
+<blockquote>
+<p>负补码可以快速还原：最高位为 1 时，先写下最高位的负权值，再把其余位按普通无符号数相加。比如</p>
+<p>$$11101010_{\text{补}}=-128+64+32+8+2=-22$$</p>
+<p>这比“先取反、再加 1、再按无符号数读”更不容易丢步骤。</p>
+</blockquote>
+<p>补码求相反数也很方便：把补码连同符号位一起逐位取反，再在末位加 1：</p>
+<p>$$[-X]_{\text{补}}=\sim[X]_{\text{补}}+1$$</p>
+<p>所以两个补码相减可以直接改成“加相反数”：</p>
+<p>$$[X-Y]_{\text{补}}=[X]_{\text{补}}+[-Y]_{\text{补}}$$</p>
+<blockquote>
+<p>这正是补码适合统一实现加减法的原因。</p>
+</blockquote>
+<hr/>
+<p><strong>符号扩展不会改变真值。</strong> 把较短补码放入更宽寄存器时：</p>
+<ul>
+<li>正数高位补 0；</li>
+<li>负数高位补 1；</li>
+<li>扩展前后补码表示的真值完全相同。</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">补充：符号扩展与长补码化简</summary>
+<p>4 位补码 <code>1100</code> 表示 $-4$，扩展到 8 位后是</p>
+<p>$$11111100_{\text{补}}=-128+64+32+16+8+4=-4$$</p>
+<p>反过来说，一个很长的补码如果高位有大量重复的符号位，可以化简为能保持真值的最短补码：</p>
+<p>$$111111111100_{\text{补}}
+\rightarrow
+1100_{\text{补}}=-4$$</p>
+</details>
+<details class="article-details">
+<summary class="article-summary">自检：长补码化简后为什么值不变？</summary>
+<p>短补码 <code>1100</code> 表示 $-4$。每次把它符号扩展到左边一位，相当于新增一个权值为 $+2^k$ 的位，同时原来负权最高位从 $-2^k$ 变成更高一层的负权：</p>
+<p>$$-2^{k+1}+2^k=-2^k$$</p>
+<p>新增的 1 与符号扩展造成的权值变化恰好抵消，所以真值不变。</p>
+<p>这就是“连续相同的符号位可以删到最短”的原因，但最低有效位和符号位不能随意删。</p>
+</details>
+<hr/>
+<p><strong>移码</strong>通常用“真值 + 偏置”得到编码：</p>
+<p>$$[X]_{\text{移}}=X+\text{偏置}$$</p>
+<p>对普通 $n$ 位整数移码，常用偏置是</p>
+<p>$$2^{n-1}$$</p>
+<details class="article-details">
+<summary class="article-summary">补充：4 位移码示例</summary>
+<p>4 位移码的偏置为 8：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th style="text-align: right;">真值</th>
+<th style="text-align: right;">移码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">$-8$</td>
+<td style="text-align: right;"><code>0000</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">$0$</td>
+<td style="text-align: right;"><code>1000</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">$7$</td>
+<td style="text-align: right;"><code>1111</code></td>
+</tr>
+</tbody>
+</table></div>
+</details>
+<p>把移码当无符号数看，其大小顺序与真值顺序一致，因此浮点数常用来表示阶码，便于直接比较大小。</p>
+<blockquote>
+<p>同一真值的移码与补码相比，<strong>符号位相反，数值位相同</strong>。</p>
+<p>普通 $n$ 位整数移码的偏置是 $2^{n-1}$；IEEE 754 的阶码字段有 $k$ 位时，偏置是 $2^{k-1}-1$。</p>
+<p>例如单精度阶码有 8 位，偏置是 127，而不是 128。IEEE 754 还需要把全 0 和全 1 阶码留给零、非规格化数、无穷大和 NaN，因此规格化数的阶码字段只用 $1\sim254$，对应实际指数 $-126\sim127$。</p>
+</blockquote>
+<hr/>
+<p>设机器字长为 $n$，并把这些编码按<strong>定点整数</strong>理解，则固定位数真值的上下限为：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>编码</th>
+<th>$n$ 位真值范围</th>
+<th>8 位范围</th>
+<th>零的表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无符号数</td>
+<td>$0\sim2^n-1$</td>
+<td>$0\sim255$</td>
+<td>唯一</td>
+</tr>
+<tr>
+<td>原码</td>
+<td>$-(2^{n-1}-1)\sim2^{n-1}-1$</td>
+<td>$-127\sim127$</td>
+<td>正零、负零</td>
+</tr>
+<tr>
+<td>反码</td>
+<td>$-(2^{n-1}-1)\sim2^{n-1}-1$</td>
+<td>$-127\sim127$</td>
+<td>正零、负零</td>
+</tr>
+<tr>
+<td>补码</td>
+<td>$-2^{n-1}\sim2^{n-1}-1$</td>
+<td>$-128\sim127$</td>
+<td>唯一</td>
+</tr>
+<tr>
+<td>移码</td>
+<td>$-2^{n-1}\sim2^{n-1}-1$</td>
+<td>$-128\sim127$</td>
+<td>唯一</td>
+</tr>
+</tbody>
+</table></div>
+<p>补码比原码、反码多表示一个负数，是因为 <code>1000...0</code> 不再浪费在负零上，而被规定为 $-2^{n-1}$。</p>
+<details class="article-details">
+<summary class="article-summary">自检：说明 4 位补码 `1000` 为什么表示 $-8$ 而不是 $-0$</summary>
+<p>按最高位负权计算：</p>
+<p>$$1000_{\text{补}}=-2^3=-8$$</p>
+<p>如果按“符号位 + 绝对值”理解，就会误以为它是负零。原码、反码和补码必须使用各自的解释规则，不能把原码规则套到补码上。</p>
+<p>同理，8 位补码的表示范围是 $-128\sim127$；<code>10000000</code> 表示 $-128$，它的模 8 位相反数仍然是自身。</p>
+</details>
+<details class="article-details">
+<summary class="article-summary">补充：定点小数时的范围缩放</summary>
+<p>如果题目表示的是定点小数，而不是整数，则范围随隐含小数点位置缩放。若低 $k$ 位是小数位，实际真值要整体乘 $2^{-k}$，表示间隔和范围也同步缩放。</p>
+</details>
+<hr/>
+<p>移位的题目要先问两个问题：<mark>操作对象是哪一个位模式，右移时高位该补什么</mark>。</p>
+<p>对于补码：</p>
+<ul>
+<li><strong>算术左移</strong>：低位补 0，高位直接移出；</li>
+<li><strong>算术右移</strong>：高位补原来的符号位；</li>
+<li><strong>逻辑右移</strong>：高位一律补 0，不保留符号。</li>
+</ul>
+<p>逻辑左移也是低位补 0、高位移出，但“逻辑”与“算术”的差别主要体现在右移：逻辑右移把整个位模式看成一串二进制位，算术右移则把最高位解释成负权。</p>
+<details class="article-details">
+<summary class="article-summary">补充：算术右移与逻辑右移对照</summary>
+<pre><code class="language-text">补码 1101    算术右移 1 位 → 1110
+             (-3)          (-2)
+
+补码 1101    逻辑右移 1 位 → 0110
+           （若按无符号看）   (13 → 6)
+</code></pre>
+</details>
+<p>算术右移相当于对补码做“除以 2 后向负无穷取整”。所以负数右移时可能看起来只变了 1：</p>
+<p>$$-3\gg 1=-2$$</p>
+<p><mark>逻辑移位通常用于无符号数，算术移位用于补码</mark>。若把负数补码直接做逻辑右移，符号位会被清成 0，真值语义随即被破坏。</p>
+<p>左移 1 位时，可以直接观察移位前后的符号位：</p>
+<ul>
+<li>符号位没有改变，通常没有有符号溢出；</li>
+<li>符号位改变，发生有符号溢出。</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">补充：左移溢出示例</summary>
+<p>4 位补码中：</p>
+<p>$$0101_2=5
+\quad\xrightarrow{\text{算术左移 1 位}}\quad
+1010_2=-6$$</p>
+<p>从正数移成了负数，说明 $5\times2=10$ 已超出 4 位补码范围，发生溢出。若结果是 $1100\rightarrow1000$，二者仍都是负数；$-4\times2=-8$ 恰好在 4 位补码范围内，所以不溢出。</p>
+</details>
+<blockquote>
+<p>左移相当于乘 2，右移相当于除 2 的幂；但只有在目标结果仍能由当前位宽表示时，移位后的位模式和数学结果才一致。</p>
+</blockquote>
+<h2 id="_1">总览：真值与机器数</h2>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="数据专题总览：真值分为整数和浮点数；整数分无符号数和带符号数，带符号数又分补码、原码、反码、移码；浮点数对应 IEEE 754" data-src="/408-review/assets/textbook/coa-data-topic-overview.webp" href="/408-review/assets/textbook/coa-data-topic-overview.webp"><img alt="数据专题总览：真值分为整数和浮点数；整数分无符号数和带符号数，带符号数又分补码、原码、反码、移码；浮点数对应 IEEE 754" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-data-topic-overview.webp"/></a><figcaption>数据专题总览：真值分为整数和浮点数；整数分无符号数和带符号数，带符号数又分补码、原码、反码、移码；浮点数对应 IEEE 754</figcaption></figure>
+<ul>
+<li><strong>真值</strong>是实际想表示的数，<strong>机器数</strong>是它在计算机中的二进制表示形式。</li>
+<li>真值和机器数是一对多的关系：同一个真值可以有不同的机器数表示。</li>
+<li>真值可以是任何进制。</li>
+</ul>
+<h2 id="_2">无符号数与带符号数</h2>
+<p><strong>无符号数</strong></p>
+<ul>
+<li>相同位数下能表示最大数字（$2^n-1$）的一种解释方式，因为所有位都用来表示数值。</li>
+<li>就是简单的十进制转二进制问题。</li>
+<li>地址都使用无符号数表示。</li>
+<li>对无符号数采用逻辑移位。</li>
+</ul>
+<p><strong>带符号数</strong></p>
+<ul>
+<li>最高位用 0/1 表示符号。</li>
+<li>进一步分为补码、原码、反码、移码。</li>
+<li>计算机中的带符号整数都用补码表示。</li>
+</ul>
+<p>原码、补码、移码的表示范围、用途和考点：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="n 位带符号数的原码、补码、移码对比：原码范围 -2^(n-1)+1 ~ +2^(n-1)-1，用于 IEEE 754 尾数；补码范围 -2^(n-1) ~ +2^(n-1)-1，用于所有带符号整数；移码范围相同，用于 IEEE 754 指数；表中还列出各自考点" data-src="/408-review/assets/textbook/coa-signed-number-codes-table.webp" href="/408-review/assets/textbook/coa-signed-number-codes-table.webp"><img alt="n 位带符号数的原码、补码、移码对比：原码范围 -2^(n-1)+1 ~ +2^(n-1)-1，用于 IEEE 754 尾数；补码范围 -2^(n-1) ~ +2^(n-1)-1，用于所有带符号整数；移码范围相同，用于 IEEE 754 指数；表中还列出各自考点" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-signed-number-codes-table.webp"/></a><figcaption>n 位带符号数的原码、补码、移码对比：原码范围 -2^(n-1)+1 ~ +2^(n-1)-1，用于 IEEE 754 尾数；补码范围 -2^(n-1) ~ +2^(n-1)-1，用于所有带符号整数；移码范围相同，用于 IEEE 754 指数；表中还列出各自考点</figcaption></figure>
+<h4 id="2021-13">例题：【2021】第 13 题</h4>
+<p>已知带符号整数用补码表示，变量 <code>x</code>、<code>y</code>、<code>z</code> 的机器数分别为 <code>FFFDH</code>、<code>FFDFH</code>、<code>7FFCH</code>，下列结论中正确的是（ ）。</p>
+<ul>
+<li>A. 若 x、y、z 为无符号整数，则 z &lt; x &lt; y</li>
+<li>B. 若 x、y、z 为无符号整数，则 x &lt; y &lt; z</li>
+<li>C. 若 x、y、z 为带符号整数，则 x &lt; y &lt; z</li>
+<li>D. 若 x、y、z 为带符号整数，则 y &lt; x &lt; z</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D。</strong></p>
+<p>按无符号数看：<code>FFFDH</code> = 65533，<code>FFDFH</code> = 65503，<code>7FFCH</code> = 32764，所以 z &lt; y &lt; x，A、B 都不对。</p>
+<p>按带符号补码看：<code>FFFDH</code> = -3，<code>FFDFH</code> = -33，<code>7FFCH</code> = +32764，所以 y &lt; x &lt; z，D 对、C 错。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

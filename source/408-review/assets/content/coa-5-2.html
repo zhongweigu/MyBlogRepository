@@ -1,0 +1,62 @@
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#irq-basic">中断与异常</a></li>
+<li><a href="#irq-response">中断响应过程</a></li>
+<li><a href="#io-modes">三种 I/O 方式</a></li>
+<li><a href="#dma">DMA 与总线占用</a></li>
+<li><a href="#irq-compare">中断与 DMA 的区别</a></li>
+</ul></div>
+</details>
+<div class="article-content">
+<h2 id="irq-basic">中断与异常</h2>
+<p><strong>中断</strong>通常指外中断：I/O 设备完成、时钟中断、键盘等来自 CPU 外部的事件。它一般在下一条指令执行前被检查；可屏蔽中断可以用 IF 标志屏蔽，不可屏蔽中断（如电源故障）不能。</p>
+<p><strong>异常</strong>（内中断）由当前指令的执行引起：缺页、除零、非法指令、断点、系统调用等。按恢复方式分为故障（fault，处理后重新执行当前指令）、陷阱（trap，处理后执行下一条指令）和终止（abort，无法恢复）。</p>
+<p>中断向量表保存各中断服务程序的入口地址。多个请求同时到达时，按中断优先级排队；高优先级可以打断低优先级的服务程序，形成中断嵌套。</p>
+
+<h2 id="irq-response">中断响应过程</h2>
+<p>CPU 在一条指令执行结束后检查中断请求。响应过程可以概括为：</p>
+<ol>
+<li><strong>关中断</strong>：防止响应过程被新的中断打断；</li>
+<li><strong>保存断点</strong>：把当前 PC（下一条指令地址）压栈或存入指定单元；</li>
+<li><strong>保存现场</strong>：保存通用寄存器和程序状态字等，服务程序返回后要恢复；</li>
+<li><strong>识别中断源</strong>：通过中断向量或排队器确定服务程序入口；</li>
+<li><strong>转中断服务程序</strong>：执行设备服务，结束后恢复现场、开中断、返回。</li>
+</ol>
+<p>关中断、保存断点等由硬件自动完成，称为<strong>中断隐指令</strong>；它不是一条真正的机器指令，而是响应中断时硬件执行的一组微操作。保存通用寄存器通常由服务程序用指令完成。</p>
+<p>中断响应发生在<strong>指令执行结束之后</strong>，而不是任意一个时钟周期；DMA 请求则通常在总线周期结束时响应，这是两者最容易混的时序差别。</p>
+
+<h2 id="io-modes">三种 I/O 方式</h2>
+<div class="article-table"><table>
+<thead><tr><th>方式</th><th>CPU 参与</th><th>数据传送</th><th>适用</th></tr></thead>
+<tbody>
+<tr><td>程序查询</td><td>不断读状态，循环等待</td><td>CPU 在查询循环里搬运</td><td>简单、低速、CPU 空闲多</td></tr>
+<tr><td>程序中断</td><td>启动设备后并行；服务时参与</td><td>CPU 在中断服务程序里搬运</td><td>随机、中低速 I/O</td></tr>
+<tr><td>DMA</td><td>只在开始和结束介入</td><td>DMA 控制器直接在主存与设备间搬运</td><td>成块、高速 I/O</td></tr>
+</tbody>
+</table></div>
+<p>程序查询的缺点是 CPU 利用率低；程序中断把“等待”变成了“并行”，但每传一个字/字节仍要 CPU 执行服务程序；DMA 把数据搬运交给硬件，CPU 只负责初始化、启动和结束处理。</p>
+
+<h2 id="dma">DMA 与总线占用</h2>
+<p>DMA 控制器需要和 CPU 争用总线。常见三种方式：</p>
+<ul>
+<li><strong>停止 CPU 访存</strong>：DMA 工作时让 CPU 暂停访问主存，控制简单，但 CPU 可能长时间不能访存；</li>
+<li><strong>周期挪用</strong>：DMA 在 CPU 不使用总线的周期“偷”一个周期传送数据，最常用；</li>
+<li><strong>交替访问</strong>：CPU 与 DMA 分时使用总线，适合高速外设。</li>
+</ul>
+<p>DMA 传送结束后向 CPU 发中断，让 CPU 做结束处理。DMA 适合磁盘、网卡等成块高速设备；中断适合键盘、打印机等少量随机数据。</p>
+
+<h2 id="irq-compare">中断与 DMA 的区别</h2>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>程序中断</th><th>DMA</th></tr></thead>
+<tbody>
+<tr><td>数据搬运者</td><td>CPU 执行服务程序</td><td>DMA 控制器硬件</td></tr>
+<tr><td>CPU 介入</td><td>每次传送都要参与</td><td>开始 / 结束介入</td></tr>
+<tr><td>响应时机</td><td>指令执行结束后</td><td>总线周期结束后</td></tr>
+<tr><td>适用数据量</td><td>少量、随机</td><td>成块、高速</td></tr>
+<tr><td>优先级</td><td>通常低于 DMA</td><td>通常高于中断</td></tr>
+</tbody>
+</table></div>
+<p>常考判断：中断隐指令由硬件完成；中断响应后 PC 指向服务程序入口；断点现场要保存；DMA 传送不经过 CPU 的通用寄存器；DMA 与中断可以同时存在，但 DMA 请求通常优先级更高。</p>
+</div>
+<p class="article-source">本考点原帖没有单独的长文，以上按 408 教材与站内速记整理；重点保留中断响应、三种 I/O 方式和 DMA 的对比。</p>

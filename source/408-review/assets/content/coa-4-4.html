@@ -1,0 +1,385 @@
+<div class="article-content">
+<h2 id="51-cpu">5.1 CPU 的基本结构</h2>
+<p>CPU 由运算器和控制器组成，再加上寄存器组、总线接口和中断机构。</p>
+<p><strong>主要部件。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PC</td>
+<td>存放下一条指令的地址；取指后自增</td>
+</tr>
+<tr>
+<td>IR</td>
+<td>存放当前指令，操作码送 ID，字段送其他部件</td>
+</tr>
+<tr>
+<td>GPRs</td>
+<td>通用寄存器组，存放操作数和结果</td>
+</tr>
+<tr>
+<td>FR（PSW）</td>
+<td>标志寄存器，存放 ALU 产生的条件标志</td>
+</tr>
+<tr>
+<td>MAR</td>
+<td>主存地址寄存器，存放要访问的主存地址</td>
+</tr>
+<tr>
+<td>MDR</td>
+<td>主存数据寄存器，存放读出或写入的数据</td>
+</tr>
+<tr>
+<td>ID</td>
+<td>指令译码器，把操作码译成控制信号</td>
+</tr>
+<tr>
+<td>ALU</td>
+<td>算术逻辑单元，做算术、逻辑、移位等运算</td>
+</tr>
+<tr>
+<td>时序信号产生部件</td>
+<td>产生时钟、节拍、脉冲等时序信号</td>
+</tr>
+<tr>
+<td>操作控制信号形成部件</td>
+<td>按操作码、时序和标志产生控制信号（硬布线或微程序）</td>
+</tr>
+<tr>
+<td>总线控制逻辑</td>
+<td>控制总线的使用权和传输方向，避免冲突</td>
+</tr>
+<tr>
+<td>中断机构</td>
+<td>处理中断请求、判优和响应</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>寄存器分类。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>寄存器</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span style="white-space:nowrap">用户可见</span></td>
+<td>GPRs、PC、PSW/FR</td>
+<td>程序员可通过指令访问或感知；PC 是专用寄存器，不能像 GPR 一样直接参与运算</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">用户不可见</span></td>
+<td>MAR、MDR、IR、Y/Z 等暂存器、微程序相关寄存器</td>
+<td>供 CPU 内部使用，指令不能直接访问</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>指令周期。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>主要动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>取指</td>
+<td>PC→MAR，发读命令，MDR→IR，PC+1</td>
+</tr>
+<tr>
+<td>译码/读寄存器</td>
+<td>操作码送 ID 译码；读 GPRs</td>
+</tr>
+<tr>
+<td>执行/计算地址</td>
+<td>ALU 运算，或计算有效地址</td>
+</tr>
+<tr>
+<td>访存</td>
+<td>读/写主存（只有访存指令有）</td>
+</tr>
+<tr>
+<td>写回</td>
+<td>结果写回寄存器或主存</td>
+</tr>
+</tbody>
+</table></div>
+<p>各条指令经过的阶段不完全相同；中断周期另算。</p>
+<p><strong>处理器指令执行模型。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>每条指令的时钟数</th>
+<th>时钟周期</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单周期</td>
+<td>1</td>
+<td>取最长指令的延迟</td>
+<td>CPI=1，但周期长、部件冗余</td>
+</tr>
+<tr>
+<td>多周期</td>
+<td>可变</td>
+<td>各步中最长的</td>
+<td>部件复用、CPI&gt;1</td>
+</tr>
+<tr>
+<td>流水线</td>
+<td>理想为 1</td>
+<td>最长阶段</td>
+<td>吞吐率高，有冒险</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="52">5.2 数据通路</h2>
+<p>数据通路是各部件之间传送数据的路径，由组合逻辑元件和时序逻辑元件组成。</p>
+<p><strong>组合逻辑与时序逻辑。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th></th>
+<th>组合逻辑元件</th>
+<th>时序逻辑元件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输出</td>
+<td>只取决于当前输入</td>
+<td>取决于当前输入和原状态</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>无</td>
+<td>有</td>
+</tr>
+<tr>
+<td>时钟</td>
+<td>不需要</td>
+<td>时钟边沿写入</td>
+</tr>
+<tr>
+<td>例子</td>
+<td>MUX、加法器、ALU、译码器</td>
+<td>寄存器、触发器、计数器</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>数据通路的分类。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>类型</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>结构</td>
+<td>总线式</td>
+<td>共享总线，分时使用，连线少、速度慢</td>
+</tr>
+<tr>
+<td>结构</td>
+<td>专用通路</td>
+<td>部件间单独连线，速度快、硬件多</td>
+</tr>
+<tr>
+<td>时序</td>
+<td>单周期</td>
+<td>一条指令一个时钟</td>
+</tr>
+<tr>
+<td>时序</td>
+<td>多周期</td>
+<td>一条指令多个时钟</td>
+</tr>
+<tr>
+<td>时序</td>
+<td>流水线</td>
+<td>多条指令重叠执行</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>单总线数据通路。</strong></p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="图 5.6 一种典型的单总线数据通路结构：MAR、MDR、PC、IR、GPRs、Y、Z、ALU、FR 通过内部总线相连" data-src="/408-review/assets/textbook/coa-single-bus-datapath.webp" href="/408-review/assets/textbook/coa-single-bus-datapath.webp"><img alt="图 5.6 一种典型的单总线数据通路结构：MAR、MDR、PC、IR、GPRs、Y、Z、ALU、FR 通过内部总线相连" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-single-bus-datapath.webp"/></a><figcaption>图 5.6 一种典型的单总线数据通路结构：MAR、MDR、PC、IR、GPRs、Y、Z、ALU、FR 通过内部总线相连</figcaption></figure>
+<blockquote>
+<p>注：图中虚线为控制信号，<code>Xout</code> 表示把 X 的内容送上总线，<code>Xin</code> 表示把总线内容写入 X。</p>
+</blockquote>
+<ul>
+<li>系统总线连接主存，内部总线连接 CPU 各部件；同一时刻只允许一个部件 <code>out</code>，否则总线冲突。</li>
+<li><code>ALUop</code> 选择 ALU 的操作（3 位时，加法约定为 <code>000</code>）；<code>Read</code>/<code>Write</code> 控制主存读写。</li>
+<li>GPRs 的 <code>rd</code>、<code>rs</code> 是 4 位寄存器编号：<code>rs</code> 选读端口（多路选择器），<code>rd</code> 选写端口（译码器），<code>GPRin</code> 有效才写入；编号来自 IR 的相应字段。</li>
+<li>暂存器 Y、Z：单总线一次只能送一个操作数，ALU 却要两个输入，所以一个操作数先存 Y；ALU 的结果不能直接送回同一条总线（会形成组合逻辑环路），先存 Z，下一拍再送上总线。</li>
+<li>MAR 只向主存提供地址，MDR 在 CPU 与主存之间双向传送数据。</li>
+</ul>
+<p><strong>取指阶段的微操作。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>节拍</th>
+<th>微操作</th>
+<th>有效控制信号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>(PC)→MAR，发读命令</td>
+<td><code>PCout</code>、<code>MARin</code>、<code>Read</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>M(MAR)→MDR</td>
+<td><code>MDRin</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>(MDR)→IR</td>
+<td><code>MDRout</code>、<code>IRin</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>(PC)+1→PC</td>
+<td><code>PCin</code>（PC 自增）</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>PC 的加 1 由 PC 内部完成；如果改用 ALU，则还要 <code>PCout</code>、<code>ALUop=inc</code>、<code>Zin</code>、<code>Zout</code>。</p>
+</blockquote>
+<p><strong>加法指令 <code>add R1, R2</code>。</strong> 功能：R1 ← R1 + R2。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>节拍</th>
+<th>微操作</th>
+<th>控制信号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>取指</td>
+<td>1～4</td>
+<td>同取指阶段</td>
+<td>略</td>
+</tr>
+<tr>
+<td>执行</td>
+<td>5</td>
+<td>(R1)→Y</td>
+<td><code>R1out</code>、<code>Yin</code></td>
+</tr>
+<tr>
+<td>执行</td>
+<td>6</td>
+<td>(R2)+(Y)→Z</td>
+<td><code>R2out</code>、<code>ALUop=add</code>、<code>Zin</code></td>
+</tr>
+<tr>
+<td>执行</td>
+<td>7</td>
+<td>(Z)→R1</td>
+<td><code>Zout</code>、<code>R1in</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><code>R1out</code>、<code>R1in</code> 实际是 <code>GPRout</code>/<code>GPRin</code> 配合 <code>rs</code>/<code>rd</code> 选中 R1。</p>
+</blockquote>
+<p><strong>取数指令 <code>load R1, (R2)</code>。</strong> 功能：R1 ← M[R2]。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>节拍</th>
+<th>微操作</th>
+<th>控制信号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>取指</td>
+<td>1～4</td>
+<td>同取指阶段</td>
+<td>略</td>
+</tr>
+<tr>
+<td>执行</td>
+<td>5</td>
+<td>(R2)→MAR，发读命令</td>
+<td><code>R2out</code>、<code>MARin</code>、<code>Read</code></td>
+</tr>
+<tr>
+<td>执行</td>
+<td>6</td>
+<td>M(MAR)→MDR</td>
+<td><code>MDRin</code></td>
+</tr>
+<tr>
+<td>执行</td>
+<td>7</td>
+<td>(MDR)→R1</td>
+<td><code>MDRout</code>、<code>R1in</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>数据通路题的做题顺序。</strong></p>
+<ol>
+<li>先看数据现在在哪里（哪个寄存器或存储单元）。</li>
+<li>沿连线找目标位置，确定要经过总线还是 ALU。</li>
+<li>每跨过一个时序元件（寄存器、存储器）至少占一个时钟边沿，不能在同一拍完成。</li>
+<li>单总线每拍只能选一个输出源，避免冲突。</li>
+<li>把数据流翻译成控制信号，未用到的使能置 0。</li>
+<li>存储器等待时间按题目给的周期补足。</li>
+</ol>
+<p><strong>时钟与时序约束。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Clock-to-Q</td>
+<td>时钟有效边沿到寄存器输出稳定的时间</td>
+</tr>
+<tr>
+<td>组合逻辑延迟</td>
+<td>组合逻辑的最大传播延迟</td>
+</tr>
+<tr>
+<td>Setup</td>
+<td>时钟边沿前输入必须稳定的时间</td>
+</tr>
+<tr>
+<td>Hold</td>
+<td>时钟边沿后输入仍需保持的时间</td>
+</tr>
+</tbody>
+</table></div>
+<p>$$T_{clk}\ge T_{cq}+T_{comb,max}+T_{setup}$$</p>
+<ul>
+<li>关键路径是相邻状态元件之间最长的组合逻辑路径；关键路径越长，允许的主频越低。</li>
+<li>若题目考虑时钟偏移，还要在不等式中加上偏移量。</li>
+</ul>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

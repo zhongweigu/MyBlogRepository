@@ -1,0 +1,100 @@
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc">
+<ul>
+<li><a href="#7-">考点7-稀疏矩阵</a><ul>
+<li><a href="#_1">稀疏矩阵的存储</a></li>
+<li><a href="#_2">特殊矩阵的存储</a></li>
+<li><a href="#_3">对称矩阵</a></li>
+<li><a href="#_4">三角矩阵 / 对角（带状）矩阵</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</details><div class="article-content">
+<h2 id="7-">考点7-稀疏矩阵</h2>
+<h3 id="_1">稀疏矩阵的存储</h3>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="稀疏矩阵的两种存储方式：三元组表、十字链表" data-src="/408-review/assets/textbook/ds-sparse-matrix-storage.webp" href="/408-review/assets/textbook/ds-sparse-matrix-storage.webp"><img alt="稀疏矩阵的两种存储方式：三元组表、十字链表" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-sparse-matrix-storage.webp"/></a><figcaption>稀疏矩阵的两种存储方式：三元组表、十字链表</figcaption></figure>
+<h3 id="_2">特殊矩阵的存储</h3>
+<h3 id="_3">对称矩阵</h3>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="对称矩阵：按行/列优先，只存上三角或下三角（含对角线）" data-src="/408-review/assets/textbook/ds-symmetric-matrix.webp" href="/408-review/assets/textbook/ds-symmetric-matrix.webp"><img alt="对称矩阵：按行/列优先，只存上三角或下三角（含对角线）" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-symmetric-matrix.webp"/></a><figcaption>对称矩阵：按行/列优先，只存上三角或下三角（含对角线）</figcaption></figure>
+<h3 id="_4">三角矩阵 / 对角（带状）矩阵</h3>
+<p>存储思路和对称矩阵一样，也是按行优先或列优先压缩进一维数组。</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption='A[i][j] 在一维数组中的下标：下标从 0 开始看"前面有几个元素"，从 1 开始看"它是第几个元素"' data-src="/408-review/assets/textbook/ds-compressed-array-index.webp" href="/408-review/assets/textbook/ds-compressed-array-index.webp"><img alt='A[i][j] 在一维数组中的下标：下标从 0 开始看"前面有几个元素"，从 1 开始看"它是第几个元素"' class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-compressed-array-index.webp"/></a><figcaption>A[i][j] 在一维数组中的下标：下标从 0 开始看"前面有几个元素"，从 1 开始看"它是第几个元素"</figcaption></figure>
+<h4 id="2016">例题：【2016】（三对角矩阵）</h4>
+<p>【2016】有一个 100 阶的三对角矩阵 M，其元素 $m_{i,j}$（$1 \le i, j \le 100$）按行优先依次压缩存入下标从 0 开始的一维数组 N 中。元素 $m_{30,30}$ 在 N 中的下标是</p>
+<ul>
+<li>A. 86</li>
+<li>B. 87</li>
+<li>C. 88</li>
+<li>D. 89</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（87）。</strong> 三对角矩阵每行最多 3 个元素（$|i-j| \le 1$）。下标从 0 开始，所以<strong>数 $m_{30,30}$ 前面有多少个元素</strong>即可：</p>
+<ul>
+<li>第 1 行只有 2 个元素（$m_{1,1}$、$m_{1,2}$）；</li>
+<li>第 2 ~ 29 行每行 3 个，共 $28 \times 3 = 84$ 个；</li>
+<li>于是第 30 行之前共 $2 + 84 = 86$ 个；</li>
+<li>第 30 行依次是 $m_{30,29}$、$m_{30,30}$、$m_{30,31}$，$m_{30,30}$ 是本行第 2 个，前面还有 1 个。</li>
+</ul>
+<p>合计前面 $86 + 1 = 87$ 个元素，下标就是 <strong>87</strong>。</p>
+<p>通式：三对角矩阵按行优先存储（$i, j$ 从 1 开始、数组下标从 0 开始）时，$A[i][j]$ 的下标 $= 2i + j - 3$，代入 $i = j = 30$ 同样得 87。</p>
+</details>
+<h4 id="2021">例题：【2021】（由两个地址反推每行几个元素）</h4>
+<p>【2021】二维数组 A 按行优先方式存储，每个元素占用 1 个存储单元。若元素 <code>A[0][0]</code> 的存储地址是 100，<code>A[3][3]</code> 的存储地址是 220，则元素 <code>A[5][5]</code> 的存储地址是</p>
+<ul>
+<li>A. 295</li>
+<li>B. 300</li>
+<li>C. 301</li>
+<li>D. 306</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（300）。</strong> 考的是"行列号 ↔ 一维地址"的换算。</p>
+<p>设每行有 $x$ 列。从 $A[0][0]$ 到 $A[3][3]$ 跨过 3 整行、再多 3 个元素：</p>
+<p>$$3x + 3 = 220 - 100 = 120 \;\Longrightarrow\; x = 39$$</p>
+<p>即每行 39 列，于是</p>
+<p>$$A[5][5] = 100 + 5x + 5 = 100 + 5 \times 39 + 5 = 300$$</p>
+</details>
+<h4 id="2023">例题：【2023】（三元组表还要存什么）</h4>
+<p>【2023】若采用三元组表存储结构存储稀疏矩阵 M，则除三元组表外，下列数据中还需要保存的是</p>
+<ul>
+<li>Ⅰ. M 的行数</li>
+<li>Ⅱ. M 中包含非零元素的行数</li>
+<li>Ⅲ. M 的列数</li>
+<li>
+<p>Ⅳ. M 中包含非零元素的列数</p>
+</li>
+<li>
+<p>A. 仅 Ⅰ、Ⅲ</p>
+</li>
+<li>B. 仅 Ⅰ、Ⅳ</li>
+<li>C. 仅 Ⅱ、Ⅳ</li>
+<li>D. Ⅰ、Ⅱ、Ⅲ、Ⅳ</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 A。</strong> 三元组表只记了每个非零元素的（行号、列号、值），要把它<strong>还原成矩阵</strong>，还缺矩阵的形状——<strong>行数和列数</strong>（Ⅰ、Ⅲ）。至于哪几行、哪几列含非零元素，遍历一遍三元组就能统计出来，不必额外保存。</p>
+</details>
+<h4 id="_5">例题：对称矩阵上三角按列存，求下标</h4>
+<p>有一个 $n \times n$ 的对称矩阵 A，将其上三角部分（含主对角线）<strong>按列</strong>存放在一维数组 B 中，且规定 <code>A[0][0]</code> 放在 <code>B[0]</code> 处。若 $i \le j$，则 <code>A[i][j]</code> 在数组 B 中的下标为</p>
+<ul>
+<li>A. $\frac{j(j+1)}{2} + i$</li>
+<li>B. $\frac{i(i+1)}{2} + j$</li>
+<li>C. $\frac{n(n-1)}{2} - \frac{(n-j)(n-j-1)}{2} + i$</li>
+<li>D. $\frac{j(j-1)}{2} + i$</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 A。</strong> 按列存上三角，每列存的是一个"竖条"：第 0 列 1 个（$A[0][0]$）、第 1 列 2 个（$A[0][1]$、$A[1][1]$）……第 $j$ 列 $j+1$ 个（$A[0][j]$ 到 $A[j][j]$）。</p>
+<p>所以 $A[i][j]$（$i \le j$）前面的元素数：</p>
+<ul>
+<li>前 $j$ 列：$1 + 2 + \dots + j = \frac{j(j+1)}{2}$ 个；</li>
+<li>本列之内：$A[0][j]$ 到 $A[i-1][j]$，共 $i$ 个。</li>
+</ul>
+<p>即下标为 $\frac{j(j+1)}{2} + i$。核对：$A[0][0] \to 0$、$A[0][1] \to 1$、$A[1][1] \to 2$ ✅。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

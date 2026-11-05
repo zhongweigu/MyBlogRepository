@@ -1,0 +1,125 @@
+<div class="article-content">
+<h2 id="5-">考点5-树、森林与二叉树</h2>
+<p>核心就是<strong>孩子兄弟表示法</strong>：转换永远按「<strong>左孩子、右兄弟</strong>」来——原来的第一个孩子变成左孩子，其余的兄弟依次串在它右边。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>转换方向</th>
+<th>规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span style="white-space:nowrap">树 ↔ 二叉树</span></td>
+<td>左孩子、右兄弟</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">二叉树 → 森林</span></td>
+<td>二叉树的根、根的右孩子、根的右孩子的右孩子……依次是森林里各棵树的根结点；其余结点按「左孩子右兄弟」还原</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">森林 → 二叉树</span></td>
+<td>森林里各棵树的根结点，依次做二叉树的根、根的右孩子、根的右孩子的右孩子……；其余按「左孩子右兄弟」转换</td>
+</tr>
+</tbody>
+</table></div>
+<p>由此能读出三条最常用的结论：</p>
+<ul>
+<li>二叉树<strong>从根出发一路往右</strong>经过的结点个数，就是森林里<strong>树的数量</strong>；</li>
+<li>森林里的结点<strong>没有右兄弟</strong>、或者根结点<strong>没有下一个根</strong>，对应到二叉树上就是：这个结点<strong>没有右孩子</strong>。</li>
+<li>二叉树上<strong>没有右孩子</strong>的结点，正好是每个<strong>非终端结点的最后一个孩子</strong>，再加上<strong>根链最末尾的那个结点</strong>（它没有下一个根）。</li>
+</ul>
+<p>遍历的对应关系也是同一套转换带来的：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>树的遍历</th>
+<th>二叉树的遍历</th>
+<th>森林的遍历</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>先根遍历</td>
+<td>先序遍历</td>
+<td>先序遍历</td>
+</tr>
+<tr>
+<td>后根遍历</td>
+<td>中序遍历</td>
+<td>中（后）序遍历</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>注：树、森林不知道怎么遍历时，先转成二叉树，再对到上表里相应的遍历即可。</p>
+</blockquote>
+<h4 id="2009-uv">例题：【2009】（森林转二叉树后 u、v 的关系）</h4>
+<p>【2009】将森林转换为对应的二叉树，若在二叉树中，结点 u 是结点 v 的父结点的父结点，则在原来的森林中，u 和 v 可能具有的关系是</p>
+<p>Ⅰ. 父子关系
+Ⅱ. 兄弟关系
+Ⅲ. u 的父结点和 v 的父结点是兄弟关系</p>
+<ul>
+<li>A. 只有 Ⅱ</li>
+<li>B. Ⅰ 和 Ⅱ</li>
+<li>C. Ⅰ 和 Ⅲ</li>
+<li>D. Ⅰ、Ⅱ 和 Ⅲ</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（Ⅰ 和 Ⅱ）。</strong> 把二叉树里 u → w → v 这条两步路径拆开，每一步只有两种走法：<strong>往左下</strong>进到第一个孩子、<strong>往右下</strong>进到下一个兄弟。</p>
+<ul>
+<li><strong>左 + 右</strong>：w 是 u 的第一个孩子，v 又是 w 的下一个兄弟 → v 也是 u 的孩子，u、v 是<strong>父子关系</strong>（Ⅰ 成立）；</li>
+<li><strong>右 + 右</strong>：u、w、v 是同一个父亲的连续三个兄弟 → u、v 是<strong>兄弟关系</strong>（Ⅱ 成立）；</li>
+<li><strong>左 + 左</strong>：v 是 u 的孙子；</li>
+<li><strong>右 + 左</strong>：u 是 v 的父亲的兄弟。</li>
+</ul>
+<p>后两种都凑不出 Ⅲ 说的那层关系，所以 Ⅲ 不成立，选 B。</p>
+</details>
+<h4 id="2011">例题：【2011】（二叉树中无右孩子的结点个数）</h4>
+<p>【2011】已知一棵有 2011 个结点的树，其叶结点个数为 116，该树对应的二叉树中无右孩子的结点个数是</p>
+<ul>
+<li>A. 115</li>
+<li>B. 116</li>
+<li>C. 1895</li>
+<li>D. 1896</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D（1896）。</strong> 直接套上面那条结论：非终端结点数 $= 2011 - 116 = 1895$，每个非终端结点贡献一个「最后一个孩子」（它在二叉树里没有右孩子），再加上树根（它没有下一个根，也就没有右孩子），一共 $1895 + 1 = 1896$ 个。</p>
+</details>
+<h4 id="2020">例题：【2020】（由森林的遍历推出二叉树的后序）</h4>
+<p>【2020】已知森林 F 及与之对应的二叉树 T，若 F 的先根遍历序列是 <code>a, b, c, d, e, f</code>，后根遍历序列是 <code>b, a, d, f, e, c</code>，则 T 的后序遍历序列是</p>
+<ul>
+<li>A. <code>b, a, d, f, e, c</code></li>
+<li>B. <code>b, d, f, e, c, a</code></li>
+<li>C. <code>b, f, e, d, c, a</code></li>
+<li>D. <code>f, e, d, c, b, a</code></li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 C。</strong> 先套两条等价关系：<strong>森林的先根遍历 = 二叉树 T 的先序</strong>、<strong>森林的后根遍历 = 二叉树 T 的中序</strong>。所以 T 的先序是 <code>a b c d e f</code>、中序是 <code>b a d f e c</code>，题目就变成了"由先序 + 中序求后序"。</p>
+<ul>
+<li>先序第一个是 a（中序里 a 也在，位置对得上）→ 中序里 a 左边只有 <code>b</code>、右边是 <code>d f e c</code>；左子树就一个结点 b，右子树的先序段是 <code>c d e f</code>。</li>
+<li>右子树：先序段 <code>c d e f</code>、中序段 <code>d f e c</code> → 根是 c，中序里 c 排在最末尾 → c 没有右子树，左子树是 <code>d f e</code>。</li>
+<li><code>d f e</code>：先序段 <code>d e f</code>、中序段 <code>d f e</code> → 根是 d，中序里 d 排最前面 → d 没有左子树，右子树是 <code>f e</code>。</li>
+<li><code>f e</code>：先序段 <code>e f</code>、中序段 <code>f e</code> → 根是 e，f 是 e 的左孩子。</li>
+</ul>
+<p>按后序「左、右、根」拼起来：左子树给出 <code>b</code>，右子树依次给出 <code>f e d c</code>，最后才是根 a → <code>b, f, e, d, c, a</code>，选 C。</p>
+</details>
+<h4 id="n">例题：森林有 n 个非终端结点时，二叉树上右指针为空的结点数</h4>
+<p>森林 F 对应的二叉树是 B，若 F 有 n 个非终端结点，则 B 中右指针域为空的结点个数为</p>
+<ul>
+<li>A. $n-1$</li>
+<li>B. $n$</li>
+<li>C. $n+1$</li>
+<li>D. $n+2$</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 C（$n+1$）。</strong> 非终端结点就是<strong>有孩子</strong>的结点，落到二叉树上它必定有一棵左子树（左孩子 = 它的第一个孩子）；从这棵左子树<strong>一路往右下</strong>走（右孩子 = 下一个兄弟），走到头的那个结点右指针就是空的——它表示"没有下一个兄弟了"，也就是这个非终端结点的<strong>最后一个孩子</strong>。n 个非终端结点各贡献这样一个结点，已经有 n 个。</p>
+<p>还差一个：<strong>根链最末尾的那个结点</strong>（森林里最后一棵树的根），它没有"下一个根"，右指针同样是空的。</p>
+<p>合计 $n + 1$ 个，选 C。这条推理也正是前面第三条常用结论的来历。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

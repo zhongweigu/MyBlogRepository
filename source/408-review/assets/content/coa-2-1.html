@@ -1,0 +1,181 @@
+<div class="article-content">
+<h2 id="2-">考点2-补码加减运算与加法器</h2>
+<p>补码加减法的核心是：<mark>减法先改成加相反数，剩下的全部交给加法器</mark>。</p>
+<p>$$X-Y=X+\overline{Y}+1$$</p>
+<p>下面这张图把“加法”和“减法”统一到了同一套硬件：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="带标志位的补码加/减法器：Sub 控制第二操作数是否取反并决定最低位进位，上方输出结果 F、最高位进位 Cout 和四个标志位" data-src="/408-review/assets/textbook/coa-add-sub-flags.webp" href="/408-review/assets/textbook/coa-add-sub-flags.webp"><img alt="带标志位的补码加/减法器：Sub 控制第二操作数是否取反并决定最低位进位，上方输出结果 F、最高位进位 Cout 和四个标志位" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-add-sub-flags.webp"/></a><figcaption>带标志位的补码加/减法器：Sub 控制第二操作数是否取反并决定最低位进位，上方输出结果 F、最高位进位 Cout 和四个标志位</figcaption></figure>
+<p>读图时抓住三个信号：</p>
+<ol>
+<li>左输入 $X$ 直接进入加法器；</li>
+<li>右输入 $Y$ 先经过多路选择器；</li>
+<li>控制信号 <code>Sub</code> 同时控制“是否取反”和“最低位进位”。</li>
+</ol>
+<p>具体工作过程如下：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th style="text-align: right;"><code>Sub</code></th>
+<th>第二操作数</th>
+<th style="text-align: right;">最低位进位 $C_0$</th>
+<th>加法器实际完成</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td>$Y$</td>
+<td style="text-align: right;">0</td>
+<td>$F=X+Y$</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td>$\overline{Y}$</td>
+<td style="text-align: right;">1</td>
+<td>$F=X+\overline{Y}+1=X-Y$</td>
+</tr>
+</tbody>
+</table></div>
+<p>最低位进位 $C_0$ 就是图中右侧从 <code>Sub</code> 引来的一根控制线。做减法时如果没有把 $C_0$ 置 1，电路实际计算的是“反码相加”，结果会与补码差值相差 1。</p>
+<blockquote>
+<p>8421 口诀：<mark>加法 0 与 0，减法 1 与 1</mark>。<code>Sub=0</code> 时第二操作数不取反、进位为 0；<code>Sub=1</code> 时取反、进位为 1。</p>
+</blockquote>
+<p>加法器输出的结果只保留低 $n$ 位，更高位的进位会单独成为 $C_{\text{out}}$。因此它天然服从 $2^n$ 取模运算：</p>
+<p>$$F=(X\pm Y)\bmod 2^n$$</p>
+<p>是否把这个结果解释为有效真值，要看后面四类标志位。</p>
+<hr/>
+<p>图中顶部的四个标志位分别回答四个不同问题：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>标志</th>
+<th>名称</th>
+<th>由图中的哪个输出得到</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ZF</td>
+<td>零标志</td>
+<td>所有结果位都为 0</td>
+<td>结果是否为 0</td>
+</tr>
+<tr>
+<td>SF</td>
+<td>符号标志</td>
+<td>结果最高位 $F_{n-1}$</td>
+<td>按补码解释时结果为正还是负</td>
+</tr>
+<tr>
+<td>CF</td>
+<td>进位/借位标志</td>
+<td>最高位进位 $C_{\text{out}}$ 结合 <code>Sub</code></td>
+<td><strong>无符号数</strong>运算是否越界</td>
+</tr>
+<tr>
+<td>OF</td>
+<td>溢出标志</td>
+<td>符号位进位与符号位输入进位</td>
+<td><strong>有符号补码</strong>运算是否越界</td>
+</tr>
+</tbody>
+</table></div>
+<p>设最高位为第 $n-1$ 位：</p>
+<ul>
+<li>$C_n$ 表示加法器最终向外产生的进位，也就是图中的 <code>Cout</code>；</li>
+<li>$C_{n-1}$ 表示由低一位送进符号位的进位，也就是“符号位下面的进位”；</li>
+<li>$F_{n-1}$ 是结果的最高位。</li>
+</ul>
+<p>四个标志可写成：</p>
+<p>$$ZF=1\iff F=000\cdots0$$</p>
+<p>$$SF=F_{n-1}$$</p>
+<p>$$OF=C_n\oplus C_{n-1}$$</p>
+<p>$$CF=
+\begin{cases}
+C_n, &amp; \text{加法 }(\mathrm{Sub}=0)\\[4pt]
+\overline{C_n}, &amp; \text{减法 }(\mathrm{Sub}=1)
+\end{cases}
+$$</p>
+<p>也可把 CF 合并写成</p>
+<p>$$CF=C_n\oplus\mathrm{Sub}$$</p>
+<blockquote>
+<p><code>CF</code> 面向<strong>无符号数</strong>，表示加法有进位或减法不够减需要借位；<code>OF</code> 面向<strong>有符号补码</strong>，表示正负号组合已经超出当前位宽。</p>
+<p>同一次运算完全可能“CF=1、OF=0”，也可能“CF=0、OF=1”。</p>
+</blockquote>
+<hr/>
+<p>补码溢出有三种等价判断法，分别适合不同题型：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>观察对象</th>
+<th>判断规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>符号法</td>
+<td>两个操作数和结果的符号</td>
+<td>正 + 正得负，上溢；负 + 负得正，下溢</td>
+</tr>
+<tr>
+<td>进位法</td>
+<td>符号位进位 $C_{n-1}$ 与最终进位 $C_n$</td>
+<td>两者不同则溢出：$V=C_n\oplus C_{n-1}$</td>
+</tr>
+<tr>
+<td>双符号位法</td>
+<td>两个符号位 $S_1S_2$</td>
+<td>结果双符号位不同则溢出：$V=S_1\oplus S_2$</td>
+</tr>
+</tbody>
+</table></div>
+<p>设 $A_s,B_s,F_s$ 分别是两个加数和结果的符号位，则单符号位法的逻辑表达式为</p>
+<p>$$V=A_sB_s\overline{F_s}
++\overline{A_s}\overline{B_s}F_s$$</p>
+<p>其中 $V=1$ 表示溢出。第一项对应“负 + 负 = 正”，第二项对应“正 + 正 = 负”。</p>
+<p><strong>双符号位法</strong>可以先对操作数做符号扩展，使符号位变成两位，再参加运算：</p>
+<ul>
+<li>正数变成 <code>00...</code>；</li>
+<li>负数变成 <code>11...</code>；</li>
+<li>结果的两个符号位相同 → 未溢出；</li>
+<li>结果的两个符号位不同 → 溢出。</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">补充：双符号位判断上溢例子</summary>
+<p>4 位操作数扩展成 5 位双符号位：</p>
+<pre><code class="language-text">  00111      7 + 1 = 8
++ 00001
+-------
+  01000
+   ↑↑
+   01：双符号位不同，发生上溢
+</code></pre>
+</details>
+<details class="article-details">
+<summary class="article-summary">自检：为什么同一组结果可能 CF=1、OF=0？</summary>
+<p>以 4 位运算为例子。</p>
+<p><strong>（1）<code>1111 + 0001 = 0000</code></strong></p>
+<ul>
+<li>无符号数：$15+1=16$，超出 4 位无符号数范围，CF=1；</li>
+<li>补码：$-1+1=0$，结果完全正确，OF=0；</li>
+<li>结果最高位为 0，所以 SF=0、ZF=1。</li>
+</ul>
+<p><strong>（2）<code>0111 + 0001 = 1000</code></strong></p>
+<ul>
+<li>无符号数：$7+1=8$，没有超过 4 位无符号数范围，CF=0；</li>
+<li>补码：$7+1=8$ 已超出 $-8\sim7$，OF=1；</li>
+<li>结果的符号位为 1，所以 SF=1，但零标志 ZF=0。</li>
+</ul>
+<p>这两个例子说明：<mark>CF 与 OF 服务的是两套不同的数值解释</mark>。</p>
+</details>
+<hr/>
+<p>加法器的速度瓶颈在于进位传递方式。</p>
+<p><strong>串行进位加法器</strong>把 $n$ 个全加器首尾相连，每一级的进位都等待前一级算完：</p>
+<pre><code class="language-text">FA₀ ──C₁──&gt; FA₁ ──C₂──&gt; FA₂ ──&gt; … ──Cₙ──&gt; FAₙ₋₁
+</code></pre>
+<p>结构简单、硬件少，但最坏情况下进位要从最低位一路传到最高位，延迟随位数近似线性增长。</p>
+<p><strong>并行进位加法器</strong>也称先行进位加法器。它增加专门的进位逻辑，使各高位进位不等前一级逐级算完，而是尽可能同时产生。</p>
+<p>因此，并行进位的主要优点是<mark>缩短进位延迟</mark>，代价是门电路和连线更多、结构更复杂。408 中掌握这层区别即可，不需要展开具体进位公式。</p>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

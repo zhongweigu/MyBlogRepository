@@ -205,6 +205,16 @@ export class Store {
     return [...due, ...fresh];
   }
 
+  /**
+   * 今日复习队列：目标固定数量，到期优先，不足的用新考点补齐。
+   * 数量比旧版多，避免一天只过 3 个点。
+   */
+  dailyQueue(limit = 10) {
+    const due = this.dueTopics().map((id) => ({ id, kind: 'due' }));
+    const fresh = this.newTopics(limit).map((id) => ({ id, kind: 'new' }));
+    return [...due, ...fresh].slice(0, limit);
+  }
+
   streak() {
     let cursor = today();
     const active = (key) => (this.state.history[key]?.reviews || 0) + (this.state.history[key]?.questions || 0) > 0;

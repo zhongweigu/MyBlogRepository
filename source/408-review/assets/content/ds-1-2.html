@@ -1,0 +1,101 @@
+<div class="article-content">
+<h2 id="2-">题型2-递归</h2>
+<p>递归类题目也是看两个量，乘起来就是总时间：</p>
+<ol>
+<li><strong>每次调用执行了多少次基本语句</strong>——通常是一个常数，即 $O(1)$；</li>
+<li><strong>一共调用了多少次</strong>——也就是递归的调用次数。</li>
+</ol>
+<p>$$T(n) = \text{每次调用的基本语句次数} \times \text{调用次数}$$</p>
+<h4 id="2012">例题：【2012】</h4>
+<p>求整数 $n$（$n \ge 0$）阶乘的算法如下，其时间复杂度是</p>
+<pre><code class="language-c">int fact(int n){
+    if(n &lt;= 1) return 1;
+    return n * fact(n - 1); }
+</code></pre>
+<ol>
+<li><strong>每次调用执行基本语句的次数</strong>：一次比较 + 一次乘法，即 $O(1)$；</li>
+<li><strong>调用次数</strong>：每次把 $n$ 减 1，从 $n$ 一路递归到 1，易知调用次数为 $n$；</li>
+<li>相乘：$1 \times n = n$，所以 $T(n) = O(n)$。</li>
+</ol>
+<hr/>
+<h3 id="_1">通用方法：怎么数递归的调用次数</h3>
+<p>调用次数本身就是一个递归结构。设 $C(n)$ 表示“执行 $f(n)$ 一共会发生多少次调用（含 $f(n)$ 自己这一次）”，则</p>
+<p>$$C(n) = 1 + \sum_i C(n_i)$$</p>
+<p>其中 $n_i$ 是每次递归进去的子问题规模，边界取 $C(\text{基例}) = 1$。这个式子数出来的正好是<strong>递归调用树的结点总数</strong>——所以数调用次数就是数这棵树有多少个结点，关键是两个量：<strong>每层有几个结点</strong>（由分支数决定）和<strong>一共有几层</strong>（由规模衰减的速度决定）。</p>
+<p>按结构分几类就很清楚了：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>递归结构</th>
+<th>调用次数递推式</th>
+<th>调用次数</th>
+<th>典型例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单分支，规模每次减 1</td>
+<td>$C(n) = C(n-1) + 1$</td>
+<td>$O(n)$</td>
+<td>阶乘、递归求最大值</td>
+</tr>
+<tr>
+<td>单分支，规模每次减半</td>
+<td>$C(n) = C(n/2) + 1$</td>
+<td>$O(\log n)$</td>
+<td>递归的折半查找</td>
+</tr>
+<tr>
+<td>双分支，规模减常数</td>
+<td>$C(n) = C(n-1) + C(n-2) + 1$</td>
+<td>$O(2^n)$</td>
+<td>朴素递归求斐波那契</td>
+</tr>
+<tr>
+<td>双分支，规模减半</td>
+<td>$C(n) = 2C(n/2) + 1$</td>
+<td>$O(n)$</td>
+<td>归并排序的调用数</td>
+</tr>
+</tbody>
+</table></div>
+<hr/>
+<p><strong>① 单分支、规模每次减 1 —— 调用 $n$ 次。</strong></p>
+<pre><code class="language-text">Fact(n):
+    if n &lt;= 1: return 1
+    return n * Fact(n - 1)
+</code></pre>
+<p>从 <code>Fact(n)</code> 一路递归到 <code>Fact(1)</code>，正好 $n$ 次（$n = 8$ 就是 8 次）。</p>
+<p><strong>② 单分支、规模每次减半 —— 调用约 $\log_2 n$ 次。</strong></p>
+<pre><code class="language-text">BinarySearch(A, l, r, key):
+    if l &gt; r: return FAIL
+    m := (l + r) / 2
+    if A[m] == key: return m
+    if A[m] &gt; key: return BinarySearch(A, l, m - 1, key)
+    return BinarySearch(A, m + 1, r, key)
+</code></pre>
+<p>每次把区间减半，递归深度就是 $\log_2 n$（$n = 8$：$8 \to 4 \to 2 \to 1$，一共 4 次）。</p>
+<p><strong>③ 双分支、规模减常数 —— 调用次数指数级。</strong></p>
+<pre><code class="language-text">Fib(n):
+    if n &lt;= 1: return n
+    return Fib(n - 1) + Fib(n - 2)
+</code></pre>
+<p>每层多一个分叉，结点数按指数膨胀（$n = 8$ 已经要 67 次，再大就爆掉了）。</p>
+<p><strong>④ 双分支、规模减半 —— 调用约 $2n$ 次。</strong></p>
+<pre><code class="language-text">MergeSort(A, l, r):
+    if l &gt;= r: return
+    m := (l + r) / 2
+    MergeSort(A, l, m)
+    MergeSort(A, m + 1, r)
+    Merge(A, l, m, r)
+</code></pre>
+<p>虽然也是两个分支，但规模同时减半：从根往下每层结点数翻倍、层数只有 $\log n$，累计结点数约 $2n$（$n = 8$：15 次）。</p>
+<hr/>
+<p><strong>两条要点</strong>：</p>
+<ul>
+<li>单分支时“调用次数 = 递归深度”：规模每次减 1 → 深度 $n$；规模每次折半 → 深度 $\log_2 n$。</li>
+<li>多分支时不能只看深度，还要乘上每层的结点数：斐波那契每减一层就多一个分叉，结点数指数膨胀；归并排序虽然也是两个分支，但规模同时减半，从根往下每层结点数翻倍、层数只有 $\log n$，累计仍是 $O(n)$。</li>
+</ul>
+<p>更一般地，凡是能写成 $T(n) = aT(n/b) + f(n)$ 的递归（把“每次调用的基本语句次数”也并进 $f(n)$），都可以直接用<strong>主定理</strong>定出数量级——这也是大题里推导分治算法复杂度的标准工具。</p>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

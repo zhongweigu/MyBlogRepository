@@ -1,0 +1,886 @@
+<details class="article-toc">
+<summary>本页目录 <span>9 节</span></summary>
+<div class="toc">
+<ul>
+<li><a href="#4-bb">考点4-B树和B+树</a><ul>
+<li><a href="#_1">节点结构</a></li>
+<li><a href="#_2">性质</a></li>
+<li><a href="#bb">B/B+树的查找</a></li>
+<li><a href="#bb_1">B/B+树的插入</a></li>
+<li><a href="#bb_2">B/B+树的删除</a></li>
+</ul>
+</li>
+<li><a href="#5-">考点5-散列表</a><ul>
+<li><a href="#_3">散列函数的构造方法</a></li>
+<li><a href="#_4">处理冲突的方法</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</details><div class="article-content">
+<h2 id="4-bb">考点4-B树和B+树</h2>
+<p><strong>B 树（m 阶）</strong>：一种多路平衡查找树。每个结点最多有 $m$ 棵子树、$m-1$ 个关键字；除根结点外的非叶结点至少有 $\lceil m/2 \rceil$ 棵子树；所有叶结点在同一层。</p>
+<h3 id="_1">节点结构</h3>
+<p>B 树的结点通常存成：</p>
+<p><code>n | p0 | k1 | p1 | k2 | p2 | ... | kn | pn</code></p>
+<ul>
+<li>$n$：结点内关键字个数（实现中常省略）；</li>
+<li>$k_1&lt;k_2&lt;\cdots&lt;k_n$：关键字，按升序排列；</li>
+<li>$p_0$ 指向的子树中所有关键字都小于 $k_1$；</li>
+<li>$p_i$（$1\le i&lt;n$）指向的子树中所有关键字都大于 $k_i$、小于 $k_{i+1}$；</li>
+<li>$p_n$ 指向的子树中所有关键字都大于 $k_n$。</li>
+</ul>
+<p>所以 <strong>n 个关键字把关键字空间分成 n+1 段，对应 n+1 棵子树</strong>。B+ 树不是这样：它的 n 个关键字只对应 n 棵子树。</p>
+<h3 id="_2">性质</h3>
+<p>B 树和 B+ 树的核心区别：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>B 树</th>
+<th>B+ 树</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>关键字与子树</td>
+<td>$n$ 个关键字对应 $n+1$ 棵子树</td>
+<td>$n$ 个关键字对应 $n$ 棵子树</td>
+</tr>
+<tr>
+<td>根结点子树</td>
+<td>$[2,m]$</td>
+<td>$[2,m]$</td>
+</tr>
+<tr>
+<td>根结点关键字</td>
+<td>$[1,m-1]$</td>
+<td>$[2,m]$</td>
+</tr>
+<tr>
+<td>非根结点子树</td>
+<td>$[\lceil m/2 \rceil,m]$</td>
+<td>$[\lceil m/2 \rceil,m]$</td>
+</tr>
+<tr>
+<td>非根结点关键字</td>
+<td>$[\lceil m/2 \rceil-1,m-1]$</td>
+<td>$[\lceil m/2 \rceil,m]$</td>
+</tr>
+<tr>
+<td>叶子结点</td>
+<td>同一层、不带信息（失败结点）</td>
+<td>含全部关键字和记录指针，按关键字顺序链接</td>
+</tr>
+<tr>
+<td>查找方式</td>
+<td>随机查找</td>
+<td>随机查找 + 顺序查找</td>
+</tr>
+<tr>
+<td>高度</td>
+<td>见下式</td>
+<td>同 B 树量级</td>
+</tr>
+</tbody>
+</table></div>
+<p>B 树的高度（$n$ 为关键字总数，$h$ 为层数）：</p>
+<p>$$\log_m(n+1) \le h \le \log_{\lceil m/2 \rceil}\left(\frac{n+1}{2}\right)+1$$</p>
+<ul>
+<li>下界：每个结点最多 $m$ 棵子树，高度 $h$ 最多容纳 $m^h-1$ 个关键字，所以树不能太矮；</li>
+<li>上界：每个非根结点至少 $\lceil m/2 \rceil$ 棵子树，分叉不会太少，所以树不会长得太高。</li>
+</ul>
+<p><strong>B 树</strong>：每个结点都可能存数据（或记录指针），查找可能在内部结点就命中，不必走到叶子；叶子是失败结点，不带信息，所有叶子同层。</p>
+<p><strong>B+ 树</strong>：</p>
+<ul>
+<li>内部结点只存索引关键字，所有关键字和记录指针都在叶子，查找必须走到叶子；</li>
+<li>叶子按关键字从小到大顺序链接，支持范围查询和顺序查找；</li>
+<li>同样扇出下，内部结点不存数据，能容纳更多索引项，树更矮，适合做数据库/文件索引。</li>
+</ul>
+<blockquote>
+<p>注：B+ 树的内部关键字是叶子关键字的副本，只作分隔符；B 树的关键字在整棵树中只出现一次。</p>
+</blockquote>
+<h4 id="201415">例题：【2014】（15 个关键字最多多少个含关键字结点）</h4>
+<p>【2014】在一棵有 15 个关键字的 4 阶 B 树中，含关键字的结点个数最多是</p>
+<ul>
+<li>A. 5</li>
+<li>B. 6</li>
+<li>C. 10</li>
+<li>D. 15</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D（15）。</strong></p>
+<p>要让含关键字的结点数最多，就让每个结点只放 1 个关键字。4 阶 B 树每个结点最多 3 个关键字、最少 1 个；每个内部结点 1 个关键字时有两个孩子，正好可以长成一棵高度 4 的满二叉树：</p>
+<ul>
+<li>第 1 层 1 个、第 2 层 2 个、第 3 层 4 个、第 4 层 8 个；</li>
+<li>合计 $1+2+4+8=15$ 个结点、15 个关键字。</li>
+</ul>
+<p>结点数不可能超过关键字数（每个结点至少 1 个关键字），所以最多就是 15，选 D。</p>
+</details>
+<p><strong>追问：如果是 14 个关键字呢？</strong></p>
+<p>4 阶 B 树高度为 4 时，至少要 15 个关键字：每个内部结点至少 1 个关键字、每个终端结点至少 1 个关键字，最小的形状就是上面那棵 15 结点的满二叉树。所以 14 个关键字不可能保持 4 层，树高必须降到 3。</p>
+<p>高度 3 时，要让结点数最多，仍尽量让每个结点少放关键字。设第 1、2 层关键字数为 $K_1,K_2$，则三层结点数为</p>
+<p>$$N=3+2K_1+K_2$$</p>
+<p>终端结点数为 $K_1+K_2+1$。剩余 $14-K_1-K_2$ 个关键字要放进这些终端结点，且每个终端结点至少 1 个，于是</p>
+<p>$$14-K_1-K_2 \ge K_1+K_2+1 \Rightarrow K_1+K_2 \le 6$$</p>
+<p>又第二层每个结点至少 1 个关键字，$K_2\ge K_1+1$，所以 $K_1\le2$；于是 $N\le 3+4+4=11$。</p>
+<p>这个上限能达到：第 1 层 1 个结点 2 个关键字；第 2 层 3 个结点共 4 个关键字（2、1、1）；第 3 层 7 个终端结点共 8 个关键字（2、1、1、1、1、1、1）。合计 11 个结点、14 个关键字，所有终端结点都在第 3 层。</p>
+<p>所以 14 个关键字时，含关键字的结点数最多是 <strong>11</strong>，不是 14；终端结点仍同层，只是通过让部分结点多放关键字来补足。</p>
+<p>从 15 个关键字的满 4 层树删掉一个关键字，也不能简单摘掉一个叶子——那样父结点只剩一个孩子，违反 B 树性质；删除算法会借/合并，最终把树高降到 3。</p>
+<h4 id="20213-b-3-2-4">例题：【2021】（3 阶 B 树高度 3，第 2 层 4 个关键字）</h4>
+<p>【2021】在一棵高度为 3 的 3 阶 B 树中，根为第 1 层，若第 2 层中有 4 个关键字，则该树的结点数最多是</p>
+<ul>
+<li>A. 11</li>
+<li>B. 10</li>
+<li>C. 9</li>
+<li>D. 8</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 A（11）。</strong></p>
+<p>3 阶 B 树每个结点最多 2 个关键字、3 个孩子；根结点关键字数为 1 或 2，非根结点也是 1 或 2。</p>
+<p>设根有 $K_1$ 个关键字，则第 2 层有 $K_1+1$ 个结点。要让总结点数最多，先让第 2 层结点数最多，取 $K_1=2$，于是第 2 层有 3 个结点。</p>
+<p>第 2 层一共 4 个关键字，分给 3 个结点，每个结点 1 或 2 个关键字，最优分配是 <code>2,1,1</code>：</p>
+<ul>
+<li>2 个关键字的结点有 3 个孩子；</li>
+<li>1 个关键字的结点有 2 个孩子；</li>
+<li>第 3 层共有 $3+2+2=7$ 个结点。</li>
+</ul>
+<p>总结点数 $=1+3+7=11$，选 A。</p>
+<p>（若根只放 1 个关键字，第 2 层只有 2 个结点，要装 4 个关键字只能各放 2 个，第 3 层 6 个结点，总数只有 9。）</p>
+</details>
+<h3 id="bb">B/B+树的查找</h3>
+<p><strong>B 树的查找</strong>：</p>
+<ol>
+<li>从根结点开始，在结点内按关键字有序比较；</li>
+<li>命中就成功——B 树的内部结点也可能存记录，不必走到叶子；</li>
+<li>没命中，就根据 key 落在哪两个关键字之间，沿对应指针下降到子树；</li>
+<li>走到空指针，查找失败。</li>
+</ol>
+<p>每下降一层通常对应一次磁盘 I/O，所以查找代价主要看树高，为 $O(\log_m n)$。结点内既可以顺序比较，也可以折半比较。</p>
+<p>以图中查找 29 为例：</p>
+<ul>
+<li>根块 <code>[17, 35]</code>：$17&lt;29&lt;35$，走 p2 到磁盘块 3；</li>
+<li>块 3 <code>[26, 30]</code>：$26&lt;29&lt;30$，走 p2 到磁盘块 8；</li>
+<li>块 8 <code>[28, 29]</code>：找到 29。</li>
+</ul>
+<p>一共访问 3 个结点。</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="B 树查找示意：根块含 17、35，查找 29 时依次走 17&lt;29&lt;35、26&lt;29&lt;30，最后在叶块 28、29 中命中" data-src="/408-review/assets/textbook/ds-btree-search-example.webp" href="/408-review/assets/textbook/ds-btree-search-example.webp"><img alt="B 树查找示意：根块含 17、35，查找 29 时依次走 17&lt;29&lt;35、26&lt;29&lt;30，最后在叶块 28、29 中命中" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-btree-search-example.webp"/></a><figcaption>B 树查找示意：根块含 17、35，查找 29 时依次走 17&lt;29&lt;35、26&lt;29&lt;30，最后在叶块 28、29 中命中</figcaption></figure>
+<p><strong>B+ 树的查找</strong>：</p>
+<ul>
+<li>内部结点只作索引，查找必须一路走到叶子；即使内部结点出现了要查的 key，也不能在那里返回；</li>
+<li>到叶子后，在叶内找 key，找到后通过记录指针取记录；</li>
+<li>所有查找都要到叶子，访问的结点数固定为树高（叶内再比较），查找长度稳定；</li>
+<li>叶子按关键字顺序链接，找到一个 key 后可以沿链继续扫描，支持范围查询和顺序查找。</li>
+</ul>
+<p>同样以查找 29 为例：</p>
+<ul>
+<li>根块 <code>[26, 99]</code>：$29&gt;26$，走 p2 到磁盘块 3；</li>
+<li>块 3 <code>[35, 75, 99]</code>：$29&lt;35$，走 p1 到磁盘块 7；</li>
+<li>块 7 <code>[28, 29, 30, 35]</code>：找到 29；沿叶链继续还能读出 30、35……</li>
+</ul>
+<p>同样访问 3 个结点。</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="B+ 树查找示意：根块含 26、99，查找 29 时走右子树 35、75、99，再走 p1 到叶块 28、29、30、35；各叶块之间用指针顺序链接" data-src="/408-review/assets/textbook/ds-bplus-search-example.webp" href="/408-review/assets/textbook/ds-bplus-search-example.webp"><img alt="B+ 树查找示意：根块含 26、99，查找 29 时走右子树 35、75、99，再走 p1 到叶块 28、29、30、35；各叶块之间用指针顺序链接" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-bplus-search-example.webp"/></a><figcaption>B+ 树查找示意：根块含 26、99，查找 29 时走右子树 35、75、99，再走 p1 到叶块 28、29、30、35；各叶块之间用指针顺序链接</figcaption></figure>
+<p><strong>两者的关键差别</strong>：</p>
+<ul>
+<li>B 树可能在内部结点就命中，B+ 树必须到叶子；</li>
+<li>B+ 树内部结点不存记录，同样扇出下能容纳更多索引项，树更矮、磁盘 I/O 更少；</li>
+<li>B+ 树所有查找都到叶子，查找长度更稳定；B 树可能提前成功；</li>
+<li>B+ 树的叶子链表支持范围查询，B 树做范围查询要中序遍历或回溯。</li>
+</ul>
+<h4 id="2017-b">例题：【2017】（适合使用 B+ 树的应用）</h4>
+<p>【2017】下列应用中，适合使用 B+ 树的是</p>
+<ul>
+<li>A. 编译器中的词法分析</li>
+<li>B. 关系数据库中的索引</li>
+<li>C. 网络中的路由表快速查找</li>
+<li>D. 操作系统的磁盘空闲块管理</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（关系数据库中的索引）。</strong></p>
+<p>B+ 树把全部关键字和记录指针放在叶结点，叶子按关键字顺序链接，内部结点只存索引。这带来两个数据库最需要的能力：</p>
+<ul>
+<li>内部结点不存记录，扇出大、树矮，查一条记录访问的磁盘块少；</li>
+<li>叶子链表支持范围查询和顺序扫描（例如 <code>WHERE id BETWEEN 10 AND 20</code>）。</li>
+</ul>
+<p>其他选项的常用结构：</p>
+<ul>
+<li>词法分析：DFA/状态机（或哈希表）；</li>
+<li>路由表：Trie/前缀树、哈希；</li>
+<li>磁盘空闲块管理：位图、空闲链表/成组链接。</li>
+</ul>
+</details>
+<h3 id="bb_1">B/B+树的插入</h3>
+<p><strong>B 树的插入</strong>：</p>
+<ol>
+<li>先按查找路径找到应插入的终端结点（最底层）；</li>
+<li>插入后关键字个数 $\le m-1$：直接插入；</li>
+<li>插入后关键字个数 $&gt;m-1$（即变成 $m$ 个）：取第 $\lceil m/2 \rceil$ 个关键字移到父结点，原结点一分为二——左边 $\lceil m/2 \rceil-1$ 个，右边 $m-\lceil m/2 \rceil$ 个；</li>
+<li>父结点若也因此超过 $m-1$，继续向上分裂；根结点分裂时新建根，树高加 1。</li>
+</ol>
+<p><strong>B+ 树的插入</strong>：</p>
+<ol>
+<li>所有关键字最终都插入叶子；先按索引找到目标叶；</li>
+<li>插入后关键字个数 $\le m$：直接插入；</li>
+<li>插入后关键字个数 $&gt;m$（即 $m+1$ 个）：把结点分成左右两半，两边都不少于 $\lceil m/2 \rceil$ 个关键字；把左半的最大值（第 $\lceil m/2 \rceil$ 个）复制到父结点，作为新的索引项（本图索引取的是左子树最大值；若教材取右子树最小值，则复制右半第一个关键字，原理相同）；</li>
+<li>父结点若超过 $m$，继续向上分裂；根分裂时新建根，树高加 1；</li>
+<li>插入、分裂后都要检查父结点索引：如果新 key 成了某个子树的最大值，即使没有分裂，也要更新对应的索引关键字。</li>
+</ol>
+<p>用 $m=3$ 各看一个溢出分裂：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>树</th>
+<th>溢出后的结点</th>
+<th>分裂结果</th>
+<th>父结点得到</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B 树</td>
+<td><code>[10, 20, 30]</code></td>
+<td><code>[10]</code> + <code>[30]</code></td>
+<td>20（移动上去）</td>
+</tr>
+<tr>
+<td>B+ 树</td>
+<td><code>[10, 20, 25, 30]</code></td>
+<td><code>[10, 20]</code> + <code>[25, 30]</code></td>
+<td>20（复制上去，仍留在左叶）</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>注：B 树分裂是"中间关键字搬家"；B+ 树是"边界关键字复印"——原关键字仍留在叶子里，父结点只多一个索引副本。插入过程中要时刻注意是否需要修改索引中的关键字。</p>
+</blockquote>
+<h4 id="20204-b">例题：【2020】（4 阶 B 树插入后的根结点）</h4>
+<p>【2020】依次将关键字 5, 6, 9, 13, 8, 2, 12, 15 插入初始为空的 4 阶 B 树后，根结点中包含的关键字是</p>
+<ul>
+<li>A. 8</li>
+<li>B. 6, 9</li>
+<li>C. 8, 13</li>
+<li>D. 9, 12</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（6, 9）。</strong></p>
+<p>4 阶 B 树每个结点最多 3 个关键字。插入过程：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>插入</th>
+<th>变化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5, 6, 9</td>
+<td>根结点 <code>[5,6,9]</code>，已满</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>[5,6,9,13]</code> 溢出，6 上移；根 <code>[6]</code>，孩子 <code>[5]</code>、<code>[9,13]</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>$8&gt;6$，进入右子树，变 <code>[8,9,13]</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>$2&lt;6$，进入左子树，变 <code>[2,5]</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td>右子树 <code>[8,9,12,13]</code> 溢出，9 上移；根 <code>[6,9]</code>，孩子 <code>[2,5]</code>、<code>[8]</code>、<code>[12,13]</code></td>
+</tr>
+<tr>
+<td>15</td>
+<td>$15&gt;9$，进入最右子树，变 <code>[12,13,15]</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>最后根结点是 <code>[6,9]</code>，选 B。</p>
+</details>
+<h3 id="bb_2">B/B+树的删除</h3>
+<blockquote>
+<p>先明确：这里说的<strong>终端结点</strong>，指最下一层<strong>含关键字</strong>的结点，不是 B 树中那个不带信息的外部/失败结点。</p>
+</blockquote>
+<p><strong>B 树的删除</strong>：</p>
+<ol>
+<li>若被删关键字在非终端结点：用它的直接前驱（左子树最大）或直接后继（右子树最小）替代，转化为删除终端结点中的关键字；</li>
+<li>在终端结点删除后：
+   - 关键字个数 $\ge \lceil m/2 \rceil-1$：直接删除；
+   - 关键字个数 $&lt;\lceil m/2 \rceil-1$（下溢），且兄弟够借（兄弟关键字个数 $\ge \lceil m/2 \rceil$）：<strong>父下子上</strong>——父结点的分隔关键字下移，兄弟的一个关键字上移；
+   - 兄弟不够借：<strong>父下与子合并</strong>——父结点的分隔关键字下移，与当前结点、兄弟合并成一个结点；父结点少一个关键字和一个孩子，若父结点也下溢，继续向上处理。</li>
+</ol>
+<p>借的时候看方向：左兄弟够借，取左兄弟最大关键字上移；右兄弟够借，取右兄弟最小关键字上移。</p>
+<p><strong>B+ 树的删除</strong>：</p>
+<p>B+ 树所有关键字都在终端结点，内部结点只是索引，所以删除总从终端结点开始；删完还要同步索引。</p>
+<ol>
+<li>删除后关键字个数 $\ge \lceil m/2 \rceil$：直接删除；如果删的是该结点的边界值，还要检查父结点索引是否要改；</li>
+<li>关键字个数 $&lt;\lceil m/2 \rceil$（下溢），且兄弟够借（兄弟关键字个数 $\ge \lceil m/2 \rceil+1$）：从兄弟借一个关键字到当前结点，并更新父结点索引；</li>
+<li>兄弟不够借：当前结点与兄弟合并；删掉父结点对应的索引项，调整叶子链表；父结点若下溢，继续向上处理。</li>
+</ol>
+<blockquote>
+<p>删除过程中要时刻保持终端结点关键字和非终端结点关键字的一致性：B+ 树的内部关键字只是叶子关键字的副本，借、并、删边界值后不同步索引，就会出现"索引里有、叶子里没有"或边界值对不上。</p>
+<p>根结点特殊：若根在合并后没有关键字，就删掉根，让它的唯一孩子成为新根，树高减 1（B 树、B+ 树都一样）。</p>
+</blockquote>
+<p><strong>对照记</strong>：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>B 树</th>
+<th>B+ 树</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>删除位置</td>
+<td>可能在非终端，先替换成终端删除</td>
+<td>总在终端叶子</td>
+</tr>
+<tr>
+<td>下溢阈值</td>
+<td>$\lceil m/2 \rceil-1$</td>
+<td>$\lceil m/2 \rceil$</td>
+</tr>
+<tr>
+<td>够借</td>
+<td>父下子上</td>
+<td>兄弟给一个 + 改索引</td>
+</tr>
+<tr>
+<td>不够借</td>
+<td>父下与子合并</td>
+<td>与兄弟合并 + 改索引/叶链</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>记法</strong>：B 树"先换后删，少了先借后并；借是父下子上，并是父下子合"；B+ 树"叶删，少了先借后并，借并都要改索引"。</p>
+<h4 id="20225-b-260">例题：【2022】（5 阶 B 树删除 260 后的根）</h4>
+<p>【2022】在下图所示的 5 阶 B 树 T 中，删除关键字 260 之后需要进行必要的调整，得到新的 B 树 T1。下列选项中，不可能是 T1 根结点中关键字序列的是</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="2022 题图：5 阶 B 树，根结点 60、90、260、350；五个孩子分别为 30、50；70、80、85；100、110；280、300；400、500" data-src="/408-review/assets/textbook/ds-btree-2022-delete.webp" href="/408-review/assets/textbook/ds-btree-2022-delete.webp"><img alt="2022 题图：5 阶 B 树，根结点 60、90、260、350；五个孩子分别为 30、50；70、80、85；100、110；280、300；400、500" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-btree-2022-delete.webp"/></a><figcaption>2022 题图：5 阶 B 树，根结点 60、90、260、350；五个孩子分别为 30、50；70、80、85；100、110；280、300；400、500</figcaption></figure>
+<ul>
+<li>A. 60, 90, 280</li>
+<li>B. 60, 90, 350</li>
+<li>C. 60, 85, 110, 350</li>
+<li>D. 60, 90, 110, 350</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D。</strong></p>
+<p>5 阶 B 树每个结点最多 4 个关键字；非根结点最少 2 个关键字，所以 <code>[100,110]</code> 和 <code>[280,300]</code> 删掉一个就下溢。</p>
+<p>260 在根结点，先按 B 树删除规则用前驱或后继替代：</p>
+<p><strong>① 用前驱 110 替代 260</strong>：根暂时变成 <code>[60,90,110,350]</code>，左孩子 <code>[100]</code> 下溢。</p>
+<ul>
+<li>左兄弟 <code>[70,80,85]</code> 有 3 个关键字，够借：父结点 90 下移、85 上移，根变成 <code>[60,85,110,350]</code>——C 可能；</li>
+<li>不借而与右兄弟合并：父结点 110 下移，<code>[100] + 110 + [280,300]</code> 合成 <code>[100,110,280,300]</code>，根变成 <code>[60,90,350]</code>——B 可能。</li>
+</ul>
+<p><strong>② 用后继 280 替代 260</strong>：根暂时变成 <code>[60,90,280,350]</code>，右孩子 <code>[300]</code> 下溢；左右兄弟都只有 2 个关键字，不够借，只能合并。</p>
+<ul>
+<li>与左兄弟合并：<code>[100,110] + 280 + [300]</code> 合成 <code>[100,110,280,300]</code>，根变成 <code>[60,90,350]</code>——B 可能；</li>
+<li>与右兄弟合并：<code>[300] + 350 + [400,500]</code> 合成 <code>[300,350,400,500]</code>，根变成 <code>[60,90,280]</code>——A 可能。</li>
+</ul>
+<p><strong>D <code>[60,90,110,350]</code> 只是用前驱 110 替代 260 后的中间状态</strong>：此时 <code>[100]</code> 还下溢，必须继续借或合并，根一定会变（变成 B 或 C），所以 D 不可能是调整后的 T1 根结点序列。</p>
+<p>所以选 D。</p>
+</details>
+<h2 id="5-">考点5-散列表</h2>
+<p><strong>散列表</strong>：用散列函数 $H(key)$ 把关键字直接映射到存储地址，理想情况下一次就能定位。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>同义词</td>
+<td>具有相同散列函数值的关键字</td>
+</tr>
+<tr>
+<td>非同义词</td>
+<td>散列函数值不同的关键字</td>
+</tr>
+<tr>
+<td>冲突/碰撞</td>
+<td>不同关键字映射到同一散列地址</td>
+</tr>
+<tr>
+<td>堆积/二次聚集</td>
+<td>用线性探测处理同义词冲突时，又占用了非同义词的位置，造成连锁拥挤</td>
+</tr>
+<tr>
+<td>装填因子</td>
+<td>$\alpha = n/m$，$n$ 为表中关键字个数，$m$ 为散列表长度</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>影响散列表效率的三个因素</strong>：</p>
+<p><strong>① 装填因子 $\alpha$</strong>：</p>
+<ul>
+<li>$\alpha=n/m$，即表中关键字个数 / 散列表长度；</li>
+<li>$\alpha$ 表示散列表的装满程度：$\alpha$ 越大，空闲槽越少，产生冲突的可能性越大；</li>
+<li><strong>ASL 与 $n$ 或 $m$ 没有直接关系，而是依赖于 $\alpha$</strong>（散列函数均匀、冲突处理方法固定时）。不能单看表长：$m=1000$ 时，$n=100$ 的 $\alpha=0.1$，$n=900$ 的 $\alpha=0.9$，后者冲突多得多。</li>
+</ul>
+<p><strong>② 散列函数</strong>：设计得越好，关键字分布越均匀，产生冲突的可能性越小，查找路径越短。</p>
+<p><strong>③ 处理冲突的方法</strong>：决定发生冲突后的查找效率；有些方法还会引入新的冲突（例如线性探测的堆积），使查找距离变长。</p>
+<blockquote>
+<p>一句话：ASL 不直接看 $n$、$m$ 的绝对大小，而看 $\alpha$ 和冲突处理方法；$\alpha$ 越大，ASL 越大。</p>
+</blockquote>
+<h4 id="2014">例题：【2014】（堆积现象直接影响什么）</h4>
+<p>【2014】用哈希（散列）方法处理冲突（碰撞）时可能出现堆积（聚集）现象，下列选项中，会受堆积现象直接影响的是</p>
+<ul>
+<li>A. 存储效率</li>
+<li>B. 散列函数</li>
+<li>C. 装填（装载）因子</li>
+<li>D. 平均查找长度</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D（平均查找长度）。</strong></p>
+<p>堆积是用线性探测处理冲突时，冲突的关键字挤占了后面的槽，导致本来散列地址不同的关键字也被迫继续往后探测。它直接拉长的是<strong>探测序列</strong>，所以平均查找长度（ASL）变长。</p>
+<p>其他选项：</p>
+<ul>
+<li>存储效率：堆积不改变表长和关键字个数，不直接改变空间利用率；</li>
+<li>散列函数：它是映射规则，堆积是冲突处理造成的，不会反过来改变散列函数；</li>
+<li>装填因子：$\alpha=n/m$ 由关键字数和表长决定，堆积不改变 $\alpha$。</li>
+</ul>
+</details>
+<h3 id="_3">散列函数的构造方法</h3>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>做法</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接定址法</td>
+<td>$H(key)=a\cdot key+b$</td>
+<td>简单；$a\ne0$ 时无冲突，但要求关键字分布已知，可能浪费空间</td>
+</tr>
+<tr>
+<td>除留余数法</td>
+<td>$H(key)=key \bmod p$，$p\le m$</td>
+<td>最常用；$p$ 取不大于 $m$ 的质数，分布较均匀</td>
+</tr>
+<tr>
+<td>数字分析法</td>
+<td>选取关键字中分布均匀的若干位</td>
+<td>适合关键字集合已知、位数较多的情况</td>
+</tr>
+<tr>
+<td>平方取中法</td>
+<td>关键字平方后取中间几位</td>
+<td>适合关键字各位分布不均匀的情况</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="_4">处理冲突的方法</h3>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>探测序列/结构</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>线性探测</td>
+<td>$d_i=1,2,3,\dots$，$H_i=(H(key)+d_i)\bmod m$</td>
+<td>简单；容易产生堆积/二次聚集</td>
+</tr>
+<tr>
+<td>平方探测</td>
+<td>$d_i=1^2,-1^2,2^2,-2^2,\dots$</td>
+<td>减少堆积；某些 $m$ 下不能探测到所有槽</td>
+</tr>
+<tr>
+<td>双散列</td>
+<td>$d_i=i\cdot H_2(key)$</td>
+<td>分布更均匀；需要多算一个散列函数</td>
+</tr>
+<tr>
+<td>伪随机序列</td>
+<td>$d_i$ 取伪随机数</td>
+<td>依赖随机序列</td>
+</tr>
+<tr>
+<td>链地址法</td>
+<td>每个槽挂一条同义词链表</td>
+<td>无堆积；$\alpha$ 可以大于 1；删除方便；需要额外指针空间</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>线性探测法</strong>（开放定址法的一种）：</p>
+<ol>
+<li>冲突发生时，顺序查看表中的下一个单元，直到找到空单元或查遍全表；</li>
+<li>探测到表尾后，下一个探测地址回到表头（循环探测）；</li>
+<li>处理同义词冲突的过程中，可能又占用非同义词的位置，造成堆积/二次聚集；</li>
+<li>删除不能直接把槽置空，否则会截断后面的探测链，一般只做删除标记（墓碑）。这条对所有开放定址法都成立。</li>
+</ol>
+<p><strong>例</strong>：散列表长 $m=13$，散列函数 $H(key)=key\bmod 10$，依次插入 $10,21,32,42,52,75$。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>关键字</th>
+<th>$H(key)$</th>
+<th>实际地址</th>
+<th>比较次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>21</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>32</td>
+<td>2</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>42</td>
+<td>2</td>
+<td>3（2 被占，后移一位）</td>
+<td>2</td>
+</tr>
+<tr>
+<td>52</td>
+<td>2</td>
+<td>4（2、3 被占，后移两位）</td>
+<td>3</td>
+</tr>
+<tr>
+<td>75</td>
+<td>5</td>
+<td>5</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>最终表：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+<th>11</th>
+<th>12</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>关键字</td>
+<td>10</td>
+<td>21</td>
+<td>32</td>
+<td>42</td>
+<td>52</td>
+<td>75</td>
+<td>空</td>
+<td>空</td>
+<td>空</td>
+<td>空</td>
+<td>空</td>
+<td>空</td>
+<td>空</td>
+</tr>
+</tbody>
+</table></div>
+<p>$$\text{ASL}_{成功}=\frac{1+1+1+2+3+1}{6}=1.5$$</p>
+<p>失败查找从每个可能的散列地址 $0\sim9$ 出发，一直探测到空槽：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>比较次数</td>
+<td>7</td>
+<td>6</td>
+<td>5</td>
+<td>4</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>$$\text{ASL}_{失败}=\frac{7+6+5+4+3+2+1+1+1+1}{10}=3.1$$</p>
+<blockquote>
+<p>注意：表长是 13，但 $H(key)=key\bmod 10$ 只能映射到 0~9；地址 10、11、12 不会成为任何关键字的初始散列地址，所以计算失败 ASL 时只看 0~9，分母是 10，不是 13。</p>
+</blockquote>
+<h4 id="2023-asl">例题：【2023】（线性探测删除后的失败 ASL）</h4>
+<p>【2023】现有长度为 5、初始为空的散列表 HT，散列函数 $H(k)=(k+4)\bmod 5$，用线性探查再散列法解决冲突。若将关键字序列 2022, 12, 25 依次插入 HT，然后删除关键字 25，则 HT 中查找失败的平均查找长度为</p>
+<ul>
+<li>A. 1</li>
+<li>B. 1.6</li>
+<li>C. 1.8</li>
+<li>D. 2.2</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 C（1.8）。</strong></p>
+<p>插入过程：</p>
+<ul>
+<li>$H(2022)=(2022+4)\bmod 5=2026\bmod 5=1$，放在地址 1；</li>
+<li>$H(12)=16\bmod 5=1$，冲突，线性探测到地址 2；</li>
+<li>$H(25)=29\bmod 5=4$，放在地址 4。</li>
+</ul>
+<p>表为 <code>[空, 2022, 12, 空, 25]</code>。</p>
+<p>删除 25 时不能把地址 4 直接置空，否则会截断探测链；要做删除标记。删除后：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>状态</td>
+<td>空</td>
+<td>2022</td>
+<td>12</td>
+<td>空</td>
+<td>删除标记</td>
+</tr>
+</tbody>
+</table></div>
+<p>失败查找从每个可能的散列地址 0~4 出发，探测到<strong>真正的空槽</strong>为止（删除标记不算空）：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>起始地址</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>比较次数</td>
+<td>1</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>从 4 出发：地址 4 是删除标记（算一次比较），继续回绕到 0，0 为空，共 2 次；</li>
+<li>其余：0 空 → 1 次；1→2→3 空 → 3 次；2→3 空 → 2 次；3 空 → 1 次。</li>
+</ul>
+<p>$$\text{ASL}_{失败}=\frac{1+3+2+1+2}{5}=1.8$$</p>
+<p>选 C。</p>
+<blockquote>
+<p>易错：如果删除 25 时直接把地址 4 置空，从 4 出发一次就失败，$\text{ASL}_{失败}=8/5=1.6$，会误选 B。开放定址法必须用删除标记。</p>
+</blockquote>
+</details>
+<p><strong>平方探测法</strong>（开放定址法的一种）：</p>
+<ol>
+<li>$H_i=(H(key)+d_i)\bmod m$，$d_i=1^2,-1^2,2^2,-2^2,\dots$；有的题目用 $1^2,2^2,3^2,\dots$，具体公式以题目为准；</li>
+<li>散列表长度 $m$ 必须是一个可以表示成 $4k+3$ 的素数；</li>
+<li>可以避免线性探测的堆积，但不能保证探测到散列表上的所有单元；</li>
+<li>删除同样不能直接把槽置空，要做删除标记。</li>
+</ol>
+<blockquote>
+<p>注：不同教材对平方探测能覆盖多少槽的结论不完全一致；按课件记"避免堆积，但不保证覆盖全表"，做题时以题目给定的探测序列为准。</p>
+</blockquote>
+<h4 id="2024">例题：【2024】（平方探测构造散列表与查找）</h4>
+<p>【2024】将关键字序列 20, 3, 11, 18, 9, 14, 7 依次存储到初始为空、长度为 11 的散列表 HT 中，散列函数 $H(key)=(key\times3)\bmod 11$。$H(key)$ 计算出的初始散列地址为 $H_0$，发生冲突时探查地址序列是 $H_1,H_2,H_3,\dots$，其中 $H_k=(H_0+k^2)\bmod 11$，$k=1,2,3,\dots$。</p>
+<p>请回答下列问题：</p>
+<p>1）画出所构造的 HT，并计算 HT 的装填因子。
+2）给出在 HT 中查找关键字 14 的关键字比较序列。
+3）在 HT 中查找关键字 8，确认查找失败时的散列地址是多少？</p>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>1）HT 如下，装填因子 $\alpha=7/11\approx0.64$。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>关键字</td>
+<td>11</td>
+<td>空</td>
+<td>14</td>
+<td>7</td>
+<td>空</td>
+<td>20</td>
+<td>9</td>
+<td>空</td>
+<td>空</td>
+<td>3</td>
+<td>18</td>
+</tr>
+</tbody>
+</table></div>
+<p>插入过程：</p>
+<ul>
+<li>20：$H_0=5$，放地址 5；</li>
+<li>3：$H_0=9$，放地址 9；</li>
+<li>11：$H_0=0$，放地址 0；</li>
+<li>18：$H_0=10$，放地址 10；</li>
+<li>9：$H_0=5$ 冲突，$H_1=6$，放地址 6；</li>
+<li>14：$H_0=9$ 冲突，$H_1=10$ 冲突，$H_2=2$，放地址 2；</li>
+<li>7：$H_0=10$ 冲突，$H_1=0$ 冲突，$H_2=3$，放地址 3。</li>
+</ul>
+<p>共有 $n=7$ 个关键字，表长 $m=11$，所以 $\alpha=7/11\approx0.64$。</p>
+<p><strong>2）查找 14：关键字比较序列是 3, 18, 14。</strong></p>
+<p>$H(14)=42\bmod11=9$：地址 9 是 3，$H_1=10$ 是 18，$H_2=2$ 是 14，命中。对应地址序列 $9\to10\to2$。</p>
+<p><strong>3）查找 8 失败，确认失败的散列地址是 7。</strong></p>
+<p>$H(8)=24\bmod11=2$：地址 2 是 14，$H_1=3$ 是 7，$H_2=6$ 是 9，$H_3=0$ 是 11，$H_4=7$ 为空，查找失败。探测地址序列是 $2\to3\to6\to0\to7$。</p>
+</details>
+<p><strong>注意表长 $m$ 与散列函数除数的区别</strong>：</p>
+<ul>
+<li>表长 $m$ 是槽的个数，线性探测、平方探测回绕时都对 $m$ 取模；</li>
+<li>$H(key)=key\bmod p$ 里的 $p$ 只决定初始散列地址的范围，$p$ 可以小于 $m$；</li>
+<li>算初始地址用 $p$，算探测地址用 $m$，两者不要混。</li>
+</ul>
+<h4 id="14math175">例题：表长 14、$H(key)=key\bmod 11$ 的二次探测</h4>
+<p>【题目】散列表长 $m=14$，$H(key)=key\bmod 11$，若插入关键字 15、38、61、84，并使用二次探测法解决冲突，则 49 的散列地址是</p>
+<ul>
+<li>A. 8</li>
+<li>B. 3</li>
+<li>C. 5</li>
+<li>D. 9</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D（9）。</strong></p>
+<p>先算初始地址（除数是 11）：</p>
+<ul>
+<li>$15\bmod11=4$，放地址 4；</li>
+<li>$38\bmod11=5$，放地址 5；</li>
+<li>$61\bmod11=6$，放地址 6；</li>
+<li>$84\bmod11=7$，放地址 7。</li>
+</ul>
+<p>49 的初始地址是 $49\bmod11=5$，地址 5 已被 38 占用。按正向平方探测，回绕对<strong>表长 14</strong> 取模：</p>
+<ul>
+<li>$H_1=(5+1^2)\bmod14=6$，被 61 占用；</li>
+<li>$H_2=(5+2^2)\bmod14=9$，空，放地址 9。</li>
+</ul>
+<p>所以 49 的散列地址是 9，选 D。</p>
+<blockquote>
+<p>注意：这题用 11 回绕碰巧也会得到 9，但规则上探测地址必须对表长 $m=14$ 取模；换一组数据就可能不同。</p>
+</blockquote>
+</details>
+<p><strong>链地址法</strong>：</p>
+<ol>
+<li>所有同义词存在一条链表里，链表由散列地址唯一标识——数组的每个槽存对应链表的头指针；</li>
+<li>插入、删除都只改链表指针，可以直接删除关键字，不需要墓碑；</li>
+<li>查找时先算 $H(key)$ 找到槽，再沿链表逐个比较；</li>
+<li><strong>空指针也算一次比较</strong>：成功时比较到目标结点为止，次数等于结点在链中的序号；失败时要走完整条链，再判断一次空指针，次数 $=$ 链长 $+1$。</li>
+</ol>
+<p>等概率、散列函数均匀映射到 $m$ 个槽时：</p>
+<p>$$\text{ASL}_{成功}=\frac{1}{n}\sum_{i=1}^{m}\frac{k_i(k_i+1)}{2}$$</p>
+<p>$$\text{ASL}_{失败}=\frac{1}{m}\sum_{i=1}^{m}(k_i+1)$$</p>
+<p>其中 $k_i$ 是第 $i$ 个槽的链长，$n=\sum k_i$。</p>
+<p><strong>例</strong>：$m=5$，各槽链长 $k=(2,1,0,3,0)$：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>槽</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>链长 $k_i$</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>0</td>
+</tr>
+<tr>
+<td>失败比较次数 $k_i+1$</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>$$\text{ASL}_{失败}=\frac{3+2+1+4+1}{5}=2.2$$</p>
+<p>若 6 个关键字在链中的位置分别为 1、2（槽 0）、1（槽 1）、1、2、3（槽 3），则</p>
+<p>$$\text{ASL}_{成功}=\frac{1+2+1+1+2+3}{6}=\frac{10}{6}\approx1.67$$</p>
+<p><strong>查找过程</strong>：先算 $H(key)$ 并比较；冲突就按探测序列或链表继续找；找到关键字成功，遇到空槽或链尾失败。</p>
+<ul>
+<li>开放定址法要求 $\alpha&lt;1$（表不能满）；</li>
+<li>链地址法的 $\alpha$ 可以大于 1，平均链长就是 $\alpha$；</li>
+<li>ASL 与 $\alpha$ 和冲突处理方法都有关，但总体趋势是 $\alpha$ 越大、ASL 越大。</li>
+</ul>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

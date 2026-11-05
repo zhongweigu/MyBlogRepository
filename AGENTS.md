@@ -339,3 +339,16 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 4. 只有预览放大后仍无法辨认，才读单张原图，并说明原因。
 
 不要一次查看多张 contact sheet，也不要按 `IMG01`、`IMG02`……顺序把全部预览看完。写乘法就筛 `2.2.4`，写哪一小节就只取哪一小节；需要跨小节核对时再增加一个筛选词。索引缓存不需要提交，也不要复制进帖子资源目录。
+
+---
+
+## 20. 408 复习台（source/408-review）
+
+- 维护手册：`docs/408-review-maintenance.md`，**改复习台前先读**。
+- 入口 `/408-review/`，由 `_config.yml` 的 `skip_render: 408-review/**` 原样复制；不要改 Butterfly 主题去渲染它。
+- 今日页只保留「每日知识点复习」一个模块，默认 10 个考点；不要加回计划 / 每日一题 / 热力图等模块。
+- 考点页正文在 `assets/content/<topic-id>.html`，按需 fetch；`topic.points` 只是速记层。
+- 所有图片必须落地到 `assets/textbook/` 或 `assets/img/`，在正文对应段落插入；不要只堆文末。
+- 原帖图片可用 `python scripts/build-review-content.py` 生成（51 篇 + 图片）；手写长文直接写 `assets/content/<id>.html`。
+- 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。
+- 改完 `npx hexo clean && npx hexo generate`，桌面 + 390px 各验证，确认无 404；然后自动 commit + push。

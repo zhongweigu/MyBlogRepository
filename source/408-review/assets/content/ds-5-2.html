@@ -1,0 +1,378 @@
+<details class="article-toc">
+<summary>本页目录 <span>8 节</span></summary>
+<div class="toc">
+<ul>
+<li><a href="#2-bst">考点2-BST（二叉搜索树）</a><ul>
+<li><a href="#_1">查找</a></li>
+<li><a href="#_2">删除</a></li>
+</ul>
+</li>
+<li><a href="#3-avl">考点3-AVL（平衡二叉树）</a><ul>
+<li><a href="#avl">AVL查找</a></li>
+<li><a href="#avl_1">AVL插入</a></li>
+<li><a href="#avl_2">AVL删除</a></li>
+<li><a href="#avl_3">AVL的性质</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</details><div class="article-content">
+<h2 id="2-bst">考点2-BST（二叉搜索树）</h2>
+<p><strong>定义</strong>：二叉搜索树（BST）满足：对任意结点，左子树上所有关键字都小于它，右子树上所有关键字都大于它；左、右子树也分别是 BST。</p>
+<p>由此得到最重要的性质：<strong>中序遍历 BST，得到递增有序序列</strong>。</p>
+<h3 id="_1">查找</h3>
+<p>BST 查找和折半查找是同一个思路：每比较一次，就排除一整棵子树。</p>
+<ol>
+<li>从根开始，<code>key</code> 等于当前结点，查找成功；</li>
+<li><code>key</code> 小于当前结点，去左子树；</li>
+<li><code>key</code> 大于当前结点，去右子树；</li>
+<li>走到空指针，查找失败。</li>
+</ol>
+<p>比较次数等于路径上经过的<strong>非空结点数</strong>：成功时数到目标结点，失败时数到最后一个非空结点。把每个结点看成一次比较，这条路径就是一株判定树；树平衡时，查找长度和折半查找同量级。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>折半查找</th>
+<th>BST 查找</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>存储</td>
+<td>顺序表</td>
+<td>二叉链表</td>
+</tr>
+<tr>
+<td>前提</td>
+<td>表按关键字有序</td>
+<td>满足 BST 性质</td>
+</tr>
+<tr>
+<td>比较路径</td>
+<td>折半判定树</td>
+<td>BST 本身</td>
+</tr>
+<tr>
+<td>平均时间复杂度</td>
+<td>$O(\log_2 n)$</td>
+<td>$O(\log_2 n)$</td>
+</tr>
+<tr>
+<td>最坏时间复杂度</td>
+<td>$O(\log_2 n)$</td>
+<td>$O(n)$（退化成单支链）</td>
+</tr>
+</tbody>
+</table></div>
+<p>⚠ 这是 BST 和折半查找最容易考的区别：折半查找的判定树始终平衡，BST 的形状却取决于结点的插入顺序，同样的 $n$ 个关键字可能长成一条链。</p>
+<h3 id="_2">删除</h3>
+<p>先找到待删结点 <code>p</code>，再按它的孩子个数分三种情况：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>p</code> 是叶子</td>
+<td>直接删除，把父结点对应的孩子指针置空（<code>p</code> 是根时直接把根置空）</td>
+</tr>
+<tr>
+<td><code>p</code> 只有一个孩子</td>
+<td>用<strong>唯一的孩子</strong>顶替它，父结点改为指向这个孩子（<code>p</code> 是根时根改为这个孩子）</td>
+</tr>
+<tr>
+<td><code>p</code> 有两个孩子</td>
+<td>用<strong>直接前驱</strong>或<strong>直接后继</strong>的值替代 <code>p</code>，再删除那个前驱/后继结点</td>
+</tr>
+</tbody>
+</table></div>
+<p>两个概念：</p>
+<ul>
+<li><strong>直接前驱</strong>：中序遍历中 <code>p</code> 的前一个结点，即 <code>p</code> 左子树中<strong>最右</strong>的结点（左子树的最大值）；</li>
+<li><strong>直接后继</strong>：中序遍历中 <code>p</code> 的后一个结点，即 <code>p</code> 右子树中<strong>最左</strong>的结点（右子树的最小值）。</li>
+</ul>
+<p>两种选法都合法，题目没有额外要求时选任意一种即可；不同选法得到的树形可能不同。用前驱/后继的值替代后，BST 性质仍然成立。并且前驱没有右孩子、后继没有左孩子，所以替代结点最多只有一个孩子——删它时只会落回前两种情况，不会一直递归下去。</p>
+<p>删除的时间复杂度也是 $O(h)$（$h$ 为树高）：平均 $O(\log_2 n)$，最坏 $O(n)$。</p>
+<h2 id="3-avl">考点3-AVL（平衡二叉树）</h2>
+<p><strong>定义</strong>：AVL 树是一棵平衡的二叉搜索树：任意结点的左、右子树高度之差的绝对值不超过 1。</p>
+<p>平衡因子：</p>
+<p>$$\text{BF}(x) = h(\text{左子树}) - h(\text{右子树})$$</p>
+<p>所以 AVL 树中每个结点的 BF 只能是 $-1$、$0$、$1$。插入、删除后要沿路径更新高度和 BF。</p>
+<h3 id="avl">AVL查找</h3>
+<p>和 BST 完全一样：从根开始，<code>key</code> 小往左、大往右，相等命中，走到空指针失败。</p>
+<p>区别在复杂度：AVL 树高始终是 $O(\log_2 n)$，所以查找最坏也是 $O(\log_2 n)$；普通 BST 可能退化成单支链，最坏 $O(n)$。</p>
+<h3 id="avl_1">AVL插入</h3>
+<p>插入新结点后，可能从插入点向上出现不平衡。<strong>只调整最小不平衡子树</strong>，整棵树就恢复平衡。</p>
+<p><strong>最小不平衡子树</strong>：从插入结点向上找，第一个 $|\text{BF}| = 2$ 的结点为根的子树——它是离插入点最近的不平衡结点。</p>
+<p>按新结点相对最小不平衡子树根的位置分四种：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>插入位置</th>
+<th>调整</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LL</td>
+<td>左孩子的左子树</td>
+<td>右旋最小不平衡结点</td>
+</tr>
+<tr>
+<td>RR</td>
+<td>右孩子的右子树</td>
+<td>左旋最小不平衡结点</td>
+</tr>
+<tr>
+<td>LR</td>
+<td>左孩子的右子树</td>
+<td>先左旋左孩子，再右旋最小不平衡结点</td>
+</tr>
+<tr>
+<td>RL</td>
+<td>右孩子的左子树</td>
+<td>先右旋右孩子，再左旋最小不平衡结点</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>两种基本旋转</strong>（都以被旋转的结点为轴）：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>旋转</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>左旋</td>
+<td>① 右孩子变为旋转结点的父结点；② 右孩子的<strong>左子树</strong>变为旋转结点的<strong>右子树</strong></td>
+</tr>
+<tr>
+<td>右旋</td>
+<td>① 左孩子变为旋转结点的父结点；② 左孩子的<strong>右子树</strong>变为旋转结点的<strong>左子树</strong></td>
+</tr>
+</tbody>
+</table></div>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="AVL 插入的四种不平衡：①LL，80 的左子树左边过长；②RR，80 的右子树右边过长；③LR，80 的左子树右边过长；④RL，80 的右子树左边过长；灰色结点为新插入结点" data-src="/408-review/assets/textbook/ds-avl-insert-cases.webp" href="/408-review/assets/textbook/ds-avl-insert-cases.webp"><img alt="AVL 插入的四种不平衡：①LL，80 的左子树左边过长；②RR，80 的右子树右边过长；③LR，80 的左子树右边过长；④RL，80 的右子树左边过长；灰色结点为新插入结点" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-avl-insert-cases.webp"/></a><figcaption>AVL 插入的四种不平衡：①LL，80 的左子树左边过长；②RR，80 的右子树右边过长；③LR，80 的左子树右边过长；④RL，80 的右子树左边过长；灰色结点为新插入结点</figcaption></figure>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>例</th>
+<th>类型</th>
+<th>调整</th>
+<th>调整后的根</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①</td>
+<td>LL</td>
+<td>右旋 80</td>
+<td>70</td>
+</tr>
+<tr>
+<td>②</td>
+<td>RR</td>
+<td>左旋 80</td>
+<td>100</td>
+</tr>
+<tr>
+<td>③</td>
+<td>LR</td>
+<td>先左旋 70，再右旋 80</td>
+<td>75</td>
+</tr>
+<tr>
+<td>④</td>
+<td>RL</td>
+<td>先右旋 100，再左旋 80</td>
+<td>90</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>注：LL/RR 是单旋，LR/RL 是双旋；双旋的第一步旋的是"不平衡结点的孩子"，第二步才是"不平衡结点"。</p>
+</blockquote>
+<p><strong>有序插入的特殊结论</strong>：按 $1,2,\dots,2^n-1$ 的顺序依次插入空 AVL，最终会得到一棵高度为 $n$ 的<strong>满二叉树</strong>；根是 $2^{n-1}$，左右子树分别由前一半和后一半递归构成。</p>
+<h4 id="2013-17bf0">例题：【2013】（有序插入 1~7，BF=0 的分支结点）</h4>
+<p>【2013】若将关键字 1, 2, 3, 4, 5, 6, 7 依次插入初始为空的平衡二叉树 T，则 T 中平衡因子为 0 的分支结点的个数是</p>
+<ul>
+<li>A. 0</li>
+<li>B. 1</li>
+<li>C. 2</li>
+<li>D. 3</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 D（3 个）。</strong></p>
+<p>$7 = 2^3 - 1$，由上面的结论，1~7 依次插入后是一棵高度为 3 的满二叉树：根是 4，左孩子 2（左右孩子 1、3），右孩子 6（左右孩子 5、7）。</p>
+<p>分支结点（非叶结点）是 4、2、6，它们的左右子树高度都相等，BF 全为 0。叶子 1、3、5、7 的 BF 也是 0，但题目问的是<strong>分支结点</strong>，不算叶子。</p>
+<p>所以 BF=0 的分支结点有 3 个，选 D。</p>
+</details>
+<h3 id="avl_2">AVL删除</h3>
+<p>先按 BST 的删除规则处理，再检查平衡。按被删结点的孩子情况分四种：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 删除叶子结点</td>
+<td>删除后仍平衡就直接删；不平衡就转成插入的四种情况调整</td>
+</tr>
+<tr>
+<td>② 删除结点只有一个孩子（左或右）</td>
+<td>让这个孩子上位，再转成插入情况检查、调整</td>
+</tr>
+<tr>
+<td>③ 有左右孩子，且左子树更深</td>
+<td>与中序前驱交换，再转成插入情况调整</td>
+</tr>
+<tr>
+<td>④ 有左右孩子，且右子树更深</td>
+<td>与中序后继交换，再转成插入情况调整</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>中序前驱 = 左子树最右结点（左子树最大值）；中序后继 = 右子树最左结点（右子树最小值）。</li>
+<li>③④交换后，待删结点变成前驱/后继原来的位置，而前驱没有右孩子、后继没有左孩子，所以最多只有一个孩子，化归为①②。</li>
+</ul>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="AVL 删除的四种情形：①删除叶子 8；②删除只有右孩子的 40，50 上位；③删除左右孩子且左子树更深的 20，与中序前驱 15 交换；④删除左右孩子且右子树更深的 20，与中序后继 21 交换" data-src="/408-review/assets/textbook/ds-avl-delete-cases.webp" href="/408-review/assets/textbook/ds-avl-delete-cases.webp"><img alt="AVL 删除的四种情形：①删除叶子 8；②删除只有右孩子的 40，50 上位；③删除左右孩子且左子树更深的 20，与中序前驱 15 交换；④删除左右孩子且右子树更深的 20，与中序后继 21 交换" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-avl-delete-cases.webp"/></a><figcaption>AVL 删除的四种情形：①删除叶子 8；②删除只有右孩子的 40，50 上位；③删除左右孩子且左子树更深的 20，与中序前驱 15 交换；④删除左右孩子且右子树更深的 20，与中序后继 21 交换</figcaption></figure>
+<blockquote>
+<p>注：图中灰色结点是待删除的结点；③④ 交换后，真正删除的是前驱/后继原来的位置。</p>
+</blockquote>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>例</th>
+<th>待删结点</th>
+<th>情形</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①</td>
+<td>8（叶子）</td>
+<td>删除叶子</td>
+</tr>
+<tr>
+<td>②</td>
+<td>40（只有右孩子 50）</td>
+<td>孩子上位</td>
+</tr>
+<tr>
+<td>③</td>
+<td>20（左右孩子，左子树更深）</td>
+<td>与中序前驱 15 交换</td>
+</tr>
+<tr>
+<td>④</td>
+<td>20（左右孩子，右子树更深）</td>
+<td>与中序后继 21 交换</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>注：插入只需要调整最小不平衡子树一次；删除可能在调整后让更高层的祖先继续失衡，所以要沿路径继续检查，可能需要多次旋转。</p>
+</blockquote>
+<h4 id="2019t1-t3">例题：【2019】（删除后重新插入，T1 与 T3 是否相同）</h4>
+<p>【2019】在任意一棵非空平衡二叉树（AVL 树）T1 中，删除某结点 v 之后形成平衡二叉树 T2，再将 v 插入 T2 形成平衡二叉树 T3。下列关于 T1 与 T3 的叙述中，正确的是</p>
+<ul>
+<li>Ⅰ. 若 v 是 T1 的叶结点，则 T1 与 T3 可能不相同</li>
+<li>Ⅱ. 若 v 不是 T1 的叶结点，则 T1 与 T3 一定不相同</li>
+<li>
+<p>Ⅲ. 若 v 不是 T1 的叶结点，则 T1 与 T3 一定相同</p>
+</li>
+<li>
+<p>A. 仅 Ⅰ</p>
+</li>
+<li>B. 仅 Ⅱ</li>
+<li>C. 仅 Ⅰ、Ⅱ</li>
+<li>D. 仅 Ⅰ、Ⅲ</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 A（仅 Ⅰ）。</strong></p>
+<p>AVL 的删除和插入不是互逆操作：删除可能触发旋转，插入又可能触发新的旋转，所以 T3 不一定回到 T1。下面用 <code>根(左, 右)</code> 简写树形，<code>_</code> 表示空。</p>
+<ul>
+<li><strong>例①（v 是叶子）</strong>：T1 = <code>2(1, 4(3,5))</code>。删 1 后根 2 右重，左旋得 T2 = <code>4(2(_,3),5)</code>；重插 1 得 T3 = <code>4(2(1,3),5)</code>。T1 根 2、T3 根 4，<strong>可能不同</strong>，Ⅰ 对。</li>
+<li><strong>例②（v 不是叶子，会变）</strong>：T1 = <code>3(1(_,2), 5(4,6))</code>。删 1（只有右孩子 2）得 T2 = <code>3(2,5(4,6))</code>；重插 1 得 T3 = <code>3(2(1,_),5(4,6))</code>，与 T1 <strong>不同</strong>，Ⅲ 错。</li>
+<li><strong>例③（v 不是叶子，不变）</strong>：T1 = <code>2(1,3)</code>。删根 2（用前驱 1 代替）得 T2 = <code>1(_,3)</code>；重插 2 后经 RL 旋转回到 <code>2(1,3)</code>，与 T1 <strong>相同</strong>，Ⅱ 错。</li>
+</ul>
+<p>因此只有 Ⅰ 正确，选 A。</p>
+</details>
+<h3 id="avl_3">AVL的性质</h3>
+<p>下面的 $h$ 都按<strong>层数</strong>算，根为第 1 层。</p>
+<p><strong>① 最少结点数</strong>：设 $n_h$ 表示高度为 $h$ 的 AVL 树最少需要的结点数，则</p>
+<p>$$n_h = n_{h-1} + n_{h-2} + 1, \qquad n_1 = 1,\ n_2 = 2$$</p>
+<p>理由：根占 1 个；左右子树高度差最多 1，要让总数最少，就取一棵高度 $h-1$、另一棵高度 $h-2$，各自取最少结点数。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>$h$</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$n_h$</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>7</td>
+<td>12</td>
+<td>20</td>
+<td>33</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>② $n$ 个结点的 AVL 最小高度</strong>：</p>
+<p>$$h_{\min} = \lceil \log_2(n+1) \rceil$$</p>
+<p>因为高度为 $h$ 的二叉树最多 $2^h - 1$ 个结点，要装下 $n$ 个结点必须 $2^h - 1 \ge n$，即 $h \ge \log_2(n+1)$，取最小的整数就是向上取整。</p>
+<blockquote>
+<p>注：这里是<strong>向上取整</strong>。例如 $n=4$ 时 $h_{\min} = \lceil \log_2 5 \rceil = 3$，不能用向下取整算成 2。</p>
+</blockquote>
+<p><strong>③ 最多结点数</strong>：高度为 $h$ 的 AVL 树最多有</p>
+<p>$$2^h - 1$$</p>
+<p>个结点，取满二叉树时达到。每层最多 $1,2,4,\dots,2^{h-1}$ 个，求和即可。</p>
+<p><strong>合起来看</strong>：同样高度 $h$，AVL 的结点数在 $[n_h,\ 2^h-1]$ 之间；同样 $n$ 个结点，AVL 的高度在 $[\lceil \log_2(n+1) \rceil,\ h_{\max}]$ 之间（$h_{\max}$ 是 $n$ 个结点时 AVL 可能达到的最大高度）。令 $m_h = n_h + 1$，则 $m_h = m_{h-1} + m_{h-2}$，所以 $n_h$ 按 Fibonacci 速度增长，$h_{\max} = O(\log_2 n)$——这正是 AVL 查找最坏仍为 $O(\log_2 n)$ 的原因。</p>
+<p>例如 $n=8$：$h_{\min} = \lceil \log_2 9 \rceil = 4$；高度 4 的 AVL 最少 7 个结点、最多 15 个结点，8 个结点正好能构成高度 4 的 AVL。</p>
+<p><strong>记忆</strong>：高度固定时，<strong>非叶结点的 BF 全为 $\pm 1$（没有 $0$）$\Leftrightarrow$ 结点数取最少 $n_h$</strong>。只要有一个非叶结点的 BF 为 $0$，说明它左右子树一样高，这棵子树比"最少"更满，总结点数就会大于 $n_h$。</p>
+<h4 id="2012-1">例题：【2012】（非叶结点平衡因子全为 1）</h4>
+<p>【2012】若平衡二叉树的高度为 6，且所有非叶结点的平衡因子均为 1，则该平衡二叉树的结点总数为</p>
+<ul>
+<li>A. 12</li>
+<li>B. 20</li>
+<li>C. 32</li>
+<li>D. 33</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（20）。</strong></p>
+<p>所有非叶结点的 BF 都是 1（没有 0），说明每个内部结点左右子树高度都差 1，整棵树取到了高度 6 时的<strong>最少结点数</strong>。</p>
+<p>由性质①：</p>
+<p>$$n_6 = n_5 + n_4 + 1$$</p>
+<p>查前面的数列，$n_4 = 7$、$n_5 = 12$，所以</p>
+<p>$$n_6 = 12 + 7 + 1 = 20$$</p>
+<p>选 B。</p>
+<p>选项里的 12 正好是 $n_5$、33 是 $n_7$，32 是 $2^5$，都是按相邻高度或满二叉树设的干扰项。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

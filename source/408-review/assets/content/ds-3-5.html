@@ -1,0 +1,167 @@
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc">
+<ul>
+<li><a href="#2-">考点2-树的存储</a><ul>
+<li><a href="#_1">二叉树的存储方式</a></li>
+<li><a href="#_2">树的存储</a></li>
+</ul>
+</li>
+<li><a href="#3-">考点3-唯一确定一棵二叉树</a><ul>
+<li><a href="#_4">中序 + 先序</a></li>
+<li><a href="#_5">中序 + 后序</a></li>
+<li><a href="#_6">中序 + 层序</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</details><div class="article-content">
+<h2 id="2-">考点2-树的存储</h2>
+<h3 id="_1">二叉树的存储方式</h3>
+<p><strong>顺序存储</strong>：把二叉树补成完全二叉树，再按下标放进数组。一般从下标 1 开始存——这样父子关系直接算得出来（$i$ 的左孩子是 $2i$、右孩子是 $2i+1$、父结点是 $\lfloor i/2 \rfloor$）；下标 0 一般空出来存结点总数。</p>
+<p><strong>链式存储</strong>：二叉链表，每个结点是「数据域 + 左孩子指针 + 右孩子指针」。$n$ 个结点的二叉链表一共有 $n+1$ 个空链域。</p>
+<p>两种存法按查找代价对照：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>存储方式</th>
+<th>存储结构</th>
+<th>找父结点</th>
+<th>找子结点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>顺序存储</td>
+<td>按完全二叉树补空放进数组，一般从下标 1 开始</td>
+<td>方便</td>
+<td>方便</td>
+</tr>
+<tr>
+<td>二叉链表</td>
+<td>数据域 + 左孩子指针 + 右孩子指针</td>
+<td>不方便</td>
+<td>方便</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="_2">树的存储</h3>
+<p><strong>双亲表示法</strong>：数组存储，每个位置存 data 和父结点下标 parent。找父结点方便，找子结点要遍历整个数组。</p>
+<p><strong>孩子表示法</strong>：每个结点的所有孩子串成一条单链表，所有孩子链表的头指针放在一个顺序表里。找孩子方便，找父结点不方便。</p>
+<p><strong>孩子兄弟表示法</strong>：用二叉链表，每个结点是「数据域 + 指向下一个孩子的指针 + 指向下一个兄弟的指针」。用法灵活、能复用二叉树的算法；再加一个 parent 指针变成三叉链表，就能高效查找父结点。</p>
+<p>三种表示法按查找代价对照：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>存储方式</th>
+<th>存储结构</th>
+<th>找父结点</th>
+<th>找子结点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>双亲表示法</td>
+<td>数组，每个位置存 data 和父结点下标 parent</td>
+<td>方便</td>
+<td>不方便，要遍历整个数组</td>
+</tr>
+<tr>
+<td>孩子表示法</td>
+<td>顺序表存各孩子链表的头指针，孩子串成单链表</td>
+<td>不方便</td>
+<td>方便</td>
+</tr>
+<tr>
+<td>孩子兄弟表示法</td>
+<td>二叉链表：数据域 + 第一个孩子的指针 + 下一个兄弟的指针</td>
+<td>不方便（再加 parent 指针就可以）</td>
+<td>方便</td>
+</tr>
+</tbody>
+</table></div>
+<hr/>
+<h4 id="2020">例题：【2020】（顺序存储至少需要多少单元）</h4>
+<p>【2020】对于任意一棵高度为 5 且有 10 个结点的二叉树，若采用顺序存储结构保存，每个结点占 1 个存储单元（仅存放结点的数据信息），则存放该二叉树需要的存储单元数量至少是</p>
+<ul>
+<li>A. 31</li>
+<li>B. 16</li>
+<li>C. 15</li>
+<li>D. 10</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 A（31）。</strong> 关键词是「<strong>任意</strong>」和「至少」：问的是"保证任意一棵高 5、10 个结点的二叉树都装得下"需要多少单元，所以按最坏情况算，而不是挑一棵省地方的树（完全二叉树 10 个结点只到下标 15 附近）。顺序存储的下标就是完全二叉树的编号，高度为 5 的树，结点下标最大会落在第 5 层的最后一个位置，也就是 $2^5 - 1 = 31$：让路径一路向右走（$1 \to 3 \to 7 \to 15 \to 31$），最后那个结点就能放到第 5 层最右边；这条斜链只占 5 个结点，剩下 5 个随便挂在别的空位上，照样是高 5、10 个结点的二叉树。所以至少需要 31 个存储单元。</p>
+</details>
+<h4 id="_3">例题：三叉链表的空指针域个数</h4>
+<p>具有 n 个结点的三叉树用三叉链表表示，则树中空指针域的个数为</p>
+<ul>
+<li>A. $3n+1$</li>
+<li>B. $2n+1$</li>
+<li>C. $3n-1$</li>
+<li>D. $3n$</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 B（$2n+1$）。</strong> 三叉链表的每个结点有 3 个指针域，$n$ 个结点一共 $3n$ 个。从下往上看，除根结点以外每个结点都恰好被父结点的一个指针指着，所以非空的指针域只有 $n-1$ 个，空指针域就是 $3n - (n-1) = 2n+1$ 个。（同一套算法放在二叉链表上：$2n - (n-1) = n+1$，正好和前面那条对上。）</p>
+</details>
+<h2 id="3-">考点3-唯一确定一棵二叉树</h2>
+<p>能唯一确定一棵二叉树的组合是<strong>中序 + 先序</strong>、<strong>中序 + 后序</strong>、层序 + 中序——都离不开中序（中序定左右，另一种序定根）；只有<strong>先序 + 后序不行</strong>：某个结点只带一个孩子时，从这两种序列里分不出它是左孩子还是右孩子。</p>
+<hr/>
+<h3 id="_4">中序 + 先序</h3>
+<p>先序的第一个元素就是根；拿它去中序里一劈，左边是左子树、右边是右子树，再对这两段递归。下图是先序 <code>2 1 5 4 3 6</code>、中序 <code>5 1 2 4 6 3</code> 的还原过程：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="中序加先序还原二叉树：先序第一个元素 2 是根，中序里 2 左边是左子树 5 1、右边是右子树 4 6 3，再对两部分递归" data-src="/408-review/assets/textbook/ds-build-tree-inorder-preorder.webp" href="/408-review/assets/textbook/ds-build-tree-inorder-preorder.webp"><img alt="中序加先序还原二叉树：先序第一个元素 2 是根，中序里 2 左边是左子树 5 1、右边是右子树 4 6 3，再对两部分递归" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-build-tree-inorder-preorder.webp"/></a><figcaption>中序加先序还原二叉树：先序第一个元素 2 是根，中序里 2 左边是左子树 5 1、右边是右子树 4 6 3，再对两部分递归</figcaption></figure>
+<p>① 先序第一个是 2 → 根是 2；中序里 2 左边是 <code>5 1</code>、右边是 <code>4 6 3</code>。
+② 左子树那两个结点对应先序开头的 <code>1 5</code>，第一个 1 就是它的根；中序里 5 在 1 左边 → 5 是 1 的左孩子。
+③ 右子树那三个结点对应先序的 <code>4 3 6</code> → 4 是根；中序里 4 左边为空，所以 4 没有左子树，右边的 <code>6 3</code> 是它的右子树。
+④ <code>6 3</code> 在先序里是 <code>3 6</code> → 3 是根；中序里 6 在 3 左边 → 6 是 3 的左孩子。</p>
+<hr/>
+<h3 id="_5">中序 + 后序</h3>
+<p>换成后序，根就跑到序列的最后一位，切法完全一样。下图是后序 <code>2 1 5 4 3 6</code>、中序 <code>5 1 2 4 6 3</code> 的还原过程：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="中序加后序还原二叉树：后序最后一个元素 6 是根，中序里 6 左边是左子树 5 1 2 4、右边是右子树 3，再对两部分递归" data-src="/408-review/assets/textbook/ds-build-tree-inorder-postorder.webp" href="/408-review/assets/textbook/ds-build-tree-inorder-postorder.webp"><img alt="中序加后序还原二叉树：后序最后一个元素 6 是根，中序里 6 左边是左子树 5 1 2 4、右边是右子树 3，再对两部分递归" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-build-tree-inorder-postorder.webp"/></a><figcaption>中序加后序还原二叉树：后序最后一个元素 6 是根，中序里 6 左边是左子树 5 1 2 4、右边是右子树 3，再对两部分递归</figcaption></figure>
+<p>① 后序最后一个是 6 → 根是 6；中序里 6 左边是 <code>5 1 2 4</code>、右边是 <code>3</code>。
+② 左子树那四个结点对应后序的 <code>2 1 5 4</code>，最后一位 4 是它的根；中序里 4 左边是 <code>5 1 2</code>、右边为空 → 4 没有右子树。
+③ <code>5 1 2</code> 对应后序的 <code>2 1 5</code> → 5 是根；中序里 5 左边为空、右边是 <code>1 2</code> → 5 没有左子树。
+④ <code>1 2</code> 对应后序的 <code>2 1</code> → 1 是根；中序里 1 左边为空、右边是 2 → 2 是 1 的右孩子。</p>
+<hr/>
+<h3 id="_6">中序 + 层序</h3>
+<p>层序的第一个元素就是根；把剩下的结点按中序里排在根的哪一侧分成两组，每组里<strong>层序中最先出现的那个</strong>就是这棵子树的根，然后一路往下分组。下图是层序 <code>2 1 4 5 3 6</code>、中序 <code>5 1 2 4 6 3</code> 的还原过程：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="中序加层序还原二叉树：层序第一个元素 2 是根，中序里 2 左边是左子树 5 1、右边是右子树 4 6 3，再按层序先后定出各子树的根" data-src="/408-review/assets/textbook/ds-build-tree-inorder-levelorder.webp" href="/408-review/assets/textbook/ds-build-tree-inorder-levelorder.webp"><img alt="中序加层序还原二叉树：层序第一个元素 2 是根，中序里 2 左边是左子树 5 1、右边是右子树 4 6 3，再按层序先后定出各子树的根" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-build-tree-inorder-levelorder.webp"/></a><figcaption>中序加层序还原二叉树：层序第一个元素 2 是根，中序里 2 左边是左子树 5 1、右边是右子树 4 6 3，再按层序先后定出各子树的根</figcaption></figure>
+<p>① 层序第一个是 2 → 根是 2；中序里 2 把它劈成左 <code>5 1</code>、右 <code>4 6 3</code>。
+② 从左往右扫剩下的 <code>1 4 5 3 6</code>，看每个结点在中序里落在 2 的哪一侧：<code>1 5</code> 是左子树、<code>4 3 6</code> 是右子树，两边最先出现的结点各是 1 和 4 → 左子树的根是 1、右子树的根是 4。
+③ 左子树 <code>5 1</code>：中序里 5 在 1 左边 → 5 是 1 的左孩子。右子树那一段的层序是 <code>4 3 6</code>、中序是 <code>4 6 3</code>，4 左边为空 → 4 没有左子树，<code>6 3</code> 全在它右边。
+④ <code>6 3</code> 里层序是 <code>3 6</code> → 3 是根；中序里 6 在 3 左边 → 6 是 3 的左孩子。</p>
+<hr/>
+<h4 id="2011">例题：【2011】（先序 + 后序定不出中序）</h4>
+<p>【2011】一棵二叉树的前序遍历序列和后序遍历序列分别为 <code>1, 2, 3, 4</code> 和 <code>4, 3, 2, 1</code>，该二叉树的中序遍历序列不会是</p>
+<ul>
+<li>A. <code>1, 2, 3, 4</code></li>
+<li>B. <code>2, 3, 4, 1</code></li>
+<li>C. <code>3, 2, 4, 1</code></li>
+<li>D. <code>4, 3, 2, 1</code></li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 C。</strong> 先序 <code>1 2 3 4</code> 定出 1 是根（后序最后一位也是 1，对上了）、2 是 1 唯一的孩子、3 是 2 唯一的孩子、4 是 3 唯一的孩子——这棵树的骨架就是一条 4 个结点的单链；至于每一节挂在左边还是右边，先序 + 后序看不出来（这正是这对组合定不出树的地方）。</p>
+<p>单链里每个结点只有一棵子树，那棵子树的所有结点在中序里必须全排在它同一侧。看 C：<code>3, 2, 4, 1</code> 里 2 唯一的孩子子树是 <code>{3, 4}</code>，可 3 在 2 左边、4 在 2 右边，被 2 劈成了两半——出不来。另外三个都能构造：<code>1,2,3,4</code> 是 2、3、4 依次挂在右边，<code>4,3,2,1</code> 是依次挂在左边，<code>2,3,4,1</code> 是 2 挂 1 左边、其余挂右边。</p>
+</details>
+<h4 id="2012">例题：【2012】（先序 + 后序能推出根有几个孩子）</h4>
+<p>【2012】若一棵二叉树的前序遍历序列为 <code>a, e, b, d, c</code>，后序遍历序列为 <code>b, c, d, e, a</code>，则根结点的孩子结点</p>
+<ul>
+<li>A. 只有 e</li>
+<li>B. 有 e、b</li>
+<li>C. 有 e、c</li>
+<li>D. 无法确定</li>
+</ul>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>选 A（只有 e）。</strong> 先序 + 后序定不出整棵树的形状，那就只挑能确定的部分往下推。</p>
+<p><strong>a 是根</strong>：前序第一个是 a，后序最后一个也是 a，对上了。</p>
+<p><strong>e 是这棵子树的根</strong>：去掉 a，剩下前序 <code>e b d c</code>、后序 <code>b c d e</code>——前序的第一个、后序的最后一个都是 e。</p>
+<p><strong>e 有没有兄弟</strong>：不妨假设有。先序去掉 a 之后必然是两块——e 的子树整段在前、兄弟的子树整段在后（兄弟那棵子树只可能由 e 后面那些结点 <code>b d c</code> 组成）；后序的排法则是「e 的子树 → 兄弟的子树 → a」。e 是它那棵子树的根，在后序里排在 e 的子树那一段的最后，所以兄弟的子树必须整段落在 e 的<strong>后面</strong>。可实际后序 <code>b c d e a</code> 里，e 已经紧挨着 a 了（它后面只剩 a 一个），b、c、d 又全排在 e 前面——兄弟的子树无处可放，矛盾。所以 e 没有兄弟。</p>
+<p><strong>另一条路，直接从定义看</strong>：先序的结构是 <code>a [L] [R]</code>、后序是 <code>[L] [R] a</code>；去掉 a 之后，「前序的第一个」是 L 的根、「后序的最后一个」是 R 的根，而现在这两个位置都是 e，说明 e 既在 L 也在 R——e 只有一个，L 和 R 就不可能同时存在，e 只能是唯一的孩子。</p>
+<p>小心别选 D：先序 + 后序定不出来的是「这个孩子挂在左边还是右边」以及往下各层的形状，根有几个孩子是定得出来的。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

@@ -1,9 +1,9 @@
 import { Store, today } from './store.js';
 import { topicById, chapterById, topicsOfChapter, QUESTIONS, subjectOf } from './data/index.js';
-import { todayView, dailyQuestionCard } from './views/today.js';
+import { todayView } from './views/today.js';
 import { mapView } from './views/map.js';
 import { chapterView } from './views/chapter.js';
-import { topicView } from './views/topic.js';
+import { topicView, hydrateTopicArticle } from './views/topic.js';
 import { questionsView } from './views/questions.js';
 import { guideView } from './views/guide.js';
 import { startRunner } from './runner.js';
@@ -14,7 +14,6 @@ const store = new Store();
 const THEME_KEY = 'review408.theme';
 const app = $('#app');
 let lastPath = null;
-let dailySeed = 0;
 
 /* ---------------- 主题 ---------------- */
 
@@ -159,7 +158,7 @@ function afterRender(route) {
     });
   }
   if (name === 'topic' && param) {
-    // 阅读页一开始收在顶部，保留第一个知识点展开
+    hydrateTopicArticle(param);
   }
 }
 
@@ -230,8 +229,18 @@ function handleAction(actionEl, e) {
   }
   if (action === 'start-queue') {
     e.preventDefault();
-    startRunner(store, store.queue(), {
+    startRunner(store, store.dailyQueue(10), {
       title: '今日复习',
+      onClose: () => render({ scroll: false }),
+    });
+    return;
+  }
+  if (action === 'start-topic-runner') {
+    e.preventDefault();
+    const topicId = actionEl.dataset.topic;
+    const kind = actionEl.dataset.kind || 'due';
+    startRunner(store, [{ id: topicId, kind }], {
+      title: '单点复习',
       onClose: () => render({ scroll: false }),
     });
     return;
@@ -305,29 +314,6 @@ function handleAction(actionEl, e) {
     actionEl.innerHTML = `${icon('check', 15)} 已显示解析`;
     actionEl.disabled = true;
     store.markQuestionSeen();
-    return;
-  }
-  if (action === 'daily-tab') {
-    e.preventDefault();
-    const tab = actionEl.dataset.tab;
-    $$('.daily-tab').forEach((b) => {
-      const on = b.dataset.tab === tab;
-      b.classList.toggle('is-active', on);
-      b.setAttribute('aria-selected', String(on));
-    });
-    $$('.daily-pane').forEach((p) => {
-      const on = p.dataset.pane === tab;
-      p.classList.toggle('is-active', on);
-      p.hidden = !on;
-    });
-    return;
-  }
-  if (action === 'shuffle-daily') {
-    e.preventDefault();
-    dailySeed += 1;
-    const idx = Math.floor(Math.random() * QUESTIONS.length);
-    const slot = $('#daily-question-slot');
-    if (slot) slot.innerHTML = dailyQuestionCard(idx);
     return;
   }
   if (action === 'shuffle-question') {

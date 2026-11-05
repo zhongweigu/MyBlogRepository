@@ -1,0 +1,132 @@
+<div class="article-content">
+<h2 id="2-cpuio">考点2-CPU、主存、I/O 与总线</h2>
+<p>408 题经常根据功能倒推寄存器名称，因此不能只记缩写：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>部件</th>
+<th>主要作用</th>
+<th>易错点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PC</td>
+<td>保存下一条待取指令的地址</td>
+<td>它指向指令，执行阶段可能被转移类指令改写</td>
+</tr>
+<tr>
+<td>IR</td>
+<td>保存当前正在译码、执行的指令</td>
+<td>保存整条指令，不只是操作码</td>
+</tr>
+<tr>
+<td>MAR</td>
+<td>保存本次要访问的存储单元地址</td>
+<td>MAR 位数决定可寻址空间，不直接决定存储器总容量</td>
+</tr>
+<tr>
+<td>MDR</td>
+<td>保存与主存交换的数据或指令</td>
+<td>又称 MBR，408 中其位数等于存储字长；按字节编址时通常为 8 位，不由机器字长决定</td>
+</tr>
+<tr>
+<td>通用寄存器</td>
+<td>暂存操作数、中间结果、地址</td>
+<td>程序员通常可见，由指令直接使用</td>
+</tr>
+<tr>
+<td>PSW</td>
+<td>保存标志位、中断允许位、运行状态等</td>
+<td>其中条件码可能决定条件转移</td>
+</tr>
+<tr>
+<td>ALU</td>
+<td>完成算术运算和逻辑运算</td>
+<td>ALU 本身不存放指令，也不单独决定执行顺序</td>
+</tr>
+<tr>
+<td>控制器</td>
+<td>对指令译码并产生控制信号</td>
+<td>微程序控制器还会访问控制存储器</td>
+</tr>
+</tbody>
+</table></div>
+<p>CPU 与主存之间一次典型的信息传递可以写成：</p>
+<pre><code class="language-text">CPU 内部地址 → MAR → 主存
+主存数据     → MDR → CPU 内部寄存器
+</code></pre>
+<p><mark>PC 指向指令，IR 保存当前指令，MAR 送地址，MDR 接数据</mark>，四者不能因为都与“访存”有关而混用。</p>
+<hr/>
+<p>“主存”指 CPU 能直接按地址访问、用于存放当前运行程序和数据的那一层存储器。完整存储层次通常可以概括为：</p>
+<ol>
+<li>寄存器：位于 CPU 内，速度最快、容量最小；</li>
+<li>Cache：位于 CPU 内或紧邻 CPU，对程序员透明，缓存主存中的活跃数据；</li>
+<li>主存：存放当前要执行的指令和数据；</li>
+<li>外存：如磁盘、SSD，容量大、价格低，但 CPU 不能直接执行其中的指令，程序和数据必须先调入主存。</li>
+</ol>
+<pre class="mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;primaryColor&quot;: &quot;#5b9bd5&quot;,
+    &quot;primaryTextColor&quot;: &quot;#ffffff&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#41719c&quot;,
+    &quot;lineColor&quot;: &quot;#41719c&quot;,
+    &quot;secondaryColor&quot;: &quot;#ffffff&quot;,
+    &quot;tertiaryColor&quot;: &quot;#e2f0d9&quot;,
+    &quot;fontSize&quot;: &quot;16px&quot;,
+    &quot;fontFamily&quot;: &quot;-apple-system, BlinkMacSystemFont, \&quot;Segoe UI\&quot;, Roboto, \&quot;Helvetica Neue\&quot;, Arial, \&quot;Noto Sans\&quot;, sans-serif&quot;
+  },
+  &quot;flowchart&quot;: {
+    &quot;nodeSpacing&quot;: 8,
+    &quot;rankSpacing&quot;: 26,
+    &quot;curve&quot;: &quot;basis&quot;,
+    &quot;htmlLabels&quot;: true,
+    &quot;subGraphTitleMargin&quot;: { &quot;top&quot;: 0, &quot;bottom&quot;: 14 },
+    &quot;padding&quot;: 4,
+    &quot;useMaxWidth&quot;: false,
+    &quot;wrappingWidth&quot;: 1000
+  }
+}}%%
+graph LR
+  REG[&quot;寄存器&lt;br&gt;最快 / 最小&lt;br&gt;位于 CPU 内&quot;]
+  CACHE[&quot;Cache&lt;br&gt;硬件自动管理&lt;br&gt;缓存活跃数据&quot;]
+  MAIN[&quot;主存&lt;br&gt;按地址直接访问&lt;br&gt;存放当前程序&quot;]
+  DISK[&quot;外存&lt;br&gt;容量最大&lt;br&gt;持久保存&quot;]
+
+  REG --&gt; CACHE
+  CACHE --&gt; MAIN
+  MAIN --&gt; DISK
+
+  classDef root fill:#5b9bd5,stroke:#41719c,color:#ffffff,font-size:20px
+  classDef lvl1 fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d,font-size:19px
+  classDef lvl2d fill:#dbe8f6,stroke:#1f4e79,stroke-width:2px,color:#0d2f4d,font-size:16px
+  classDef lvl3d fill:#dbe8f6,stroke:#1f4e79,stroke-width:1.5px,color:#0d2f4d,font-size:15px
+
+  class REG root;
+  class CACHE lvl1;
+  class MAIN lvl2d;
+  class DISK lvl3d;</pre>
+<blockquote>
+<p>上图展示的是<strong>完整存储层次</strong>，主存只是其中一层。寄存器也不全相同：既有指令可直接访问的通用寄存器，也有 PC、IR、MAR、MDR 这类专用寄存器。Cache 虽由高速存储单元构成，但逻辑上处于 CPU 与主存之间。</p>
+</blockquote>
+<hr/>
+<p>CPU 通常不能直接驱动键盘、磁盘等设备，中间需要 I/O 接口完成地址译码、数据缓冲、状态保存和格式转换。接口中常见三类寄存器：</p>
+<ul>
+<li>数据寄存器：暂存取入或送出的数据；</li>
+<li>状态寄存器：保存忙、就绪、错误等状态；</li>
+<li>控制寄存器：接收 CPU 发出的启动、读写模式等命令。</li>
+</ul>
+<p>I/O 的主要控制方式包括程序查询、中断和 DMA。前两种通常仍由 CPU 参与数据传送，DMA 则让 DMA 控制器在设备与主存之间成批搬运数据，CPU 主要负责启动和收尾。</p>
+<p>总线是一组能为多个部件共享的信息传输线。按所传信息可分为：</p>
+<ul>
+<li>数据总线：传送数据、指令和状态信息，宽度影响一次能传多少位；</li>
+<li>地址总线：传送存储单元或 I/O 端口地址，宽度决定可寻址范围；</li>
+<li>控制总线：传送读/写命令、中断请求、总线请求、时钟和应答等控制信号。</li>
+</ul>
+<p>存储器和 I/O 设备都通过总线或相应的接口连接 CPU。现代计算机常采用多级总线结构，但无论结构怎样变化，“地址指出找谁，数据完成传输，控制信号规定何时做什么”这三类信息始终存在。</p>
+<blockquote>
+<p>记忆：<mark>地址线决定“找哪里”，数据线负责“送什么”，控制线规定“何时、怎么做”</mark>。</p>
+</blockquote>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

@@ -1,0 +1,1372 @@
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc">
+<ul>
+<li><a href="#43">4.3 程序的机器级代码表示</a></li>
+<li><a href="#44">4.4 考点提纲</a><ul>
+<li><a href="#_1">条件转移与标志位</a></li>
+<li><a href="#_2">相对转移计算</a></li>
+<li><a href="#c">C 程序与机器代码对应</a></li>
+<li><a href="#risc-cisc">RISC 与 CISC 判断</a></li>
+</ul>
+</li>
+<li><a href="#_3">四*、指令专题</a></li>
+</ul>
+</div>
+
+</details><div class="article-content">
+<h2 id="43">4.3 程序的机器级代码表示</h2>
+<p>汇编语句的语义分析按四个问题逐层展开：</p>
+<pre class="mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;primaryColor&quot;: &quot;#5b9bd5&quot;,
+    &quot;primaryTextColor&quot;: &quot;#ffffff&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#41719c&quot;,
+    &quot;lineColor&quot;: &quot;#41719c&quot;,
+    &quot;secondaryColor&quot;: &quot;#ffffff&quot;,
+    &quot;tertiaryColor&quot;: &quot;#e2f0d9&quot;,
+    &quot;fontSize&quot;: &quot;16px&quot;,
+    &quot;fontFamily&quot;: &quot;-apple-system, BlinkMacSystemFont, \&quot;Segoe UI\&quot;, Roboto, \&quot;Helvetica Neue\&quot;, Arial, \&quot;Noto Sans\&quot;, sans-serif&quot;
+  },
+  &quot;flowchart&quot;: {
+    &quot;nodeSpacing&quot;: 8,
+    &quot;rankSpacing&quot;: 26,
+    &quot;curve&quot;: &quot;basis&quot;,
+    &quot;htmlLabels&quot;: true,
+    &quot;subGraphTitleMargin&quot;: { &quot;top&quot;: 0, &quot;bottom&quot;: 14 },
+    &quot;padding&quot;: 4,
+    &quot;useMaxWidth&quot;: false,
+    &quot;wrappingWidth&quot;: 1000
+  }
+}}%%
+graph LR
+  A[&quot;汇编语句语义分析&quot;]
+  B1[&quot;明确源操作数与目的操作数&quot;]
+  B2[&quot;每个操作数都按寻址方式求值&quot;]
+  B3[&quot;执行后逐项检查&quot;]
+  B4[&quot;高频运算对应&quot;]
+
+  A --&gt; B1
+  A --&gt; B2
+  A --&gt; B3
+  A --&gt; B4
+
+  B1 --&gt; C11[&quot;以题目给出的汇编约定为准&quot;]
+  B1 --&gt; C12[&quot;不同体系结构的书写顺序可能相反&quot;]
+
+  B2 --&gt; C21[&quot;寄存器直接：取寄存器内容&quot;]
+  B2 --&gt; C22[&quot;寄存器间接：以寄存器内容为地址访问主存&quot;]
+  B2 --&gt; C23[&quot;自增寻址：完成访存后再更新寄存器&quot;]
+
+  B3 --&gt; C31[&quot;目的寄存器是否改变&quot;]
+  B3 --&gt; C32[&quot;自增/自减寄存器是否改变&quot;]
+  B3 --&gt; C33[&quot;主存单元是否被写入&quot;]
+  B3 --&gt; C34[&quot;标志寄存器是否改变&quot;]
+  B3 --&gt; C35[&quot;PC 如何更新&quot;]
+
+  B4 --&gt; C41[&quot;add：加法&quot;]
+  B4 --&gt; C42[&quot;sub：减法&quot;]
+  B4 --&gt; C43[&quot;cmp：做减法并更新标志，但不保存差值&quot;]
+  B4 --&gt; C44[&quot;shl：逻辑左移，左移一位通常对应乘 2&quot;]
+  B4 --&gt; C45[&quot;仅当移出的高位不会破坏所需数值语义时&lt;br&gt;才能用左移替代乘 2&quot;]
+
+  classDef root fill:#5b9bd5,stroke:#41719c,color:#ffffff,font-weight:bold,font-size:20px
+  classDef lvl1 fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d,font-size:19px
+  classDef lvl2d fill:#dbe8f6,stroke:#1f4e79,stroke-width:2px,color:#000000,font-size:16px
+  classDef lvl2l fill:#f6fafe,stroke:#c3d9ef,stroke-width:2px,color:#000000,font-size:16px
+
+  class A root;
+  class B1,B2,B3,B4 lvl1;
+  class C11,C12 lvl2d;
+  class C21,C22,C23 lvl2l;
+  class C31,C32,C33,C34,C35 lvl2d;
+  class C41,C42,C43,C44,C45 lvl2l;</pre>
+<p>以 <code>mov eax, dword ptr [ebp-8]</code> 为例（设 <code>[ebp-8]</code> 中存放 80）：源操作数在 <code>[ebp-8]</code> 指向的存储单元，目的操作数是 EAX；执行后 EAX 变为 80，该存储单元不变，标志寄存器不变，PC 指向下一条指令。</p>
+<p><strong>x86 通用寄存器。</strong> x86 有 8 个 32 位通用寄存器。为向后兼容 16 位和 8 位架构，EAX、EBX、ECX、EDX 的低 16 位可以作为 16 位寄存器单独使用（记作 AX、BX、CX、DX），每个 16 位寄存器又能拆成高 8 位、低 8 位两个独立的 8 位寄存器（AX 分为 AH、AL）。名字里的 E 表示 Extended，用于标识 32 位寄存器。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>32 位</th>
+<th>16 位</th>
+<th>高 8 位</th>
+<th>低 8 位</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EAX</td>
+<td>AX</td>
+<td>AH</td>
+<td>AL</td>
+<td>累加器；乘除法的隐含操作数；函数返回值</td>
+</tr>
+<tr>
+<td>EBX</td>
+<td>BX</td>
+<td>BH</td>
+<td>BL</td>
+<td>基址寄存器</td>
+</tr>
+<tr>
+<td>ECX</td>
+<td>CX</td>
+<td>CH</td>
+<td>CL</td>
+<td>计数寄存器；循环计数、移位次数</td>
+</tr>
+<tr>
+<td>EDX</td>
+<td>DX</td>
+<td>DH</td>
+<td>DL</td>
+<td>数据寄存器；乘除法的高半部分、除法余数</td>
+</tr>
+<tr>
+<td>ESI</td>
+<td>SI</td>
+<td>—</td>
+<td>—</td>
+<td>源变址寄存器</td>
+</tr>
+<tr>
+<td>EDI</td>
+<td>DI</td>
+<td>—</td>
+<td>—</td>
+<td>目的变址寄存器</td>
+</tr>
+<tr>
+<td>EBP</td>
+<td>BP</td>
+<td>—</td>
+<td>—</td>
+<td>栈帧基址指针，指向当前栈帧底部</td>
+</tr>
+<tr>
+<td>ESP</td>
+<td>SP</td>
+<td>—</td>
+<td>—</td>
+<td>栈顶指针，指向当前栈顶</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>EIP 存放下一条要执行指令的地址，EFLAGS 存放标志位，两者不属于通用寄存器。EIP 不能直接用 <code>mov</code> 修改，只能由跳转、调用、返回等指令改变。</p>
+</blockquote>
+<p><strong>常用指令（Intel 格式，<code>操作码 目的, 源</code>）。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>指令</th>
+<th>作用与要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>传送</td>
+<td><code>mov dest, src</code></td>
+<td>dest ← src；不影响标志；两个操作数不能同时是内存</td>
+</tr>
+<tr>
+<td>栈</td>
+<td><code>push src</code></td>
+<td>ESP ← ESP−4，再令 M[ESP] ← src</td>
+</tr>
+<tr>
+<td>栈</td>
+<td><code>pop dst</code></td>
+<td>dst ← M[ESP]，再令 ESP ← ESP+4</td>
+</tr>
+<tr>
+<td>算术</td>
+<td><code>add/sub dest, src</code></td>
+<td>dest ← dest ± src；影响 CF、OF、SF、ZF</td>
+</tr>
+<tr>
+<td>算术</td>
+<td><code>inc/dec dest</code></td>
+<td>dest ← dest ± 1；影响 OF、SF、ZF，<strong>不影响 CF</strong></td>
+</tr>
+<tr>
+<td>乘法</td>
+<td><code>mul src</code></td>
+<td>无符号单操作数乘法，乘积在 EDX:EAX</td>
+</tr>
+<tr>
+<td>乘法</td>
+<td><code>imul src</code></td>
+<td>有符号单操作数乘法，乘积在 EDX:EAX</td>
+</tr>
+<tr>
+<td>除法</td>
+<td><code>div src</code> / <code>idiv src</code></td>
+<td>被除数在 EDX:EAX，商→EAX，余数→EDX</td>
+</tr>
+<tr>
+<td>逻辑</td>
+<td><code>and/or/xor dest, src</code></td>
+<td>按位与/或/异或；CF=OF=0</td>
+</tr>
+<tr>
+<td>逻辑</td>
+<td><code>not dest</code></td>
+<td>按位取反；不影响标志</td>
+</tr>
+<tr>
+<td>逻辑</td>
+<td><code>neg dest</code></td>
+<td>dest ← 0−dest；影响标志，dest≠0 时 CF=1</td>
+</tr>
+<tr>
+<td>移位</td>
+<td><code>shl/shr dest, count</code></td>
+<td>逻辑左/右移；CF 为最后移出的位</td>
+</tr>
+<tr>
+<td>比较</td>
+<td><code>cmp dest, src</code></td>
+<td>做 dest−src，只更新标志，不保存结果</td>
+</tr>
+<tr>
+<td>测试</td>
+<td><code>test dest, src</code></td>
+<td>做 dest AND src，只更新标志，不保存结果</td>
+</tr>
+<tr>
+<td>控制</td>
+<td><code>jmp label</code></td>
+<td>无条件跳转</td>
+</tr>
+<tr>
+<td>控制</td>
+<td><code>jcc label</code></td>
+<td>条件跳转，依据 ZF、SF、OF、CF</td>
+</tr>
+<tr>
+<td>过程</td>
+<td><code>call label</code></td>
+<td>返回地址压栈，跳到目标过程</td>
+</tr>
+<tr>
+<td>过程</td>
+<td><code>ret</code></td>
+<td>弹出返回地址，跳回调用者</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>乘法：<code>mul</code> 与 <code>imul</code>。</strong> 两者都只有一个显式操作数，被乘数隐含在 EAX，乘积固定放在 EDX:EAX 中（高 32 位在 EDX，低 32 位在 EAX）。</p>
+<ul>
+<li><code>mul src</code>（无符号）：乘积的高半部分 EDX 不为 0，说明结果超出 32 位无符号数的范围，置 CF=OF=1；EDX=0 则 CF=OF=0。</li>
+<li><code>imul src</code>（有符号）：乘积的高半部分 EDX 不是低半部分 EAX 的符号扩展，说明结果超出 32 位有符号数的范围，置 CF=OF=1；是符号扩展则 CF=OF=0。</li>
+<li>单操作数乘法判溢出只看 CF、OF，不靠 SF：SF、ZF、AF、PF 均无定义。乘积的符号看 EDX:EAX 的最高位，也就是 EDX 的最高位。</li>
+<li>双操作数形式 <code>imul dest, src</code> 只保留低 32 位；结果能用 dest 的符号扩展表示时 CF=OF=0，否则为 1。</li>
+</ul>
+<p><strong>除法：<code>div</code> 与 <code>idiv</code>。</strong> 同样只有一个显式操作数（除数），被除数是 EDX:EAX 拼成的 64 位数。</p>
+<ul>
+<li><code>div src</code> 无符号，<code>idiv src</code> 有符号；商放 EAX，余数放 EDX，<code>idiv</code> 的余数符号与被除数相同。</li>
+<li>32 位被除数做除法前要先准备 EDX：无符号用 <code>xor edx, edx</code> 清零，有符号用 <code>cdq</code> 把 EAX 符号扩展到 EDX。</li>
+<li>除数为 0，或商超出 EAX 能表示的范围，都会产生除法异常。</li>
+</ul>
+<p><strong>逻辑与移位。</strong></p>
+<ul>
+<li><code>and</code>、<code>or</code>、<code>xor</code> 都置 CF=OF=0，按结果置 SF、ZF、PF；<code>xor eax, eax</code> 是清零的常用写法。</li>
+<li><code>not</code> 不影响标志；<code>neg</code> 相当于 0−dest，影响标志，dest≠0 时 CF=1。</li>
+<li><code>shl</code>、<code>shr</code> 是逻辑移位，最后移出的那一位进 CF；<code>shl</code> 一位相当于乘 2，前提是移出的高位为 0；<code>shr</code> 一位相当于无符号数除 2。</li>
+<li>有符号数右移要用算术右移 <code>sar</code>，否则符号位被 0 填掉，负数会变成正数；算术左移与逻辑左移结果相同。</li>
+</ul>
+<p><strong>条件转移。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+<th>条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>je/jz</code></td>
+<td>相等/为零</td>
+<td>ZF=1</td>
+</tr>
+<tr>
+<td><code>jne/jnz</code></td>
+<td>不等/非零</td>
+<td>ZF=0</td>
+</tr>
+<tr>
+<td><code>js/jns</code></td>
+<td>负/非负</td>
+<td>SF=1 / SF=0</td>
+</tr>
+<tr>
+<td><code>jo/jno</code></td>
+<td>溢出/不溢出</td>
+<td>OF=1 / OF=0</td>
+</tr>
+<tr>
+<td><code>jg/jge</code></td>
+<td>带符号 &gt; / ≥</td>
+<td>ZF=0 且 SF=OF / SF=OF</td>
+</tr>
+<tr>
+<td><code>jl/jle</code></td>
+<td>带符号 &lt; / ≤</td>
+<td>SF≠OF / ZF=1 或 SF≠OF</td>
+</tr>
+<tr>
+<td><code>ja/jae</code></td>
+<td>无符号 &gt; / ≥</td>
+<td>CF=0 且 ZF=0 / CF=0</td>
+</tr>
+<tr>
+<td><code>jb/jbe</code></td>
+<td>无符号 &lt; / ≤</td>
+<td>CF=1 / CF=1 或 ZF=1</td>
+</tr>
+</tbody>
+</table></div>
+<p>无符号数比较只看 CF、ZF；带符号数比较看 SF、OF、ZF，其中「大于/小于」用 $SF\oplus OF$ 判断。</p>
+<p><strong>控制结构的机器级表示。</strong> 所有控制结构都由「比较 + 条件转移 + 无条件转移」拼成。下面的 <code>jcc</code> 泛指某个条件转移指令，<code>L1</code>、<code>end</code> 是标号。</p>
+<p><code>if</code>：</p>
+<pre><code class="language-text">    cmp a, b
+    jcc else        ; 条件不成立就跳到 else
+    ; then 分支
+    jmp end
+else:
+    ; else 分支
+end:
+</code></pre>
+<p>没有 else 分支时，条件不成立直接跳到 end，省掉 else 段和那条 <code>jmp end</code>。</p>
+<p><code>for</code>：</p>
+<pre><code class="language-text">    init
+L1: cmp i, n
+    jcc end         ; 循环条件不成立就结束
+    ; body
+    step
+    jmp L1
+end:
+</code></pre>
+<p><code>while</code>：</p>
+<pre><code class="language-text">L1: cmp a, b
+    jcc end
+    ; body
+    jmp L1
+end:
+</code></pre>
+<p><code>do-while</code>：</p>
+<pre><code class="language-text">L1: ; body
+    cmp a, b
+    jcc L1          ; 条件成立就回到循环体
+end:
+</code></pre>
+<ul>
+<li><code>while</code> 先判断后执行，循环体可能一次都不执行；<code>do-while</code> 先执行后判断，循环体至少执行一次。</li>
+<li><code>for</code> 与 <code>while</code> 的机器级表示几乎一样，<code>for</code> 只是把初始化和步进分别放在循环前和循环体末尾。</li>
+<li>编译器常把判断挪到循环末尾，先跳进循环体判断一次，再变成 <code>do-while</code> 的形状，这样每轮少一条 <code>jmp</code>。</li>
+</ul>
+<p>一个具体例子：</p>
+<pre><code class="language-c">int sum = 0;
+for (int i = 0; i &lt; n; i++) sum += a[i];
+</code></pre>
+<pre><code class="language-text">        mov  eax, 0             ; sum = 0
+        mov  ecx, 0             ; i = 0
+L1:     cmp  ecx, n
+        jge  end                ; i &gt;= n 时结束
+        add  eax, [ebx + ecx*4] ; sum += a[i]，ebx 存 a 的首地址
+        inc  ecx
+        jmp  L1
+end:
+</code></pre>
+<p><code>[ebx + ecx*4]</code> 就是基址 + 变址 × 比例因子的形式：<code>ebx</code> 是数组首地址，<code>ecx</code> 是下标，4 是 <code>int</code> 的字节数。</p>
+<p><strong>过程调用与栈帧。</strong> x86 的栈向低地址增长，ESP 始终指向栈顶。每个过程在栈上占一段区域，称为栈帧：EBP 指向当前栈帧的底部，ESP 指向栈顶；参数、返回地址、旧 EBP 和局部变量都在同一个栈帧里，用相对 EBP 的偏移访问。</p>
+<p>cdecl 调用约定：</p>
+<ul>
+<li>参数从右向左压栈，最后一个参数先入栈，所以进入被调用者后，第 1 个参数在 <code>[ebp+8]</code>、第 2 个在 <code>[ebp+12]</code>；</li>
+<li>返回值放在 EAX；</li>
+<li>用 <code>push</code> 形式传入的参数由调用者清理（<code>add esp, 4×参数个数</code>）；</li>
+<li>EAX、ECX、EDX 是调用者保存寄存器，EBX、ESI、EDI、EBP 是被调用者保存寄存器。</li>
+</ul>
+<p>源程序：</p>
+<pre><code class="language-c">int add(int x, int y) { return x + y; }
+
+int caller() {
+    int temp1 = 125;
+    int temp2 = 80;
+    int sum = add(temp1, temp2);
+    return sum;
+}
+</code></pre>
+<p>经 GCC 编译后，caller 对应的汇编代码如下：</p>
+<pre><code class="language-text">caller:
+    push ebp                     # 保存调用者 P 的 EBP
+    mov  ebp, esp                # 建立新栈帧：EBP ← 当前栈顶
+    sub  esp, 24                 # 为局部变量和参数区分配 24 字节
+    mov  [ebp-12], 125           # M[R[ebp]-12] ← 125，即 temp1 = 125
+    mov  [ebp-8], 80             # M[R[ebp]-8] ← 80，即 temp2 = 80
+    mov  eax, dword ptr [ebp-8]  # R[eax] ← M[R[ebp]-8]，加载 temp2
+    mov  [esp+4], eax            # 将 temp2 放入参数区高地址
+    mov  eax, dword ptr [ebp-12] # R[eax] ← M[R[ebp]-12]，加载 temp1
+    mov  [esp], eax              # 将 temp1 放入参数区低地址
+    call add                     # 调用 add，返回值保存在 eax
+    mov  [ebp-4], eax            # 将返回值存入 sum
+    mov  eax, dword ptr [ebp-4]  # 将 sum 作为返回值
+    leave                        # 等价于 mov esp, ebp 和 pop ebp
+    ret                          # 弹出返回地址并跳回
+</code></pre>
+<p>add 的汇编按同样的约定写出：</p>
+<pre><code class="language-text">add:
+    push ebp
+    mov  ebp, esp
+    mov  eax, dword ptr [ebp+8]   # 参数 1
+    add  eax, dword ptr [ebp+12]  # 参数 1 + 参数 2
+    pop  ebp
+    ret
+</code></pre>
+<p><code>call</code> 压入的是它下一条指令的地址，也就是 caller 中 <code>mov [ebp-4], eax</code> 的地址；<code>ret</code> 要跳回的就是这里。</p>
+<p><strong>栈帧布局。</strong> 先看 <code>call add</code> 之前的 caller 栈帧：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="caller 的栈帧：高地址在上，每格标出地址与内容，右侧是 EBP、ESP 的指向" data-src="/408-review/assets/textbook/coa-call-stack-frame.webp" href="/408-review/assets/textbook/coa-call-stack-frame.webp"><img alt="caller 的栈帧：高地址在上，每格标出地址与内容，右侧是 EBP、ESP 的指向" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-call-stack-frame.webp"/></a><figcaption>caller 的栈帧：高地址在上，每格标出地址与内容，右侧是 EBP、ESP 的指向</figcaption></figure>
+<p><code>call</code> 压入返回地址、add 用 <code>push ebp</code> 保存 caller 的 EBP 之后，从高地址到低地址的完整布局如下：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>相对 EBP</th>
+<th>地址</th>
+<th>内容</th>
+<th>写入者</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>+4</td>
+<td><code>0x0FFC</code></td>
+<td>P 调用 caller 时的返回地址</td>
+<td>P 的 <code>call caller</code></td>
+</tr>
+<tr>
+<td>0</td>
+<td><code>0x0FF8</code></td>
+<td>P 的 EBP（<code>0x1020</code>）</td>
+<td>caller 的 <code>push ebp</code></td>
+</tr>
+<tr>
+<td>−4</td>
+<td><code>0x0FF4</code></td>
+<td>sum</td>
+<td>caller 的 <code>mov [ebp-4], eax</code></td>
+</tr>
+<tr>
+<td>−8</td>
+<td><code>0x0FF0</code></td>
+<td>temp2 = 80</td>
+<td>caller 的 <code>mov [ebp-8], 80</code></td>
+</tr>
+<tr>
+<td>−12</td>
+<td><code>0x0FEC</code></td>
+<td>temp1 = 125</td>
+<td>caller 的 <code>mov [ebp-12], 125</code></td>
+</tr>
+<tr>
+<td>−16</td>
+<td><code>0x0FE8</code></td>
+<td>对齐填充（未使用）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>−20</td>
+<td><code>0x0FE4</code></td>
+<td>参数 2 = 80</td>
+<td>caller 的 <code>mov [esp+4], eax</code></td>
+</tr>
+<tr>
+<td>−24</td>
+<td><code>0x0FE0</code></td>
+<td>参数 1 = 125</td>
+<td>caller 的 <code>mov [esp], eax</code></td>
+</tr>
+<tr>
+<td>−28</td>
+<td><code>0x0FDC</code></td>
+<td><code>call add</code> 的返回地址</td>
+<td><code>call</code> 指令</td>
+</tr>
+<tr>
+<td>−32</td>
+<td><code>0x0FD8</code></td>
+<td>caller 的 EBP（add 的 <code>push ebp</code>）</td>
+<td>add 的 <code>push ebp</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>栈是怎么变化的。</strong> 设 P 在 <code>call caller</code> 前 ESP = <code>0x1000</code>、P 的 EBP = <code>0x1020</code>，<code>call caller</code> 把返回地址压到 <code>0x0FFC</code>，caller 从 ESP = <code>0x0FFC</code> 开始执行：</p>
+<ol>
+<li><code>push ebp</code>：ESP = <code>0x0FF8</code>，<code>[0x0FF8]</code> 存入 P 的 EBP（<code>0x1020</code>）；</li>
+<li><code>mov ebp, esp</code>：EBP = <code>0x0FF8</code>，caller 的栈帧从这里向下展开；</li>
+<li><code>sub esp, 24</code>：ESP = <code>0x0FE0</code>，24 字节覆盖 <code>0x0FE0</code>～<code>0x0FF7</code>；</li>
+<li><code>mov [ebp-12], 125</code>、<code>mov [ebp-8], 80</code>：<code>0x0FEC</code> ← 125，<code>0x0FF0</code> ← 80；</li>
+<li>两条 <code>mov [esp+4], eax</code>、<code>mov [esp], eax</code>：<code>0x0FE4</code> ← 80，<code>0x0FE0</code> ← 125；</li>
+<li><code>call add</code>：<code>0x0FDC</code> ← 返回地址，ESP = <code>0x0FDC</code>，EIP 跳到 add；</li>
+<li>add 的 <code>push ebp</code>、<code>mov ebp, esp</code>：<code>0x0FD8</code> ← <code>0x0FF8</code>，ESP = EBP = <code>0x0FD8</code>，add 的栈帧建立；</li>
+<li>add 的 <code>mov eax, [ebp+8]</code>、<code>add eax, [ebp+12]</code>：取 <code>0x0FE0</code> 的 125 和 <code>0x0FE4</code> 的 80，相加得 205 放在 EAX；</li>
+<li>add 的 <code>pop ebp</code>、<code>ret</code>：EBP 恢复为 <code>0x0FF8</code>，ESP = <code>0x0FDC</code>；<code>ret</code> 弹出 <code>0x0FDC</code> 的返回地址，ESP = <code>0x0FE0</code>，回到 caller；</li>
+<li>caller 的 <code>mov [ebp-4], eax</code>：<code>0x0FF4</code> ← 205；<code>mov eax, [ebp-4]</code>：EAX = 205；</li>
+<li>caller 的 <code>leave</code>：<code>mov esp, ebp</code> 使 ESP = <code>0x0FF8</code>，<code>pop ebp</code> 取回 <code>0x1020</code>，ESP = <code>0x0FFC</code>；</li>
+<li>caller 的 <code>ret</code>：弹出 <code>0x0FFC</code> 的返回地址，ESP = <code>0x1000</code>，回到 P。</li>
+</ol>
+<p><code>leave</code> 等价于两条指令：</p>
+<pre><code class="language-text">    mov esp, ebp    # 将栈指针 ESP 设置为当前 EBP 的值，即指向保存旧 EBP 的位置
+    pop ebp         # 从栈中弹出旧 EBP 值，恢复过程 P 的基址指针
+</code></pre>
+<p>执行完 <code>leave</code>，EBP 已恢复为 P 中的值，ESP 指向 caller 的返回地址；<code>ret</code> 再从这个位置取出返回地址送进 EIP，ESP 加 4，回到 P 继续执行。</p>
+<blockquote>
+<p>调用前，caller 保存旧 EBP、建立自己的栈帧、把参数写进参数区；<code>call</code> 只多做一件事——压入返回地址并把 EIP 改成 add 的入口。返回时顺序相反：被调用者恢复 EBP，<code>ret</code> 弹出返回地址；caller 用 EBP 找回自己的局部变量，最后 <code>leave</code> + <code>ret</code> 把整个栈帧拆掉。全程 EBP 只在 <code>mov ebp, esp</code> 时改变，ESP 则随 <code>push</code>/<code>pop</code>、<code>call</code>/<code>ret</code>、<code>sub esp</code> 不断变化。</p>
+<p>这份代码里参数不是用 <code>push</code> 压栈的，而是提前在 <code>sub esp, 24</code> 划出的参数区里直接写 <code>[esp]</code>、<code>[esp+4]</code>；参数区和局部变量一次分配、一次 <code>leave</code> 回收，返回后不需要再 <code>add esp, 8</code> 清参数。</p>
+</blockquote>
+<details class="article-details">
+<summary class="article-summary">补充：24 字节和 32 字节是怎么来的</summary>
+<p>caller 的栈帧从 <code>0x0FDC</code>（<code>call add</code> 压入的返回地址）到 <code>0x0FFB</code>（旧 EBP 的最后一字节），正好 32 字节；再往上的 <code>0x0FFC</code> 已经是 P 调用 caller 时的返回地址，不属于 caller 的栈帧。</p>
+<ul>
+<li>旧 EBP：4 字节；</li>
+<li>局部变量 temp1、temp2、sum：12 字节；</li>
+<li>参数 temp1、temp2：8 字节；</li>
+<li><code>call add</code> 的返回地址：4 字节。</li>
+</ul>
+<p>合计 $4+12+8+4=28$ 字节。GCC 要求调用发生时栈按 16 字节对齐，栈帧大小取 16 的倍数，28 向上补到 32，多出来的 4 字节就是 <code>[ebp-16]</code> 那格对齐填充——所以 <code>sub esp, 24</code> 而不是 20。</p>
+</details>
+<h2 id="44">4.4 考点提纲</h2>
+<p>本章的题大多是「判断 + 计算」，把考点收成下面几张提纲：做题时先判断属于哪一类，再套对应的判据和公式。</p>
+<h3 id="_1">条件转移与标志位</h3>
+<pre class="mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;primaryColor&quot;: &quot;#5b9bd5&quot;,
+    &quot;primaryTextColor&quot;: &quot;#ffffff&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#41719c&quot;,
+    &quot;lineColor&quot;: &quot;#41719c&quot;,
+    &quot;secondaryColor&quot;: &quot;#ffffff&quot;,
+    &quot;tertiaryColor&quot;: &quot;#e2f0d9&quot;,
+    &quot;fontSize&quot;: &quot;16px&quot;,
+    &quot;fontFamily&quot;: &quot;-apple-system, BlinkMacSystemFont, \&quot;Segoe UI\&quot;, Roboto, \&quot;Helvetica Neue\&quot;, Arial, \&quot;Noto Sans\&quot;, sans-serif&quot;
+  },
+  &quot;flowchart&quot;: {
+    &quot;nodeSpacing&quot;: 8,
+    &quot;rankSpacing&quot;: 26,
+    &quot;curve&quot;: &quot;basis&quot;,
+    &quot;htmlLabels&quot;: true,
+    &quot;subGraphTitleMargin&quot;: { &quot;top&quot;: 0, &quot;bottom&quot;: 14 },
+    &quot;padding&quot;: 4,
+    &quot;useMaxWidth&quot;: false,
+    &quot;wrappingWidth&quot;: 1000
+  }
+}}%%
+graph LR
+  A[&quot;条件转移与标志位&quot;]
+  B1[&quot;常见标志&quot;]
+  B2[&quot;无符号数比较&lt;br&gt;主要看 CF、ZF&quot;]
+  B3[&quot;有符号数比较&lt;br&gt;主要看 SF 与 OF&quot;]
+  B4[&quot;溢出判断&quot;]
+
+  A --&gt; B1
+  A --&gt; B2
+  A --&gt; B3
+  A --&gt; B4
+
+  B1 --&gt; C11[&quot;CF：进位/借位标志&quot;]
+  B1 --&gt; C12[&quot;ZF：零标志&quot;]
+  B1 --&gt; C13[&quot;SF/NF：符号标志&lt;br&gt;通常等于结果最高位&quot;]
+  B1 --&gt; C14[&quot;OF：有符号溢出标志&quot;]
+
+  B2 --&gt; C21[&quot;A #lt; B：A−B 后产生借位&lt;br&gt;通常 CF = 1&quot;]
+  B2 --&gt; C22[&quot;A = B：ZF = 1&quot;]
+  B2 --&gt; C23[&quot;A ≤ B：通常判断&lt;br&gt;CF = 1 或 ZF = 1&quot;]
+
+  B3 --&gt; C31[&quot;小于：SF ⊕ OF = 1&quot;]
+  B3 --&gt; C32[&quot;大于等于：SF ⊕ OF = 0&quot;]
+  B3 --&gt; C33[&quot;是否相等仍由 ZF 判断&quot;]
+
+  B4 --&gt; C41[&quot;加法溢出&quot;]
+  B4 --&gt; C42[&quot;减法溢出&quot;]
+  C41 --&gt; D41[&quot;两个同号数相加&lt;br&gt;结果与操作数异号&quot;]
+  C41 --&gt; D42[&quot;OF_add = ¬(A最高位 ⊕ B最高位)&lt;br&gt;∧ (A最高位 ⊕ F最高位)&quot;]
+  C42 --&gt; D43[&quot;两个异号数相减&lt;br&gt;结果与被减数异号&quot;]
+  C42 --&gt; D44[&quot;OF_sub = (A最高位 ⊕ B最高位)&lt;br&gt;∧ (A最高位 ⊕ F最高位)&quot;]
+
+  classDef root fill:#5b9bd5,stroke:#41719c,color:#ffffff,font-weight:bold,font-size:20px
+  classDef lvl1 fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d,font-size:19px
+  classDef lvl2d fill:#dbe8f6,stroke:#1f4e79,stroke-width:2px,color:#000000,font-size:16px
+  classDef lvl2l fill:#f6fafe,stroke:#c3d9ef,stroke-width:2px,color:#000000,font-size:16px
+  classDef lvl3d fill:#dbe8f6,stroke:#1f4e79,stroke-width:1.5px,color:#000000,font-size:15px
+  classDef lvl3l fill:#f6fafe,stroke:#c3d9ef,stroke-width:1.5px,color:#000000,font-size:15px
+
+  class A root;
+  class B1,B2,B3,B4 lvl1;
+  class C11,C12,C13,C14 lvl2d;
+  class C21,C22,C23 lvl2l;
+  class C31,C32,C33 lvl2d;
+  class C41,C42 lvl2l;
+  class D41,D42 lvl3d;
+  class D43,D44 lvl3l;</pre>
+<ul>
+<li>无符号数比较只看 CF、ZF：<code>A &lt; B</code> 有借位，CF=1；<code>A = B</code> 时 ZF=1；<code>A ≤ B</code> 就是 CF=1 或 ZF=1。</li>
+<li>有符号数比较看 SF⊕OF 与 ZF：小于对应 SF⊕OF=1，大于等于对应 SF⊕OF=0，相等仍看 ZF。NF 只是 SF 的另一种叫法。</li>
+<li>溢出判断有两种等价写法：加法看「同号相加得异号」，减法看「异号相减得与被减数异号」；电路上就是 $OF=C_n\oplus C_{n-1}$。</li>
+<li>条件转移指令的检测位只决定「哪些标志参与判断」；多个检测位之间是「任一为 1 就转移」还是「全部满足才转移」，按题面说的来。</li>
+</ul>
+<h3 id="_2">相对转移计算</h3>
+<pre class="mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;primaryColor&quot;: &quot;#5b9bd5&quot;,
+    &quot;primaryTextColor&quot;: &quot;#ffffff&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#41719c&quot;,
+    &quot;lineColor&quot;: &quot;#41719c&quot;,
+    &quot;secondaryColor&quot;: &quot;#ffffff&quot;,
+    &quot;tertiaryColor&quot;: &quot;#e2f0d9&quot;,
+    &quot;fontSize&quot;: &quot;16px&quot;,
+    &quot;fontFamily&quot;: &quot;-apple-system, BlinkMacSystemFont, \&quot;Segoe UI\&quot;, Roboto, \&quot;Helvetica Neue\&quot;, Arial, \&quot;Noto Sans\&quot;, sans-serif&quot;
+  },
+  &quot;flowchart&quot;: {
+    &quot;nodeSpacing&quot;: 8,
+    &quot;rankSpacing&quot;: 26,
+    &quot;curve&quot;: &quot;basis&quot;,
+    &quot;htmlLabels&quot;: true,
+    &quot;subGraphTitleMargin&quot;: { &quot;top&quot;: 0, &quot;bottom&quot;: 14 },
+    &quot;padding&quot;: 4,
+    &quot;useMaxWidth&quot;: false,
+    &quot;wrappingWidth&quot;: 1000
+  }
+}}%%
+graph LR
+  A[&quot;相对转移计算&quot;]
+  B1[&quot;先判断是否满足转移条件&quot;]
+  B2[&quot;偏移量处理&quot;]
+  B3[&quot;常用公式&quot;]
+  B4[&quot;最大前跳/后跳范围&quot;]
+  B5[&quot;反求偏移量&quot;]
+
+  A --&gt; B1
+  A --&gt; B2
+  A --&gt; B3
+  A --&gt; B4
+  A --&gt; B5
+
+  B1 --&gt; C11[&quot;检测位为 1 时&lt;br&gt;检查对应标志&quot;]
+  B1 --&gt; C12[&quot;多个标志同时被检测时&lt;br&gt;按题意确定「任一满足」还是「全部满足」&quot;]
+
+  B2 --&gt; C21[&quot;按补码解释&quot;]
+  B2 --&gt; C22[&quot;先符号扩展&lt;br&gt;再乘比例因子&quot;]
+
+  B3 --&gt; C31[&quot;目标地址 = 当前指令地址 + 指令长度&lt;br&gt;+ 符号扩展(OFFSET) × 比例因子&quot;]
+  B3 --&gt; C32[&quot;题目若明确给出 (PC) + 常数 + OFFSET&lt;br&gt;严格使用题设公式&quot;]
+
+  B4 --&gt; C41[&quot;n 位补码范围：−2^(n−1) ~ 2^(n−1)−1&quot;]
+  B4 --&gt; C42[&quot;再乘题设比例因子&quot;]
+
+  B5 --&gt; C51[&quot;OFFSET = (目标地址 − 下一条指令地址)&lt;br&gt;÷ 比例因子&quot;]
+  B5 --&gt; C52[&quot;最终写成题目要求位数的补码&quot;]
+
+  classDef root fill:#5b9bd5,stroke:#41719c,color:#ffffff,font-weight:bold,font-size:20px
+  classDef lvl1 fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d,font-size:19px
+  classDef lvl2d fill:#dbe8f6,stroke:#1f4e79,stroke-width:2px,color:#000000,font-size:16px
+  classDef lvl2l fill:#f6fafe,stroke:#c3d9ef,stroke-width:2px,color:#000000,font-size:16px
+
+  class A root;
+  class B1,B2,B3,B4,B5 lvl1;
+  class C11,C12 lvl2d;
+  class C21,C22 lvl2l;
+  class C31,C32 lvl2d;
+  class C41,C42 lvl2l;
+  class C51,C52 lvl2d;</pre>
+<ul>
+<li>顺序执行时，下一条指令地址 = 当前指令地址 + 指令长度；转移目标 = 下一条指令地址 + 符号扩展(OFFSET) × 比例因子。取指后 PC 已自增，基准是自增后的 PC，别把 OFFSET 加到当前指令地址上。</li>
+<li>OFFSET 先按补码解释、再符号扩展、最后乘比例因子；按字节编址且指令长 2B 时，比例因子就是 2。</li>
+<li>范围：n 位补码 $-2^{n-1}\sim2^{n-1}-1$，乘比例因子后才是字节偏移；问「最多跳多少条指令」时用 OFFSET 的绝对值。</li>
+<li>反求：OFFSET = (目标地址 − 下一条指令地址) ÷ 比例因子，负结果写成补码。</li>
+<li>题面给了自己的公式（如 (PC)+2+2×OFFSET）就严格按题设，不要换成课本写法。</li>
+</ul>
+<h3 id="c">C 程序与机器代码对应</h3>
+<pre class="mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;primaryColor&quot;: &quot;#5b9bd5&quot;,
+    &quot;primaryTextColor&quot;: &quot;#ffffff&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#41719c&quot;,
+    &quot;lineColor&quot;: &quot;#41719c&quot;,
+    &quot;secondaryColor&quot;: &quot;#ffffff&quot;,
+    &quot;tertiaryColor&quot;: &quot;#e2f0d9&quot;,
+    &quot;fontSize&quot;: &quot;16px&quot;,
+    &quot;fontFamily&quot;: &quot;-apple-system, BlinkMacSystemFont, \&quot;Segoe UI\&quot;, Roboto, \&quot;Helvetica Neue\&quot;, Arial, \&quot;Noto Sans\&quot;, sans-serif&quot;
+  },
+  &quot;flowchart&quot;: {
+    &quot;nodeSpacing&quot;: 8,
+    &quot;rankSpacing&quot;: 26,
+    &quot;curve&quot;: &quot;basis&quot;,
+    &quot;htmlLabels&quot;: true,
+    &quot;subGraphTitleMargin&quot;: { &quot;top&quot;: 0, &quot;bottom&quot;: 14 },
+    &quot;padding&quot;: 4,
+    &quot;useMaxWidth&quot;: false,
+    &quot;wrappingWidth&quot;: 1000
+  }
+}}%%
+graph LR
+  A[&quot;C 程序与机器代码对应&quot;]
+  B1[&quot;循环结构识别&quot;]
+  B2[&quot;数组元素大小判断&quot;]
+  B3[&quot;数据类型对指令语义的影响&quot;]
+  B4[&quot;机器代码总长度&quot;]
+
+  A --&gt; B1
+  A --&gt; B2
+  A --&gt; B3
+  A --&gt; B4
+
+  B1 --&gt; C11[&quot;初始化：循环变量赋初值&quot;]
+  B1 --&gt; C12[&quot;条件判断：cmp/test + 条件跳转&quot;]
+  B1 --&gt; C13[&quot;循环体：数组访问或算术运算&quot;]
+  B1 --&gt; C14[&quot;步进：循环变量自增&quot;]
+  B1 --&gt; C15[&quot;回跳：无条件跳转或条件分支&quot;]
+
+  B2 --&gt; C21[&quot;根据左移位数或比例因子判断&quot;]
+  B2 --&gt; C22[&quot;地址偏移为「下标左移 k 位」时&lt;br&gt;元素大小通常为 2^k B&quot;]
+
+  B3 --&gt; C31[&quot;无符号数与有符号数使用的比较条件不同&quot;]
+  B3 --&gt; C32[&quot;左移是否等价于乘法&lt;br&gt;需要结合位宽、符号与是否溢出判断&quot;]
+
+  B4 --&gt; C41[&quot;地址差法优先&quot;]
+  B4 --&gt; C42[&quot;注意机器指令可能为变长&lt;br&gt;不能用「指令条数 × 固定长度」计算&quot;]
+
+  classDef root fill:#5b9bd5,stroke:#41719c,color:#ffffff,font-weight:bold,font-size:20px
+  classDef lvl1 fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d,font-size:19px
+  classDef lvl2d fill:#dbe8f6,stroke:#1f4e79,stroke-width:2px,color:#000000,font-size:16px
+  classDef lvl2l fill:#f6fafe,stroke:#c3d9ef,stroke-width:2px,color:#000000,font-size:16px
+
+  class A root;
+  class B1,B2,B3,B4 lvl1;
+  class C11,C12,C13,C14,C15 lvl2d;
+  class C21,C22 lvl2l;
+  class C31,C32 lvl2d;
+  class C41,C42 lvl2l;</pre>
+<ul>
+<li>循环的骨架：初始化 → 条件判断（<code>cmp</code>/<code>test</code> + 条件跳转）→ 循环体 → 步进 → 回跳；<code>cmp</code>、<code>test</code> 都只改标志、不保存结果。</li>
+<li>数组元素大小：地址写成 <code>[base + index*4]</code> 或「下标左移 2 位」时，元素就是 4B；左移 k 位对应 $2^k$ B。</li>
+<li>数据类型影响指令选择：有符号比较用 <code>jg/jl</code>，无符号用 <code>ja/jb</code>；左移代替乘 2 只在移出的高位不改变所需语义时成立。</li>
+<li>机器码总长用地址差算：末条指令的下一条地址 − 首地址；变长指令不能按「条数 × 固定长度」。</li>
+</ul>
+<h3 id="risc-cisc">RISC 与 CISC 判断</h3>
+<pre class="mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;primaryColor&quot;: &quot;#5b9bd5&quot;,
+    &quot;primaryTextColor&quot;: &quot;#ffffff&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#41719c&quot;,
+    &quot;lineColor&quot;: &quot;#41719c&quot;,
+    &quot;secondaryColor&quot;: &quot;#ffffff&quot;,
+    &quot;tertiaryColor&quot;: &quot;#e2f0d9&quot;,
+    &quot;fontSize&quot;: &quot;16px&quot;,
+    &quot;fontFamily&quot;: &quot;-apple-system, BlinkMacSystemFont, \&quot;Segoe UI\&quot;, Roboto, \&quot;Helvetica Neue\&quot;, Arial, \&quot;Noto Sans\&quot;, sans-serif&quot;
+  },
+  &quot;flowchart&quot;: {
+    &quot;nodeSpacing&quot;: 8,
+    &quot;rankSpacing&quot;: 26,
+    &quot;curve&quot;: &quot;basis&quot;,
+    &quot;htmlLabels&quot;: true,
+    &quot;subGraphTitleMargin&quot;: { &quot;top&quot;: 0, &quot;bottom&quot;: 14 },
+    &quot;padding&quot;: 4,
+    &quot;useMaxWidth&quot;: false,
+    &quot;wrappingWidth&quot;: 1000
+  }
+}}%%
+graph LR
+  A[&quot;RISC 与 CISC 判断&quot;]
+  B1[&quot;RISC 常见特征&quot;]
+  B2[&quot;CISC 常见特征&quot;]
+  B3[&quot;做题时以题目中的机器码&lt;br&gt;和指令格式为证据&quot;]
+
+  A --&gt; B1
+  A --&gt; B2
+  A --&gt; B3
+
+  B1 --&gt; C11[&quot;指令长度固定&quot;]
+  B1 --&gt; C12[&quot;指令格式较规整&quot;]
+  B1 --&gt; C13[&quot;寻址方式较少&quot;]
+  B1 --&gt; C14[&quot;多数指令在较少周期内完成&quot;]
+  B1 --&gt; C15[&quot;常采用 Load/Store 结构&quot;]
+
+  B2 --&gt; C21[&quot;指令长度可变&quot;]
+  B2 --&gt; C22[&quot;寻址方式丰富&quot;]
+  B2 --&gt; C23[&quot;一条指令可完成较复杂操作&quot;]
+  B2 --&gt; C24[&quot;x86 机器代码通常表现出明显的变长特征&quot;]
+
+  B3 --&gt; C31[&quot;不仅凭汇编助记符判断&quot;]
+
+  classDef root fill:#5b9bd5,stroke:#41719c,color:#ffffff,font-weight:bold,font-size:20px
+  classDef lvl1 fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d,font-size:19px
+  classDef lvl2d fill:#dbe8f6,stroke:#1f4e79,stroke-width:2px,color:#000000,font-size:16px
+  classDef lvl2l fill:#f6fafe,stroke:#c3d9ef,stroke-width:2px,color:#000000,font-size:16px
+
+  class A root;
+  class B1,B2,B3 lvl1;
+  class C11,C12,C13,C14,C15 lvl2d;
+  class C21,C22,C23,C24 lvl2l;
+  class C31 lvl2d;</pre>
+<ul>
+<li>判断以机器码和指令格式为证据，不看汇编助记符：定长、字段规整、寻址方式少是 RISC；变长、格式复杂、寻址方式多是 CISC。</li>
+<li>典型例子：x86 是 CISC（变长、指令功能强）；MIPS/ARM 常作 RISC（定长、Load/Store）。</li>
+<li>题目给出「指令定长 + 只有 Load/Store 访存 + 寻址方式少」时，基本按 RISC 处理；反过来就是 CISC。</li>
+</ul>
+<h2 id="_3">四*、指令专题</h2>
+<h4 id="2010-43">例题：【2010】第 43 题</h4>
+<p>某计算机字长为 16 位，主存地址空间大小为 128KB，按字编址。采用单字长指令格式，指令各字段定义如下表所示（Ms/Rs 描述源操作数，Md/Rd 描述目的操作数）：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>OP</th>
+<th>Ms</th>
+<th>Rs</th>
+<th>Md</th>
+<th>Rd</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>位数</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>位置</td>
+<td>15～12</td>
+<td>11～9</td>
+<td>8～6</td>
+<td>5～3</td>
+<td>2～0</td>
+</tr>
+</tbody>
+</table></div>
+<p>转移指令采用相对寻址方式，相对偏移量用补码表示，寻址方式定义见下表：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>Ms/Md</th>
+<th>寻址方式</th>
+<th>助记符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>000B</code></td>
+<td>寄存器直接</td>
+<td><code>Rn</code></td>
+<td>操作数 = (Rn)</td>
+</tr>
+<tr>
+<td><code>001B</code></td>
+<td>寄存器间接</td>
+<td><code>(Rn)</code></td>
+<td>操作数 = ((Rn))</td>
+</tr>
+<tr>
+<td><code>010B</code></td>
+<td>寄存器间接、自增</td>
+<td><code>(Rn)+</code></td>
+<td>操作数 = ((Rn))，(Rn)+1 → Rn</td>
+</tr>
+<tr>
+<td><code>011B</code></td>
+<td>相对</td>
+<td><code>D(Rn)</code></td>
+<td>转移目标地址 = (PC) + (Rn)</td>
+</tr>
+</tbody>
+</table></div>
+<p>注：(X) 表示存储器地址 X 或寄存器 X 的内容。</p>
+<p>请回答：</p>
+<ol>
+<li>该指令系统最多可有多少条指令？该计算机最多可有多少个通用寄存器？存储器地址寄存器（MAR）和存储器数据寄存器（MDR）至少各需要多少位？</li>
+<li>（原题第 2 问，转移指令的目标地址范围，从略。）</li>
+<li>若操作码 <code>0010B</code> 表示加法操作（助记符为 <code>add</code>），寄存器 R4 和 R5 的编号分别为 <code>100B</code> 和 <code>101B</code>，R4 的内容为 <code>1234H</code>，R5 的内容为 <code>5678H</code>，地址 <code>1234H</code> 中的内容为 <code>5678H</code>，地址 <code>5678H</code> 中的内容为 <code>1234H</code>，则汇编语言为 <code>add (R4), (R5)+</code>（逗号前为源操作数，逗号后为目的操作数）对应的机器码是什么（用十六进制表示）？该指令执行后，哪些寄存器和存储单元中的内容会改变？改变后的内容是什么？</li>
+</ol>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>（1）</strong> OP 占 4 位，最多 $2^4=16$ 条指令；Rs、Rd 各占 3 位，最多 $2^3=8$ 个通用寄存器。按字编址时，地址空间 128KB 合 $128\mathrm{KB}\div2\mathrm{B}=64\mathrm{K}$ 个字 $=2^{16}$ 个字，所以 MAR 至少 16 位；MDR 要能存下一个字，至少 16 位。</p>
+<p><strong>（3）</strong> 先按字段拆开 <code>add (R4), (R5)+</code>：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+<th>依据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OP</td>
+<td><code>0010</code></td>
+<td>add</td>
+</tr>
+<tr>
+<td>Ms</td>
+<td><code>001</code></td>
+<td>源操作数 (R4) 是寄存器间接</td>
+</tr>
+<tr>
+<td>Rs</td>
+<td><code>100</code></td>
+<td>R4</td>
+</tr>
+<tr>
+<td>Md</td>
+<td><code>010</code></td>
+<td>目的操作数 (R5)+ 是寄存器间接、自增</td>
+</tr>
+<tr>
+<td>Rd</td>
+<td><code>101</code></td>
+<td>R5</td>
+</tr>
+</tbody>
+</table></div>
+<p>拼起来是 <code>0010 001 100 010 101B</code>，即 <strong><code>2315H</code></strong>。</p>
+<p>指令执行过程：</p>
+<ul>
+<li>源操作数 <code>(R4)</code>：寄存器间接，操作数为 $\mathrm{M}[1234\mathrm{H}]=5678\mathrm{H}$；</li>
+<li>目的操作数 <code>(R5)+</code>：先读出 $\mathrm{M}[5678\mathrm{H}]=1234\mathrm{H}$，再令 R5 加 1，R5 变为 <code>5679H</code>；</li>
+<li>相加：$5678\mathrm{H}+1234\mathrm{H}=68\mathrm{ACH}$，写回目的操作数所在的存储单元，即 $\mathrm{M}[5678\mathrm{H}]=68\mathrm{ACH}$。</li>
+</ul>
+<p>所以执行后，R5 的内容变为 <code>5679H</code>，存储单元 <code>5678H</code> 的内容变为 <code>68ACH</code>；R4 仍为 <code>1234H</code>，存储单元 <code>1234H</code> 仍为 <code>5678H</code>。</p>
+<p><strong>这个自增到底怎么发生的。</strong> 把 <code>(R5)+</code> 拆成三个问题看：</p>
+<blockquote>
+<ul>
+<li><strong>什么时候自增</strong>：在按 (R5) 读出目的操作数之后、本次访存结束时自增，也就是「取完操作数就 +1」。它和 add 的加法本身无关——哪怕把 add 换成只读操作数的 cmp，只要操作数用 <code>(Rn)+</code>，取完操作数照样自增。</li>
+<li><strong>自增的是谁</strong>：是目的操作数寻址方式里的 Rn，也就是 Rd 字段选中的 R5。源操作数 <code>(R4)</code> 的寻址方式是寄存器间接、不带自增，所以 R4 不变。</li>
+<li><strong>结果保存在哪</strong>：加法的结果 <code>68ACH</code> 写到自增前的地址 <code>5678H</code>；自增的结果 <code>5679H</code> 写回 R5。写回目的操作数用的是取操作数时已经算出的旧地址，不会因为 R5 刚加过 1 就写到 <code>5679H</code>。</li>
+</ul>
+</blockquote>
+<p>还有两点容易混：自增改的是<strong>寄存器里的地址</strong>，不是把存储单元的内容加 1；自增的对象是<strong>寄存器 R5</strong>，不是存储单元 <code>5678H</code>。按字编址时一个地址就是一个字（16 位），「指向下一个字」就是 +1；若按字节编址且操作数占 2 字节，才需要 +2。</p>
+</details>
+<hr/>
+<h4 id="2013-44">例题：【2013】第 44 题</h4>
+<p>某计算机采用 16 位定长指令字格式，CPU 中有一个标志寄存器，其中包含进位/借位标志 CF、零标志 ZF 和符号标志 NF。假定为该机设计了条件转移指令，其格式如下：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>OP</th>
+<th>C</th>
+<th>Z</th>
+<th>N</th>
+<th>OFFSET</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>位数</td>
+<td>5</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>8</td>
+</tr>
+<tr>
+<td>位置</td>
+<td>15～11</td>
+<td>10</td>
+<td>9</td>
+<td>8</td>
+<td>7～0</td>
+</tr>
+</tbody>
+</table></div>
+<p>其中，<code>00000</code> 为操作码 OP；C、Z 和 N 分别为 CF、ZF 和 NF 的对应检测位，某检测位为 1 时表示需检测对应标志位，需检测的标志位中只要有一个为 1 就转移，否则不转移。例如，若 C=1、Z=0、N=1，则需检测 CF 和 NF 的值，当 CF=1 或 NF=1 时发生转移；OFFSET 是相对偏移量，用补码表示。转移执行时，转移目标地址为 (PC)+2+2×OFFSET；顺序执行时，下条指令地址为 (PC)+2。请回答下列问题。</p>
+<ol>
+<li>该计算机存储器按字节编址还是按字编址？该条件转移指令向后（反向）最多可跳转多少条指令？</li>
+<li>某条件转移指令的地址为 <code>200CH</code>，指令内容为 <code>00000 0 1 1 11100011</code>，若该指令执行时 CF=0、ZF=0、NF=1，则该指令执行后 PC 的值是多少？若该指令执行时 CF=1、ZF=0、NF=0，则 PC 的值又是多少？请给出计算过程。</li>
+<li>实现“无符号数比较小于等于时转移”功能的指令中，C、Z 和 N 应各是什么？</li>
+<li>以下是该指令对应的数据通路示意图，要求给出图中部件①～③的名称或功能说明。</li>
+</ol>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="条件转移指令的数据通路示意图，图中 ①～③ 待填" data-src="/408-review/assets/textbook/coa-branch-datapath.webp" href="/408-review/assets/textbook/coa-branch-datapath.webp"><img alt="条件转移指令的数据通路示意图，图中 ①～③ 待填" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-branch-datapath.webp"/></a><figcaption>条件转移指令的数据通路示意图，图中 ①～③ 待填</figcaption></figure>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>（1）按字节编址；向后最多 128 条指令。</strong></p>
+<p>指令字长 16 位，即 2 字节。顺序执行时下条指令地址是 (PC)+2，说明 PC 每取一条指令加 2 个编址单位，编址单位是字节；若按字编址（字长 16 位），下条指令地址应当是 (PC)+1。</p>
+<p>OFFSET 是 8 位补码，范围 $-128\sim+127$。公式里乘 2，是因为 OFFSET 以指令条数为单位、每条指令 2 字节；取最小值 $-128$，从自增后的 PC 往回最多跨过 128 条指令。</p>
+<p><strong>（2）</strong> 先拆指令字：C=0、Z=1、N=1、OFFSET=<code>11100011B</code>。OFFSET 按 8 位补码解释，<code>11100011B</code> $=256-227=-29$。</p>
+<ul>
+<li>CF=0、ZF=0、NF=1：C=0 不检测 CF；Z=1 检测 ZF=0；N=1 检测 NF=1。检测的标志位中有一个为 1，<strong>转移</strong>。取指后 PC 先自增为 <code>200EH</code>，再加偏移：</li>
+</ul>
+<p>$$200\mathrm{EH}+2\times(-29)=200\mathrm{EH}-58=1\mathrm{FD}4\mathrm{H}$$</p>
+<p>所以执行后 PC = <strong><code>1FD4H</code></strong>。</p>
+<ul>
+<li>CF=1、ZF=0、NF=0：C=0，CF 虽然为 1 也不检测；Z=1 检测 ZF=0，N=1 检测 NF=0，两个都为 0，<strong>不转移</strong>。PC 顺序加 2，执行后 PC = <strong><code>200EH</code></strong>。</li>
+</ul>
+<blockquote>
+<p><strong>转移地址的算法：PC 先自增，再叠偏移。</strong> 取指结束时 PC 已经变成 (PC)+2，指向顺序执行的下一条指令；转移目标是在这个自增后的 PC 上再加 2×OFFSET，所以公式写成 (PC)+2+2×OFFSET。做题时先写出 PC+2（本题为 <code>200EH</code>），再叠加 2×OFFSET；漏掉 +2 就会少算一条指令，把 <code>1FD4H</code> 错算成 <code>1FD2H</code>。</p>
+</blockquote>
+<p><strong>（3）C=1、Z=1、N=0。</strong></p>
+<p>无符号数比较 $A\le B$ 用 $A-B$ 判断：$A&lt;B$ 时有借位，CF=1；$A=B$ 时 ZF=1。所以“小于等于”就是 CF=1 或 ZF=1，C、Z 都要置 1；无符号比较不看符号，N 置 0（若置 1，NF=1 时会误转移）。</p>
+<p><strong>（4）① 指令寄存器（IR）；② 移位器（左移一位）；③ 加法器。</strong></p>
+<ul>
+<li>① 指令寄存器：暂存当前指令，分出 OP、C、Z、N、OFFSET 五个字段；</li>
+<li>② 移位器：把符号扩展后的 OFFSET 左移一位，得到 2×OFFSET；</li>
+<li>③ 加法器：把 (PC)+2 与 2×OFFSET 相加，得到转移目标地址。</li>
+</ul>
+<p>C、Z、N 分别与 CF、ZF、NF 相与，三个与门的输出再或起来，作为多路选择器的控制信号：条件成立时选 ③ 送来的转移目标，条件不成立时选 (PC)+2，最后写回 PC。</p>
+</details>
+<hr/>
+<h4 id="2014-44">例题：【2014】第 44 题</h4>
+<p>某程序中有如下循环代码段 P：</p>
+<pre><code class="language-c">for (int i = 0; i &lt; N; i++) sum += A[i];
+</code></pre>
+<p>假设编译时变量 sum 和 i 分别分配在寄存器 R1 和 R2 中，常量 N 在寄存器 R6 中，数组 A 的首地址在寄存器 R3 中。程序段 P 起始地址为 <code>08048100H</code>，对应的汇编代码和机器代码如下表所示。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>地址</th>
+<th>机器代码</th>
+<th>汇编代码</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>08048100H</code></td>
+<td><code>00022080H</code></td>
+<td><code>loop: sll R4, R2, 2</code></td>
+<td>(R2) 左移 2 位 → R4</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>08048104H</code></td>
+<td><code>00083020H</code></td>
+<td><code>add R4, R4, R3</code></td>
+<td>(R4)+(R3) → R4</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>08048108H</code></td>
+<td><code>8C850000H</code></td>
+<td><code>load R5, 0(R4)</code></td>
+<td>((R4)+0) → R5</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>0804810CH</code></td>
+<td><code>00250820H</code></td>
+<td><code>add R1, R1, R5</code></td>
+<td>(R1)+(R5) → R1</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>08048110H</code></td>
+<td><code>20420001H</code></td>
+<td><code>add R2, R2, 1</code></td>
+<td>(R2)+1 → R2</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>08048114H</code></td>
+<td><code>1446FFFAH</code></td>
+<td><code>bne R2, R6, loop</code></td>
+<td>if((R2)≠(R6)) goto loop</td>
+</tr>
+</tbody>
+</table></div>
+<p>执行上述代码的计算机 M 采用 32 位定长指令字，其中分支指令 bne 采用如下格式：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>OP</th>
+<th>Rs</th>
+<th>Rd</th>
+<th>OFFSET</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>位置</td>
+<td>31～26</td>
+<td>25～21</td>
+<td>20～16</td>
+<td>15～0</td>
+</tr>
+<tr>
+<td>位数</td>
+<td>6</td>
+<td>5</td>
+<td>5</td>
+<td>16</td>
+</tr>
+</tbody>
+</table></div>
+<p>OP 为操作码；Rs 和 Rd 为寄存器编号；OFFSET 为偏移量，用补码表示。请回答下列问题，并说明理由。</p>
+<ol>
+<li>M 的存储器编址单位是什么？</li>
+<li>已知 <code>sll</code> 指令实现左移功能，数组 A 中每个元素占多少位？</li>
+<li>表中 bne 指令的 OFFSET 字段的值是多少？已知 bne 指令采用相对寻址方式，当前 PC 内容为 bne 指令地址，通过分析表中指令地址和 bne 指令内容，推断出 bne 指令的转移目标地址计算公式。</li>
+<li>若 M 采用如下“按序发射、按序完成”的 5 级指令流水线：IF（取指）、ID（译码及取数）、EXE（执行）、MEM（访存）、WB（写回寄存器），且硬件不采取任何转发措施，分支指令的执行均引起 3 个时钟周期的阻塞，则 P 中哪些指令的执行会由于数据相关而发生流水线阻塞？哪条指令的执行会发生控制冒险？为什么指令 1 的执行不会因为与指令 5 的数据相关而发生阻塞？</li>
+</ol>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>（1）按字节编址。</strong> 指令长 32 位，即 4 字节；表中相邻指令的地址差都是 4（<code>08048100H</code>→<code>104H</code>→<code>108H</code>…），说明一个地址对应 1 字节。</p>
+<p><strong>（2）32 位（4 字节）。</strong> <code>sll R4, R2, 2</code> 把下标 i 左移 2 位，相当于乘 4；而 A[i] 的地址 = A 首地址 + i × 元素大小，所以元素大小 = 4B = 32 位。</p>
+<p><strong>（3）OFFSET = -6，即 <code>FFFAH</code>；转移目标地址 = (PC) + 4 + 4×OFFSET（PC 为 bne 指令地址）。</strong></p>
+<p>先把 <code>1446FFFAH</code> 拆成字段：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OP</td>
+<td><code>000101B</code> = 5</td>
+</tr>
+<tr>
+<td>Rs</td>
+<td><code>00010B</code> = 2（R2）</td>
+</tr>
+<tr>
+<td>Rd</td>
+<td><code>00110B</code> = 6（R6）</td>
+</tr>
+<tr>
+<td>OFFSET</td>
+<td><code>FFFAH</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>FFFAH</code> 按 16 位补码解释：$65530-65536=-6$。验证：bne 在 <code>08048114H</code>，目标 loop 在 <code>08048100H</code>，</p>
+<p>$$08048114\mathrm{H}+4+4\times(-6)=08048118\mathrm{H}-24=08048100\mathrm{H}$$</p>
+<p>正好回到 loop。等价写法：目标地址 = (PC+4) + 4×OFFSET，其中 PC+4 是 bne 的下一条指令地址。</p>
+<p><strong>（4）因数据相关阻塞的指令是 2、3、4、6；控制冒险发生在指令 6（bne）。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>指令</th>
+<th>依赖</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>读 R4（1 写 R4）</td>
+<td>RAW</td>
+</tr>
+<tr>
+<td>3</td>
+<td>读 R4（2 写 R4）</td>
+<td>RAW</td>
+</tr>
+<tr>
+<td>4</td>
+<td>读 R5（3 写 R5）</td>
+<td>RAW，且是 load-use</td>
+</tr>
+<tr>
+<td>6</td>
+<td>读 R2（5 写 R2）</td>
+<td>RAW</td>
+</tr>
+</tbody>
+</table></div>
+<p>没有转发时，消费者要等生产者 WB 写回后才能读，所以这四条都要停。指令 6 本身是分支，条件/目标确定前继续取指可能取错，属于控制冒险；分支还会让后续取指停 3 个周期。</p>
+<p>指令 1 不会因为与指令 5 的相关而停：指令 1 读 R2、指令 5 写 R2。就同一轮看，这是反相关（WAR），指令 1 的读在指令 5 的写之前，不用等；就下一轮看，指令 1 虽然要读指令 5 写回的 R2，但两者之间隔着指令 6 和分支的 3 拍阻塞，等下一轮指令 1 到 ID 时，指令 5 早已写回，也不会停。</p>
+</details>
+<hr/>
+<h4 id="2017-44">例题：【2017】第 44 题</h4>
+<p>在按字节编址的计算机 M 上，题 43 中 f1 的部分源程序与对应的机器级代码（包括指令的虚拟地址）如下表所示。f1、f2 来自前面的 2017-43：f1 用 <code>int</code> 计算 $f(n)$，f2 把 f1 中的 <code>int</code> 都换成 <code>float</code>。</p>
+<pre><code class="language-c">int f1(unsigned n) {
+    ...
+    for (unsigned i = 0; i &lt;= n - 1; i++) {
+        ...
+        power *= 2;
+        ...
+    }
+    ...
+    return sum;
+}
+</code></pre>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>行号</th>
+<th>虚拟地址</th>
+<th>机器码</th>
+<th>汇编指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>00401020H</code></td>
+<td><code>55</code></td>
+<td><code>push ebp</code></td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>0040105EH</code></td>
+<td><code>39 4D F4</code></td>
+<td><code>cmp dword ptr [ebp-0Ch], ecx</code></td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>00401066H</code></td>
+<td><code>D1 E2</code></td>
+<td><code>shl edx, 1</code></td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>35</td>
+<td><code>0040107FH</code></td>
+<td><code>C3</code></td>
+<td><code>ret</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>其中，机器级代码行包括行号、虚拟地址、机器指令和汇编指令。请回答下列问题。</p>
+<ol>
+<li>计算机 M 是 RISC 还是 CISC？为什么？</li>
+<li>f1 的机器指令代码共占多少字节？要求给出计算过程。</li>
+<li>第 20 条指令 cmp 通过 i 减 n−1 实现对 i 和 n−1 的比较。执行 f1(0) 过程中，当 i=0 时，cmp 指令执行后，进/借位标志 CF 的内容是什么？要求给出计算过程。</li>
+<li>第 23 条指令 shl 通过左移操作实现了 <code>power *= 2</code> 运算，在 f2 中能否也用 shl 指令实现 <code>power *= 2</code>？为什么？</li>
+</ol>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>（1）CISC。</strong> 指令长度不固定：<code>push ebp</code> 是 1 字节（<code>55</code>），<code>cmp</code> 是 3 字节（<code>39 4D F4</code>），<code>shl</code> 是 2 字节（<code>D1 E2</code>），<code>ret</code> 是 1 字节（<code>C3</code>）；指令格式也不规整，<code>cmp</code> 还带 <code>[ebp-0Ch]</code> 这样的基址加偏移寻址。RISC 的特征是定长、格式规整、寻址方式少，和表中不符。</p>
+<p><strong>（2）96 字节。</strong> 第一条指令在 <code>00401020H</code>，最后一条 <code>ret</code> 在 <code>0040107FH</code>、长 1 字节，所以代码的结束边界是 <code>00401080H</code>：</p>
+<p>$$00401080\mathrm{H}-00401020\mathrm{H}=60\mathrm{H}=96$$</p>
+<p>也可以按「末条地址 − 首地址 + 末条长度」算：<code>0040107FH − 00401020H + 1 = 96</code>。</p>
+<p><strong>（3）CF=1。</strong> <code>n</code> 是无符号数，f1(0) 时 $n=0$，$n-1$ 按 32 位无符号回绕成 <code>FFFFFFFFH</code>。<code>cmp</code> 做 $i-(n-1)$，即 <code>00000000H − FFFFFFFFH</code>：被减数小于减数，无符号减法需要借位，所以 CF=1；差值为 <code>00000001H</code>。</p>
+<p><strong>（4）不能。</strong> f2 中的 <code>power</code> 是 <code>float</code>，<code>shl</code> 是整数左移，它把 IEEE 754 的 32 位位串整体左移一位：符号位、阶码、尾数都会错位，移完并不是把浮点数值乘 2。f2 里的 <code>power *= 2</code> 要用浮点乘法（或直接把阶码加 1），不能用 <code>shl</code>。</p>
+</details>
+<hr/>
+<h4 id="2023-44">例题：【2023】第 44 题</h4>
+<p>背景（来自 2023-43）：计算机 M 字长 32 位，按字节编址，采用请求调页的虚拟存储管理，虚拟地址 32 位，页大小 4KB。C 程序段中 <code>int a[24][64]</code> 按行优先存放，首地址为 <code>0042 2000H</code>，<code>sizeof(int)=4</code>；执行前数组 a 不在主存，执行过程中不发生页面置换。</p>
+<pre><code class="language-c">int a[24][64];
+for (i = 0; i &lt; 24; i++)
+    for (j = 0; j &lt; 64; j++)
+        a[i][j] = 10;
+</code></pre>
+<p>该程序段在 M 上的部分机器级代码如下，每个机器级代码行中依次包含指令序号、虚拟地址、机器指令和汇编指令。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>指令序号</th>
+<th>虚拟地址</th>
+<th>机器码</th>
+<th>汇编指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>00401072H</code></td>
+<td><code>C7 45 F8 00 00 00 00</code></td>
+<td><code>mov [ebp-8], 0</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>00401079H</code></td>
+<td><code>EB 09</code></td>
+<td><code>jmp 00401084h</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>0040107BH</code></td>
+<td><code>8B 55 F8</code></td>
+<td><code>mov eax, [ebp-8]</code></td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>00401088H</code></td>
+<td><code>7D 32</code></td>
+<td><code>jge 004010bch</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>0040108AH</code></td>
+<td><code>C7 45 FC 00 00 00 00</code></td>
+<td><code>mov [ebp-4], 0</code></td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>004010AEH</code></td>
+<td><code>C7 84 82 00 20 42 00 0A 00 00 00</code></td>
+<td><code>mov [ecx+edx*4+00422000h], 0Ah</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table></div>
+<p>请回答下列问题。</p>
+<ol>
+<li>第 20 条指令的虚拟地址是多少？</li>
+<li>已知第 2 条 jmp 和第 7 条 jge 都是跳转指令，其操作码分别是 EBH 和 7DH，跳转目标地址分别为 <code>0040 1084H</code>、<code>0040 10BCH</code>，这两条指令都采用什么寻址方式？给出第 2 条指令 jmp 的跳转目标地址计算过程。</li>
+<li>已知第 19 条 mov 指令的功能为“a[i][j]←10”，其中 ecx 和 edx 为寄存器名，<code>0042 2000H</code> 是数组 a 的首地址，指令中源操作数采用什么寻址方式？已知 edx 中存放的是变量 j，ecx 中存放的是什么？根据该指令的机器码判断计算机 M 采用大端还是小端方式。</li>
+<li>第一次执行第 19 条指令时，取指令过程中是否会发生缺页异常？为什么？</li>
+</ol>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>（1）<code>004010B9H</code>。</strong> 第 19 条指令从 <code>004010AEH</code> 开始，机器码占 11 字节（<code>C7 84 82</code> 3 字节 + 4 字节位移 + 4 字节立即数），所以下一条指令地址为</p>
+<p>$$004010AE\mathrm{H}+0\mathrm{BH}=004010B9\mathrm{H}$$</p>
+<p><strong>（2）两条都采用相对寻址。</strong> 转移目标 = 下一条指令地址 + 8 位补码偏移量。第 2 条 jmp 在 <code>00401079H</code>，指令长 2 字节（<code>EB 09</code>），下一条指令地址为 <code>00401079H+2=0040107BH</code>，偏移量为 <code>09H</code>：</p>
+<p>$$0040107\mathrm{B}\mathrm{H}+09\mathrm{H}=00401084\mathrm{H}$$</p>
+<p><strong>（3）源操作数采用立即数寻址；ecx 中存放 <code>i×64×4</code>，即 <code>i×256</code>（i 左移 8 位）；M 采用小端方式。</strong></p>
+<ul>
+<li>第 19 条指令的源操作数是 <code>0Ah</code>，直接写在指令里，属于立即（数）寻址。</li>
+<li>a[i][j] 的地址 $=00422000\mathrm{H}+(i\times64+j)\times4=00422000\mathrm{H}+i\times256+j\times4$，而指令写成 <code>[ecx+edx*4+00422000h]</code>、edx 中存的是 j，所以 ecx 中存的是 $i\times256$。</li>
+<li>机器码中 <code>00422000H</code> 存为 <code>00 20 42 00</code>，低字节在前，是小端；立即数 <code>0Ah</code> 也存成 <code>0A 00 00 00</code>，同样说明是小端。</li>
+</ul>
+<p><strong>（4）不会。</strong> 第 19 条指令的 11 字节在 <code>004010AEH</code>～<code>004010B8H</code>，位于代码页 <code>00401000H</code>～<code>00401FFFH</code>（4KB）内，取第 1～18 条指令时该页已经调入主存，而且本条取指没有跨页，所以取指令不会缺页。第一次执行时可能缺页的是数据页 <code>00422000H</code>（数组不在主存），但那是取数据，不是取指令。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

@@ -7,6 +7,7 @@ import {
   icon, escapeHtml, importanceBars, tag, footer, sectionHead, segmentedLevel, dueLabel,
 } from '../ui.js';
 import { questionCard } from '../components/question-card.js';
+import { afterArticle } from '../article.js';
 
 export function topicView(store, topicId) {
   const topic = topicById.get(topicId);
@@ -86,49 +87,27 @@ export function topicView(store, topicId) {
           <a class="ql-more" href="#/map?subject=${subject?.id || 'ds'}">知识地图 ${icon('arrowRight', 12)}</a>
         </div>` : ''}
 
+        ${topic.bitfields ? `<section class="topic-visual">
+          <p class="eyebrow">QUICK LOOK</p>
+          ${topic.bitfields.map(renderBitfield).join('')}
+        </section>` : ''}
+
         <div class="article-toolbar">
-          <div class="at-left"><span class="eyebrow">KNOWLEDGE POINTS</span><span class="at-count">${topic.points.length} 个知识点</span></div>
+          <div class="at-left"><span class="eyebrow">FULL NOTES</span><span class="at-count">正文 · 图片可点开</span></div>
           <div class="at-right">
-            <button type="button" class="text-btn" data-action="toggle-all-points">${icon('layers', 14)} <span>展开全部</span></button>
             <button type="button" class="text-btn" data-action="print">${icon('print', 14)} 打印</button>
           </div>
         </div>
 
-        <div class="points">
-          ${topic.points.map((p, i) => `<article class="point" data-open="${i === 0 ? 'true' : 'false'}">
-            <button type="button" class="point-head" data-action="toggle-point" aria-expanded="${i === 0 ? 'true' : 'false'}">
-              <span class="point-no">${String(i + 1).padStart(2, '0')}</span>
-              <span class="point-title-wrap">
-                <span class="point-title">${escapeHtml(p.t)}</span>
-                <span class="point-lead">${escapeHtml(p.lead)}</span>
-              </span>
-              <span class="point-chev">${icon('chevron', 18)}</span>
-            </button>
-            <div class="point-panel">
-              <div class="point-inner">
-                <div class="point-body">${p.body}</div>
-                ${p.bitfields ? p.bitfields.map(renderBitfield).join('') : ''}
-                ${p.figures ? `<div class="point-figures">${p.figures.map(renderFigure).join('')}</div>` : ''}
-                ${p.note ? `<div class="point-note"><span class="pn-label">记</span><div>${p.note}</div></div>` : ''}
-              </div>
-            </div>
-          </article>`).join('')}
-        </div>
-
-        ${topic.bitfields ? topic.bitfields.map(renderBitfield).join('') : ''}
-
-        ${topic.table ? renderTable(topic.table) : ''}
-        ${topic.tables ? topic.tables.map(renderTable).join('') : ''}
-        ${topic.figures ? `<section class="topic-figures">${topic.figures.map(renderFigure).join('')}</section>` : ''}
-
-        ${topic.pitfalls?.length ? `<section class="pitfall-section">
-          ${sectionHead({ eyebrow: 'TRAPS', title: '易错点', desc: '选择题最爱在这里挖坑。' })}
-          <div class="pitfall-grid">
-            ${topic.pitfalls.map((p, i) => `<div class="pitfall-card">
-              <span class="pc-no">${String(i + 1).padStart(2, '0')}</span>
-              <div><h4>${escapeHtml(p.t)}</h4><p>${p.b}</p></div>
-            </div>`).join('')}
+        <section class="topic-reader" data-topic-id="${topic.id}">
+          <div class="article-body" id="topic-article">
+            <div class="article-loading"><span class="al-dot"></span> 正在展开全文…</div>
           </div>
+        </section>
+
+        ${customFigures(topic).length ? `<section class="topic-visual topic-visual-figures">
+          ${sectionHead({ eyebrow: 'DIAGRAMS', title: '结构图解', desc: '把文字压缩成一张图，复习时先看图回忆。' })}
+          <div class="topic-figures">${customFigures(topic).map(renderFigure).join('')}</div>
         </section>` : ''}
 
         <section class="topic-questions">
@@ -244,4 +223,47 @@ function renderFigure(fig) {
 
 function stripTags(html = '') {
   return String(html).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function customFigures(topic) {
+  return (topic.figures || []).filter((f) => String(f.src || '').endsWith('.svg'));
+}
+
+/**
+ * 长文按需加载：首次进入考点时 fetch 静态 HTML，不把 50 篇文章塞进主 JS。
+ * 失败时退回 topic.points 的速记版，保证页面仍然可读。
+ */
+export async function hydrateTopicArticle(topicId) {
+  const host = document.getElementById('topic-article');
+  if (!host) return;
+  host.dataset.topicId = topicId;
+  const topic = topicById.get(topicId);
+  if (!topic) return;
+
+  try {
+    const res = await fetch(`/408-review/assets/content/${topicId}.html`, { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`article ${res.status}`);
+    const html = await res.text();
+    if (host.dataset.topicId !== topicId) return;
+    host.innerHTML = html;
+    host.classList.add('is-loaded');
+  } catch (err) {
+    if (host.dataset.topicId !== topicId) return;
+    host.innerHTML = fallbackArticle(topic);
+    host.classList.add('is-loaded', 'is-fallback');
+  }
+
+  await afterArticle(host);
+}
+
+function fallbackArticle(topic) {
+  const points = (topic.points || []).map((p) => `<section class="article-fallback-point">
+    <h2>${escapeHtml(p.t)}</h2>
+    ${p.lead ? `<p class="article-fallback-lead">${escapeHtml(p.lead)}</p>` : ''}
+    ${p.body || ''}
+  </section>`).join('');
+  return `<div class="article-content">
+    <p class="article-fallback-note">这个考点的长文还在整理，先保留速记版；下方真题与串联仍然可用。</p>
+    ${points}
+  </div>`;
 }

@@ -1,0 +1,496 @@
+<div class="article-content">
+<h2 id="7-cache">考点7-Cache</h2>
+<p>程序访问具有局部性：短时间内可能反复访问同一数据，或访问相邻地址。Cache 利用<mark>时间局部性</mark>和<mark>空间局部性</mark>，把主存中的活跃块复制到更快的 SRAM 中。</p>
+<p>Cache 的访问过程如下：</p>
+<pre class="mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;primaryColor&quot;: &quot;#5b9bd5&quot;,
+    &quot;primaryTextColor&quot;: &quot;#ffffff&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#41719c&quot;,
+    &quot;lineColor&quot;: &quot;#41719c&quot;,
+    &quot;secondaryColor&quot;: &quot;#ffffff&quot;,
+    &quot;tertiaryColor&quot;: &quot;#e2f0d9&quot;,
+    &quot;fontSize&quot;: &quot;16px&quot;,
+    &quot;fontFamily&quot;: &quot;-apple-system, BlinkMacSystemFont, \&quot;Segoe UI\&quot;, Roboto, \&quot;Helvetica Neue\&quot;, Arial, \&quot;Noto Sans\&quot;, sans-serif&quot;
+  },
+  &quot;flowchart&quot;: {
+    &quot;nodeSpacing&quot;: 8,
+    &quot;rankSpacing&quot;: 26,
+    &quot;curve&quot;: &quot;basis&quot;,
+    &quot;htmlLabels&quot;: true,
+    &quot;subGraphTitleMargin&quot;: { &quot;top&quot;: 0, &quot;bottom&quot;: 14 },
+    &quot;padding&quot;: 4,
+    &quot;useMaxWidth&quot;: false,
+    &quot;wrappingWidth&quot;: 1000
+  }
+}}%%
+graph TD
+  ADDR[&quot;CPU发出&lt;br&gt;主存地址&quot;]
+  SPLIT[&quot;拆分地址&lt;br&gt;标记 / 组号 / 块内偏移&quot;]
+  CHECK{&quot;有效位为1&lt;br&gt;且标记相同？&quot;}
+  HIT[&quot;命中&lt;br&gt;按块内偏移取数&quot;]
+  MISS[&quot;缺失&lt;br&gt;选择被替换行&quot;]
+  DIRTY{&quot;被替换行&lt;br&gt;是否为脏？&quot;}
+  WRITE[&quot;把旧块&lt;br&gt;写回主存&quot;]
+  FETCH[&quot;从主存调入新块&lt;br&gt;更新标记和控制位&quot;]
+  RETURN[&quot;返回数据&quot;]
+
+  ADDR --&gt; SPLIT
+  SPLIT --&gt; CHECK
+  CHECK --&gt;|&quot;命中&quot;| HIT
+  CHECK --&gt;|&quot;缺失&quot;| MISS
+  MISS --&gt; DIRTY
+  DIRTY --&gt;|&quot;是&quot;| WRITE
+  WRITE --&gt; FETCH
+  DIRTY --&gt;|&quot;否&quot;| FETCH
+  HIT --&gt; RETURN
+  FETCH --&gt; RETURN
+
+  classDef root fill:#5b9bd5,stroke:#41719c,color:#ffffff,font-size:20px
+  classDef lvl1 fill:#9dc3e6,stroke:#2e6da4,stroke-width:2px,color:#0d2f4d,font-size:19px
+  classDef lvl2d fill:#dbe8f6,stroke:#1f4e79,stroke-width:2px,color:#0d2f4d,font-size:16px
+  classDef lvl2l fill:#f6fafe,stroke:#c3d9ef,stroke-width:2px,color:#0d2f4d,font-size:16px
+  classDef lvl3d fill:#dbe8f6,stroke:#1f4e79,stroke-width:1.5px,color:#0d2f4d,font-size:15px
+  classDef lvl3l fill:#f6fafe,stroke:#c3d9ef,stroke-width:1.5px,color:#0d2f4d,font-size:15px
+
+  class ADDR root;
+  class SPLIT lvl1;
+  class CHECK lvl2d;
+  class HIT lvl2l;
+  class MISS lvl2l;
+  class DIRTY lvl3d;
+  class WRITE,FETCH lvl3d;
+  class RETURN lvl3l;</pre>
+<p>命中时直接得到数据；缺失时若被替换行是脏行，还要先写回主存，再从主存调入新块。</p>
+<hr/>
+<p>Cache 的一行通常包含：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标记 Tag</td>
+<td>与地址中的标记比较，判断是否命中</td>
+</tr>
+<tr>
+<td>数据块</td>
+<td>真正缓存的主存块内容</td>
+</tr>
+<tr>
+<td>有效位 V</td>
+<td>该行是否装着有效数据</td>
+</tr>
+<tr>
+<td>脏位 D</td>
+<td>回写法中记录数据是否比主存新</td>
+</tr>
+<tr>
+<td>替换控制位</td>
+<td>LRU/LFU 等信息，供选择被替换行</td>
+</tr>
+</tbody>
+</table></div>
+<p>行号或组号通常不单独保存，因为它在 Cache 中的位置本身就能反映索引。</p>
+<details class="article-details">
+<summary class="article-summary">补充：Cache 单行位数和总容量</summary>
+<p>按题目常用的逐行计法：</p>
+<p>$$\text{单行位数}
+=\text{Tag 位数}+\text{数据块位数}
++1\text{（有效位）}
++1\text{（脏位，回写时需要）}
++\log_2 E\text{（组内替换信息）}$$</p>
+<p>其中 $E$ 是组相联的组内行数。直接映射没有组内替换选择，所以通常没有 LRU 位；全相联或组相联需要替换控制信息。</p>
+<p>Cache 数据容量为</p>
+<p>$$C_{\text{data}}=\text{行数}\times\text{每行数据字节数}$$</p>
+<p>若题目问“总存储位数”，还要把标记位、有效位、脏位和替换控制位一起加进去。严格硬件实现中 LRU 状态通常按组维护，408 题若按单行列出 $\log_2 E$ 位，则按题目口径计算。</p>
+</details>
+<hr/>
+<p><strong>地址结构。</strong> 主存地址可分成：</p>
+<p>$$\text{主存地址}=\text{Tag}+\text{索引 Index}+\text{块内偏移 Offset}$$</p>
+<p>块内偏移位数由 Cache 行大小决定：</p>
+<p>$$b=\log_2(\text{块大小})$$</p>
+<p>不同映射方式的地址结构不同：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>映射方式</th>
+<th>Cache 位置关系</th>
+<th>地址结构</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接映射</td>
+<td>每个主存块只能放入固定的一行</td>
+<td>Tag + 行索引 + Offset</td>
+<td>硬件简单、命中判断快，但冲突缺失明显</td>
+</tr>
+<tr>
+<td>全相联映射</td>
+<td>任意主存块可放任意 Cache 行</td>
+<td>Tag + Offset</td>
+<td>冲突少、需要比较所有 Tag，硬件贵</td>
+</tr>
+<tr>
+<td>组相联映射</td>
+<td>先定位组，再放入组内任一行</td>
+<td>Tag + 组索引 + Offset</td>
+<td>直接映射与全相联的折中</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>全相联就是“只有一个大组”的组相联，直接映射就是“每组只有一行”的组相联。地址中的索引位用来选组，Tag 用来确认选中的组里究竟是哪个主存块。</p>
+</blockquote>
+<hr/>
+<p><strong>命中率与平均访问时间。</strong> 设命中率为 $H$，Cache 访问时间为 $T_c$，主存访问时间为 $T_m$。</p>
+<p>若先访问 Cache，缺失后才访问主存：</p>
+<p>$$T_{\text{avg}}
+=H T_c+(1-H)(T_c+T_m)
+=T_c+(1-H)T_m$$</p>
+<p>若 Cache 与主存同时访问，命中时采用 Cache 的结果，缺失时等待主存取回：</p>
+<p>$$T_{\text{avg}}
+=H T_c+(1-H)T_m$$</p>
+<blockquote>
+<p>两种公式的差别只在缺失时是否把这次 Cache 查询时间重复计算。题目说“未命中后再访问主存”，使用前式；题目说“同时访问 Cache 和主存”，使用后式。</p>
+</blockquote>
+<details class="article-details">
+<summary class="article-summary">补充：命中率计算例子</summary>
+<p>设 $H=0.95$，$T_c=1\,\mathrm{ns}$，$T_m=100\,\mathrm{ns}$。</p>
+<p>未命中后才访问主存：</p>
+<p>$$T_{\text{avg}}
+=1+0.05\times100
+=6\,\mathrm{ns}$$</p>
+<p>同时访问：</p>
+<p>$$T_{\text{avg}}
+=0.95\times1+0.05\times100
+=5.95\,\mathrm{ns}$$</p>
+</details>
+<hr/>
+<p><strong>替换算法。</strong> 直接映射没有选择余地；全相联和组相联需要从候选行中淘汰一行。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>算法</th>
+<th>规则</th>
+<th>计数器行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RAND</td>
+<td>随机选择被替换行</td>
+<td>不维护访问计数</td>
+</tr>
+<tr>
+<td>FIFO</td>
+<td>先进先出</td>
+<td>记录进入 Cache 的先后，命中不改变进入顺序</td>
+</tr>
+<tr>
+<td>LRU</td>
+<td>淘汰最久未访问的行</td>
+<td>命中或插入时更新时间戳；淘汰时间戳最早者</td>
+</tr>
+<tr>
+<td>LFU</td>
+<td>淘汰访问次数最少的行</td>
+<td>命中时计数加 1；淘汰计数最小者，必要时用 LRU 打破平局</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>LRU 关心“最近有没有访问”，LFU 关心“总共访问了多少次”。一个块过去被访问很多次但近期不再使用，LRU 会淘汰它，LFU 仍可能长期保留。</p>
+</blockquote>
+<details class="article-details">
+<summary class="article-summary">补充：LRU 与 LFU 的计数器差异</summary>
+<p><strong>LRU 时间戳法。</strong> 每次访问都令全局计数加 1，并把当前值写入该行的时间戳。命中也要更新时间戳；选择时间戳最小的行淘汰。</p>
+<p><strong>LFU 频率法。</strong> 每次命中给该行的访问计数加 1，选择计数最小的行淘汰。若同频，再用 LRU 或 FIFO 决定。</p>
+<p>关键区别：</p>
+<ul>
+<li>LRU 的计数器表示“最近一次访问有多新”；</li>
+<li>LFU 的计数器表示“访问次数有多少”；</li>
+<li>LRU 会随访问模式改变排序，LFU 的历史计数不会自动清零，可能需要定期衰减。</li>
+</ul>
+</details>
+<hr/>
+<p><strong>写策略。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>情形</th>
+<th>方法</th>
+<th>做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>写命中</td>
+<td>全写法</td>
+<td>同时修改 Cache 和主存，保证主存始终较新，写入流量较大</td>
+</tr>
+<tr>
+<td>写命中</td>
+<td>回写法</td>
+<td>只修改 Cache 并置脏位；替换该行时再写回主存</td>
+</tr>
+<tr>
+<td>写缺失</td>
+<td>写分配</td>
+<td>先把主存块调入 Cache，再修改 Cache</td>
+</tr>
+<tr>
+<td>写缺失</td>
+<td>非写分配</td>
+<td>不调入 Cache，直接写到主存</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>全写法常配合写缓冲区减少 CPU 等待；回写法常配合写分配。两者的核心区别是：全写法追求主存及时更新，回写法追求减少写主存次数。</p>
+</blockquote>
+<hr/>
+<p><strong>分离 Cache 与多级 Cache。</strong> 统一 Cache 同时存放指令和数据；分离 Cache 把 L1 指令 Cache 与 L1 数据 Cache 分开，可以并行取指和取数，也避免取指流量挤占数据缓存。</p>
+<p>多级 Cache 中，L1 容量小、速度最快；L1 缺失时访问 L2，L2 缺失时再访问 L3 或主存。L2 通常比 L1 容量大但速度慢。</p>
+<blockquote>
+<p>常见实现中 L1 数据 Cache 采用分离式组织、写分配和回写策略；指令 Cache 是只读的，因此不讨论写命中和脏位。</p>
+</blockquote>
+<h2 id="1-">题型1-地址映射与字段划分</h2>
+<p><strong>地址划分只有两步。</strong> 所有地址字段划分，本质都是先定位存储对象，再定位对象内部的单元：</p>
+<ol>
+<li><strong>大定位</strong>：先确定数据落在哪个存储对象——哪个主存块、哪个 Cache 行或组、哪个页；</li>
+<li><strong>小定位</strong>：再用块内地址或页内地址，确定对象内部的哪个单元。</li>
+</ol>
+<p>同一条地址，硬件按不同规则解释，就得到三种划分：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>面向</th>
+<th>地址字段</th>
+<th>定位方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主存单元</td>
+<td>主存块号 + 块内地址</td>
+<td>块号定位主存块，块内地址定位块中的单元</td>
+</tr>
+<tr>
+<td>Cache</td>
+<td>Tag（+ Index）+ 块内地址</td>
+<td>Index 在直接映射中是行号，组相联中是组号，全相联没有</td>
+</tr>
+<tr>
+<td>虚拟存储</td>
+<td>实页号 + 页内地址<br/>虚页号 + 页内地址</td>
+<td>页号定位页框或虚页，页内地址定位页中的单元</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>地址本身没有意义，意义来自硬件怎么解释它。</p>
+</blockquote>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="主存地址与虚拟地址的字段划分：同一主存地址面向 Cache 时分成 Tag、Cache 行号和块内地址，面向页时分成实页号和页内地址；虚拟地址分成虚页号和页内地址，二者的页内地址完全相同" data-src="/408-review/assets/textbook/coa-address-division-views.webp" href="/408-review/assets/textbook/coa-address-division-views.webp"><img alt="主存地址与虚拟地址的字段划分：同一主存地址面向 Cache 时分成 Tag、Cache 行号和块内地址，面向页时分成实页号和页内地址；虚拟地址分成虚页号和页内地址，二者的页内地址完全相同" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-address-division-views.webp"/></a><figcaption>主存地址与虚拟地址的字段划分：同一主存地址面向 Cache 时分成 Tag、Cache 行号和块内地址，面向页时分成实页号和页内地址；虚拟地址分成虚页号和页内地址，二者的页内地址完全相同</figcaption></figure>
+<p>一个完整的地址解析过程按“虚 → 实 → Cache”走：先用虚拟地址的虚页号查 TLB 或页表，得到页框号；页框号拼上页内地址就是物理地址；同一条物理地址再按 Cache 的划分拆成 Tag、组号和块内地址，去访问 Cache。页内地址在转换前后不变，主存地址面向页和面向 Cache 只是对同一条物理地址的两种解释。</p>
+<details class="article-details">
+<summary class="article-summary">补充：页内地址、块内地址与“页 / 块”辨析</summary>
+<p><strong>先把几个名词摆清楚。</strong></p>
+<ul>
+<li><strong>页（页面）</strong>：虚拟地址空间按固定大小划分出的单位，进程按页分配内存；</li>
+<li><strong>页框（物理页、页帧）</strong>：主存中与页等大的划分单位，页装入页框，页框号就是实页号（物理页号）；</li>
+<li><strong>主存块</strong>：主存与 Cache 之间交换数据的单位，通常 32B 或 64B；</li>
+<li><strong>Cache 行</strong>：Cache 中存放一个主存块的单元，由标记、数据块和控制位组成，其中数据块部分有时直接叫 Cache 块；</li>
+<li><strong>磁盘块（盘块）</strong>：主存与外存之间交换数据的单位；</li>
+<li><strong>段</strong>：按程序逻辑划分的单位，段页式里先分段、段内再分页。</li>
+</ul>
+<blockquote>
+<p>单说“块”时，看它和谁交换：和 Cache 交换的是主存块，和磁盘交换的是磁盘块；按页划分出来、用来装页的是页框。</p>
+</blockquote>
+<p>cache 行内部装的是 cache 块（数据部分），行是“块 + 标记 + 控制位”的整体。</p>
+<p><strong>“物理块”这个词最容易混。</strong> 操作系统从软件角度出发，常把页（页框）叫作物理块；计组从硬件角度出发，物理块指主存里划分出来的一块，也就是主存块。同一个词，两套视角，大小自然不同。</p>
+<p><strong>硬件视角：cache 块为什么小。</strong> 如果 cache 块只有 1B，标记、有效位、脏位、替换控制位这些附加信息会占掉很大比例；如果 cache 块太大，而 Cache 容量有限，行数就会很少，容易冲突不命中。为了方便从主存调入，主存也按块划分，主存块通常 32B，cache 块与它对应。</p>
+<p><strong>软件视角：页为什么大。</strong> 进程按页分配内存。如果页也按 32B 这种粒度，程序稍大就会占用大量页：页在主存与外存之间频繁换入换出，开销很大；每个进程的页表也会变得很大，存储和检索都不方便。所以页通常取 4KB；操作系统里也把这个分配单位叫物理块（虚拟存储 = 主存 + 外存）。</p>
+<p><strong>TLB 与 cache 行类比。</strong> TLB 行也有标记，与 cache 块对应的内容是页表项里的实页号；实页号位数 = 物理地址位数 − 页内地址位数。例如虚拟地址 36 位、物理地址 32 位、页内地址 12 位，则虚页号 24 位、实页号 20 位。</p>
+<p><strong>结论：</strong></p>
+<ol>
+<li>Cache 的换入换出在主存与 Cache 之间，页的换入换出在主存与外存之间，功能不同。</li>
+<li>页内地址和块内地址都在地址低位；VA→PA 时页内地址不变，而页内地址比块内地址位数多，块内地址直接取自页内地址的低位。</li>
+<li>cache 块与页大小不同，原因就是上面硬件、软件两套考量。</li>
+</ol>
+</details>
+<p>具体算位数时，可以拆成 10 个固定动作：前 5 个面向 Cache，后 5 个面向虚拟存储。每个动作只回答一个“多少位 / 多少行 / 多少组”，按顺序套完，地址字段就排好了。</p>
+<p><strong>1. 块大小 → 块内地址位数</strong></p>
+<p>块内地址数的是“一个块里有多少个可编址单位”，先确认编址单位是字节还是字：</p>
+<p>$$b=\log_2\frac{\text{块大小}}{\text{编址单位}}$$</p>
+<p>按字节编址、块 64B 是 6 位；按字编址、字长 32 位时一块只有 16 个字，4 位就够。块内地址只负责块内定位，不参与选行。</p>
+<details class="article-details">
+<summary class="article-summary">小例题：按字编址的块内地址</summary>
+<p>主存按字编址，字长 32 位，Cache 块大小 128B。求块内地址位数；若改为按字节编址呢？</p>
+<p><strong>解：</strong> 按字编址时一块有 $128/4=32$ 个字，块内地址 $\log_2 32=5$ 位；按字节编址则是 $\log_2 128=7$ 位。</p>
+</details>
+<hr/>
+<p><strong>2. Cache 总行数</strong></p>
+<p>总行数数的是“数据区能装下多少个主存块”：</p>
+<p>$$L=\frac{\text{Cache 数据区容量}}{\text{块大小}}$$</p>
+<p>题目说的“Cache 容量”一般指数据区；如果给的是包含标记阵列的总容量，不能直接除，要先换回数据区。</p>
+<details class="article-details">
+<summary class="article-summary">小例题：总行数</summary>
+<p>Cache 数据区 64KB，块大小 32B，求总行数；若块大小改为 64B 呢？</p>
+<p><strong>解：</strong> $64\mathrm{K}/32=2048$ 行；块改为 64B 后 $64\mathrm{K}/64=1024$ 行。</p>
+</details>
+<hr/>
+<p><strong>3. Cache 组数</strong></p>
+<p>组数由总行数和路数决定：</p>
+<p>$$S=\frac{L}{E}$$</p>
+<p>直接映射相当于每组一行（$E=1$），全相联相当于只有一个组（$E=L$）。</p>
+<details class="article-details">
+<summary class="article-summary">小例题：组数</summary>
+<p>Cache 共 512 行，8 路组相联，求组数；若改成直接映射或全相联呢？</p>
+<p><strong>解：</strong> $512/8=64$ 组；直接映射 $E=1$，512 组；全相联只有 1 组。</p>
+</details>
+<hr/>
+<p><strong>4. Cache 行号 / 组号位数</strong></p>
+<p>索引位数取决于映射方式：直接映射取行号，组相联取组号，全相联没有索引。</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>映射方式</th>
+<th>索引</th>
+<th>位数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接映射</td>
+<td>行号</td>
+<td>$\log_2 L$</td>
+</tr>
+<tr>
+<td>组相联</td>
+<td>组号</td>
+<td>$\log_2 S$</td>
+</tr>
+<tr>
+<td>全相联</td>
+<td>无</td>
+<td>0</td>
+</tr>
+</tbody>
+</table></div>
+<details class="article-details">
+<summary class="article-summary">小例题：索引位数</summary>
+<p>Cache 数据区 16KB，块大小 32B，4 路组相联，求索引位数；若改为直接映射呢？</p>
+<p><strong>解：</strong> 共 $16\mathrm{K}/32=512$ 行，4 路 → 128 组，索引 $\log_2 128=7$ 位；直接映射取行号，$\log_2 512=9$ 位。</p>
+</details>
+<hr/>
+<p><strong>5. Tag 位数</strong></p>
+<p>Tag 不用单独推：先算完索引和块内地址，剩下的位数就是 Tag。</p>
+<p>$$t=\text{主存地址位数}-b-\text{索引位数}$$</p>
+<p>同一行里还有几个固定控制位：有效位 1 位；回写法的脏位 1 位；LRU 位 $\log_2 E$（直接映射没有替换选择，不计）。</p>
+<details class="article-details">
+<summary class="article-summary">小例题：Tag 与控制位</summary>
+<p>主存地址 32 位，Cache 数据区 32KB，块大小 64B，8 路组相联、回写，求 Tag 位数以及一行中有效位、脏位、LRU 位各几位。</p>
+<p><strong>解：</strong> $32\mathrm{K}/64=512$ 行，8 路 → 64 组，组号 6 位；块内地址 6 位；Tag $=32-6-6=20$ 位。有效位 1 位，脏位 1 位，LRU $\log_2 8=3$ 位。</p>
+</details>
+<hr/>
+<p><strong>6. 页面大小 → 页内地址位数</strong></p>
+<p>页内地址和块内地址是一回事，只是单位换成了页：</p>
+<p>$$o=\log_2\frac{\text{页大小}}{\text{编址单位}}$$</p>
+<details class="article-details">
+<summary class="article-summary">小例题：页内地址</summary>
+<p>页面大小 16KB，分别求按字节编址、按字编址（字长 32 位）时的页内地址位数。</p>
+<p><strong>解：</strong> 按字节编址 $\log_2 16\mathrm{K}=14$ 位；按字编址 $16\mathrm{K}/4=4\mathrm{K}$，$\log_2 4\mathrm{K}=12$ 位。</p>
+</details>
+<hr/>
+<p><strong>7. 实页号（页框号）位数</strong></p>
+<p>物理地址去掉页内地址，剩下的就是页框号：</p>
+<p>$$\text{页框号}=\text{物理地址位数}-o$$</p>
+<details class="article-details">
+<summary class="article-summary">小例题：页框号</summary>
+<p>物理地址 30 位，页面大小 4KB，求页框号位数；若物理地址只有 20 位呢？</p>
+<p><strong>解：</strong> $30-12=18$ 位；物理地址 20 位时 $20-12=8$ 位。</p>
+</details>
+<hr/>
+<p><strong>8. 虚页号位数</strong></p>
+<p>虚拟地址去掉页内地址，剩下的就是虚页号：</p>
+<p>$$\text{虚页号}=\text{虚拟地址位数}-o$$</p>
+<details class="article-details">
+<summary class="article-summary">小例题：虚页号</summary>
+<p>虚拟地址 32 位，页面大小 4KB，求虚页号位数；若虚拟地址空间为 16MB 呢？</p>
+<p><strong>解：</strong> $32-12=20$ 位；16MB 对应 24 位虚拟地址，$24-12=12$ 位。</p>
+</details>
+<hr/>
+<p><strong>9. TLB 组号位数</strong></p>
+<p>TLB 是 VPN 的 Cache：项数除以路数得组数，组号取 VPN 的低位。</p>
+<p>$$S_{\mathrm{TLB}}=\frac{N}{E},\qquad \text{组号位数}=\log_2 S_{\mathrm{TLB}}$$</p>
+<details class="article-details">
+<summary class="article-summary">小例题：TLB 组号</summary>
+<p>TLB 共 32 项，8 路组相联，求 TLB 组数、组号位数；若改为全相联呢？</p>
+<p><strong>解：</strong> $32/8=4$ 组，组号 $\log_2 4=2$ 位；全相联只有 1 组，组号 0 位。</p>
+</details>
+<hr/>
+<p><strong>10. TLB tag 位数</strong></p>
+<p>TLB tag 是虚页号去掉组号后剩下的高位，页内地址不参与比较：</p>
+<p>$$\text{TLB tag}=\text{虚页号位数}-\text{TLB 组号位数}$$</p>
+<details class="article-details">
+<summary class="article-summary">小例题：TLB tag</summary>
+<p>虚拟地址 32 位，页面大小 4KB，TLB 共 64 项、4 路组相联，求 TLB tag 位数。</p>
+<p><strong>解：</strong> 页内地址 12 位，虚页号 $32-12=20$ 位；TLB 组数 $64/4=16$，组号 4 位；TLB tag $=20-4=16$ 位。</p>
+</details>
+<blockquote>
+<p>综合题里先给虚拟地址的，按 6→8→9→10 拿到页框号，再用 7 拼物理地址，最后按 1→2→3→4→5 拆 Cache 字段。</p>
+</blockquote>
+<hr/>
+<h4 id="2021-44">例题：【2021】第 44 题</h4>
+<p>假设计算机 M 的主存地址为 24 位，按字节编址；采用分页存储管理方式，虚拟地址为 30 位，页大小为 4KB；TLB 采用 2 路组相联方式和 LRU 替换策略，共 8 组。请回答下列问题。</p>
+<ol>
+<li>虚拟地址中哪几位表示虚页号？哪几位表示页内地址？</li>
+<li>已知访问 TLB 时虚页号高位部分用作 TLB 标记，低位部分用作 TLB 组号，M 的虚拟地址中哪几位是 TLB 标记？哪几位是 TLB 组号？</li>
+</ol>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>1. 虚页号 VA[29:12]（18 位）；页内地址 VA[11:0]（12 位）。</strong></p>
+<p>页大小 $4\mathrm{KB}=2^{12}$，页内地址 12 位；虚拟地址 30 位，虚页号 $30-12=18$ 位。</p>
+<p><strong>2. TLB 标记 VA[29:15]（15 位）；TLB 组号 VA[14:12]（3 位）。</strong></p>
+<p>TLB 共 8 组，组号 $\log_2 8=3$ 位，取虚页号的低 3 位；虚页号共 18 位，剩下的高 15 位是 TLB 标记。</p>
+<p>题目虽然提到 LRU，但虚拟地址本身没有功能位，LRU 位是 TLB 表项里的，所以划分虚拟地址时不需要减去 LRU 位。</p>
+</details>
+<hr/>
+<h4 id="2018-44">例题：【2018】第 44 题</h4>
+<p>某计算机采用页式虚拟存储管理方式，按字节编址。CPU 进行存储访问的过程如题 44 图所示：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="2018 年第 44 题的 CPU 访存过程：虚拟地址分为 20 位虚页号和 12 位页内地址；TLB 逐项比较标记、有效位和实页号；页表为两级（10 位页目录索引 + 10 位页表索引）；Cache 为 2 路组相联，物理地址分为 20 位标记、3 位组号和 5 位块内地址" data-src="/408-review/assets/textbook/coa-2018-cache-tlb-figure.webp" href="/408-review/assets/textbook/coa-2018-cache-tlb-figure.webp"><img alt="2018 年第 44 题的 CPU 访存过程：虚拟地址分为 20 位虚页号和 12 位页内地址；TLB 逐项比较标记、有效位和实页号；页表为两级（10 位页目录索引 + 10 位页表索引）；Cache 为 2 路组相联，物理地址分为 20 位标记、3 位组号和 5 位块内地址" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-2018-cache-tlb-figure.webp"/></a><figcaption>2018 年第 44 题的 CPU 访存过程：虚拟地址分为 20 位虚页号和 12 位页内地址；TLB 逐项比较标记、有效位和实页号；页表为两级（10 位页目录索引 + 10 位页表索引）；Cache 为 2 路组相联，物理地址分为 20 位标记、3 位组号和 5 位块内地址</figcaption></figure>
+<ol>
+<li>主存物理地址占多少位？</li>
+<li>TLB 采用什么映射方式？TLB 是用 SRAM 还是 DRAM 实现？</li>
+<li>Cache 采用什么映射方式？若 Cache 采用 LRU 替换算法和回写（Write Back）策略，则 Cache 每行中除数据（Data）、Tag 和有效位外，还应有哪些附加位？Cache 的总容量是多少？Cache 中有效位的作用是什么？</li>
+<li>若 CPU 给出的虚拟地址为 <code>0008 C040H</code>，则对应的物理地址是多少？是否在 Cache 中命中？说明理由。若 CPU 给出的虚拟地址为 <code>0007 C260H</code>，则该地址所在主存块映射到的 Cache 组号是多少？</li>
+</ol>
+<details class="article-details">
+<summary class="article-summary">查看答案解析</summary>
+<p><strong>1. 物理地址 28 位。</strong></p>
+<p>实页号 16 位（TLB 中的实页号是 4 位十六进制数），页内地址 12 位，共 $16+12=28$ 位。</p>
+<p><strong>2. 全相联映射；用 SRAM 实现。</strong></p>
+<p>TLB 的 4 项并行比较，没有组索引，标记就是整个虚页号（20 位），所以是全相联。TLB 和 Cache 一样追求速度，用 SRAM。</p>
+<p><strong>3. 2 路组相联；附加位为修改位（脏位）1 位、LRU 位 1 位；总容量 558B；有效位标记该行是否装有有效主存块。</strong></p>
+<p>路数看 Cache 的结构：图中有左右两路 Tag 阵列和两个比较器，比较结果经多路选择器二选一，所以每组 2 路。</p>
+<p>data 大小看物理地址的低位：Cache 下方标出物理地址划分为 20 位 | 3 位 | 5 位，5 位块内地址说明一个块有 $2^5=32$ 个字节，即每行数据 32B；3 位组号说明有 $2^3=8$ 组，每组 2 路，共 16 行。每行位数：</p>
+<p>$$20\text{（Tag）}+32\times8\text{（数据）}+1\text{（有效位）}+1\text{（脏位）}+1\text{（LRU）}=279\text{ 位}$$</p>
+<p>$$16\times279=4464\text{ 位}=558\mathrm{B}$$</p>
+<p>有效位用于区分“这一行恰好标记相同”和“这一行根本没装过有效块”，初始时 Cache 内容随机，必须靠有效位判断。</p>
+<p><strong>4. 物理地址 <code>0040040H</code>，不命中；第二个地址的组号是 3。</strong></p>
+<p><code>0008 C040H</code> 的虚页号是 <code>0008CH</code>，页内地址是 <code>040H</code>。TLB 中 <code>0008CH</code> 有效，实页号为 <code>0040H</code>，所以</p>
+<p>$$\text{PA}=0040\mathrm{H}\times 2^{12}+040\mathrm{H}=0040040\mathrm{H}$$</p>
+<p>用 PA 查 Cache：组号 $=(0040040\mathrm{H}\gg 5)\bmod 8=2$，标记 $=0040040\mathrm{H}\gg 8=00400\mathrm{H}$。第 2 组中标记 <code>00400H</code> 的那一行有效位为 0，所以不命中。</p>
+<p><code>0007 C260H</code> 的 Cache 组号取物理地址的第 7～5 位。页内地址 12 位，Cache 索引加块内地址 8 位，都落在页内地址里，转换前后不变。取 <code>260H</code> 的第 7～5 位：</p>
+<p>$$(260\mathrm{H}\gg 5)\bmod 8=3$$</p>
+<p>所以组号为 3。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

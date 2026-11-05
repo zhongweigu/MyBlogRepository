@@ -1,0 +1,194 @@
+<div class="article-content">
+<h2 id="2-ramdram">考点2-RAM与DRAM芯片</h2>
+<p>RAM 是可随机读写、断电后通常不能保存信息的半导体存储器。408 主要比较 SRAM 和 DRAM：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>比较维度</th>
+<th>SRAM</th>
+<th>DRAM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基本存储元</td>
+<td>双稳态触发器，常见为 6 个 MOS 管</td>
+<td>电容加访问管，常见为 1T1C</td>
+</tr>
+<tr>
+<td>数据保存</td>
+<td>通电期间保持，不需要刷新</td>
+<td>电容会漏电，必须周期性刷新</td>
+</tr>
+<tr>
+<td>读出性质</td>
+<td>非破坏性读出</td>
+<td>破坏性读出，读出后需要重写</td>
+</tr>
+<tr>
+<td>地址输入</td>
+<td>行、列地址可一次送入</td>
+<td>行地址、列地址通常分两次复用同一组引脚</td>
+</tr>
+<tr>
+<td>速度</td>
+<td>快</td>
+<td>较慢</td>
+</tr>
+<tr>
+<td>集成度</td>
+<td>较低</td>
+<td>较高</td>
+</tr>
+<tr>
+<td>每位成本</td>
+<td>较高</td>
+<td>较低</td>
+</tr>
+<tr>
+<td>典型用途</td>
+<td>Cache</td>
+<td>主存</td>
+</tr>
+<tr>
+<td>易失性</td>
+<td>易失</td>
+<td>易失</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>SRAM 的“静态”是指只要不断电，存储单元无需刷新就能保持数据，并不意味着断电后还能保存；SRAM 和 DRAM 都属于易失性存储器。</p>
+</blockquote>
+<hr/>
+<p>存储芯片内部常出现以下概念：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>存储元</td>
+<td>能保存 1 位二进制信息的最小物理结构，如一个 SRAM 触发器或一个 DRAM 电容单元</td>
+</tr>
+<tr>
+<td>存储单元</td>
+<td>被同一个地址选中的一组存储元，一次并行读写若干位；位数就是芯片的数据宽度</td>
+</tr>
+<tr>
+<td>存储矩阵 / 存储体</td>
+<td>大量存储单元按行、列排列形成的整体</td>
+</tr>
+<tr>
+<td>存储阵列</td>
+<td>从物理结构角度强调由存储元组成的二维阵列，408 中通常可与存储矩阵按同一层理解</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>这些层次不是按“容量大小”随意排列的名称：存储元保存 1 位，存储单元保存一个多位字，存储矩阵或存储阵列再把大量存储单元组织成一个可寻址的整体。</p>
+</blockquote>
+<p>例如 <code>4M×4</code> 位芯片共有 $4\mathrm{M}$ 个存储单元，每个单元并行输出 4 位，总容量为</p>
+<p>$$4\mathrm{M}\times4\,\mathrm{bit}=16\,\mathrm{Mbit}=2\,\mathrm{MB}$$</p>
+<hr/>
+<p>一个 4M×4 位 DRAM 芯片的逻辑结构如下：</p>
+<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="一个 4M×4 位 DRAM 芯片的逻辑结构：地址引脚先送行地址、再送列地址，RAS/CAS/WE/OE 控制行列锁存和读写；刷新计数器通过 MUX 向行译码器提供刷新行地址" data-src="/408-review/assets/textbook/coa-dram-4m-chip.webp" href="/408-review/assets/textbook/coa-dram-4m-chip.webp"><img alt="一个 4M×4 位 DRAM 芯片的逻辑结构：地址引脚先送行地址、再送列地址，RAS/CAS/WE/OE 控制行列锁存和读写；刷新计数器通过 MUX 向行译码器提供刷新行地址" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-dram-4m-chip.webp"/></a><figcaption>一个 4M×4 位 DRAM 芯片的逻辑结构：地址引脚先送行地址、再送列地址，RAS/CAS/WE/OE 控制行列锁存和读写；刷新计数器通过 MUX 向行译码器提供刷新行地址</figcaption></figure>
+<p>图中的主要信号与部件：</p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>部件或信号</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$A_0\sim A_{10}$</td>
+<td>11 根地址引脚，分时传送行地址和列地址</td>
+</tr>
+<tr>
+<td>$\overline{\mathrm{RAS}}$</td>
+<td>行地址选通信号，有效时锁存行地址</td>
+</tr>
+<tr>
+<td>$\overline{\mathrm{CAS}}$</td>
+<td>列地址选通信号，有效时锁存列地址</td>
+</tr>
+<tr>
+<td>$\overline{\mathrm{WE}}$</td>
+<td>写使能；有效时写入，无效时读出</td>
+</tr>
+<tr>
+<td>$\overline{\mathrm{OE}}$</td>
+<td>输出使能；有效时允许数据输出</td>
+</tr>
+<tr>
+<td>$D_1\sim D_4$</td>
+<td>4 根数据引脚，对应每个存储单元的 4 位数据宽度</td>
+</tr>
+<tr>
+<td>行、列地址缓冲器</td>
+<td>暂存从同一组地址引脚分两次送来的行、列地址</td>
+</tr>
+<tr>
+<td>行、列译码器</td>
+<td>分别选中存储矩阵中的一行和一列</td>
+</tr>
+<tr>
+<td>存储矩阵</td>
+<td>图中为 $2048\times2048\times4$ 位</td>
+</tr>
+<tr>
+<td>读出放大器 / I/O</td>
+<td>放大 DRAM 读出的微弱电信号，并连接到数据通路</td>
+</tr>
+<tr>
+<td>刷新计数器与 MUX</td>
+<td>刷新时产生依次变化的行地址，并由 MUX 送入行译码器</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>4M×4</code> 位芯片需要</p>
+<p>$$\log_2(4\mathrm{M})=22$$</p>
+<p>位地址信息。图中只有 11 根地址引脚，因此地址采用<strong>行、列复用</strong>：</p>
+<ol>
+<li>先由 $A_0\sim A_{10}$ 送 11 位行地址，$\overline{\mathrm{RAS}}=0$ 将其锁存；</li>
+<li>再由同一组 $A_0\sim A_{10}$ 送 11 位列地址，$\overline{\mathrm{CAS}}=0$ 将其锁存；</li>
+<li>行译码器选中 2048 行中的一行，列译码器在选中行中选出目标列，最后通过 $D_1\sim D_4$ 读写 4 位数据。</li>
+</ol>
+<blockquote>
+<p>地址复用减少了芯片引脚数和封装成本，但一次访问要分“送行地址、送列地址”两个阶段，因此增加了访问延迟。SRAM 通常不需要这种复用。</p>
+</blockquote>
+<hr/>
+<p>DRAM 用微小电容保存信息，而电容会漏电，所以必须在信息丢失前按行刷新。</p>
+<p>刷新时只需要给出<strong>行地址</strong>，不需要列地址：</p>
+<ul>
+<li>行译码选中一整行；</li>
+<li>该行所有列的内容同时由读出放大器读出并重新写回；</li>
+<li>因而没有“选中某一列”这一步，$\overline{\mathrm{CAS}}$ 和列地址不参与刷新；</li>
+<li>刷新计数器可以自动产生下一条行地址，通过 MUX 送入行译码器。</li>
+</ul>
+<blockquote>
+<p>刷新按照“行数”计数，而不是按照总存储单元数计数。对图中 $2048\times2048$ 的阵列，一次刷新一整行，共需要刷新 2048 行。</p>
+</blockquote>
+<hr/>
+<p><strong>行缓冲器。</strong> 一行被激活后，整行数据会被送入行缓冲器或读出放大器阵列。后续访问若仍落在同一行，可以从行缓冲器连续取出不同列的数据，不必重新激活整行，这就是<mark>突发传输</mark>的基础。</p>
+<p>行缓冲器容量为</p>
+<p>$$\text{行缓冲器容量}=\text{列数}\times\text{每个存储单元位数}$$</p>
+<details class="article-details">
+<summary class="article-summary">补充：图中 DRAM 的行缓冲器容量</summary>
+<p>图中存储矩阵为 $2048\times2048\times4$ 位：</p>
+<ul>
+<li>行数为 2048；</li>
+<li>每行有 2048 列；</li>
+<li>每个存储单元为 4 位。</li>
+</ul>
+<p>因此一个行缓冲器可容纳</p>
+<p>$$2048\times4=8192\,\mathrm{bit}=1\,\mathrm{KB}$$</p>
+<p>同一行内的连续列数据可直接突发输出；跨到另一行时才需要再次完成行激活。</p>
+</details>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>

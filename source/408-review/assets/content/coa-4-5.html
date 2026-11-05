@@ -1,0 +1,112 @@
+<div class="article-content">
+<h2 id="53">5.3 控制器</h2>
+<p><strong>硬布线控制器与微程序控制器。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>硬布线控制器</th>
+<th>微程序控制器</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>控制信号</td>
+<td>组合逻辑电路直接产生</td>
+<td>微指令存放在控制存储器，取出后译码产生</td>
+</tr>
+<tr>
+<td>速度</td>
+<td>快</td>
+<td>慢（多一次取微指令）</td>
+</tr>
+<tr>
+<td>修改/扩展</td>
+<td>难</td>
+<td>容易（改微程序即可）</td>
+</tr>
+<tr>
+<td>规整性</td>
+<td>不规整</td>
+<td>规整</td>
+</tr>
+<tr>
+<td>适用</td>
+<td>RISC</td>
+<td>CISC</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>工作流程。</strong></p>
+<ul>
+<li><strong>硬布线</strong>：取指 → 指令译码 → 操作码、时序信号、标志/条件码一起送入组合逻辑 → 直接产生本拍的控制信号 → 执行。控制信号由电路固定，节拍和操作码决定。</li>
+<li><strong>微程序</strong>：取指（公共微程序）→ 指令译码，形成微程序入口地址 → 从控制存储器取微指令到微指令寄存器 → 微指令译码产生控制信号 → 由顺序控制字段形成下一条微指令地址（增量或断定）→ 直到微程序结束。</li>
+</ul>
+<p><strong>微指令的编码方式。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>方式</th>
+<th>做法</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接编码</td>
+<td>每一位对应一个控制信号</td>
+<td>并行、快，微指令长</td>
+</tr>
+<tr>
+<td>字段直接编码</td>
+<td>互斥的控制信号分段，段内编码后再译码</td>
+<td>微指令短，需要译码</td>
+</tr>
+<tr>
+<td>字段间接编码</td>
+<td>字段的含义由另一个字段解释</td>
+<td>更短，译码更复杂</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>微指令的地址形成方式。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>方式</th>
+<th>做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>增量</td>
+<td>下一条微指令地址 = 当前地址 + 1</td>
+</tr>
+<tr>
+<td>断定</td>
+<td>下址由微指令中的下址字段直接给出，或按条件码选择</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>微指令的格式。</strong></p>
+<div class="article-table"><table>
+<thead>
+<tr>
+<th>格式</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>水平型</td>
+<td>并行控制信号多、微指令长、微程序短、执行快</td>
+</tr>
+<tr>
+<td>垂直型</td>
+<td>控制信号少、需要译码、微程序长、执行慢</td>
+</tr>
+</tbody>
+</table></div>
+<p>微指令一般分为操作控制字段和顺序控制字段（下址字段）。</p>
+</div>
+<p class="article-source">内容整理自站内 408 笔记；公式、插图与例题按原帖结构保留，解析默认折叠。</p>
