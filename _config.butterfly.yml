@@ -18,7 +18,6 @@ nav:
 
 menu:
   首页: / || fas fa-home
-  408复习台: /408-review/ || fas fa-layer-group
   归档: /archives/ || fas fa-archive
   标签: /tags || fas fa-tags
   分类: /categories/ || fas fa-folder-open

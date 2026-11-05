@@ -1,3 +1,10 @@
+- class_name: 复习工具
+  link_list:
+    - name: 408 复习台
+      link: /408-review/
+      avatar: /408-review/assets/favicon.svg
+      descr: 408 考点地图、分层阅读、真题分类与滚动复习
+
 - class_name: 友情链接
   link_list:
     - name: -UNSWEAR-
