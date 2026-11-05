@@ -10,9 +10,9 @@
 ## 1. 先记住这几件事
 
 1. **不编辑 `source/_posts/*.md`**。帖子是历史归档；新内容只进复习台。
-2. 只有 **马原** 一科。六个板块、29 个专题，结构见 `assets/js-v1/data/meta.js`。
+2. 只有 **马原** 一科。六个板块、29 个专题，结构见 `assets/js-v2/data/meta.js`。
 3. 三个模块：**今日**（每日 8 个专题）、**知识地图**、**术语库**。用户明确不要真题、图解、评论、英文版。
-4. 专题 1–15 已写；专题 16–29 是 `pending` 占位。占位专题在地图上可见，但不进每日队列和统计。
+4. 专题 1–19 已写；专题 20–29 是 `pending` 占位。占位专题在地图上可见，但不进每日队列和统计。
 5. 样式直接复用 `/408-review/assets/css/app.css`，本页只加载 `assets/css/politics.css` 做覆写（朱红主色、待补标记）。
 
 ---
@@ -26,7 +26,7 @@ source/politics-review/
 │   ├── css/politics.css           # 覆写层（accent、pending、小节样式）
 │   ├── favicon.svg
 │   ├── content/my-XX.html         # 每篇长文，按需 fetch
-│   └── js-v1/
+│   └── js-v2/
 │       ├── app.js                 # 路由：today / map / chapter / topic / glossary
 │       ├── store.js               # localStorage 进度、复习间隔（1/3/7/15 天）
 │       ├── stats.js               # 板块与专题统计（只算非 pending）
@@ -127,7 +127,7 @@ git commit -m "…"
 git push origin main
 ```
 
-> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v1` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
+> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v2` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
 
 ---
 

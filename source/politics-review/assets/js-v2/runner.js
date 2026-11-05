@@ -1,5 +1,5 @@
 import { topicById, chapterById, subjectById } from './data/index.js';
-import { icon, escapeHtml, showOverlay, closeOverlay, toast } from './ui.js';
+import { icon, escapeHtml, showOverlay, closeOverlay, toast, markTerms } from './ui.js';
 
 const RATINGS = [
   { key: 'forgot', label: '忘记', hint: '明天再来', cls: 'r-forgot' },
@@ -74,10 +74,10 @@ export function startRunner(store, queue, { title = '今日复习', onClose = nu
       <div class="runner-reveal" hidden>
         <div class="runner-takeaway">
           <span class="rt-label">一句话抓手</span>
-          <p>${topic.takeaway}</p>
+          <p>${markTerms(topic.takeaway)}</p>
         </div>
         <ul class="runner-points">
-          ${topic.points.slice(0, 3).map((p) => `<li><span>${escapeHtml(p.t)}</span><small>${escapeHtml(p.lead)}</small></li>`).join('')}
+          ${topic.points.slice(0, 3).map((p) => `<li><span>${markTerms(p.t)}</span><small>${markTerms(p.lead)}</small></li>`).join('')}
         </ul>
         <a class="runner-link" href="#/topic/${topic.id}">打开完整专题 ${icon('arrowRight', 14)}</a>
       </div>

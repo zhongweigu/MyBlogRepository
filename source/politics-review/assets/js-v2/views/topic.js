@@ -4,7 +4,7 @@ import {
 import { chapterStats } from '../stats.js';
 import { today } from '../store.js';
 import {
-  icon, escapeHtml, importanceBars, tag, footer, sectionHead, segmentedLevel, dueLabel,
+  icon, escapeHtml, importanceBars, tag, footer, sectionHead, segmentedLevel, dueLabel, markTerms,
 } from '../ui.js';
 import { afterArticle } from '../article.js';
 
@@ -69,7 +69,7 @@ export function topicView(store, topicId) {
 
         <section class="takeaway">
           <div class="takeaway-label">${icon('spark', 14)} 一句话抓手</div>
-          <p>${topic.takeaway}</p>
+          <p>${markTerms(topic.takeaway)}</p>
         </section>
 
         <div class="topic-level-row">
@@ -95,7 +95,8 @@ export function topicView(store, topicId) {
         <nav class="study-jump" aria-label="本页学习顺序">
           <a href="#recite">01 背诵</a>
           <a href="#understand">02 理解</a>
-          <a href="#links">03 串联</a>
+          ${topic.pitfalls?.length ? '<a href="#traps">03 题眼</a>' : ''}
+          <a href="#links">${topic.pitfalls?.length ? '04' : '03'} 串联</a>
         </nav>
 
         <section class="study-aids" id="recite">
@@ -104,7 +105,7 @@ export function topicView(store, topicId) {
             <p class="sc-take">${topic.takeaway}</p>
             ${topic.recall ? `<p class="sc-self"><b>先自问：</b>${escapeHtml(topic.recall)}</p>` : ''}
             <ol class="recite-list">
-              ${topic.points.slice(0, 6).map((p) => `<li><b>${escapeHtml(p.t)}</b><span>${escapeHtml(p.lead)}</span></li>`).join('')}
+              ${topic.points.slice(0, 6).map((p) => `<li><b>${markTerms(p.t)}</b><span>${markTerms(p.lead)}</span></li>`).join('')}
             </ol>
             ${topic.points.length > 6 ? `<p class="sc-more">其余 ${topic.points.length - 6} 条在下方正文里展开。</p>` : ''}
           </article>
@@ -112,11 +113,22 @@ export function topicView(store, topicId) {
           <article class="study-card answer-card">
             <div class="sc-head"><span class="sc-icon">${icon('target', 16)}</span><div><p class="eyebrow">ANSWER</p><h2>考场答法</h2></div><span class="sc-count">${(topic.exam?.types || ['选择']).join(' / ')}</span></div>
             <div class="answer-steps">
-              ${answerSteps(topic).map((s, i) => `<div class="answer-step"><span class="as-no">${i + 1}</span><div><b>${s.label}</b><p>${escapeHtml(s.text)}</p></div></div>`).join('')}
+              ${answerSteps(topic).map((s, i) => `<div class="answer-step"><span class="as-no">${i + 1}</span><div><b>${s.label}</b><p>${markTerms(s.text)}</p></div></div>`).join('')}
             </div>
             <p class="answer-hint">${(topic.exam?.types || []).includes('分析') ? '分析题先写原理（原话），再扣材料里的关键词，最后回扣方法论；每段都要有「因为……所以……」。' : '选择题先排绝对化表述（唯一、完全、决定一切），再回到定义核对主语和限定条件。'}</p>
           </article>
         </section>
+
+        ${topic.pitfalls?.length ? `<section class="trap-card" id="traps">
+          <div class="trap-head">
+            <span class="trap-icon">${icon('alert', 16)}</span>
+            <div><p class="eyebrow">TRAPS</p><h2>题眼：选择题常改这几个字</h2></div>
+            <span class="sc-count">${topic.pitfalls.length} 条</span>
+          </div>
+          <ul class="trap-list">
+            ${topic.pitfalls.map((p) => `<li><b>${markTerms(p.t)}</b><p>${markTerms(p.b)}</p></li>`).join('')}
+          </ul>
+        </section>` : ''}
 
         <section class="study-section" id="understand">
           <header class="study-section-head">

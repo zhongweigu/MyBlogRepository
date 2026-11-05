@@ -14,6 +14,16 @@ export function escapeHtml(str = '') {
     .replace(/'/g, '&#39;');
 }
 
+/**
+ * 选择题的「题眼」：马原的判断题基本都改在这几个词上。
+ * 先转义再上色，顺序长的放前面，避免「决定作用」被拆成「决定」。
+ */
+const KEY_TERMS = /(最终决定|决定作用|决定力量|决定性|最根本|最鲜明|本质属性|唯一标准|唯一特性|唯一|根本|核心|实质|首要|前提|标志)/g;
+
+export function markTerms(text = '') {
+  return escapeHtml(text).replace(KEY_TERMS, '<mark class="kw">$1</mark>');
+}
+
 const ICONS = {
   calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/><path d="M8 15h3"/>',
   map: '<path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4Z"/><path d="M9 4v13M15 6.5v13"/>',

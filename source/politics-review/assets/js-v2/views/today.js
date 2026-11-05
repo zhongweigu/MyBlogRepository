@@ -1,7 +1,7 @@
 import { META, REVIEWABLE_TOPICS, topicById, chapterById, subjectById } from '../data/index.js';
 import { examCountdown } from '../stats.js';
 import { LEVELS } from '../store.js';
-import { escapeHtml, icon, footer, todayLabel, subjectClass } from '../ui.js';
+import { escapeHtml, icon, footer, todayLabel, subjectClass, markTerms } from '../ui.js';
 
 const DAILY_LIMIT = 8;
 
@@ -98,7 +98,7 @@ function dailyItem(item, index, store) {
         <span class="di-kind ${kind === 'new' ? 'is-new' : ''}">${kindLabel}</span>
       </div>
       <h3><a href="#/topic/${topic.id}">${escapeHtml(topic.title)}</a></h3>
-      <p class="di-take">${escapeHtml(topic.takeaway)}</p>
+      <p class="di-take">${markTerms(topic.takeaway)}</p>
       <div class="di-foot">
         <span class="di-level">${LEVELS[level]?.label || '未学'}</span>
         <span class="di-dots" aria-hidden="true">${[1, 2, 3, 4].map((n) => `<i class="${level >= n ? 'on' : ''}"></i>`).join('')}</span>

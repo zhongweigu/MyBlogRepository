@@ -1,6 +1,6 @@
 import { chapterById, topicsOfChapter, subjectOf, CHAINS } from '../data/index.js';
 import { chapterStats } from '../stats.js';
-import { icon, escapeHtml, importanceBars, footer } from '../ui.js';
+import { icon, escapeHtml, importanceBars, footer, markTerms } from '../ui.js';
 import { today } from '../store.js';
 
 export function chapterView(store, chapterId) {
@@ -67,7 +67,7 @@ export function chapterView(store, chapterId) {
               <span class="li-main">
                 <span class="li-title">${escapeHtml(topic.title)}</span>
                 <span class="li-kicker">${escapeHtml(topic.kicker)}</span>
-                <span class="li-take">${escapeHtml(topic.takeaway)}</span>
+                <span class="li-take">${markTerms(topic.takeaway)}</span>
               </span>
               <span class="li-side">
                 <span class="status-pill level-${level}">${topic.pending ? '待补' : level ? ['', '初识', '熟悉', '掌握', '熟练'][level] : '未学'}</span>
