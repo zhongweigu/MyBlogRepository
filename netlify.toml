@@ -1,0 +1,8 @@
+[build]
+  command = "npm run netlify"
+  publish = "public"
+
+[[headers]]
+  for = "/408-review/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
