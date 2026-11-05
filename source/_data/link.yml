@@ -4,6 +4,10 @@
       link: /408-review/
       avatar: /408-review/assets/favicon.svg
       descr: 408 考点地图、分层阅读、真题分类与滚动复习
+    - name: 政治复习台 · 马原
+      link: /politics-review/
+      avatar: /politics-review/assets/favicon.svg
+      descr: 考研政治马原：每日知识点复习、知识地图与术语库
 
 - class_name: 友情链接
   link_list:

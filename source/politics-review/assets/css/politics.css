@@ -1,0 +1,70 @@
+/* ============================================================
+   政治复习台 · 覆写层
+   设计系统直接沿用 /408-review/assets/css/app.css，
+   这里只做三件事：换主色（朱红）、标注待补专题、补一个小卡片。
+   ============================================================ */
+
+/* ---------- 主色：马原 = 朱红 ---------- */
+.view-map.is-my,
+.view-chapter.is-my,
+.view-topic.is-my,
+.subject-hero.is-my,
+.daily-item.is-my,
+.runner-card.is-my {
+  --accent: var(--red);
+  --accent-soft: var(--red-soft);
+  --accent-soft-2: color-mix(in srgb, var(--red) 7%, var(--card));
+  --accent-deep: color-mix(in srgb, var(--red) 82%, #000);
+}
+
+[data-theme="dark"] .view-map.is-my,
+[data-theme="dark"] .view-chapter.is-my,
+[data-theme="dark"] .view-topic.is-my,
+[data-theme="dark"] .subject-hero.is-my,
+[data-theme="dark"] .daily-item.is-my,
+[data-theme="dark"] .runner-card.is-my {
+  --accent-deep: color-mix(in srgb, var(--red) 72%, #fff);
+  --accent-soft-2: color-mix(in srgb, var(--red) 12%, var(--card));
+}
+
+/* ---------- 待补专题 ---------- */
+.map-topic.is-pending { opacity: 0.66; }
+.map-topic.is-pending:hover { opacity: 1; }
+
+.mt-q.is-pending {
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, var(--red) 28%, var(--line));
+  border-radius: 999px;
+  color: var(--red);
+  font-size: 9px;
+}
+
+.ladder-item.is-pending { opacity: 0.7; }
+.ladder-item.is-pending:hover { opacity: 1; }
+
+/* ---------- 专题页：待补提示卡 ---------- */
+.pending-card {
+  display: flex;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 20px 22px;
+  border: 1px dashed color-mix(in srgb, var(--red) 34%, var(--line));
+  border-radius: var(--radius-sm);
+  background: var(--card-2);
+  color: var(--ink-2);
+}
+.pending-card > .i { flex: none; margin-top: 2px; color: var(--red); }
+.pending-card h3 {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--ink);
+}
+.pending-card p { margin: 0 0 10px; font-size: 13px; line-height: 1.75; }
+.pending-card .text-link { font-size: 12px; }
+
+/* ---------- 术语页：板块 tab 多时换行 ---------- */
+.glossary-toolbar .lib-tabs { flex-wrap: wrap; row-gap: 6px; }
+
+/* ---------- 顶部品牌：跟 408 区分一下 ---------- */
+.brand-text strong { letter-spacing: 0.04em; }

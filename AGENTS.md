@@ -361,3 +361,19 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 验证提速：日常只查改动页 + 一个入口 + 390px，不每次全量 52 篇；只有改路由/schema/批量图片/模板时才全量。
 - 改完默认 `npx hexo generate`；只有改 `_config`、路由/schema、批量图片或生成异常时才 `npx hexo clean`。日常验证改动页 + 一个入口 + 390px，不全量跑 52 篇。
 - **缓存**：Netlify/Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 时必须递增 `assets/js-vN` 目录版本或 `app.css?v=...`，否则用户普通刷新仍会用旧文件。
+
+---
+
+## 21. 考研政治复习台（source/politics-review）
+
+- 维护手册：`docs/politics-review-maintenance.md`，改之前先读。
+- 入口 `/politics-review/`，`_config.yml` 的 `skip_render` 已加 `politics-review/**`；样式直接复用 `/408-review/assets/css/app.css`，本页只追加 `assets/css/politics.css`（换朱红主色、待补标记）。
+- 只有 **马原** 一科：六个板块（导论 / 辩证唯物论与唯物辩证法 / 认识论 / 唯物史观 / 政治经济学 / 科学社会主义）、29 个专题。
+- 三个模块：**今日**（每日 8 个专题的滚动队列）、**知识地图**、**术语库**。用户明确不要真题、图解、评论、英文版；不要加回。
+- 专题 1–15 有速记点和长文；专题 16–29 是 `pending` 占位：地图上可见、专题页显示「整理中」、不进每日队列与统计。
+- 数据在 `assets/js-v1/data/`：`topics-core.js`（1–15）、`topics-pending.js`（16–29）、`glossary.js`、`meta.js`（板块 + 横向脉络）。长文在 `assets/content/<id>.html`。
+- 用户发来新笔记/图片时：不再改博客帖子，直接补对应专题的 `points` 与 `content/my-XX.html`；写完把该专题从 `topics-pending.js` 移到 `topics-core.js`，补术语、按需补 `links` 与 `CHAINS`。
+- 新增专题：`id` 用 `my-XX`（XX = 专题号），`chapter` 必须是 `my-c1`…`my-c6`，`order` 用全局专题号；不要改已有 id。
+- 长篇按「定义 → 条件/关系 → 易错点」写，保留教材原话；`points` 只写能背的短句，长文放 `content/`。
+- 验证：`npx hexo generate` 后本地起 `python -m http.server --directory public`，用 headless Chrome 看 `#/today`、`#/map`、改动的 `#/topic/<id>`、`#/glossary`。注意 headless 的 `--window-size=500` 实际视口约 518px，截图右侧会被裁 18px，不是布局溢出。
+- 缓存：改 JS/CSS 时递增 `assets/js-v1` 目录或 `politics.css?v=...`。
