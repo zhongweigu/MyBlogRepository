@@ -4,6 +4,7 @@ import { todayView } from './views/today.js';
 import { mapView } from './views/map.js';
 import { chapterView } from './views/chapter.js';
 import { topicView, hydrateTopicArticle } from './views/topic.js';
+import { renderMath } from './article.js';
 import { glossaryView, filterGlossary } from './views/glossary.js';
 import { diagramsView } from './views/diagrams.js';
 import { questionsView } from './views/questions.js';
@@ -165,6 +166,8 @@ function afterRender(route) {
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
       el.classList.add('is-flash');
       setTimeout(() => el.classList.remove('is-flash'), 1400);
+      renderMath(el.querySelector('.q-stem'));
+      renderMath(el.querySelector('.q-options'));
     });
   }
   if (name === 'topic' && param) {
@@ -305,6 +308,10 @@ function handleAction(actionEl, e) {
     const open = card.dataset.open === 'true';
     card.dataset.open = open ? 'false' : 'true';
     actionEl.setAttribute('aria-expanded', String(!open));
+    if (!open) {
+      renderMath(card.querySelector('.q-stem'));
+      renderMath(card.querySelector('.q-options'));
+    }
     return;
   }
   if (action === 'reveal-answer') {
@@ -314,6 +321,7 @@ function handleAction(actionEl, e) {
     const analysis = card.querySelector('.q-analysis');
     if (!analysis) return;
     analysis.hidden = false;
+    renderMath(analysis);
     card.dataset.revealed = 'true';
     const qid = card.dataset.q;
     const q = QUESTIONS.find((x) => x.id === qid);

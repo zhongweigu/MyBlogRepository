@@ -73,6 +73,12 @@ export async function afterArticle(host) {
   });
 }
 
+/** 题库的题干 / 选项 / 解析也走同一套 MathJax。 */
+export async function renderMath(host) {
+  if (!host) return;
+  await typesetMath(host);
+}
+
 async function typesetMath(host) {
   if (!/\$[^$]/.test(host.textContent || '')) return;
   let mathJax;
