@@ -11,7 +11,7 @@ export const META = {
   updated: '2026-11-05',
   examDate: '2026-12-19', // 预计初试日，只用于倒计时；可在手册页关闭
   sourceNote: '内容整理自站内《408 考点强化 · 数据结构》《408 考点强化 · 计算机组成原理》《408 真题分类 · 数据结构》等笔记。',
-  sampleNote: '当前是设计样张：已录入 39 个考点、17 道真题，其余内容按同一结构继续补充即可。',
+  sampleNote: '已录入 52 个考点、29 道真题，覆盖数据结构与计算机组成原理的完整章节；后续可按同一结构继续补充。',
 };
 
 export const SUBJECTS = {
@@ -187,6 +187,17 @@ export const CHAINS = [
       { topic: 'ds-1-2', label: '递归调用' },
       { topic: 'ds-4-2', label: 'DFS' },
       { topic: 'ds-4-4', label: '拓扑排序' },
+    ],
+  },
+  {
+    id: 'chain-ds-catalan',
+    subject: 'ds',
+    title: '栈和二叉树，是同一件事',
+    note: '先序是压栈，中序是弹栈；固定一种顺序、问另一种合法顺序，答案都是卡特兰数。',
+    steps: [
+      { topic: 'ds-2-6', label: '卡特兰数' },
+      { topic: 'ds-3-5', label: '先序 + 中序' },
+      { topic: 'ds-3-1', label: '遍历序列' },
     ],
   },
   {

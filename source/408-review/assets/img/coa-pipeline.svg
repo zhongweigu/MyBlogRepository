@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" role="img" aria-label="五段流水线的时空图">
+  <rect width="1000" height="400" fill="#fffdf8"/>
+  <g font-family="Noto Sans SC, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="55" y="42" fill="#1b2425" font-size="20" font-weight="700">五段流水线：时空图</text>
+    <text x="55" y="68" fill="#68736f" font-size="12">k = 5，n = 5，总时间 T = (k + n − 1)Δt = 9Δt。</text>
+
+    <!-- column headers -->
+    <g font-size="11" fill="#68736f" text-anchor="middle">
+      <text x="250" y="106">IF</text><text x="330" y="106">ID</text><text x="410" y="106">EX</text><text x="490" y="106">MEM</text><text x="570" y="106">WB</text>
+    </g>
+    <!-- grid -->
+    <g stroke="#e7e0d2" stroke-width="1">
+      <line x1="200" y1="118" x2="880" y2="118"/>
+      <line x1="200" y1="118" x2="200" y2="342"/>
+      <line x1="280" y1="118" x2="280" y2="342"/><line x1="360" y1="118" x2="360" y2="342"/><line x1="440" y1="118" x2="440" y2="342"/><line x1="520" y1="118" x2="520" y2="342"/><line x1="600" y1="118" x2="600" y2="342"/><line x1="680" y1="118" x2="680" y2="342"/><line x1="760" y1="118" x2="760" y2="342"/><line x1="840" y1="118" x2="840" y2="342"/>
+    </g>
+    <!-- row labels -->
+    <g font-size="12" fill="#4d5a59" text-anchor="end">
+      <text x="184" y="146">I1</text><text x="184" y="190">I2</text><text x="184" y="234">I3</text><text x="184" y="278">I4</text><text x="184" y="322">I5</text>
+    </g>
+
+    <!-- blocks: cycles 1..9, each stage 80 wide -->
+    <g>
+      <!-- I1: IF c1, ID c2, EX c3, MEM c4, WB c5 -->
+      <rect x="202" y="126" width="76" height="28" rx="4" fill="#0d6b60"/><text x="240" y="145" fill="#fff" font-size="10.5" text-anchor="middle">IF</text>
+      <rect x="282" y="126" width="76" height="28" rx="4" fill="#3b8f83"/><text x="320" y="145" fill="#fff" font-size="10.5" text-anchor="middle">ID</text>
+      <rect x="362" y="126" width="76" height="28" rx="4" fill="#6fb3a8"/><text x="400" y="145" fill="#fff" font-size="10.5" text-anchor="middle">EX</text>
+      <rect x="442" y="126" width="76" height="28" rx="4" fill="#9ccfc6"/><text x="480" y="145" fill="#1b2425" font-size="10.5" text-anchor="middle">MEM</text>
+      <rect x="522" y="126" width="76" height="28" rx="4" fill="#cbe5df"/><text x="560" y="145" fill="#1b2425" font-size="10.5" text-anchor="middle">WB</text>
+
+      <!-- I2: IF c2 ... -->
+      <rect x="282" y="170" width="76" height="28" rx="4" fill="#0d6b60"/><text x="320" y="189" fill="#fff" font-size="10.5" text-anchor="middle">IF</text>
+      <rect x="362" y="170" width="76" height="28" rx="4" fill="#3b8f83"/><text x="400" y="189" fill="#fff" font-size="10.5" text-anchor="middle">ID</text>
+      <rect x="442" y="170" width="76" height="28" rx="4" fill="#6fb3a8"/><text x="480" y="189" fill="#fff" font-size="10.5" text-anchor="middle">EX</text>
+      <rect x="522" y="170" width="76" height="28" rx="4" fill="#9ccfc6"/><text x="560" y="189" fill="#1b2425" font-size="10.5" text-anchor="middle">MEM</text>
+      <rect x="602" y="170" width="76" height="28" rx="4" fill="#cbe5df"/><text x="640" y="189" fill="#1b2425" font-size="10.5" text-anchor="middle">WB</text>
+
+      <!-- I3 -->
+      <rect x="362" y="214" width="76" height="28" rx="4" fill="#0d6b60"/><text x="400" y="233" fill="#fff" font-size="10.5" text-anchor="middle">IF</text>
+      <rect x="442" y="214" width="76" height="28" rx="4" fill="#3b8f83"/><text x="480" y="233" fill="#fff" font-size="10.5" text-anchor="middle">ID</text>
+      <rect x="522" y="214" width="76" height="28" rx="4" fill="#6fb3a8"/><text x="560" y="233" fill="#fff" font-size="10.5" text-anchor="middle">EX</text>
+      <rect x="602" y="214" width="76" height="28" rx="4" fill="#9ccfc6"/><text x="640" y="233" fill="#1b2425" font-size="10.5" text-anchor="middle">MEM</text>
+      <rect x="682" y="214" width="76" height="28" rx="4" fill="#cbe5df"/><text x="720" y="233" fill="#1b2425" font-size="10.5" text-anchor="middle">WB</text>
+
+      <!-- I4 -->
+      <rect x="442" y="258" width="76" height="28" rx="4" fill="#0d6b60"/><text x="480" y="277" fill="#fff" font-size="10.5" text-anchor="middle">IF</text>
+      <rect x="522" y="258" width="76" height="28" rx="4" fill="#3b8f83"/><text x="560" y="277" fill="#fff" font-size="10.5" text-anchor="middle">ID</text>
+      <rect x="602" y="258" width="76" height="28" rx="4" fill="#6fb3a8"/><text x="640" y="277" fill="#fff" font-size="10.5" text-anchor="middle">EX</text>
+      <rect x="682" y="258" width="76" height="28" rx="4" fill="#9ccfc6"/><text x="720" y="277" fill="#1b2425" font-size="10.5" text-anchor="middle">MEM</text>
+      <rect x="762" y="258" width="76" height="28" rx="4" fill="#cbe5df"/><text x="800" y="277" fill="#1b2425" font-size="10.5" text-anchor="middle">WB</text>
+
+      <!-- I5 -->
+      <rect x="522" y="302" width="76" height="28" rx="4" fill="#0d6b60"/><text x="560" y="321" fill="#fff" font-size="10.5" text-anchor="middle">IF</text>
+      <rect x="602" y="302" width="76" height="28" rx="4" fill="#3b8f83"/><text x="640" y="321" fill="#fff" font-size="10.5" text-anchor="middle">ID</text>
+      <rect x="682" y="302" width="76" height="28" rx="4" fill="#6fb3a8"/><text x="720" y="321" fill="#fff" font-size="10.5" text-anchor="middle">EX</text>
+      <rect x="762" y="302" width="76" height="28" rx="4" fill="#9ccfc6"/><text x="800" y="321" fill="#1b2425" font-size="10.5" text-anchor="middle">MEM</text>
+      <rect x="842" y="302" width="76" height="28" rx="4" fill="#cbe5df"/><text x="880" y="321" fill="#1b2425" font-size="10.5" text-anchor="middle">WB</text>
+    </g>
+
+    <!-- cycle labels -->
+    <g fill="#68736f" font-size="9.5" text-anchor="middle">
+      <text x="240" y="356">1</text><text x="320" y="356">2</text><text x="400" y="356">3</text><text x="480" y="356">4</text><text x="560" y="356">5</text><text x="640" y="356">6</text><text x="720" y="356">7</text><text x="800" y="356">8</text><text x="880" y="356">9</text>
+    </g>
+    <text x="200" y="382" fill="#68736f" font-size="11">加速比 S = nk / (k+n−1) = 25/9 ≈ 2.78；理想上限是 k = 5。</text>
+  </g>
+</svg>

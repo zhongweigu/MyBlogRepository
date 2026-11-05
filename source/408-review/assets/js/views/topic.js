@@ -108,6 +108,7 @@ export function topicView(store, topicId) {
               <div class="point-inner">
                 <div class="point-body">${p.body}</div>
                 ${p.bitfields ? p.bitfields.map(renderBitfield).join('') : ''}
+                ${p.figures ? `<div class="point-figures">${p.figures.map(renderFigure).join('')}</div>` : ''}
                 ${p.note ? `<div class="point-note"><span class="pn-label">记</span><div>${p.note}</div></div>` : ''}
               </div>
             </div>
@@ -117,6 +118,8 @@ export function topicView(store, topicId) {
         ${topic.bitfields ? topic.bitfields.map(renderBitfield).join('') : ''}
 
         ${topic.table ? renderTable(topic.table) : ''}
+        ${topic.tables ? topic.tables.map(renderTable).join('') : ''}
+        ${topic.figures ? `<section class="topic-figures">${topic.figures.map(renderFigure).join('')}</section>` : ''}
 
         ${topic.pitfalls?.length ? `<section class="pitfall-section">
           ${sectionHead({ eyebrow: 'TRAPS', title: '易错点', desc: '选择题最爱在这里挖坑。' })}
@@ -226,4 +229,19 @@ function renderTable(table) {
     </div>
     ${table.note ? `<p class="table-note">${table.note}</p>` : ''}
   </section>`;
+}
+
+function renderFigure(fig) {
+  const src = fig.src || '';
+  const caption = fig.caption || '';
+  return `<figure class="topic-figure">
+    <a class="figure-link" href="${escapeHtml(src)}" data-action="zoom-image" data-src="${escapeHtml(src)}" data-caption="${escapeHtml(stripTags(caption))}">
+      <img src="${escapeHtml(src)}" alt="${escapeHtml(fig.alt || stripTags(caption) || '')}" loading="lazy" decoding="async">
+    </a>
+    ${caption ? `<figcaption>${caption}</figcaption>` : ''}
+  </figure>`;
+}
+
+function stripTags(html = '') {
+  return String(html).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 }

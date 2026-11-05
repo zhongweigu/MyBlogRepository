@@ -92,6 +92,8 @@ export function guideView(store) {
   points: [
     { t: '知识点标题', lead: '一句线索', body: '&lt;p&gt;展开内容&lt;/p&gt;' }
     // 需要位域图时，加 bitfields: [{ title, total, fields: [{ k, bits, cls }] }]
+    // 需要配图时，加 figures: [{ src: '/408-review/assets/img/x.webp', caption: '图注' }]
+    // 多张对比表用 tables: [{ title, head, rows }]，单张表继续用 table
   ],
   pitfalls: [{ t: '易错点', b: '解释' }],
   links: [{ to: 'ds-2-5', why: '为什么相关' }],
@@ -125,7 +127,7 @@ export function guideView(store) {
       <aside class="guide-aside">
         <section class="side-card">
           <p class="eyebrow">STATUS</p>
-          <h3>当前样张</h3>
+          <h3>内容规模</h3>
           <p>${escapeHtml(META.sampleNote)}</p>
           <div class="guide-tags">${SUBJECT_LIST.map((s) => tag(s.name, s.id === 'coa' ? 'coa' : 'ds')).join('')}${tag('静态页面', 'plain')}${tag('本地进度', 'plain')}</div>
           <p class="guide-fine">更新于 ${META.updated}</p>

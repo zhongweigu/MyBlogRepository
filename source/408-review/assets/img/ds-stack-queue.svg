@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 430" width="1000" height="430" role="img" aria-label="顺序栈与循环队列的结构对比">
+  <rect width="1000" height="430" fill="#fffdf8"/>
+  <g font-family="Noto Sans SC, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="55" y="46" fill="#1b2425" font-size="20" font-weight="700">栈：后进先出</text>
+    <text x="490" y="46" fill="#1b2425" font-size="20" font-weight="700">循环队列：取模复用空间</text>
+
+    <!-- stack -->
+    <g>
+      <rect x="95" y="90" width="150" height="220" rx="10" fill="#edf6f2" stroke="#0d6b60" stroke-width="1.5"/>
+      <g fill="#fff" stroke="#0d6b60" stroke-width="1.2">
+        <rect x="110" y="104" width="120" height="40" rx="4"/>
+        <rect x="110" y="148" width="120" height="40" rx="4"/>
+        <rect x="110" y="192" width="120" height="40" rx="4"/>
+        <rect x="110" y="236" width="120" height="40" rx="4"/>
+      </g>
+      <g fill="#1b2425" font-size="16" text-anchor="middle">
+        <text x="170" y="130">6</text><text x="170" y="174">1</text><text x="170" y="218">8</text><text x="170" y="262">3</text>
+      </g>
+      <text x="258" y="126" fill="#0d6b60" font-size="13">← top（栈顶）</text>
+      <text x="258" y="278" fill="#68736f" font-size="12">栈底</text>
+      <text x="110" y="330" fill="#0d6b60" font-size="13">push / pop 都只动 top</text>
+      <text x="55" y="360" fill="#4d5a59" font-size="13">顺序栈：top 指向栈顶元素时，初始 -1；</text>
+      <text x="55" y="382" fill="#4d5a59" font-size="13">指向栈顶后一空位时，初始 0。</text>
+    </g>
+
+    <!-- circular queue -->
+    <g>
+      <circle cx="735" cy="220" r="128" fill="none" stroke="#ded7c8" stroke-width="1.2" stroke-dasharray="4 5"/>
+      <!-- 8 slots: 0 top, 1 top-right, 2 right, 3 bottom-right, 4 bottom, 5 bottom-left, 6 left, 7 top-left -->
+      <g>
+        <g transform="translate(735 80)"><rect x="-30" y="-20" width="60" height="40" rx="6" fill="#fff" stroke="#c9b79f" stroke-width="1.3"/><text x="0" y="6" fill="#1b2425" font-size="14" text-anchor="middle">0</text></g>
+        <g transform="translate(826 118)"><rect x="-30" y="-20" width="60" height="40" rx="6" fill="#fff" stroke="#c9b79f" stroke-width="1.3"/><text x="0" y="6" fill="#1b2425" font-size="14" text-anchor="middle">1</text></g>
+        <g transform="translate(863 210)"><rect x="-30" y="-20" width="60" height="40" rx="6" fill="#fbf3e9" stroke="#a75a1f" stroke-width="1.8"/><text x="0" y="6" fill="#1b2425" font-size="14" text-anchor="middle">2</text></g>
+        <g transform="translate(826 302)"><rect x="-30" y="-20" width="60" height="40" rx="6" fill="#fbf3e9" stroke="#a75a1f" stroke-width="1.8"/><text x="0" y="6" fill="#1b2425" font-size="14" text-anchor="middle">3</text></g>
+        <g transform="translate(735 340)"><rect x="-30" y="-20" width="60" height="40" rx="6" fill="#fbf3e9" stroke="#a75a1f" stroke-width="1.8"/><text x="0" y="6" fill="#1b2425" font-size="14" text-anchor="middle">4</text></g>
+        <g transform="translate(644 302)"><rect x="-30" y="-20" width="60" height="40" rx="6" fill="#fbf3e9" stroke="#a75a1f" stroke-width="1.8"/><text x="0" y="6" fill="#1b2425" font-size="14" text-anchor="middle">5</text></g>
+        <g transform="translate(607 210)"><rect x="-30" y="-20" width="60" height="40" rx="6" fill="#fff" stroke="#c9b79f" stroke-width="1.3"/><text x="0" y="6" fill="#1b2425" font-size="14" text-anchor="middle">6</text></g>
+        <g transform="translate(644 118)"><rect x="-30" y="-20" width="60" height="40" rx="6" fill="#fff" stroke="#c9b79f" stroke-width="1.3"/><text x="0" y="6" fill="#1b2425" font-size="14" text-anchor="middle">7</text></g>
+      </g>
+
+      <!-- center note -->
+      <text x="735" y="214" fill="#a75a1f" font-size="14" font-weight="700" text-anchor="middle">M = 8</text>
+      <text x="735" y="238" fill="#68736f" font-size="12" text-anchor="middle">占用 4 个单元</text>
+
+      <!-- front / rear labels outside the ring -->
+      <text x="980" y="196" fill="#a75a1f" font-size="13" font-weight="700" text-anchor="end">front = 2</text>
+      <line x1="950" y1="204" x2="896" y2="210" stroke="#a75a1f" stroke-width="1.4" marker-end="url(#qarr)"/>
+      <text x="500" y="196" fill="#a75a1f" font-size="13" font-weight="700">rear = 6</text>
+      <line x1="535" y1="204" x2="574" y2="210" stroke="#a75a1f" stroke-width="1.4" marker-end="url(#qarr)"/>
+      <text x="735" y="386" fill="#68736f" font-size="11" text-anchor="middle">浅色格 = 当前队列中的元素；rear 指向队尾后一空位</text>
+      <text x="490" y="410" fill="#4d5a59" font-size="13">元素个数 = (rear − front + M) % M = (6 − 2 + 8) % 8 = 4；</text>
+      <text x="490" y="426" fill="#4d5a59" font-size="13">牺牲一个单元时，最多存 M−1 = 7 个元素。</text>
+    </g>
+  </g>
+  <defs>
+    <marker id="qarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a75a1f"/>
+    </marker>
+  </defs>
+</svg>

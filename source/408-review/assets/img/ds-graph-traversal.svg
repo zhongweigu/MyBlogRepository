@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 430" width="1000" height="430" role="img" aria-label="同一张图上的 DFS 与 BFS 访问顺序">
+  <rect width="1000" height="430" fill="#fffdf8"/>
+  <g font-family="Noto Sans SC, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="55" y="42" fill="#1b2425" font-size="20" font-weight="700">一张图，两种遍历</text>
+    <text x="55" y="68" fill="#68736f" font-size="12">从 A 出发；邻接点按字母序访问。</text>
+
+    <!-- graph edges -->
+    <g stroke="#68736f" stroke-width="1.5">
+      <line x1="170" y1="125" x2="120" y2="245"/>
+      <line x1="170" y1="125" x2="280" y2="215"/>
+      <line x1="120" y1="245" x2="230" y2="330"/>
+      <line x1="280" y1="215" x2="230" y2="330"/>
+      <line x1="280" y1="215" x2="410" y2="150"/>
+      <line x1="410" y1="150" x2="470" y2="290"/>
+      <line x1="230" y1="330" x2="470" y2="290"/>
+    </g>
+    <!-- graph nodes -->
+    <g>
+      <circle cx="170" cy="110" r="27" fill="#0d6b60" stroke="#084f47" stroke-width="1.5"/>
+      <text x="170" y="117" fill="#fff" font-size="16" text-anchor="middle" font-weight="700">A</text>
+      <circle cx="120" cy="265" r="27" fill="#fff" stroke="#0d6b60" stroke-width="1.5"/>
+      <text x="120" y="272" fill="#1b2425" font-size="16" text-anchor="middle">B</text>
+      <circle cx="300" cy="230" r="27" fill="#fff" stroke="#0d6b60" stroke-width="1.5"/>
+      <text x="300" y="237" fill="#1b2425" font-size="16" text-anchor="middle">C</text>
+      <circle cx="230" cy="355" r="27" fill="#fff" stroke="#0d6b60" stroke-width="1.5"/>
+      <text x="230" y="362" fill="#1b2425" font-size="16" text-anchor="middle">D</text>
+      <circle cx="435" cy="135" r="27" fill="#fff" stroke="#0d6b60" stroke-width="1.5"/>
+      <text x="435" y="142" fill="#1b2425" font-size="16" text-anchor="middle">E</text>
+      <circle cx="480" cy="310" r="27" fill="#fff" stroke="#0d6b60" stroke-width="1.5"/>
+      <text x="480" y="317" fill="#1b2425" font-size="16" text-anchor="middle">F</text>
+    </g>
+
+    <line x1="540" y1="90" x2="540" y2="380" stroke="#ded7c8" stroke-dasharray="4 5"/>
+
+    <!-- DFS -->
+    <text x="585" y="112" fill="#0d6b60" font-size="16" font-weight="700">DFS：一条路走到黑</text>
+    <g font-size="13">
+      <g transform="translate(585 132)"><rect width="42" height="34" rx="7" fill="#0d6b60"/><text x="21" y="23" fill="#fff" text-anchor="middle">A</text></g>
+      <g transform="translate(637 132)"><rect width="42" height="34" rx="7" fill="#edf6f2" stroke="#0d6b60"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">B</text></g>
+      <g transform="translate(689 132)"><rect width="42" height="34" rx="7" fill="#edf6f2" stroke="#0d6b60"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">D</text></g>
+      <g transform="translate(741 132)"><rect width="42" height="34" rx="7" fill="#edf6f2" stroke="#0d6b60"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">C</text></g>
+      <g transform="translate(793 132)"><rect width="42" height="34" rx="7" fill="#edf6f2" stroke="#0d6b60"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">E</text></g>
+      <g transform="translate(845 132)"><rect width="42" height="34" rx="7" fill="#edf6f2" stroke="#0d6b60"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">F</text></g>
+    </g>
+    <text x="585" y="192" fill="#4d5a59" font-size="12">A → B → D → C → E → F</text>
+    <text x="585" y="214" fill="#68736f" font-size="11">走到 D 后回头，再走 C；C 走 E，E 走 F。</text>
+
+    <!-- BFS -->
+    <text x="585" y="270" fill="#a75a1f" font-size="16" font-weight="700">BFS：一层一层扩散</text>
+    <g font-size="13">
+      <g transform="translate(585 290)"><rect width="42" height="34" rx="7" fill="#a75a1f"/><text x="21" y="23" fill="#fff" text-anchor="middle">A</text></g>
+      <g transform="translate(637 290)"><rect width="42" height="34" rx="7" fill="#fbf3e9" stroke="#a75a1f"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">B</text></g>
+      <g transform="translate(689 290)"><rect width="42" height="34" rx="7" fill="#fbf3e9" stroke="#a75a1f"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">C</text></g>
+      <g transform="translate(741 290)"><rect width="42" height="34" rx="7" fill="#fbf3e9" stroke="#a75a1f"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">D</text></g>
+      <g transform="translate(793 290)"><rect width="42" height="34" rx="7" fill="#fbf3e9" stroke="#a75a1f"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">E</text></g>
+      <g transform="translate(845 290)"><rect width="42" height="34" rx="7" fill="#fbf3e9" stroke="#a75a1f"/><text x="21" y="23" fill="#1b2425" text-anchor="middle">F</text></g>
+    </g>
+    <text x="585" y="350" fill="#4d5a59" font-size="12">A → B → C → D → E → F</text>
+    <text x="585" y="372" fill="#68736f" font-size="11">先访问完 A 的所有邻接点，再下一层。</text>
+  </g>
+</svg>

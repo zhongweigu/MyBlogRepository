@@ -1,11 +1,37 @@
 import { META, SUBJECTS, CHAPTERS, CHAINS } from './meta.js';
 import { DS_TOPICS } from './ds.js';
 import { COA_TOPICS } from './coa.js';
+import { DS_EXTRA_TOPICS } from './ds-extra.js';
+import { COA_EXTRA_TOPICS } from './coa-extra.js';
+import { DS_SUPPLEMENTS } from './supplements-ds.js';
+import { COA_SUPPLEMENTS } from './supplements-coa.js';
 import { QUESTIONS } from './questions.js';
 
 export { META, SUBJECTS, CHAPTERS, CHAINS, QUESTIONS };
 
-export const TOPICS = [...DS_TOPICS, ...COA_TOPICS];
+const SUPPLEMENTS = { ...DS_SUPPLEMENTS, ...COA_SUPPLEMENTS };
+
+function mergeTopic(base, extra) {
+  if (!extra) return base;
+  const hidden = new Set(extra.hidePoints || []);
+  return {
+    ...base,
+    ...extra,
+    exam: { ...(base.exam || {}), ...(extra.exam || {}) },
+    points: [
+      ...(base.points || []).filter((p) => !hidden.has(p.t)),
+      ...(extra.points || []),
+    ],
+    pitfalls: [...(base.pitfalls || []), ...(extra.pitfalls || [])],
+    links: [...(base.links || []), ...(extra.links || [])],
+    questions: [...new Set([...(base.questions || []), ...(extra.questions || [])])],
+    tables: [...(base.tables || []), ...(extra.tables || [])],
+    figures: [...(base.figures || []), ...(extra.figures || [])],
+  };
+}
+
+export const TOPICS = [...DS_TOPICS, ...DS_EXTRA_TOPICS, ...COA_TOPICS, ...COA_EXTRA_TOPICS]
+  .map((t) => mergeTopic(t, SUPPLEMENTS[t.id]));
 
 export const topicById = new Map(TOPICS.map((t) => [t.id, t]));
 export const chapterById = new Map(CHAPTERS.map((c) => [c.id, c]));

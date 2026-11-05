@@ -8,7 +8,7 @@ import { questionsView } from './views/questions.js';
 import { guideView } from './views/guide.js';
 import { startRunner } from './runner.js';
 import { openSearch } from './search.js';
-import { $, $$, toast, closeOverlay, isOverlayOpen, icon, escapeHtml, fmtDateCN, dueLabel, footer } from './ui.js';
+import { $, $$, toast, closeOverlay, isOverlayOpen, icon, escapeHtml, fmtDateCN, dueLabel, footer, showOverlay } from './ui.js';
 
 const store = new Store();
 const THEME_KEY = 'review408.theme';
@@ -195,6 +195,20 @@ function handleAction(actionEl, e) {
   const action = actionEl.dataset.action;
   if (!action) return;
 
+  if (action === 'zoom-image') {
+    e.preventDefault();
+    const src = actionEl.dataset.src;
+    const caption = actionEl.dataset.caption || '';
+    const overlay = showOverlay(`<div class="image-viewer" role="group" aria-label="查看配图">
+      <button type="button" class="icon-btn image-close" data-image-close aria-label="关闭图片">${icon('close', 20)}</button>
+      <img src="${escapeHtml(src)}" alt="${escapeHtml(caption)}">
+      ${caption ? `<p class="image-caption">${escapeHtml(caption)}</p>` : ''}
+    </div>`, { className: 'overlay-image' });
+    overlay.addEventListener('click', (ev) => {
+      if (ev.target === overlay || ev.target.closest('[data-image-close]')) closeOverlay();
+    });
+    return;
+  }
   if (action === 'skip-to-main') {
     e.preventDefault();
     const main = document.getElementById('app');
