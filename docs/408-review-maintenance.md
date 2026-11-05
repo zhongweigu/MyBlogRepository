@@ -250,6 +250,6 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 ## 8. 已知取舍
 
 - 长文由帖子生成时，`points` 仍是速记层；两者不要求一一对应。
-- MathJax / Mermaid 走 jsDelivr CDN；加载失败时公式/图退化为原始文本，正文仍可读。
+- MathJax / Mermaid 走 jsDelivr CDN，**按需加载**（只有文章里出现公式 / mermaid 才注入脚本）；加载失败时公式/图退化为原始文本，正文仍可读。
 - `coa-5-2`（中断与 I/O）原帖没有对应长文，`content/coa-5-2.html` 是手写补充；后续可直接扩写该文件。
 - 今日队列是考点级，不是知识点级；`points` 用于搜索/速记，不单独记录 SRS 进度。

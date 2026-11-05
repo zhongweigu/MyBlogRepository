@@ -1,16 +1,62 @@
 /**
  * 长文渲染后的增强：MathJax 公式 + Mermaid 图。
- * 外部库按需等待，加载失败时保留原始文本 / 代码，不影响正文阅读。
+ *
+ * 这两个库不放在页面头部，只有当前考点长文真的出现公式 / mermaid 时才加载。
+ * 这样今日页、地图、真题页不会被 CDN 拖慢；文章页也保留失败降级（原始文本/代码）。
  */
 
-async function waitFor(getter, timeout = 7000) {
-  const start = Date.now();
-  while (Date.now() - start < timeout) {
-    const value = getter();
-    if (value) return value;
-    await new Promise((resolve) => setTimeout(resolve, 80));
+const MATHJAX_SRC = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+const MERMAID_SRC = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js';
+
+let mathLoading = null;
+let mermaidLoading = null;
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`load failed: ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
+async function ensureMathJax() {
+  if (window.MathJax?.typesetPromise) return window.MathJax;
+  if (!mathLoading) {
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+      },
+      startup: { typeset: false },
+    };
+    mathLoading = loadScript(MATHJAX_SRC)
+      .then(() => window.MathJax)
+      .catch((err) => {
+        mathLoading = null;
+        throw err;
+      });
   }
-  return null;
+  return mathLoading;
+}
+
+async function ensureMermaid() {
+  if (window.mermaid?.run) return window.mermaid;
+  if (!mermaidLoading) {
+    mermaidLoading = loadScript(MERMAID_SRC)
+      .then(() => window.mermaid)
+      .catch((err) => {
+        mermaidLoading = null;
+        throw err;
+      });
+  }
+  return mermaidLoading;
 }
 
 export async function afterArticle(host) {
@@ -29,8 +75,14 @@ export async function afterArticle(host) {
 
 async function typesetMath(host) {
   if (!/\$[^$]/.test(host.textContent || '')) return;
-  const mathJax = await waitFor(() => (window.MathJax?.typesetPromise ? window.MathJax : null));
-  if (!mathJax) return;
+  let mathJax;
+  try {
+    mathJax = await ensureMathJax();
+  } catch (err) {
+    console.warn('[408] MathJax 加载失败，保留原始公式', err);
+    return;
+  }
+  if (!mathJax?.typesetPromise) return;
   try {
     if (mathJax.startup?.promise) await mathJax.startup.promise;
     await mathJax.typesetPromise([host]);
@@ -42,8 +94,14 @@ async function typesetMath(host) {
 async function renderMermaid(host) {
   const nodes = [...host.querySelectorAll('pre.mermaid')];
   if (!nodes.length) return;
-  const mermaid = await waitFor(() => (window.mermaid?.run ? window.mermaid : null));
-  if (!mermaid) return;
+  let mermaid;
+  try {
+    mermaid = await ensureMermaid();
+  } catch (err) {
+    console.warn('[408] mermaid 加载失败，保留代码', err);
+    return;
+  }
+  if (!mermaid?.run) return;
   try {
     mermaid.initialize({
       startOnLoad: false,
