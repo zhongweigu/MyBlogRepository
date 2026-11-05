@@ -98,7 +98,7 @@ export function guideView(store) {
         <section class="guide-section" id="extend">
           <p class="eyebrow">05 · EXTEND</p>
           <h2>怎么继续往里加内容</h2>
-          <p class="guide-p">页面是纯静态的：考点结构在 <code>source/408-review/assets/js-v5/data/</code>，长文在 <code>source/408-review/assets/content/</code>，图片在 <code>assets/textbook/</code> 或 <code>assets/img/</code>。新增考点除了加数据，还要给这个 id 写一篇长文；维护步骤见仓库的 <code>docs/408-review-maintenance.md</code>。</p>
+          <p class="guide-p">页面是纯静态的：考点结构在 <code>source/408-review/assets/js-v6/data/</code>，长文在 <code>source/408-review/assets/content/</code>，图片在 <code>assets/textbook/</code> 或 <code>assets/img/</code>。新增考点除了加数据，还要给这个 id 写一篇长文；维护步骤见仓库的 <code>docs/408-review-maintenance.md</code>。</p>
           <pre class="code guide-code"><code>{
   id: 'ds-2-6',              // 唯一 id
   chapter: 'ds-2',           // 所属章节

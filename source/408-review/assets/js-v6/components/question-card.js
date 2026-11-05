@@ -34,10 +34,7 @@ export function questionCard(q, { compact = false, open = false } = {}) {
           <button type="button" class="btn btn-sm q-reveal" data-action="reveal-answer">${icon('eye', 15)} 查看解析</button>
           ${topicsChips(q)}
         </div>
-        <div class="q-analysis" hidden>
-          <div class="q-analysis-head">${icon('check', 16)}<span>答案与解析</span>${q.answer ? `<span class="q-answer">正确答案 <b>${q.answer}</b></span>` : ''}</div>
-          <div class="q-analysis-body">${q.analysis || '<p>暂无解析。</p>'}</div>
-        </div>
+        <div class="q-analysis" hidden data-analysis-for="${q.id}"></div>
       </div>
     </div>
   </article>`;

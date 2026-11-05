@@ -320,11 +320,16 @@ function handleAction(actionEl, e) {
     if (!card) return;
     const analysis = card.querySelector('.q-analysis');
     if (!analysis) return;
+    const qid = card.dataset.q;
+    const q = QUESTIONS.find((x) => x.id === qid);
+    if (analysis.dataset.loaded !== '1') {
+      analysis.innerHTML = `<div class="q-analysis-head">${icon('check', 16)}<span>答案与解析</span>${q?.answer ? `<span class="q-answer">正确答案 <b>${escapeHtml(q.answer)}</b></span>` : ''}</div>
+        <div class="q-analysis-body">${q?.analysis || '<p>暂无解析。</p>'}</div>`;
+      analysis.dataset.loaded = '1';
+    }
     analysis.hidden = false;
     renderMath(analysis);
     card.dataset.revealed = 'true';
-    const qid = card.dataset.q;
-    const q = QUESTIONS.find((x) => x.id === qid);
     if (q?.answer) {
       const opt = card.querySelector(`.opt[data-letter="${q.answer}"]`);
       if (opt) opt.classList.add('is-correct');
