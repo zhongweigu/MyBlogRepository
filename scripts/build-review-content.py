@@ -487,7 +487,13 @@ def main() -> None:
     articles = 0
     missing = []
 
+    # coa-4-4 的数据通路正文已手写补充（含 2015/2022 真题图），生成器不要覆盖。
+    # 其余 topic 仍按 MAPPING 生成。
+    MANUAL_TOPICS = {"coa-4-4"}
+
     for topic_id, parts in MAPPING.items():
+        if topic_id in MANUAL_TOPICS:
+            continue
         chunks: list[str] = []
         for source_key, needle, options in parts:
             section = find_section(SECTIONS_BY_SOURCE[source_key], needle)

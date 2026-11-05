@@ -5,7 +5,7 @@ import { escapeHtml, icon, footer, sectionHead } from '../ui.js';
 export function diagramsView(store, query = {}) {
   const group = DIAGRAM_GROUPS.some((g) => g.id === query.group) ? query.group : 'all';
   const list = group === 'all' ? DIAGRAMS : DIAGRAMS.filter((d) => d.group === group);
-  const featured = DIAGRAMS[0];
+  const featured = DIAGRAMS.find((d) => d.id === 'dg-address-path') || DIAGRAMS[0];
   const gridList = group === 'all' ? list.filter((d) => d.id !== featured.id) : list;
 
   return `<section class="view view-diagrams">

@@ -1,4 +1,4 @@
-﻿# 408 复习台 · 维护手册
+# 408 复习台 · 维护手册
 
 > 适用对象：以后接手这个页面的 agent。用户会持续发来新的考点、知识点和图片，要求「提取、补充、加进复习台」，**不再改博客帖子**。
 >
@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v6/
+│   ├── js-v7/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -102,7 +102,7 @@ source/408-review/
 
 **A. 从站内帖子生成（推荐，适用于已有帖子）**
 
-`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 51 篇长文 + 图片：
+`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 50 篇长文 + 图片；`coa-4-4`（数据通路与控制信号）和 `coa-5-2`（中断与 I/O）是手写文件，脚本会跳过、不要覆盖：
 
 ```powershell
 python scripts/build-review-content.py
@@ -323,6 +323,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 背诵清单 / 考场答法由 `points` 自动派生，所以 `points` 的标题和一句线索要写清楚；特殊题型之后再手写覆盖。
 - 术语库的大部分释义来自 `points.lead`，核心术语才手写；发现释义太薄时，先补 `points.lead` 或把词加进 `CORE_TERMS`。
 - MathJax / Mermaid 走 jsDelivr CDN，**按需加载**（只有文章里出现公式 / mermaid 才注入脚本）；加载失败时公式/图退化为原始文本，正文仍可读。
+- `coa-4-4`（数据通路与控制信号）在 `content/coa-4-4.html` 手写维护；生成器的 `MANUAL_TOPICS` 已跳过它。新增组合/状态元件、时钟、单总线、2015-43/44、2022-43 的内容直接改这个文件。
 - `coa-5-2`（中断与 I/O）原帖没有对应长文，`content/coa-5-2.html` 是手写补充；后续可直接扩写该文件。
 - 今日队列是考点级，不是知识点级；`points` 用于搜索/速记，不单独记录 SRS 进度。
 - 题库是“完整题目”优先：自动抽取会跳过没有年份、没有选项、没有分问的短小例；如果发现漏题，先检查它是否有 `<u>例题`/`<u>练习` 标记，没有就补到 `questions-manual-extra.js`。
