@@ -291,7 +291,7 @@ export const DIAGRAMS = [
     group: 'sort',
     topic: 'ds-6-3',
     title: '多路归并与最佳归并树',
-    src: '/408-review/assets/textbook/ds-external-sort-multiway.webp',
+    src: '/408-review/assets/textbook/external-sort-multiway.webp',
     caption: 'k 路归并的趟数约 ⌈log_k m⌉；k 越大 I/O 越少，但缓冲区和内部比较增加。',
     why: '外部排序题先算初始段数，再算归并趟数和读写次数；最佳归并树记得补虚段。',
   },
