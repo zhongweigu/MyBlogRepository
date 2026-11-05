@@ -348,6 +348,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 入口 `/408-review/`，由 `_config.yml` 的 `skip_render: 408-review/**` 原样复制；不要改 Butterfly 主题去渲染它。
 - 今日页只保留「每日知识点复习」一个模块，默认 10 个考点；不要加回计划 / 每日一题 / 热力图等模块。
 - 考点页正文在 `assets/content/<topic-id>.html`，按需 fetch；`topic.points` 只是速记层。
+- 考点页结构：背诵清单 / 考场答法（由 points 派生）→ 理解长文 → 图解（正文图 + 自绘 SVG）→ 关联真题。
+- 新增 `views/glossary.js` + `data/glossary.js`（术语库）、`views/diagrams.js` + `data/diagrams.js`（代表题型图解库）；导航已接入。
+- 用户明确不要：评论、路线 / 纲领、P0–P3 优先级、英文版；不要加回。
+- 视觉参考 `docs.cpl.icu/kangaroo-review/site/`：网格纸、衬线标题、硬边卡片、红色索引；不要大圆角 + 重阴影。
 - 所有图片必须落地到 `assets/textbook/` 或 `assets/img/`，在正文对应段落插入；不要只堆文末。
 - 原帖图片可用 `python scripts/build-review-content.py` 生成（51 篇 + 图片）；手写长文直接写 `assets/content/<id>.html`。
 - 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。

@@ -7,12 +7,13 @@
 
 ---
 
-## 1. 先记住四件事
+## 1. 先记住这几件事
 
 1. **不要编辑 `source/_posts/*.md`。** 帖子是历史归档；新内容只进复习台。
 2. **今日页只有一个模块**：每日知识点复习，默认 10 个考点。不要加回计划、每日一题、热力图、复习指引等模块。
-3. **考点页是长文，不是几条摘要。** 每个考点应接近一篇小教材：定义、推导、例子、表格、图、易错点、真题都要有；形式按内容走，不要硬凑「123 + 表格」。
-4. **图要放到对应位置。** 用户发的图、原帖里的图、自己画的图，都要落到 `assets/textbook/` 或 `assets/img/`，并在正文相应段落插入，不能只堆在文末。
+3. **考点页是长文，不是几条摘要；但顶部要先给背诵和答法。** 结构是：背诵清单 / 考场答法 → 理解长文 → 图解 → 关联真题。长文要接近一篇小教材：定义、推导、例子、表格、图、易错点都要有。
+4. **图要放到对应位置。** 用户发的图、原帖里的图、自己画的图，都要落到 `assets/textbook/` 或 `assets/img/`，并在正文相应段落插入，不能只堆在文末；代表一类题型的图再收进 `data/diagrams.js`。
+5. **术语和图解是独立入口**：`#/glossary`、`#/diagrams`。不要加评论、路线 / 纲领、P0–P3 优先级、英文版——用户明确不要。
 
 ---
 
@@ -20,13 +21,13 @@
 
 ```
 source/408-review/
-├── index.html                     # 壳、MathJax/Mermaid CDN、主题启动
+├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js/
+│   ├── js-v3/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
-│   │   ├── article.js             # MathJax / Mermaid 增强
+│   │   ├── article.js             # MathJax / Mermaid 按需增强
 │   │   ├── data/
 │   │   │   ├── meta.js            # 科目、章节、跨章脉络
 │   │   │   ├── ds.js / coa.js     # 原有考点
@@ -34,13 +35,17 @@ source/408-review/
 │   │   │   ├── coa-extra.js       # 新增 COA 考点
 │   │   │   ├── supplements-*.js   # 原有考点的补充点/图/题
 │   │   │   ├── questions.js       # 真题
+│   │   │   ├── diagrams.js        # 图解库（代表题型）
+│   │   │   ├── glossary.js        # 术语（核心手写 + 自动抽取）
 │   │   │   └── index.js           # 合并、排序、索引
 │   │   ├── views/today.js         # 今日页（单模块）
-│   │   ├── views/topic.js         # 考点页壳 + 长文 fetch
+│   │   ├── views/topic.js         # 考点页壳 + 背诵/答法/图解 + 长文 fetch
+│   │   ├── views/glossary.js      # 术语库
+│   │   ├── views/diagrams.js      # 图解库
 │   │   └── ...
 │   ├── content/<topic-id>.html    # 每篇长文（按需 fetch）
 │   ├── textbook/*.webp            # 从帖子复制/压缩的原图
-│   └── img/*.webp|*.svg           # 补充图 + 自绘 SVG
+│   └── img/*.webp|*.svg           # 补充图 + 自绘 SVG（含地址翻译全链路）
 └── ...
 ```
 
@@ -170,6 +175,24 @@ python scripts/build-review-content.py
 
 然后在对应 topic 的 `questions` 里加 id；真题库、考点页、搜索都会自动出现。
 
+### 3.6 背诵清单 / 考场答法 / 图解（自动派生）
+
+考点页顶部不再只有“一句话抓手”，而是：
+
+1. **背诵清单**：`takeaway` + `points` 的 `t` / `lead` + `recall`。所以 `points` 要写得短、能背；长文放 `content/<id>.html`。
+2. **考场答法**：`takeaway` + 前 4 个 `points.t` + 第一个 `pitfalls[0].b` 自动拼成“定义 → 要点 → 收口”。如果这一题的答法很特殊，可以之后再给 topic 加手写 `answer` 字段（当前页面会优先用自动版）。
+3. **图解**：文章加载后自动抽取前 4 张 `.article-figure`，加上 `figures` 里的自绘 SVG。要新增“代表一类题型”的图，优先放进 `data/diagrams.js` 和图解库；考点页的图仍以正文位置为准。
+
+### 3.7 术语库与图解库
+
+- `data/glossary.js`：`CORE_TERMS` 手写核心术语；其余从 52 个考点的 `points` 自动抽取（术语 = 知识点标题，释义 = `lead`）。术语页支持科目筛选和搜索。
+- `data/diagrams.js`：`DIAGRAMS` 每项字段：
+  ```js
+  { id, subject: 'ds'|'coa', group, topic, title, src, caption, why }
+  ```
+  `src` 必须是 `assets/img/` 或 `assets/textbook/` 下真实存在的文件；`why` 写“这类题怎么用这张图”。新增图先想清楚它代表哪一类题型，不要把所有插图都搬进去。
+- 术语 / 图解都从顶部导航进入；移动端底部导航也有入口。
+
 ---
 
 ## 4. 今日页规则
@@ -246,12 +269,18 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 不要在同一个章节里让两个考点 `order` 相同。
 - 不要把 `public/`、`db.json`、`.tmp*` 提交。
 - 不要在没有本地验证的情况下直接承诺线上正常。
+- **不要加**：评论、路线 / 纲领、P0–P3 优先级筛选、英文版 / 中英切换。用户明确不要这些。
+- **样式**：参考 `docs.cpl.icu/kangaroo-review/site/` 的编辑型阅读感——网格纸、衬线标题、硬边卡片、红色索引；不要改回大圆角 + 渐变阴影。
+- **改 JS/CSS 必须递增版本**（`js-vN` / `app.css?v=`），否则 CDN 4 小时缓存会让用户看不到更新。
 
 ---
 
 ## 8. 已知取舍
 
 - 长文由帖子生成时，`points` 仍是速记层；两者不要求一一对应。
+- 背诵清单 / 考场答法由 `points` 自动派生，所以 `points` 的标题和一句线索要写清楚；特殊题型之后再手写覆盖。
+- 术语库的大部分释义来自 `points.lead`，核心术语才手写；发现释义太薄时，先补 `points.lead` 或把词加进 `CORE_TERMS`。
 - MathJax / Mermaid 走 jsDelivr CDN，**按需加载**（只有文章里出现公式 / mermaid 才注入脚本）；加载失败时公式/图退化为原始文本，正文仍可读。
 - `coa-5-2`（中断与 I/O）原帖没有对应长文，`content/coa-5-2.html` 是手写补充；后续可直接扩写该文件。
 - 今日队列是考点级，不是知识点级；`points` 用于搜索/速记，不单独记录 SRS 进度。
+- Netlify / Cloudflare 对 `assets/*` 可能仍给 4 小时缓存；当前用 `js-vN` 目录 + CSS query 版本化绕过，发布后让用户走一次新 URL。

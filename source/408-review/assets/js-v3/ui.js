@@ -191,7 +191,7 @@ function trapOverlayKeys(e) {
 export function footer() {
   return `<footer class="site-foot">
     <div class="foot-brand">${icon('layers', 16)}<span><strong>408 复习台</strong> · 把考点串成一张网</span></div>
-    <div class="foot-meta">进度只保存在本机 · 静态页面 · <a href="/">返回博客</a></div>
+    <div class="foot-meta">进度只保存在本机 · 静态页面 · <a href="#/glossary">术语</a> · <a href="#/diagrams">图解</a> · <a href="#/guide">手册</a> · <a href="/">返回博客</a></div>
   </footer>`;
 }
 

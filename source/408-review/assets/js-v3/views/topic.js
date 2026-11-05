@@ -87,34 +87,62 @@ export function topicView(store, topicId) {
           <a class="ql-more" href="#/map?subject=${subject?.id || 'ds'}">知识地图 ${icon('arrowRight', 12)}</a>
         </div>` : ''}
 
+        <nav class="study-jump" aria-label="本页学习顺序">
+          <a href="#recite">01 背诵</a>
+          <a href="#understand">02 理解</a>
+          <a href="#diagrams">03 图解</a>
+          <a href="#questions">04 真题</a>
+        </nav>
+
+        <section class="study-aids" id="recite">
+          <article class="study-card recite-card">
+            <div class="sc-head"><span class="sc-icon">${icon('book', 16)}</span><div><p class="eyebrow">MEMORIZE</p><h2>背诵清单</h2></div><span class="sc-count">${topic.points.length} 条</span></div>
+            <p class="sc-take">${topic.takeaway}</p>
+            ${topic.recall ? `<p class="sc-self"><b>先自问：</b>${escapeHtml(topic.recall)}</p>` : ''}
+            <ol class="recite-list">
+              ${topic.points.slice(0, 6).map((p) => `<li><b>${escapeHtml(p.t)}</b><span>${escapeHtml(p.lead)}</span></li>`).join('')}
+            </ol>
+            ${topic.points.length > 6 ? `<p class="sc-more">其余 ${topic.points.length - 6} 条在下方正文里展开。</p>` : ''}
+          </article>
+
+          <article class="study-card answer-card">
+            <div class="sc-head"><span class="sc-icon">${icon('target', 16)}</span><div><p class="eyebrow">ANSWER</p><h2>考场答法</h2></div><span class="sc-count">${(topic.exam?.types || ['选择']).join(' / ')}</span></div>
+            <div class="answer-steps">
+              ${answerSteps(topic).map((s, i) => `<div class="answer-step"><span class="as-no">${i + 1}</span><div><b>${s.label}</b><p>${escapeHtml(s.text)}</p></div></div>`).join('')}
+            </div>
+            <p class="answer-hint">${topic.exam?.types?.includes('综合') ? '综合题先画图 / 列表，再分步写结论；每一步都写“为什么”。' : '选择题先排除绝对化、无中生有的选项，再代边界值验证。'}</p>
+          </article>
+        </section>
+
         ${topic.bitfields ? `<section class="topic-visual">
-          <p class="eyebrow">QUICK LOOK</p>
+          <p class="eyebrow">STRUCTURE</p>
           ${topic.bitfields.map(renderBitfield).join('')}
         </section>` : ''}
 
-        <div class="article-toolbar">
-          <div class="at-left"><span class="eyebrow">FULL NOTES</span><span class="at-count">正文 · 图片可点开</span></div>
-          <div class="at-right">
+        <section class="study-section" id="understand">
+          <header class="study-section-head">
+            <div><p class="eyebrow">02 · UNDERSTAND</p><h2>理解：把结论推一遍</h2><p>正文按原帖整理；公式、表格、代码和例题解析都在里面。先读推导，再回头背清单。</p></div>
             <button type="button" class="text-btn" data-action="print">${icon('print', 14)} 打印</button>
-          </div>
-        </div>
-
-        <section class="topic-reader" data-topic-id="${topic.id}">
+          </header>
           <div class="article-body" id="topic-article">
             <div class="article-loading"><span class="al-dot"></span> 正在展开全文…</div>
           </div>
         </section>
 
-        ${customFigures(topic).length ? `<section class="topic-visual topic-visual-figures">
-          ${sectionHead({ eyebrow: 'DIAGRAMS', title: '结构图解', desc: '把文字压缩成一张图，复习时先看图回忆。' })}
-          <div class="topic-figures">${customFigures(topic).map(renderFigure).join('')}</div>
-        </section>` : ''}
+        <section class="study-section" id="diagrams">
+          <header class="study-section-head">
+            <div><p class="eyebrow">03 · DIAGRAMS</p><h2>图解：把一类题的图抽出来</h2><p>正文里的关键插图集中在这里；先看图回忆流程，再回正文读细节。</p></div>
+            <a class="text-link" href="#/diagrams">全部图解 ${icon('arrowRight', 14)}</a>
+          </header>
+          <div id="topic-figure-strip" class="figure-strip"></div>
+          ${customFigures(topic).length ? `<div class="topic-figures">${customFigures(topic).map(renderFigure).join('')}</div>` : ''}
+        </section>
 
-        <section class="topic-questions">
+        <section class="topic-questions" id="questions">
           ${sectionHead({
             eyebrow: 'VERIFY',
-            title: '真题验证',
-            desc: questions.length ? '先自己写答案，再展开解析。' : '这个考点暂时没有配套真题。',
+            title: '关联真题',
+            desc: questions.length ? '先自己写答案，再展开解析；做完回到上面的背诵清单复盘。' : '这个考点暂时没有配套真题。',
             actions: questions.length ? `<a class="text-link" href="#/questions?subject=${subject?.id || 'ds'}">全部真题 ${icon('arrowRight', 14)}</a>` : '',
           })}
           ${questions.length
@@ -229,6 +257,42 @@ function customFigures(topic) {
   return (topic.figures || []).filter((f) => String(f.src || '').endsWith('.svg'));
 }
 
+function stripText(value = '') {
+  return String(value).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function answerSteps(topic) {
+  const points = topic.points || [];
+  const type = (topic.exam?.types || []).join(' ');
+  const pitfall = topic.pitfalls?.[0];
+  const keySteps = points.slice(0, 4).map((p) => p.t).join('；');
+  return [
+    { label: '先交代对象 / 定义', text: stripText(topic.takeaway) },
+    { label: type.includes('综合') ? '再写步骤 / 公式' : '再写判定 / 对比', text: keySteps || '把题干条件转成符号或图，再列关键性质。' },
+    { label: '最后收口', text: pitfall ? stripText(pitfall.b) : '写出结论，再检查边界条件、反例和单位。' },
+  ];
+}
+
+async function fillFigureStrip(host) {
+  const strip = document.getElementById('topic-figure-strip');
+  if (!strip) return;
+  const figures = [...host.querySelectorAll('.article-figure')].slice(0, 4);
+  strip.innerHTML = figures.map((fig) => {
+    const link = fig.querySelector('.figure-link');
+    const img = fig.querySelector('img');
+    const caption = fig.querySelector('figcaption')?.textContent?.trim() || img?.alt || '';
+    if (!link || !img) return '';
+    return `<button type="button" class="figure-chip" data-action="zoom-image" data-src="${escapeHtml(link.dataset.src || img.src)}" data-caption="${escapeHtml(link.dataset.caption || caption)}">
+      <img src="${escapeHtml(img.getAttribute('src') || img.src)}" alt="${escapeHtml(caption)}" loading="lazy" decoding="async">
+      <span>${escapeHtml(caption)}</span>
+    </button>`;
+  }).join('');
+  if (!strip.children.length && !document.querySelector('#diagrams .topic-figures')) {
+    document.getElementById('diagrams')?.setAttribute('hidden', '');
+    document.querySelector('.study-jump a[href="#diagrams"]')?.setAttribute('hidden', '');
+  }
+}
+
 /**
  * 长文按需加载：首次进入考点时 fetch 静态 HTML，不把 50 篇文章塞进主 JS。
  * 失败时退回 topic.points 的速记版，保证页面仍然可读。
@@ -253,6 +317,7 @@ export async function hydrateTopicArticle(topicId) {
     host.classList.add('is-loaded', 'is-fallback');
   }
 
+  await fillFigureStrip(host);
   await afterArticle(host);
 }
 

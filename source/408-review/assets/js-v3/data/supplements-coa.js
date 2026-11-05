@@ -104,6 +104,7 @@ export const COA_SUPPLEMENTS = {
   'coa-3-5': {
     order: 7,
     figures: [
+      fig('coa-address-path.svg', '一条地址的完整旅程：VA 拆虚页号和偏移，TLB 命中直接得页框号，未命中查页表，拼成 PA 后再拆 Cache 的 Tag / 索引 / 块内偏移。'),
       fig('tlb-cache-access-path.webp', 'TLB 与 Cache 的访问路径：先查 TLB 做虚实转换，再用物理地址查 Cache；TLB 缺失查页表，缺页才由 OS 调入页面。'),
       fig('virtual-memory-address-translation.webp', '虚拟地址到物理地址的转换：虚页号查页表得到页框号，页内偏移保持不变。'),
     ],

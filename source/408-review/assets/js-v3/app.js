@@ -4,6 +4,8 @@ import { todayView } from './views/today.js';
 import { mapView } from './views/map.js';
 import { chapterView } from './views/chapter.js';
 import { topicView, hydrateTopicArticle } from './views/topic.js';
+import { glossaryView, filterGlossary } from './views/glossary.js';
+import { diagramsView } from './views/diagrams.js';
 import { questionsView } from './views/questions.js';
 import { guideView } from './views/guide.js';
 import { startRunner } from './runner.js';
@@ -110,6 +112,14 @@ function render({ scroll = true } = {}) {
       nav = 'questions';
       subjectId = ['ds', 'coa'].includes(query.subject) ? query.subject : null;
       title = '真题';
+    } else if (name === 'glossary') {
+      html = glossaryView(store, query);
+      nav = 'glossary';
+      title = '术语库';
+    } else if (name === 'diagrams') {
+      html = diagramsView(store, query);
+      nav = 'diagrams';
+      title = '图解库';
     } else if (name === 'guide') {
       html = guideView(store);
       nav = 'guide';
@@ -402,6 +412,19 @@ document.addEventListener('click', (e) => {
   if (searchTrigger) {
     e.preventDefault();
     openSearch();
+    return;
+  }
+  // 站内锚点：#recite / #3- 这类不能走 hash 路由，否则会被当成新页面。
+  const localAnchor = e.target.closest('a[href^="#"]');
+  if (localAnchor) {
+    const href = localAnchor.getAttribute('href') || '';
+    if (href && !href.startsWith('#/')) {
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   }
 });
 
@@ -430,6 +453,11 @@ document.addEventListener('change', (e) => {
     reader.readAsText(file);
     e.target.value = '';
   }
+});
+
+document.addEventListener('input', (e) => {
+  const input = e.target.closest('[data-glossary-search]');
+  if (input) filterGlossary(input.value);
 });
 
 document.addEventListener('keydown', (e) => {

@@ -11,7 +11,7 @@ export function guideView(store) {
     <header class="guide-hero">
       <p class="eyebrow">FIELD GUIDE</p>
       <h1>使用手册</h1>
-      <p class="lede">这不是另一份笔记，而是一张可以反复走的路线图。读一遍、串一次、再回忆一轮——三层就够。</p>
+      <p class="lede">这不是另一份笔记，而是一套可以反复走的阅读顺序。先背、再理解、再看图、最后用真题收口。</p>
       <div class="guide-stats">
         <div><strong>${sample}</strong><span>个考点</span></div>
         <div><strong>${chapters}</strong><span>个章节</span></div>
@@ -32,7 +32,7 @@ export function guideView(store) {
             </div>
             <div class="guide-step">
               <span class="gs-no">B</span>
-              <div><h3>再读考点，读成一篇小教材</h3><p>每个考点页最上面是“一句话抓手”。下面的正文按原帖整理成完整长文：定义、推导、例子、表格、插图和真题解析都在里面；先读完，再做题，不要只背抓手。</p></div>
+              <div><h3>再读考点，读成一篇小教材</h3><p>每个考点页最上面是“背诵清单”和“考场答法”：先背一句话和几条关键词，再看“理解”里的完整长文——定义、推导、例子、表格、插图和真题解析都在里面。读完再做题，不要只背抓手。</p></div>
             </div>
             <div class="guide-step">
               <span class="gs-no">C</span>
@@ -65,7 +65,26 @@ export function guideView(store) {
         </section>
 
         <section class="guide-section">
-          <p class="eyebrow">03 · SHORTCUTS</p>
+          <p class="eyebrow">03 · LIBRARY</p>
+          <h2>背诵、图解和术语</h2>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="gs-no">A</span>
+              <div><h3>背诵清单 + 考场答法</h3><p>每个考点页顶部先给“背诵清单”和“考场答法”：清单是能直接背的短句，答法是选择题 / 综合题的收口顺序。先背，再去“理解”里看推导。</p></div>
+            </div>
+            <div class="guide-step">
+              <span class="gs-no">B</span>
+              <div><h3>图解库</h3><p><a href="#/diagrams">图解库</a>只收“代表一类题型”的图，比如 Cache + TLB + 页表的完整访问链、Cache 字段划分、流水线时空图、AVL 旋转。图片可点击放大，图下直接跳到对应考点。</p></div>
+            </div>
+            <div class="guide-step">
+              <span class="gs-no">C</span>
+              <div><h3>术语库</h3><p><a href="#/glossary">术语库</a>按科目筛选，也可以直接搜；核心术语手写定义，其余从 52 个考点的知识点里抽出，每个词都能跳回原考点。</p></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="guide-section">
+          <p class="eyebrow">04 · SHORTCUTS</p>
           <h2>键盘快捷键</h2>
           <div class="shortcut-table">
             <div><kbd>/</kbd><span>打开搜索</span></div>
@@ -77,9 +96,9 @@ export function guideView(store) {
         </section>
 
         <section class="guide-section" id="extend">
-          <p class="eyebrow">04 · EXTEND</p>
+          <p class="eyebrow">05 · EXTEND</p>
           <h2>怎么继续往里加内容</h2>
-          <p class="guide-p">页面是纯静态的：考点结构在 <code>source/408-review/assets/js-v2/data/</code>，长文在 <code>source/408-review/assets/content/</code>，图片在 <code>assets/textbook/</code> 或 <code>assets/img/</code>。新增考点除了加数据，还要给这个 id 写一篇长文；维护步骤见仓库的 <code>docs/408-review-maintenance.md</code>。</p>
+          <p class="guide-p">页面是纯静态的：考点结构在 <code>source/408-review/assets/js-v3/data/</code>，长文在 <code>source/408-review/assets/content/</code>，图片在 <code>assets/textbook/</code> 或 <code>assets/img/</code>。新增考点除了加数据，还要给这个 id 写一篇长文；维护步骤见仓库的 <code>docs/408-review-maintenance.md</code>。</p>
           <pre class="code guide-code"><code>{
   id: 'ds-2-6',              // 唯一 id
   chapter: 'ds-2',           // 所属章节
