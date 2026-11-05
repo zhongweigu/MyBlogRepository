@@ -16,6 +16,15 @@ async function waitFor(getter, timeout = 7000) {
 export async function afterArticle(host) {
   if (!host) return;
   await Promise.all([typesetMath(host), renderMermaid(host)]);
+  host.querySelectorAll('details').forEach((details) => {
+    if (details.dataset.articleBound) return;
+    details.dataset.articleBound = '1';
+    details.addEventListener('toggle', () => {
+      if (!details.open) return;
+      typesetMath(details);
+      renderMermaid(details);
+    });
+  });
 }
 
 async function typesetMath(host) {
