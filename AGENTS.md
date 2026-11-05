@@ -370,11 +370,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 入口 `/politics-review/`，`_config.yml` 的 `skip_render` 已加 `politics-review/**`；样式直接复用 `/408-review/assets/css/app.css`，本页只追加 `assets/css/politics.css`（换朱红主色、待补标记）。
 - 只有 **马原** 一科：六个板块（导论 / 辩证唯物论与唯物辩证法 / 认识论 / 唯物史观 / 政治经济学 / 科学社会主义）、29 个专题。
 - 三个模块：**今日**（每日 8 个专题的滚动队列）、**知识地图**、**术语库**。用户明确不要真题、图解、评论、英文版；不要加回。
-- 专题 1–19 有速记点和长文；专题 20–29 是 `pending` 占位：地图上可见、专题页显示「整理中」、不进每日队列与统计。
-- 数据在 `assets/js-v2/data/`：`topics-core.js`（1–19）、`topics-pending.js`（20–29）、`glossary.js`、`meta.js`（板块 + 横向脉络）。长文在 `assets/content/<id>.html`。
+- 专题 1–22 有速记点和长文；专题 23–29 是 `pending` 占位：地图上可见、专题页显示「整理中」、不进每日队列与统计。
+- 数据在 `assets/js-v3/data/`：`topics-core.js`（1–22）、`topics-pending.js`（23–29）、`glossary.js`、`meta.js`（板块 + 横向脉络）。长文在 `assets/content/<id>.html`。
 - **题眼机制**：`ui.js` 的 `markTerms()` 自动把「根本、唯一、决定、核心、实质、本质属性、前提、标志」等判定词标红，今日卡片、背诵清单、章节列表、回忆模式都走它；专题页另有「题眼：选择题常改这几个字」卡片，内容来自 `topic.pitfalls`。新增专题时把易被改字的表述写进 `pitfalls`，就会自动出现在这张卡片里。
 - 用户发来新笔记/图片时：不再改博客帖子，直接补对应专题的 `points` 与 `content/my-XX.html`；写完把该专题从 `topics-pending.js` 移到 `topics-core.js`，补术语、按需补 `links` 与 `CHAINS`。
 - 新增专题：`id` 用 `my-XX`（XX = 专题号），`chapter` 必须是 `my-c1`…`my-c6`，`order` 用全局专题号；不要改已有 id。
 - 长篇按「定义 → 条件/关系 → 易错点」写，保留教材原话；`points` 只写能背的短句，长文放 `content/`。
 - 验证：`npx hexo generate` 后本地起 `python -m http.server --directory public`，用 headless Chrome 看 `#/today`、`#/map`、改动的 `#/topic/<id>`、`#/glossary`。注意 headless 的 `--window-size=500` 实际视口约 518px，截图右侧会被裁 18px，不是布局溢出。
-- 缓存：改 JS/CSS 时递增 `assets/js-v2` 目录或 `politics.css?v=...`。
+- 缓存：改 JS/CSS 时递增 `assets/js-v3` 目录或 `politics.css?v=...`。
