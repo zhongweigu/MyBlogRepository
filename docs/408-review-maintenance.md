@@ -1,4 +1,4 @@
-﻿# 408 复习台 · 维护手册
+# 408 复习台 · 维护手册
 
 > 适用对象：以后接手这个页面的 agent。用户会持续发来新的考点、知识点和图片，要求「提取、补充、加进复习台」，**不再改博客帖子**。
 >
@@ -215,6 +215,8 @@ git push origin main
 ```
 
 Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 `public`。推送后等 1~2 分钟，用无痕窗口验证线上。
+
+> **缓存（重要）**：Netlify / Cloudflare 对 `/408-review/assets/*` 仍可能返回 `max-age=14400`，普通刷新会继续用旧 JS。**每次改 JS/CSS，必须递增版本**：把 `assets/js-vN` 改成下一个 `js-v(N+1)`（同时改 `index.html` 的入口、本手册与 `guide.js` 里的路径），或至少改 `index.html` 里 `app.css?v=...`。只改文件内容、不改 URL，用户很可能看不到更新。
 
 ---
 

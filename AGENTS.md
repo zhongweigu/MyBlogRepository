@@ -352,3 +352,4 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 原帖图片可用 `python scripts/build-review-content.py` 生成（51 篇 + 图片）；手写长文直接写 `assets/content/<id>.html`。
 - 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。
 - 改完 `npx hexo clean && npx hexo generate`，桌面 + 390px 各验证，确认无 404；然后自动 commit + push。
+- **缓存**：Netlify/Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 时必须递增 `assets/js-vN` 目录版本或 `app.css?v=...`，否则用户普通刷新仍会用旧文件。
