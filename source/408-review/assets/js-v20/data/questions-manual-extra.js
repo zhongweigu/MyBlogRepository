@@ -339,4 +339,177 @@ export const MANUAL_EXTRA_QUESTIONS = [
       <li><strong>D 错</strong>：统一编址（存储器映射）正是把端口映射到主存地址空间，CPU 可以用普通 load/store 访存指令访问 I/O 端口。</li>
       </ul>`,
   },
+  {
+    id: 'q-2015-coa-21',
+    year: 2015,
+    no: '21',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-1'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['I/O 端口', '中断 I/O', '打印接口'],
+    stem: '在采用中断 I/O 方式控制打印输出的情况下，CPU 和打印控制接口中的 I/O 端口之间交换的信息不可能是：',
+    options: ['打印字符', '主存地址', '设备状态', '控制命令'],
+    answer: 'B',
+    analysis: `<p><strong>选 B。</strong> CPU 与打印接口的端口之间交换的是：</p>
+      <ul>
+      <li><strong>打印字符</strong>：CPU 写到数据端口，接口再送给打印机。</li>
+      <li><strong>设备状态</strong>：接口把“忙/就绪/缺纸”等状态送 CPU。</li>
+      <li><strong>控制命令</strong>：CPU 写控制端口，启动打印、允许中断等。</li>
+      </ul>
+      <p><strong>主存地址</strong>不是 CPU 与 I/O 端口之间交换的内容：中断 I/O 由 CPU 执行服务程序搬运数据，数据经 CPU 通用寄存器/接口数据端口传送；主存地址由 CPU 在访存时使用，不发给打印接口。DMA 才需要把主存地址给 DMA 控制器，但本题是中断 I/O。</p>`,
+  },
+  {
+    id: 'q-2017-coa-21',
+    year: 2017,
+    no: '21',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-1'],
+    type: '选择',
+    difficulty: 1,
+    score: '2 分',
+    tags: ['I/O 指令', 'I/O 端口', '通用寄存器'],
+    stem: 'I/O 指令实现的数据传送通常发生在：',
+    options: ['I/O 设备和 I/O 端口之间', '通用寄存器和 I/O 设备之间', 'I/O 端口和 I/O 端口之间', '通用寄存器和 I/O 端口之间'],
+    answer: 'D',
+    analysis: `<p><strong>选 D。</strong> I/O 指令（如 IN/OUT）是 CPU 执行的指令，操作数在<strong>通用寄存器</strong>和<strong>I/O 端口</strong>之间：</p>
+      <ul>
+      <li>IN：端口 → 通用寄存器；</li>
+      <li>OUT：通用寄存器 → 端口。</li>
+      </ul>
+      <p>CPU 不能直接用一条 I/O 指令访问设备内部；设备与端口之间是接口/设备侧的硬件握手，不经过 I/O 指令。端口到端口也不能由一条 I/O 指令直接完成。</p>`,
+  },
+  {
+    id: 'q-2017-coa-22',
+    year: 2017,
+    no: '22',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-3'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['多重中断', '开中断', '中断响应'],
+    stem: '下列关于多重中断系统的叙述中，错误的是：',
+    options: ['在一条指令执行结束时响应中断', '中断处理期间 CPU 处于关中断状态', '中断请求的产生与当前指令的执行无关', 'CPU 通过采样中断请求信号检测中断请求'],
+    answer: 'B',
+    analysis: `<p><strong>选 B。</strong> 多重中断的关键就是“中断处理期间可以开中断”，让更高处理优先级的中断嵌套进来；如果全程关中断，就退化成单级中断了。</p>
+      <ul>
+      <li>A 对：外中断通常在指令边界响应。</li>
+      <li>B 错：保护现场后可以开中断，允许嵌套；恢复现场前再关中断。</li>
+      <li>C 对：外中断请求由设备/时钟等外部事件产生，和当前指令执行无关。</li>
+      <li>D 对：CPU 在指令结束时采样中断请求信号（或由中断控制器送 INTR）。</li>
+      </ul>`,
+  },
+  {
+    id: 'q-2019-coa-22',
+    year: 2019,
+    no: '22',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-2'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['DMA', '设备驱动', '总线请求', '中断后处理'],
+    stem: '下列关于 DMA 方式的叙述中，正确的是：<br>I. DMA 传送前由设备驱动程序设置传送参数<br>II. 数据传送前由 DMA 控制器请求总线使用权<br>III. 数据传送由 DMA 控制器直接控制总线完成<br>IV. DMA 传送结束后的处理由中断服务程序完成',
+    options: ['仅 I、II', '仅 I、III、IV', '仅 II、III、IV', 'I、II、III、IV'],
+    answer: 'D',
+    analysis: `<p><strong>选 D。</strong> 四项都正确：</p>
+      <ul>
+      <li>I：设备驱动程序负责初始化 DMA 控制器（内存地址、设备地址、传送长度、方向）。</li>
+      <li>II：DMA 控制器通过 HRQ 申请总线，得到 HLDA 后才能传送。</li>
+      <li>III：传送过程由 DMA 控制器直接控制总线，在设备与主存之间搬数据，不经过 CPU 通用寄存器。</li>
+      <li>IV：DMA 结束时向 CPU 发中断，CPU 执行中断服务程序做校验、结束处理。</li>
+      </ul>`,
+  },
+  {
+    id: 'q-2020-coa-21',
+    year: 2020,
+    no: '21',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-3'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['外部中断', 'NMI', '可屏蔽中断'],
+    stem: '外部中断包括不可屏蔽中断（NMI）和可屏蔽中断，下列关于外部中断的叙述中，错误的是：',
+    options: ['CPU 处于关中断状态时，也能响应 NMI 请求', '一旦可屏蔽中断请求信号有效，CPU 将立即响应', '不可屏蔽中断的优先级比可屏蔽中断的优先级高', '可通过中断屏蔽字改变可屏蔽中断的处理优先级'],
+    answer: 'B',
+    analysis: `<p><strong>选 B。</strong> 可屏蔽中断请求有效，只是“有请求”，还要满足响应条件：</p>
+      <ul>
+      <li>当前指令执行结束；</li>
+      <li>IF=1（开中断）；</li>
+      <li>没有更高优先级/屏蔽字阻挡。</li>
+      </ul>
+      <p>所以不是“立即响应”。其余三项：A 对，NMI 不受 IF 影响；C 对，NMI 通常优先级更高；D 对，屏蔽字决定处理优先级/能否嵌套。</p>`,
+  },
+  {
+    id: 'q-2020-coa-22',
+    year: 2020,
+    no: '22',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-2'],
+    type: '选择',
+    difficulty: 3,
+    score: '2 分',
+    tags: ['周期挪用', 'DMA', '数据缓冲寄存器'],
+    stem: '若设备采用周期挪用 DMA 方式进行输入和输出，每次 DMA 传送的数据块大小为 512 字节，相应的 I/O 接口中有一个 32 位数据缓冲寄存器。对于数据输入过程，下列叙述中，错误的是：',
+    options: ['每准备好 32 位数据，DMA 控制器就发出一次总线请求', '相对于 CPU，DMA 控制器的总线使用权的优先级更高', '在整个数据块的传送过程中，CPU 不可以访问主存储器', '数据块传送结束时，会产生“DMA 传送结束”中断请求'],
+    answer: 'C',
+    analysis: `<p><strong>选 C。</strong> 周期挪用的特点是“每次只偷一个总线周期”，不是整块期间霸占总线：</p>
+      <ul>
+      <li>A 对：接口缓冲寄存器 32 位 = 4 B，每准备好 4 B 就请求一次总线；512 B 共需 512/4=128 次传送/请求。</li>
+      <li>B 对：DMA 请求通常优先于 CPU 访存。</li>
+      <li>C 错：DMA 只在它占用的总线周期内阻止 CPU 访存，其他周期 CPU 仍可访问主存；不是整个数据块期间都不能访问。</li>
+      <li>D 对：块传送结束，DMA 发中断请求，CPU 做后处理。</li>
+      </ul>`,
+  },
+  {
+    id: 'q-2021-coa-22',
+    year: 2021,
+    no: '22',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-3'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['多重中断', '用户态', '内核态'],
+    stem: '下列是关于多重中断系统中 CPU 响应中断的叙述，其中错误的是：',
+    options: ['仅在用户态（执行用户程序）下，CPU 才能检测和响应中断', 'CPU 只有在检测到中断请求信号后，才会进入中断响应周期', '进入中断响应周期时，CPU 一定处于中断允许（开中断）状态', '若 CPU 检测到中断请求信号，则一定存在未被屏蔽的中断源请求信号'],
+    answer: 'A',
+    analysis: `<p><strong>选 A。</strong> CPU 在用户态和内核态都可以检测/响应中断；中断服务程序本身就在内核态运行，若只能在用户态响应，嵌套就无从谈起。</p>
+      <p>B 对：先有请求信号，才进入响应周期。D 对：能被 CPU 检测到的请求，至少是当前未被屏蔽的。C 在“可屏蔽中断”语境下成立（开中断才响应）；NMI 是例外，但本题要选的是明显错误的 A。</p>`,
+  },
+  {
+    id: 'q-2022-coa-21',
+    year: 2022,
+    no: '21',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-2', 'coa-6-3'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['中断 I/O', '字符设备', '准备数据时间'],
+    stem: '下列关于中断 I/O 方式的叙述中，不正确的是：',
+    options: ['适用于键盘、针式打印机等字符型设备', '外设和主机之间的数据传送通过软件完成', '外设准备数据的时间应小于中断处理时间', '外设为某进程准备数据时 CPU 可运行其他进程'],
+    answer: 'C',
+    analysis: `<p><strong>选 C。</strong> 中断 I/O 适合键盘、打印机等字符型/中低速设备，CPU 启动设备后可以运行其他进程；数据传送由中断服务程序（软件）完成。</p>
+      <p>C 错在方向：外设准备数据的时间应<strong>大于</strong>（至少不短于）CPU 的中断处理时间，否则 CPU 还没处理完上一个数据，设备又准备好下一个，容易丢失数据。不是“应小于”。</p>`,
+  },
 ];
