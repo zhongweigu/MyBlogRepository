@@ -327,6 +327,16 @@ export const DIAGRAMS = [
     why: '同时请求先按硬件排队；进入服务后 B 被 A 屏蔽，所以 C 先于 B；B 必须等 A 退出后才能响应。',
   },
   {
+    id: 'dg-interrupt-request-time',
+    subject: 'coa',
+    group: 'process',
+    topic: 'coa-6-3',
+    title: '请求不同时到达：D→A→C→A→D→B',
+    src: '/408-review/assets/textbook/coa-interrupt-mask-timeline.webp',
+    caption: 'D 先到先响应；A 抢占 D，C 抢占 A；C 返回 A，A 返回 D，D 返回主程序后再响应 B。',
+    why: '先到先响应，优先级只在多个请求同时等待时比较；返回地址看它打断了谁，不要一律写主程序。',
+  },
+  {
     id: 'dg-address-path',
     subject: 'coa',
     group: 'address',

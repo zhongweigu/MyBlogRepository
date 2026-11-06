@@ -152,6 +152,33 @@
 <p><strong>为什么 A 之后是 C，不是 B？</strong> B 的硬件优先级虽然高于 C，但 A 的屏蔽字把 B 屏蔽了；当前可响应的只有 C。硬件优先级只在“当前未被屏蔽的请求”之间比较。</p>
 <p><strong>为什么 A 结束后要回主程序才响应 B？</strong> B 在 A 的服务程序里一直被屏蔽，不能嵌套；A 的返回地址是主程序，A 结束后 CPU 回到主程序上下文。B 仍处于未响应状态，CPU 在回到主程序后、执行下一条主程序指令前响应 B。不是“必须先执行一段主程序”，而是“必须先退出 A 的服务程序”。</p>
 
+<h2 id="irq-request-time">例题：请求不同时到达，轨迹又怎么变</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-interrupt-mask-timeline.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-interrupt-mask-timeline.webp" data-caption="请求按 D、A、B、C 到达时的 CPU 执行轨迹">
+    <img class="article-img" src="/408-review/assets/textbook/coa-interrupt-mask-timeline.webp" alt="中断请求按 D、A、B、C 到达时的执行轨迹：先响应 D，A 抢占 D，C 抢占 A，C 返回 A，A 返回 D，D 返回主程序后响应 B" loading="lazy" decoding="async">
+  </a>
+  <figcaption>请求到达时刻不同，先到的 D 可以先被响应；之后才按屏蔽字决定谁能抢占谁。</figcaption>
+</figure>
+<p>这次四个请求不是同时到达，图中箭头顺序是 <strong>D → A → B → C</strong>。硬件排队仍是 A&gt;B&gt;C&gt;D，处理优先级仍是 C&gt;A&gt;D&gt;B，屏蔽字也不变。</p>
+<ol>
+  <li><strong>D 先到</strong>：此时只有 D 一个请求，没有竞争，CPU 直接响应 D，开始执行 D 的服务程序。</li>
+  <li><strong>A 到达</strong>：D 的屏蔽字中 A 位是 0（允许 A），所以 A 抢占 D。D 的现场留在栈里，CPU 转去执行 A。</li>
+  <li><strong>B 到达</strong>：A 的屏蔽字中 B 位是 1（屏蔽 B），B 不能打断 A，只能等待。</li>
+  <li><strong>C 到达</strong>：A 的屏蔽字中 C 位是 0（允许 C），所以 C 抢占 A。</li>
+  <li><strong>C 执行</strong>：C 的屏蔽字全为 1，谁也不能打断 C；C 执行完返回 A。</li>
+  <li><strong>A 继续</strong>：A 执行完，返回它打断的 D（不是主程序）。</li>
+  <li><strong>D 继续</strong>：D 执行完，返回主程序。此时 B 仍在等待。</li>
+  <li><strong>B 响应</strong>：B 执行完，返回主程序。</li>
+</ol>
+<p>所以服务程序序列是：<strong>D → A → C → A → D → B</strong>。</p>
+<p>关键点：</p>
+<ul>
+  <li><strong>先到先响应</strong>：D 到达时只有它一个请求，不需要比较优先级；优先级只在多个请求同时等待时起作用。</li>
+  <li><strong>A 能打断 D</strong>：看的是 D 的屏蔽字，不是 A 的优先级；D 的 A 位为 0，所以允许。</li>
+  <li><strong>B 一直等</strong>：A 屏蔽 B、D 也屏蔽 B、C 全屏蔽；B 只能等 D 也返回主程序后再响应。</li>
+  <li><strong>A 返回 D，不是直接回主程序</strong>：A 是在 D 执行期间打断 D 的，所以 A 的断点是 D 的服务程序；C 返回 A、A 返回 D、D 最后返回主程序。</li>
+</ul>
+
 <h2 id="irq-full">把整条路径串一遍</h2>
 <ol>
   <li>设备完成/需要服务，置请求；中断控制器判优、查屏蔽，向 CPU 发 INTR。</li>
