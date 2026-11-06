@@ -35,6 +35,8 @@ export function questionsView(store, query = {}) {
 
   const dsCount = QUESTIONS.filter((q) => q.subject === 'ds').length;
   const coaCount = QUESTIONS.filter((q) => q.subject === 'coa').length;
+  const choiceCount = QUESTIONS.filter((q) => q.type === '选择').length;
+  const bigCount = QUESTIONS.filter((q) => q.type === '综合').length;
 
   return `<section class="view view-questions">
     <header class="q-hero">
@@ -50,6 +52,12 @@ export function questionsView(store, query = {}) {
         <div><strong>${years[0]}</strong><span>最近年份</span></div>
       </div>
     </header>
+
+    <div class="q-type-tabs" role="group" aria-label="选择题与大题">
+      <a class="${type === 'all' ? 'is-active' : ''}" href="${urlFor({ type: 'all' })}">全部<b>${QUESTIONS.length}</b></a>
+      <a class="${type === '选择' ? 'is-active' : ''}" href="${urlFor({ type: '选择' })}">选择题<b>${choiceCount}</b></a>
+      <a class="${type === '综合' ? 'is-active' : ''}" href="${urlFor({ type: '综合' })}">大题<b>${bigCount}</b></a>
+    </div>
 
     <div class="filter-bar">
       <div class="filter-row">
@@ -68,8 +76,8 @@ export function questionsView(store, query = {}) {
           </select></label>
           <label class="select-wrap"><span>题型</span><select data-filter="type" aria-label="按题型筛选">
             <option value="all">全部题型</option>
-            <option value="选择" ${type === '选择' ? 'selected' : ''}>选择</option>
-            <option value="综合" ${type === '综合' ? 'selected' : ''}>综合</option>
+            <option value="选择" ${type === '选择' ? 'selected' : ''}>选择题</option>
+            <option value="综合" ${type === '综合' ? 'selected' : ''}>大题</option>
           </select></label>
         </div>
         <button type="button" class="btn btn-sm btn-shuffle" data-action="shuffle-question">${icon('shuffle', 15)} 随机一题</button>
@@ -78,7 +86,7 @@ export function questionsView(store, query = {}) {
     </div>
 
     <div class="q-results-head">
-      <span class="q-results-count"><b>${list.length}</b> 道题${subject !== 'all' ? ` · ${subjectById.get(subject)?.name}` : ''}${year !== 'all' ? ` · ${year}` : ''}${type !== 'all' ? ` · ${type}` : ''}</span>
+      <span class="q-results-count"><b>${list.length}</b> 道题${subject !== 'all' ? ` · ${subjectById.get(subject)?.name}` : ''}${year !== 'all' ? ` · ${year}` : ''}${type !== 'all' ? ` · ${type === '综合' ? '大题' : '选择题'}` : ''}</span>
       <div class="view-toggle" role="group" aria-label="分组方式">
         <a class="${group === 'year' ? 'is-active' : ''}" href="${urlFor({ group: 'year' })}">${icon('calendar', 14)} 按年份</a>
         <a class="${group === 'chapter' ? 'is-active' : ''}" href="${urlFor({ group: 'chapter' })}">${icon('list', 14)} 按章节</a>

@@ -1,0 +1,34 @@
+<div class="article-content">
+<h1>I/O 接口与端口</h1>
+<p>接口做缓冲、译码和握手；端口是接口里可编址的寄存器。</p>
+<h2 id="io-interface">I/O 接口的基本结构</h2>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="I/O 接口基本结构：数据缓冲寄存器、状态/控制寄存器、地址译码和 I/O 控制逻辑、外设界面控制逻辑" data-src="/408-review/assets/textbook/coa-io-interface.webp" href="/408-review/assets/textbook/coa-io-interface.webp">
+<img alt="I/O 接口基本结构：主机侧系统总线通过数据线、地址线、控制线连接数据缓冲寄存器、状态控制寄存器、地址译码和 I/O 控制逻辑，再经外设界面控制逻辑连接设备侧" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-io-interface.webp"/>
+</a>
+<figcaption>左侧主机侧接系统总线，右侧设备侧接接口电缆；中间四类部件各管一件事。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>部件</th><th>功能</th><th>常考点</th></tr></thead>
+<tbody>
+<tr><td>数据缓冲寄存器</td><td>暂存 CPU 与设备之间传送的数据，做速度匹配和格式转换</td><td>解决 CPU 与外设速度差异；DMA 也有数据缓冲寄存器</td></tr>
+<tr><td>状态/控制寄存器</td><td>状态位（就绪、忙、错误）供 CPU 查询；控制位（启动、中断允许）由 CPU 写入</td><td>程序查询读状态、中断方式靠状态/控制位</td></tr>
+<tr><td>地址译码和 I/O 控制逻辑</td><td>识别 CPU 送来的端口地址，产生片选和读写控制，选择内部寄存器</td><td>端口地址不同，选中的寄存器不同</td></tr>
+<tr><td>外设界面控制逻辑</td><td>把系统总线的并行信号转换成设备要求的时序/电平，完成串并转换、设备握手</td><td>面向设备侧，处理“接口电缆”上的数据/状态/控制</td></tr>
+</tbody>
+</table></div>
+<p>主机侧看接口：CPU 通过数据线读写接口寄存器，通过地址线选端口，通过控制线发读/写命令；设备侧看接口：数据、状态、控制三组信号与设备握手。接口是“CPU 与设备之间的翻译和缓冲”。</p>
+
+<h2 id="io-port">I/O 端口及其编址</h2>
+<p><strong>I/O 端口</strong>是接口中可被 CPU 直接访问的寄存器（数据端口、状态端口、控制端口）。CPU 用端口地址选中它，再读写其中的内容。端口不等于接口：接口是整体，端口是接口里可编址的寄存器。</p>
+<div class="article-table"><table>
+<thead><tr><th>编址方式</th><th>做法</th><th>优点</th><th>缺点</th></tr></thead>
+<tbody>
+<tr><td>独立编址（I/O 空间）</td><td>I/O 端口单独编址，用专用 IN/OUT 指令访问</td><td>不占主存地址空间；I/O 指令和主存指令区分明显</td><td>需要专用指令和控制信号；寻址方式不如访存丰富</td></tr>
+<tr><td>统一编址（存储器映射）</td><td>端口和主存单元统一编址，用普通 load/store 访问</td><td>可用全部访存指令和寻址方式；控制简单</td><td>占用主存地址空间；需译码区分是内存还是 I/O</td></tr>
+</tbody>
+</table></div>
+<p>判断方法：看指令是 IN/OUT 还是 load/store；看端口是否占用主存地址空间。独立编址的端口地址可以和主存地址重叠，靠指令/控制信号区分。</p>
+
+</div>
+<p class="article-source">内容整理自站内 408 笔记与新增专题；例题、真题与解析归入「真题」板块。</p>

@@ -1,0 +1,75 @@
+<div class="article-content">
+<h1>三种 I/O 方式与 DMA</h1>
+<p>程序查询、中断、DMA 的核心差别是“谁等、谁搬、CPU 介入到什么程度”。</p>
+<h2 id="io-modes-flow">三种 I/O 方式的流程</h2>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="三种 I/O 方式流程：程序查询、中断、DMA" data-src="/408-review/assets/textbook/coa-io-methods.webp" href="/408-review/assets/textbook/coa-io-methods.webp">
+<img alt="三种 I/O 方式流程思维导图：程序直接控制方式、中断控制方式、DMA 控制方式" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-io-methods.webp"/>
+</a>
+<figcaption>三种方式的核心差别是“谁等、谁搬、CPU 介入到什么程度”。</figcaption>
+</figure>
+<h3>程序查询方式</h3>
+<ol>
+<li>CPU 预置传送参数（内存缓冲区、设备地址、字计数）。</li>
+<li>启动外设。</li>
+<li>读外设状态，判断是否就绪；未就绪就循环查询。</li>
+<li>就绪后传送一个数据，修改内存地址和字计数。</li>
+<li>判断是否传送完；未完继续查询，完成则结束。</li>
+</ol>
+<p>独占查询会让 CPU 一直忙等；定时查询是周期性地查，查询间隔与设备传输速率有关。优点是简单，缺点是 CPU 与外设完全串行，浪费 CPU。</p>
+<h3>中断控制方式</h3>
+<ol>
+<li>CPU 启动外设后继续执行其他程序，不必等待。</li>
+<li>外设完成一个数据单元后向 CPU 发中断请求。</li>
+<li>CPU 在满足条件时响应，转中断服务程序传送数据。</li>
+<li>服务结束返回原程序；下一个数据再重复。</li>
+</ol>
+<p>外设与 CPU 可以并行，但每传一个数据仍要一次中断和一段服务程序，适合中低速、随机 I/O。</p>
+<h3>DMA 控制方式</h3>
+<ol>
+<li>CPU 初始化 DMA 控制器：内存起始地址、设备地址、传送长度、方向。</li>
+<li>CPU 发“启动 DMA”命令，之后不再参与数据搬运。</li>
+<li>DMA 控制器申请总线，获得后给出内存地址、发读写命令，在设备与主存之间直接传数据。</li>
+<li>每传一次，地址计数器加 1、长度计数器减 1；计数值为 0 表示完成。</li>
+<li>DMA 向 CPU 发“DMA 结束”中断，CPU 做校验等后处理。</li>
+</ol>
+<p>DMA 适合磁盘、网卡等成块高速设备；CPU 只在开始和结束介入。</p>
+
+<h2 id="dma-flow">DMA 传送流程与控制器</h2>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="DMA 传送流程与 DMA 控制器结构：预处理、数据传送、后处理；HRQ/HLDA、地址计数器、长度计数器、数据缓冲寄存器" data-src="/408-review/assets/textbook/coa-dma-flow.webp" href="/408-review/assets/textbook/coa-dma-flow.webp">
+<img alt="DMA 传送流程：CPU 预处理设置 AR、DAR、WC 并启动设备，DMA 控制器通过 HRQ/HLDA 申请总线，用地址计数器、长度计数器、数据缓冲寄存器完成传送，结束后中断 CPU 做后处理" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-dma-flow.webp"/>
+</a>
+<figcaption>左：CPU 的预处理 → 数据传送 → 后处理；右：DMA 控制器内部与系统总线的连接。</figcaption>
+</figure>
+<ol>
+<li><strong>预处理</strong>：CPU 把主存起始地址送 AR（地址计数器）、设备地址送 DAR、传送长度送 WC（字计数器），启动设备。</li>
+<li><strong>申请总线</strong>：DMA 控制器发 HRQ，CPU 响应后发 HLDA，DMA 获得总线控制权。</li>
+<li><strong>传送</strong>：DMA 给出主存地址，发读/写命令，在设备与主存之间传数据；每传一次，地址计数器 +1、长度计数器 −1。</li>
+<li><strong>结束</strong>：WC=0 时，DMA 发中断请求，CPU 转入中断服务程序做数据校验、结束处理。</li>
+<li><strong>归还总线</strong>：DMA 释放总线，CPU 继续执行主程序。</li>
+</ol>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="DMA 的块传输与单字传输：任务规模与每次占用总线的粒度" data-src="/408-review/assets/textbook/coa-dma-block-word.webp" href="/408-review/assets/textbook/coa-dma-block-word.webp">
+<img alt="DMA 的块传输和单字传输思维导图：块传输以数据块为单位，单字传输又称周期挪用，每次申请一个总线周期传一个字" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-dma-block-word.webp"/>
+</a>
+<figcaption>“块传输”是任务规模，“单字传输”是每次占用总线的粒度；块传输通常由多次单字传送组成。</figcaption>
+</figure>
+<p><strong>块传输</strong>：DMA 面向一整块数据，CPU 设置参数并启动后，整块交给 DMA 控制器；完成后 DMA 用中断通知 CPU。<strong>单字传输</strong>（周期挪用）：DMA 每次只申请一个总线周期，传一个字/一个基本单位，然后归还总线，下次再申请。两者不是对立关系：块传输是总任务，实际占用总线时可以按单字逐次传。</p>
+<p>DMA 与 CPU 争总线的三种方式：停止 CPU 访存（简单但 CPU 长时间不能访存）、周期挪用（最常用）、交替访问（CPU 与 DMA 分时使用总线）。DMA 请求通常在总线周期结束时响应，优先级通常高于中断。</p>
+
+<h2 id="irq-compare">中断与 DMA 的区别</h2>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>程序中断</th><th>DMA</th></tr></thead>
+<tbody>
+<tr><td>数据搬运者</td><td>CPU 执行服务程序</td><td>DMA 控制器硬件</td></tr>
+<tr><td>CPU 介入</td><td>每次传送都要参与</td><td>开始 / 结束介入</td></tr>
+<tr><td>响应时机</td><td>指令执行结束后</td><td>总线周期结束后</td></tr>
+<tr><td>适用数据量</td><td>少量、随机</td><td>成块、高速</td></tr>
+<tr><td>优先级</td><td>通常低于 DMA</td><td>通常高于中断</td></tr>
+</tbody>
+</table></div>
+<p>常考判断：中断隐指令由硬件完成；中断响应后 PC 指向服务程序入口；断点现场要保存；DMA 传送不经过 CPU 的通用寄存器；DMA 与中断可以同时存在，但 DMA 请求通常优先级更高。</p>
+
+</div>
+<p class="article-source">内容整理自站内 408 笔记与新增专题；例题、真题与解析归入「真题」板块。</p>

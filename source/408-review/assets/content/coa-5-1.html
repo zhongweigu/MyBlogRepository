@@ -1,9 +1,11 @@
 <div class="article-content">
+<h1>总线：概念、分类与性能</h1>
+<p>总线的核心是“共享 + 分时”；这一节先解决是什么、怎么分类、带宽怎么算。</p>
 <h2 id="bus-core">总线：分时、共享的部件连接通道</h2>
 <p>总线是多个部件之间<strong>共享</strong>的一组信号线。核心特征只有两个：<strong>共享</strong>（多条设备接在同一组线上）和<strong>分时</strong>（同一时刻只能有一个主设备驱动总线，其他设备等待）。这两点决定了总线的全部优缺点：线少、成本低、易扩展，但会成为带宽瓶颈，并且需要仲裁和定时。</p>
 <ul>
-  <li><strong>共享</strong>：数据线、地址线、控制线被多个部件复用，不需要点对点连线。</li>
-  <li><strong>分时</strong>：一个总线周期内只能有一对主/从设备传送；多个请求同时到来时，由总线仲裁决定谁先用。</li>
+<li><strong>共享</strong>：数据线、地址线、控制线被多个部件复用，不需要点对点连线。</li>
+<li><strong>分时</strong>：一个总线周期内只能有一对主/从设备传送；多个请求同时到来时，由总线仲裁决定谁先用。</li>
 </ul>
 
 <h2 id="bus-classification">总线的分类</h2>
@@ -25,108 +27,16 @@
 
 <h2 id="bus-performance">性能指标：周期、频率、宽度、带宽、寻址能力</h2>
 <ul>
-  <li><strong>总线时钟频率</strong> $f_{clk}$：总线时钟每秒的周期数，单位 Hz。</li>
-  <li><strong>总线周期</strong>：完成一次总线事务所需的时间，可能包含多个时钟周期和等待周期。一个总线周期不一定等于一个时钟周期。</li>
-  <li><strong>总线工作频率</strong> $f$：每秒能完成多少次数据传送（事务/传送次数），$f=f_{clk}/N$，N 是一个总线周期包含的时钟数。</li>
-  <li><strong>总线宽度</strong> W：数据线的位数，通常用位表示；换成字节要除以 8。</li>
-  <li><strong>总线带宽</strong>：单位时间能传的数据量，$B = W/8 \\times f$（W 以位为单位），或 $B=W\\times f$（W 以字节为单位）。</li>
-  <li><strong>寻址能力</strong>：地址线位数 n 决定，按字节编址时为 $2^n$ 字节；和数据线宽度无关。</li>
+<li><strong>总线时钟频率</strong> $f_{clk}$：总线时钟每秒的周期数，单位 Hz。</li>
+<li><strong>总线周期</strong>：完成一次总线事务所需的时间，可能包含多个时钟周期和等待周期。一个总线周期不一定等于一个时钟周期。</li>
+<li><strong>总线工作频率</strong> $f$：每秒能完成多少次数据传送（事务/传送次数），$f=f_{clk}/N$，N 是一个总线周期包含的时钟数。</li>
+<li><strong>总线宽度</strong> W：数据线的位数，通常用位表示；换成字节要除以 8。</li>
+<li><strong>总线带宽</strong>：单位时间能传的数据量，$B = W/8 \\times f$（W 以位为单位），或 $B=W\\times f$（W 以字节为单位）。</li>
+<li><strong>寻址能力</strong>：地址线位数 n 决定，按字节编址时为 $2^n$ 字节；和数据线宽度无关。</li>
 </ul>
 <p><strong>例 1：</strong>数据总线 32 位，总线时钟 100 MHz，每个总线周期 1 个时钟且传一次数据，则带宽 $=4\\text{ B}\\times100\\text{ M}=400\\text{ MB/s}$。</p>
 <p><strong>例 2：</strong>数据总线 16 位，时钟 200 MHz，每个总线周期 2 个时钟，则工作频率 $100\\text{ M}$ 次/s，带宽 $=2\\text{ B}\\times100\\text{ M}=200\\text{ MB/s}$。</p>
 <p>如果地址线和数据线复用，或者有等待周期、仲裁开销，有效带宽还要再打折。</p>
 
-<h2 id="bus-structure">总线结构：单总线、双总线、三总线</h2>
-<figure class="article-figure">
-  <a class="figure-link" href="/408-review/assets/img/coa-bus-structures.svg" data-action="zoom-image" data-src="/408-review/assets/img/coa-bus-structures.svg" data-caption="单总线、双总线、三总线结构">
-    <img class="article-img" src="/408-review/assets/img/coa-bus-structures.svg" alt="单总线、双总线、三总线结构：CPU、主存、I/O 与桥的连接" loading="lazy" decoding="async">
-  </a>
-  <figcaption>单总线所有部件共享一条总线；双总线把主存总线和 I/O 总线分开；三总线再加一条 DMA 总线。</figcaption>
-</figure>
-<ul>
-  <li><strong>单总线</strong>：CPU、主存、I/O 全部挂在一条系统总线上。结构简单、成本低、易扩展；但同一时刻只能有一对部件通信，CPU 访存和 I/O 争总线，带宽低。</li>
-  <li><strong>双总线</strong>：主存总线（CPU—主存）和 I/O 总线（CPU—I/O）分开，通过桥连接。CPU 访存和 I/O 可以更并行，但 I/O 数据仍要经过 CPU 或桥。</li>
-  <li><strong>三总线</strong>：主存总线、I/O 总线、DMA 总线。DMA 设备可直接用 DMA 总线访问主存，进一步提高并行性，但结构最复杂、成本最高。</li>
-</ul>
-
-<h2 id="north-south">南北桥结构</h2>
-<figure class="article-figure">
-  <a class="figure-link" href="/408-review/assets/img/coa-north-south-bridge.svg" data-action="zoom-image" data-src="/408-review/assets/img/coa-north-south-bridge.svg" data-caption="南北桥结构：北桥连接 CPU、主存、显卡，南桥连接低速 I/O">
-    <img class="article-img" src="/408-review/assets/img/coa-north-south-bridge.svg" alt="南北桥结构：CPU 经北桥连接主存和显卡，北桥经南桥连接 USB、SATA、音频等 I/O" loading="lazy" decoding="async">
-  </a>
-  <figcaption>北桥靠近 CPU，负责高速部件（主存、显卡）；南桥负责低速 I/O（USB、SATA、音频等）。</figcaption>
-</figure>
-<ul>
-  <li><strong>北桥</strong>：连接 CPU、主存、显卡/PCIe 等高速设备，传统上包含内存控制器；速度高、带宽大。</li>
-  <li><strong>南桥</strong>：连接 USB、SATA、音频、网卡等低速 I/O，再通过桥连到北桥。</li>
-  <li>现代 SoC 常把北桥功能集成进 CPU，南桥变成 PCH/芯片组，但“北桥高速、南桥低速”的考点不变。</li>
-</ul>
-
-<h2 id="bus-transaction">总线事务：一次完整的总线操作</h2>
-<p><strong>总线事务</strong>是一次总线操作从开始到结束的完整过程，包括地址、应答和数据传送。典型三个基本阶段：</p>
-<ol>
-  <li><strong>地址传送阶段</strong>：主设备把地址送到地址总线，选择从设备，并发出读/写命令。</li>
-  <li><strong>设备响应（数据准备）阶段</strong>：从设备识别地址，发出应答/就绪信号；读操作时把数据准备好，写操作时准备接收。</li>
-  <li><strong>数据传送阶段</strong>：数据在数据总线上传送，主/从设备用应答信号确认完成。</li>
-</ol>
-<p>读事务和写事务的数据方向不同，但三个阶段相同；同步总线可能把“设备响应”压缩进固定时钟，异步总线则用请求/应答显式握手。</p>
-
-<h2 id="burst">非突发传输与突发传输</h2>
-<div class="article-table"><table>
-<thead><tr><th>方式</th><th>地址</th><th>数据</th><th>特点</th></tr></thead>
-<tbody>
-<tr><td>非突发传输</td><td>每传一个数据单元都要重新送地址</td><td>一次一个</td><td>控制简单，地址开销大，适合零散访问</td></tr>
-<tr><td>突发传输</td><td>只送一次首地址</td><td>连续传多个数据单元，地址自动递增</td><td>减少地址阶段，适合 Cache 行/成块数据；总线周期更长</td></tr>
-</tbody>
-</table></div>
-<p>突发传输的关键是“一次地址、多次数据”；突发长度越长，地址开销摊得越薄，但一次占用总线的时间也越长，可能影响其他设备。<strong>非突发</strong>则是“每传一个数据都要一次完整事务”。</p>
-
-<h2 id="serial-parallel">串行传输与并行传输</h2>
-<div class="article-table"><table>
-<thead><tr><th>方式</th><th>数据线</th><th>优点</th><th>缺点</th></tr></thead>
-<tbody>
-<tr><td>并行传输</td><td>多位同时传</td><td>短距离、同频率下瞬时带宽高</td><td>线多、成本高；位间偏斜和串扰限制距离与频率</td></tr>
-<tr><td>串行传输</td><td>一位一位传</td><td>线少、成本低、适合长距离；可用差分/SerDes 提频</td><td>需并串/串并转换，协议开销</td></tr>
-</tbody>
-</table></div>
-<p>串行不一定比并行慢：现代高速总线（PCIe、USB）用串行差分信号，频率可以远高于并行总线。并行总线在短距离、低成本场景仍有优势。</p>
-<ul>
-  <li><strong>同步串行</strong>：有一根时钟线，收发双方按同一时钟采样，数据连续传送；效率高，但需要时钟同步，距离受时钟偏斜限制。</li>
-  <li><strong>异步串行</strong>：没有共享时钟，用起始位/停止位 framing，收发双方按约定波特率采样；实现简单、适合长距离，但每帧有起止开销，速率相对低。</li>
-</ul>
-
-<h2 id="bus-timing">总线定时：同步、异步、半同步、分离式</h2>
-<figure class="article-figure">
-  <a class="figure-link" href="/408-review/assets/img/coa-bus-timing.svg" data-action="zoom-image" data-src="/408-review/assets/img/coa-bus-timing.svg" data-caption="总线定时：同步、异步握手、半同步等待、分离式事务">
-    <img class="article-img" src="/408-review/assets/img/coa-bus-timing.svg" alt="总线定时示意图：同步时钟、异步请求应答、半同步等待信号、分离式事务的请求与数据分离" loading="lazy" decoding="async">
-  </a>
-  <figcaption>同步靠统一时钟；异步靠请求/应答；半同步在同步基础上加等待；分离式把请求和数据分成两段，中间释放总线。</figcaption>
-</figure>
-<ul>
-  <li><strong>同步定时</strong>：所有设备按同一时钟节拍动作。控制简单、速度快；但必须按最慢设备设计周期，总线长度受时钟偏斜限制。慢设备可插入等待周期。</li>
-  <li><strong>异步定时</strong>：用“请求—应答”握手，不依赖统一时钟，能适应不同速度的设备；控制复杂、对噪声敏感。按握手程度分：
-    <ul>
-      <li><strong>不互锁</strong>：主设备发出请求后，不等从设备应答，经过一段时间就认为完成。</li>
-      <li><strong>半互锁</strong>：主设备请求，从设备应答；主设备收到应答后撤销请求，但从设备不等待请求撤销就撤销应答。</li>
-      <li><strong>全互锁</strong>：主设备请求，从设备应答；主设备收到应答后撤销请求，从设备收到请求撤销后才撤销应答。</li>
-    </ul>
-  </li>
-  <li><strong>半同步定时</strong>：在同步总线基础上增加等待/应答信号，慢设备可以插入等待周期；兼顾同步的简单和异步的灵活。</li>
-  <li><strong>分离式事务</strong>：主设备发出请求和地址后<strong>释放总线</strong>，从设备准备好数据后再申请总线传送数据；把一次事务拆成“请求”和“数据”两段，提高总线利用率，但增加事务延迟和系统复杂度。</li>
-</ul>
-
-<h2 id="bus-arbitration">附：总线仲裁</h2>
-<p>多个主设备同时请求总线时，由仲裁器决定谁先用。集中式仲裁有三种：<strong>链式查询</strong>（线少、优先级由物理连接固定，近高远低，故障敏感）、<strong>计数器定时查询</strong>（用计数轮询，优先级可改，线较少）、<strong>独立请求</strong>（每个设备一对请求/允许线，响应快、优先级灵活，但线多）。分布式仲裁由各设备自行协商，可靠性高、逻辑复杂。</p>
-
-<h2 id="bus-pitfalls">易错点</h2>
-<ul>
-  <li>总线带宽不是只看数据线宽度，还要看工作频率和每个总线周期的传送次数。</li>
-  <li>总线周期 ≠ 时钟周期：一个总线周期可能包含多个时钟周期和等待周期。</li>
-  <li>地址线宽度决定寻址能力，数据线宽度决定一次传送的位数，两者不能互换。</li>
-  <li>串行不一定比并行慢；高速串行总线可以靠差分和高频率超过并行总线。</li>
-  <li>同步总线不一定比异步快；设备速度差异大时，异步/半同步更合适。</li>
-  <li>半互锁和全互锁的区别在“撤销应答时是否等待对方撤销请求”。</li>
-  <li>分离式事务提高的是总线利用率，不是单次事务的延迟；单次事务反而更慢。</li>
-</ul>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>
+<p class="article-source">内容整理自站内 408 笔记与新增专题；例题、真题与解析归入「真题」板块。</p>

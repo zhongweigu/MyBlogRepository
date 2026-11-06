@@ -1655,6 +1655,10 @@ pre.code code { padding: 0; background: none; color: inherit; font-size: inherit
 .q-hero-stats { display: grid; grid-template-columns: repeat(4, auto); gap: 24px; }
 .q-hero-stats strong { display: block; font-family: var(--serif); font-size: 25px; font-weight: 600; line-height: 1.2; }
 .q-hero-stats span { color: var(--ink-3); font-size: 9.5px; }
+.q-type-tabs { display: flex; gap: 0; margin: 0 0 18px; border-bottom: 1px solid var(--line); }
+.q-type-tabs a { display: inline-flex; align-items: baseline; gap: 7px; padding: 10px 18px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--ink-3); font-size: 12px; font-weight: 600; }
+.q-type-tabs a.is-active { border-bottom-color: var(--red); color: var(--ink); }
+.q-type-tabs b { font-family: var(--serif); font-size: 15px; font-weight: 600; color: var(--red); }
 
 .filter-bar {
   position: sticky;

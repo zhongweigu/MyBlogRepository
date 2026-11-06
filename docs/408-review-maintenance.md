@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v14/
+│   ├── js-v15/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -56,7 +56,7 @@ source/408-review/
 
 脚本：`scripts/build-review-content.py`（切长文、压图片、删正文例题；`coa-4-3`/`coa-4-4`/`coa-4-5`/`coa-4-6`/`coa-5-1` 手写跳过，`ds-1-1`/`ds-1-2` 保留例题）、`scripts/extract-questions.py`（抽取题库）、`scripts/extract-code.py`（抽取数据结构代码）。
 
-- 考点页只加载当前那篇 `content/<id>.html`，共 53 篇，不会把所有长文塞进主 JS。
+- 考点页只加载当前那篇 `content/<id>.html`，共 55 篇，不会把所有长文塞进主 JS。
 - 图片是普通静态文件，靠 `skip_render` 复制。
 - 进度只存浏览器 `localStorage`，没有后端。
 
@@ -105,7 +105,7 @@ source/408-review/
 
 **A. 从站内帖子生成（推荐，适用于已有帖子）**
 
-`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线）、`coa-5-2`（中断与 I/O）和 `coa-5-3`（中断完整流程）是手写文件，脚本会跳过、不要覆盖：
+`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线概念）、`coa-5-2`（总线结构/事务/定时）、`coa-6-1`（I/O 接口与端口）、`coa-6-2`（I/O 方式与 DMA）和 `coa-6-3`（中断完整流程）是手写文件，脚本会跳过、不要覆盖：
 
 ```powershell
 python scripts/build-review-content.py
@@ -226,7 +226,7 @@ python scripts/build-review-content.py
 
 ### 3.8 代码库
 
-- `scripts/extract-code.py` 从 `content/ds-*.html` 自动抽取 `<pre><code>`，取最近的 `h2/h3/h4` 当标题、代码前最近一段当说明，输出 `data/code.js`。
+- `scripts/extract-code.py` 从 `content/ds-*.html` 自动抽取 `<pre><code>`，取最近的 `h2/h3/h4` 当标题、代码前最近一段当说明，输出 `data/code.js`。**只收知识点代码**：跳过 `ds-1-1`/`ds-1-2`（复杂度例题）、标题含“例题/练习/习题/真题/题目”、以及 summary 含“答案/解析/查看”的折叠块。
 - 页面路由 `#/code`，按章节筛选 + 搜索；顶部导航「代码」、移动端底部也有入口。
 - 改完数据结构长文后重跑：
   ```powershell
@@ -262,9 +262,9 @@ npx hexo generate
 1. 打开本次改动的考点页：长文加载、公式/图正常、没有横向溢出；
 2. 如果改了题目：打开 `#/questions`，确认题数、题目和解析出现，再点一次对应考点链接；
 3. 390px 宽度看改动页；
-4. 只检查本次涉及的 `assets/content/<id>.html` 和图片是否 200，不需要遍历全部 52 篇。
+4. 只检查本次涉及的 `assets/content/<id>.html` 和图片是否 200，不需要遍历全部 55 篇。
 
-**全量 52 篇只在以下情况跑**：改了路由、数据 schema、批量图片重写、模板/CSS 大改。日常加一个知识点或一道题，不要跑全量。
+**全量 55 篇只在以下情况跑**：改了路由、数据 schema、批量图片重写、模板/CSS 大改。日常加一个知识点或一道题，不要跑全量。
 
 发布：
 
@@ -347,8 +347,11 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `coa-4-5`（微程序控制器）在 `content/coa-4-5.html` 手写维护；结构、工作流程、字段直接编码和红框常考点都直接改这个文件，生成器跳过。
 - `coa-4-6`（多处理器）在 `content/coa-4-6.html` 手写维护；SISD/SIMD/MISD/MIMD、SMP、多核、硬件多线程都直接改这个文件，生成器跳过。
 - `coa-5-1`（总线）在 `content/coa-5-1.html` 手写维护；核心特征、分类、带宽、结构、南北桥、事务、突发/串并行、四种定时都直接改这个文件，生成器跳过。
-- `coa-5-2`（中断与 I/O）原帖没有对应长文，`content/coa-5-2.html` 是手写补充；后续可直接扩写该文件。
-- `coa-5-3`（中断完整流程）在 `content/coa-5-3.html` 手写维护；从中断源请求到 IRET 返回、数据流、栈帧和多重中断都直接改这个文件。
+- `coa-5-1`（总线概念/性能）在 `content/coa-5-1.html` 手写维护。
+- `coa-5-2`（总线结构/事务/定时）在 `content/coa-5-2.html` 手写维护。
+- `coa-6-1`（I/O 接口与端口）在 `content/coa-6-1.html` 手写维护。
+- `coa-6-2`（I/O 方式与 DMA）在 `content/coa-6-2.html` 手写维护。
+- `coa-6-3`（中断完整流程）在 `content/coa-6-3.html` 手写维护；从中断源请求到 IRET 返回、数据流、栈帧和多重中断都直接改这个文件。
 - 今日队列是考点级，不是知识点级；`points` 用于搜索/速记，不单独记录 SRS 进度。
 - 题库是“完整题目”优先：自动抽取会跳过没有年份、没有选项、没有分问的短小例；如果发现漏题，先检查它是否有 `<u>例题`/`<u>练习` 标记，没有就补到 `questions-manual-extra.js`。
 - 自动抽取的题干和解析来自原帖；如果原帖解析太薄，先在 `questions-manual-extra.js` 补，或在源帖补充后再抽取。

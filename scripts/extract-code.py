@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 从数据结构长文里抽取代码块，生成 data/code.js。
 说明性文字取代码前最近的一段；标题取最近的 h2/h3/h4。
@@ -15,7 +15,11 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "source" / "408-review" / "assets" / "content"
-OUT = ROOT / "source" / "408-review" / "assets" / "js-v8" / "data" / "code.js"
+OUT = ROOT / "source" / "408-review" / "assets" / "js-v15" / "data" / "code.js"
+
+# 只收知识点里的代码；复杂度例题、例题/练习/习题里的代码不收。
+SKIP_TOPICS = {"ds-1-1", "ds-1-2"}
+SKIP_HEADING = re.compile(r"例题|练习|习题|真题|题目")
 
 
 def clean(text: str) -> str:
@@ -26,6 +30,8 @@ def main() -> None:
     snippets = []
     for path in sorted(CONTENT.glob("ds-*.html")):
         topic = path.stem
+        if topic in SKIP_TOPICS:
+            continue
         chapter = "-".join(topic.split("-")[:2])
         soup = BeautifulSoup(path.read_text(encoding="utf-8"), "html.parser")
         content = soup.select_one(".article-content") or soup
@@ -43,6 +49,12 @@ def main() -> None:
             elif getattr(node, "name", None) == "code":
                 pre = node.find_parent("pre")
                 if not pre:
+                    continue
+                if node.find_parent("details") is not None:
+                    summary = node.find_parent("details").find("summary")
+                    if summary and re.search(r"例题|练习|习题|真题|题目|答案|解析|查看", summary.get_text()):
+                        continue
+                if SKIP_HEADING.search(heading):
                     continue
                 code = node.get_text("\n").strip()
                 if len(code) < 35 or code in seen:
