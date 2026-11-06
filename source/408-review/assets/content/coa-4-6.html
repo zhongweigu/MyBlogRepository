@@ -87,6 +87,47 @@
 <li>多核处理器在一个芯片上集成多个核，每个核有独立的执行资源，多个线程可以真正同时执行；核间通过共享内存或消息传递通信。</li>
 <li>多核属于 MIMD；SIMD（如 GPU）是数据级并行，和 MIMD 的线程级并行不是一回事。</li>
 </ul>
+
+<h2 id="multiprocessor-map">多处理器：先分清 SISD / SIMD / MISD / MIMD</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-multiprocessor-map.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-multiprocessor-map.webp" data-caption="多处理器基本概念：SISD、SIMD、MISD、MIMD、SMP、多核与向量处理器">
+    <img class="article-img" src="/408-review/assets/textbook/coa-multiprocessor-map.webp" alt="多处理器基本概念思维导图：SISD、SIMD、MISD、MIMD、共享内存多处理器 SMP、多核、向量处理器" loading="lazy" decoding="async">
+  </a>
+  <figcaption>先按“指令流 / 数据流”分四类，再看硬件组成；SMP 和多核是 MIMD 里的共享内存形态。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>类型</th><th>指令流</th><th>数据流</th><th>典型硬件 / 说明</th></tr></thead>
+<tbody>
+<tr><td>SISD</td><td>单</td><td>单</td><td>单处理器 + 单主存；指令序列只能并发、不能并行，是数据级并行技术的基础</td></tr>
+<tr><td>SIMD</td><td>单</td><td>多</td><td>一个指令控制部件 + 多个处理单元；各处理单元执行同一指令、处理不同数据，如向量处理器、GPU</td></tr>
+<tr><td>MISD</td><td>多</td><td>单</td><td>多条指令处理同一数据，现实中基本不存在</td></tr>
+<tr><td>MIMD</td><td>多</td><td>多</td><td>各指令序列并行执行、处理不同数据；多处理器系统、多计算机系统都属于这一类</td></tr>
+</tbody>
+</table></div>
+<ul>
+  <li><strong>SMP（共享内存多处理器）</strong>：多个处理器共享一个主存和单一地址空间，都能用 load/store 直接访问共享变量；按访问延迟分 UMA / NUMA。</li>
+  <li><strong>多核处理器</strong>：一个 CPU 芯片内集成多个核，每个核有独立执行资源，通常共享最后一级 Cache（LLC）和主存；核间通过共享内存通信。</li>
+  <li><strong>多计算机系统</strong>：每台计算机有私有存储器和独立地址空间，不能直接用 load/store 访问对方内存，只能通过消息传递通信。</li>
+  <li><strong>向量处理器</strong>：SIMD 思想的进阶，一条指令处理一个向量；主存通常采用多端口 / 多模块交叉，支持向量寄存器组。</li>
+</ul>
+
+<h2 id="hardware-multithreading">硬件多线程：细粒度、粗粒度、同时多线程</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-hardware-multithreading.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-hardware-multithreading.webp" data-caption="三种硬件多线程的时钟示例：细粒度、粗粒度、同时多线程">
+    <img class="article-img" src="/408-review/assets/textbook/coa-hardware-multithreading.webp" alt="三种硬件多线程：细粒度每个时钟切换线程、粗粒度遇到长停顿才切换、同时多线程一个周期发射多个线程的指令" loading="lazy" decoding="async">
+  </a>
+  <figcaption>细粒度按拍切换；粗粒度遇到 Cache miss 等长停顿才切换；SMT 在一个周期内同时发射多个线程的指令。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>方式</th><th>切换时机</th><th>能否真正并行</th><th>特点</th></tr></thead>
+<tbody>
+<tr><td>细粒度多线程</td><td>每个时钟周期轮换线程</td><td>否，同一时刻只有一个线程占用流水线</td><td>切换频繁、开销小，能隐藏短停顿；单线程性能下降</td></tr>
+<tr><td>粗粒度多线程</td><td>线程遇到长停顿（如 Cache miss）才切换</td><td>否，同一时刻只有一个线程</td><td>切换开销大，适合隐藏长延迟</td></tr>
+<tr><td>同时多线程 SMT</td><td>每个周期同时发射多个线程的指令</td><td>是，共享一套流水线但多个线程的指令同时在途</td><td>吞吐高，需要更多寄存器和重命名资源</td></tr>
+</tbody>
+</table></div>
+<p>看图时注意：细粒度示例里每个时钟换一个线程；粗粒度示例里线程 A 遇到 Cache miss 后才切到 B；SMT 示例里同一时钟同时发射 A、B（甚至 C）的指令。三者都不是“多核”，多核是芯片上有多套执行资源。</p>
+
 <h2 id="56">5.6 高频易错点</h2>
 <ul>
 <li>相对寻址以「下一条指令地址」为基准，不是当前指令首地址。</li>

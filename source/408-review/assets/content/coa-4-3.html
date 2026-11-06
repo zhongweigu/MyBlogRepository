@@ -245,5 +245,32 @@ I2: add ecx, eax      # ECX ← ECX + EAX
 <blockquote>
 <p>多发射和 VLIW 都是在一个周期内启动多条指令；超流水线仍是一个周期启动一条，但周期更短。</p>
 </blockquote>
+
+<h2 id="pipeline-classification">流水线的分类</h2>
+<ul>
+  <li><strong>按级别</strong>：部件功能级流水（运算器内部，如浮点加法分阶、尾加、规格化）；处理机级流水（指令流水，IF/ID/EX/MEM/WB）；处理器间级流水（多个处理器 / 多机之间，把一个大任务拆成宏流水段）。</li>
+  <li><strong>按状态</strong>：静态流水线同一时刻各段只按一种功能工作，适合固定任务；动态流水线各段可以同时执行不同功能，允许一条流水线里出现多种运算，控制更复杂。</li>
+  <li><strong>按连接</strong>：线性流水线各段顺序连接、没有反馈；非线性流水线有反馈或循环回路，同一段可能被多次使用（如某些乘除法、循环迭代）。</li>
+</ul>
+<p>这三组分类是正交的：一条流水线可以同时是“处理机级 + 动态 + 非线性”，答题时要分别说清楚按哪个维度分。</p>
+
+<h2 id="five-stage">五段式流水线：每条指令在每个阶段做什么</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-five-stage-pipeline.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-five-stage-pipeline.webp" data-caption="五段式流水线：IF 取指、ID 译码/读寄存器、EX 执行、MEM 访存、WB 写回">
+    <img class="article-img" src="/408-review/assets/textbook/coa-five-stage-pipeline.webp" alt="五段式流水线：PC、Instruction Cache、Instruction Register、Registers、ALU、Data Cache 与 IF/ID/EX/MEM/WB 五段" loading="lazy" decoding="async">
+  </a>
+  <figcaption>PC / Instruction Cache / IR 在 IF；Registers 在 ID；ALU 在 EX；Data Cache 在 MEM；结果写回寄存器在 WB。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>指令</th><th>IF 取指</th><th>ID 译码 / 取数</th><th>EX 执行</th><th>MEM 访存</th><th>WB 写回</th></tr></thead>
+<tbody>
+<tr><td>ADD R1,R2,R3</td><td>取指令，PC+4</td><td>译码，读 R2、R3</td><td>ALU 做加法</td><td>不需要</td><td>结果写 R1</td></tr>
+<tr><td>LOAD R1,0(R2)</td><td>取指令，PC+4</td><td>译码，读 R2 和立即数</td><td>算有效地址 R2+0</td><td>读 Data Cache，取数</td><td>数据写 R1</td></tr>
+<tr><td>STORE R1,0(R2)</td><td>取指令，PC+4</td><td>译码，读 R1、R2</td><td>算有效地址 R2+0</td><td>把 R1 写入 Data Cache</td><td>不需要</td></tr>
+<tr><td>BNE R1,R2,label<br><small>（条件分支，题中 BNQ 按此处理）</small></td><td>取指令，PC+4</td><td>译码，读 R1、R2</td><td>比较 R1、R2，算目标地址</td><td>不需要</td><td>不需要；条件成立则 PC←目标</td></tr>
+<tr><td>JMP label</td><td>取指令，PC+4</td><td>译码，取偏移/目标</td><td>算跳转目标地址</td><td>不需要</td><td>不需要；PC←目标</td></tr>
+</tbody>
+</table></div>
+<p>读图时抓住一条：<strong>只有 LOAD / STORE 真正访问 Data Cache；只有需要写寄存器的指令才有 WB。</strong> 分支和 JMP 在 EX 阶段就把目标地址算出来，是否写 PC 取决于条件/控制信号，不走 MEM、WB。</p>
 </div>
 <p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>
