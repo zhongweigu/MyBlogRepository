@@ -45,6 +45,19 @@
   <li><strong>取入口</strong>：内存中的向量表 → CPU 的 PC（读总线）。</li>
 </ul>
 <figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-interrupt-response.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-interrupt-response.webp" data-caption="中断响应过程（中断隐指令）：关中断、保存断点、中断服务程序寻址，以及响应条件与中断源识别">
+    <img class="article-img" src="/408-review/assets/textbook/coa-interrupt-response.webp" alt="中断响应过程：中断隐指令包括关中断、保存断点、中断服务程序寻址；还需修改 CPU 模式位，不是执行一条真正的指令" loading="lazy" decoding="async">
+  </a>
+  <figcaption>响应过程只做三件硬件动作：关中断、保存断点、寻址；模式位切换也由硬件完成。</figcaption>
+</figure>
+<p>这张图上有四个常考判断：</p>
+<ul>
+  <li><strong>模式位</strong>：响应时还要把 CPU 模式位改为内核态，这一步由硬件自动完成，不是服务程序做的。</li>
+  <li><strong>隐指令不是指令</strong>：中断响应过程不是执行了“中断响应”这条机器指令，而是硬件在中断周期完成的一组微操作。</li>
+  <li><strong>三个条件</strong>：开中断、当前指令执行完成、有未被屏蔽的中断请求，同时满足才响应。</li>
+  <li><strong>识别中断源</strong>：软件查询法用统一的异常/中断查询程序，按优先级查异常状态寄存器，先查到先处理；硬件向量法给每个中断一个类型号，类型号对应一个服务程序，入口地址就是中断向量。CPU 取得类型号后，算出向量表项地址，从表中取出入口地址送 PC。</li>
+</ul>
+<figure class="article-figure">
   <a class="figure-link" href="/408-review/assets/img/coa-interrupt-stack.svg" data-action="zoom-image" data-src="/408-review/assets/img/coa-interrupt-stack.svg" data-caption="中断栈帧与中断向量表：旧 PSW、旧 PC、通用寄存器；类型号查表得到入口地址">
     <img class="article-img" src="/408-review/assets/img/coa-interrupt-stack.svg" alt="中断栈帧与中断向量表：旧 PSW、旧 PC、通用寄存器压栈；类型号乘表项大小查向量表得到服务程序入口" loading="lazy" decoding="async">
   </a>
@@ -75,6 +88,25 @@
 </tbody>
 </table></div>
 <p>所以外中断的“断点”是下一条指令地址；故障异常的“断点”是当前指令地址。这是选择题最爱设的陷阱。</p>
+
+<h2 id="irq-single-multiple">单级中断与多重中断：处理顺序差在哪</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-interrupt-single-multiple.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-interrupt-single-multiple.webp" data-caption="单级中断与多重中断的响应/处理流程对比">
+    <img class="article-img" src="/408-review/assets/textbook/coa-interrupt-single-multiple.webp" alt="单级中断与多重中断流程对比：响应都包括关中断、保存断点、中断服务程序寻址；单级处理保存现场后直接执行服务程序，多重中断在保存现场后开中断，执行后关中断再恢复" loading="lazy" decoding="async">
+  </a>
+  <figcaption>响应阶段两者相同；差别在处理阶段：单级不开中断，多重在保存现场后开中断，允许嵌套。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>阶段</th><th>单级中断</th><th>多重中断</th></tr></thead>
+<tbody>
+<tr><td>响应</td><td>关中断 → 保存断点 → 中断服务程序寻址</td><td>相同</td></tr>
+<tr><td>处理开头</td><td>保存现场和屏蔽字</td><td>保存现场和屏蔽字</td></tr>
+<tr><td>开中断时机</td><td><strong>不打开</strong>，处理期间不响应新中断</td><td><strong>保存现场后开中断</strong>，允许更高处理优先级中断嵌套</td></tr>
+<tr><td>执行服务程序</td><td>执行期间全程关中断</td><td>执行期间可被更高优先级中断打断；嵌套返回后继续</td></tr>
+<tr><td>处理结尾</td><td>恢复现场和屏蔽字 → 开中断 → 中断返回</td><td><strong>先关中断</strong> → 恢复现场和屏蔽字 → 开中断 → 中断返回</td></tr>
+</tbody>
+</table></div>
+<p>为什么多重中断要在恢复现场前先关中断？恢复通用寄存器和屏蔽字的过程中，如果有新中断插入，栈帧会被破坏；所以要先关中断，恢复完再开中断返回。嵌套按栈后进先出：高优先级中断先返回，再回到被打断的服务程序。</p>
 
 <h2 id="irq-nested">多重中断：谁能打断谁</h2>
 <p>进入服务程序后，如果开中断且当前<strong>屏蔽字</strong>允许，更高处理优先级的中断可以打断当前服务程序，形成嵌套。判断分两步：</p>
