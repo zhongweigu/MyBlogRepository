@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v8/
+│   ├── js-v9/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -37,13 +37,16 @@ source/408-review/
 │   │   │   ├── questions.js       # 手写精选题
 │   │   │   ├── questions-extra.js # 自动抽取题（脚本生成，勿手改）
 │   │   │   ├── questions-manual-extra.js # 裸题手工补充
-│   │   │   ├── diagrams.js        # 图解库（代表题型）
+│   │   │   ├── diagrams.js        # 图解库（代表题型 + 流程）
 │   │   │   ├── glossary.js        # 术语（核心手写 + 自动抽取）
+│   │   │   ├── code.js            # 数据结构代码（脚本抽取）
 │   │   │   └── index.js           # 合并、排序、索引
-│   │   ├── views/today.js         # 今日页（单模块）
+│   │   ├── study.js               # 先回忆 / 背诵清单的公共文案
+│   │   ├── views/today.js         # 今日页（单模块，随机队列）
 │   │   ├── views/topic.js         # 考点页壳 + 背诵/答法/图解 + 长文 fetch
 │   │   ├── views/glossary.js      # 术语库
 │   │   ├── views/diagrams.js      # 图解库
+│   │   ├── views/code.js          # 代码库
 │   │   └── ...
 │   ├── content/<topic-id>.html    # 每篇长文（按需 fetch）
 │   ├── textbook/*.webp            # 从帖子复制/压缩的原图
@@ -51,7 +54,7 @@ source/408-review/
 └── ...
 ```
 
-脚本：`scripts/build-review-content.py`（切长文、压图片、删正文例题）、`scripts/extract-questions.py`（抽取题库）。
+脚本：`scripts/build-review-content.py`（切长文、压图片、删正文例题；`coa-4-4` 手写跳过，`ds-1-1`/`ds-1-2` 保留例题）、`scripts/extract-questions.py`（抽取题库）、`scripts/extract-code.py`（抽取数据结构代码）。
 
 - 考点页只加载当前那篇 `content/<id>.html`，不会把 50 篇长文塞进主 JS。
 - 图片是普通静态文件，靠 `skip_render` 复制。
@@ -191,6 +194,7 @@ python scripts/build-review-content.py
 
 - **所有完整例题、真题都进题库**；知识点正文里**不再保留任何例题/解析**。生成器会自动删 `<u>例题` / `<u>练习` / `查看答案解析` / `## 习题训练` / “小例题”折叠块。
 - **“存储专题”里的小例题不记录**：没有选项、没有分问、篇幅很短的说明性小例，不是完整题目。自动抽取会跳过 `not year and not options and not numbered_parts and len(stem)<120` 的块；正文里也会删掉“小例题”折叠块。
+- **例外**：`ds-1-1`（循环计数）和 `ds-1-2`（递归与主定理）是“边做边讲”的复杂度课，例题必须留在正文里；生成器用 `KEEP_EXAMPLES` 保留这两节的例题，题库里同时保留归档。其余考点正文不放完整例题。
 - 自动抽取的题会按 `topics` 自动挂回考点页；不需要再改 `topic.questions`。手写题仍保留原来的 id。
 - 每题必须有 `topics` 指向相关考点；解析里写清楚“怎么想到 / 易错点”，能链回考点。
 - 重新抽取：
@@ -199,13 +203,15 @@ python scripts/build-review-content.py
   ```
   然后重新生成正文（见 3.3），因为正文里的例题也要同步删除。
 
-### 3.6 背诵清单 / 考场答法 / 图解（自动派生）
+### 3.6 背诵清单 / 先回忆 / 考场答法 / 图解
 
-考点页顶部不再只有“一句话抓手”，而是：
+考点页顶部和复习弹层共用 `study.js` 的 `recallPrompts(topic)`：
 
-1. **背诵清单**：`takeaway` + `points` 的 `t` / `lead` + `recall`。所以 `points` 要写得短、能背；长文放 `content/<id>.html`。
-2. **考场答法**：`takeaway` + 前 4 个 `points.t` + 第一个 `pitfalls[0].b` 自动拼成“定义 → 要点 → 收口”。如果这一题的答法很特殊，可以之后再给 topic 加手写 `answer` 字段（当前页面会优先用自动版）。
-3. **图解**：文章加载后自动抽取前 4 张 `.article-figure`，加上 `figures` 里的自绘 SVG。要新增“代表一类题型”的图，优先放进 `data/diagrams.js` 和图解库；考点页的图仍以正文位置为准。
+1. **先回忆**：不是只问一句 `recall`，而是 3~4 个宽问题：包括哪些核心内容、顺序/步骤是什么、公式/复杂度是什么、最容易错在哪里。`recall` 仍是第一问；没有就自动补。
+2. **背诵清单**：`takeaway` + **全部** `points` 的 `t` / `lead` + 前 3 条 `pitfalls`。`points` 要写得短、能背；长文放 `content/<id>.html`。
+3. **考场答法**：`takeaway` + 前 4 个 `points.t` + 第一个 `pitfalls[0].b` 自动拼成“定义 → 要点 → 收口”。
+4. **本章背诵清单**：章节页有一个折叠区，把所有考点的 `takeaway` + 全部 `points` 汇总；每章都能直接过一遍。
+5. **图解**：文章加载后自动抽取前 4 张 `.article-figure`，加上 `figures` 里的自绘 SVG。要新增“代表一类题型”的图，优先放进 `data/diagrams.js` 和图解库。
 
 ### 3.7 术语库与图解库
 
@@ -214,15 +220,27 @@ python scripts/build-review-content.py
   ```js
   { id, subject: 'ds'|'coa', group, topic, title, src, caption, why }
   ```
-  `src` 必须是 `assets/img/` 或 `assets/textbook/` 下真实存在的文件；`why` 写“这类题怎么用这张图”。新增图先想清楚它代表哪一类题型，不要把所有插图都搬进去。
-- 术语 / 图解都从顶部导航进入；移动端底部导航也有入口。
+  `src` 必须是 `assets/img/` 或 `assets/textbook/` 下真实存在的文件；`why` 写“这类题怎么用这张图”。`group: 'process'` 专门放流程 / 读图类：复杂度判断、KMP、拓扑排序、指令周期、中断流程、DFS/BFS、流水线等。
+- **流程类优先**：凡是“xxx 的流程 / 步骤 / 判断顺序”，先想能不能画成一张流程图；不要只写文字。缺图可以用 SVG 画，也可以让用户上传原图。
+- 术语 / 图解 / 代码库都从顶部导航进入；移动端底部导航也有入口。
+
+### 3.8 代码库
+
+- `scripts/extract-code.py` 从 `content/ds-*.html` 自动抽取 `<pre><code>`，取最近的 `h2/h3/h4` 当标题、代码前最近一段当说明，输出 `data/code.js`。
+- 页面路由 `#/code`，按章节筛选 + 搜索；顶部导航「代码」、移动端底部也有入口。
+- 改完数据结构长文后重跑：
+  ```powershell
+  python scripts/extract-code.py
+  ```
+  只收数据结构代码；计组不建代码库。
 
 ---
 
 ## 4. 今日页规则
 
 - 只保留 **每日知识点复习** 一个模块。
-- `store.dailyQueue(10)`：到期优先，不足 10 个用新考点补齐；全部学完且无到期时，从薄弱考点抽查。
+- `store.dailyQueue(10)`：先从到期考点 + 新考点里选候选，再**随机打乱**后取 10 个；到期优先入选，但顺序不再按章节。全部学完且无到期时，从薄弱考点抽查。
+- 想固定顺序时不要改回 `[...due, ...fresh]`；用户明确要随机。
 - 不要加回：今日三件事、每日一题、每日一点 tab、复习指引、科目进度、连续天数、热力图、7 天预测。
 - 改数量：`today.js` 的 `DAILY_LIMIT`、`app.js` 的 `store.dailyQueue(10)` 两处一起改。
 - 每项「复习」按钮走 `start-topic-runner`，整页「开始今日复习」走 `start-queue`。
@@ -287,8 +305,9 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
    - 只是两三行的说明性小例 → 不记录；可以吸收成正文里的一句话。
 2. **提取与补全**：读图/读笔记，先写出一句结论和 3~6 个关键词；缺的背景自己补，但不要把猜的当原文。
 3. **画图或截图**：
-   - 结构、字段、流程、访问路径这类“要画得像课本”的图，用 SVG 重画（纸色/墨色/青红配色，参考 `coa-address-path.svg`）。
+   - 结构、字段、流程、访问路径这类“要画得像课本”的图，用 SVG 重画（纸色/墨色/青红配色，参考 `coa-address-path.svg`、`ds-kmp-flow.svg`）。
    - 原图本身就是课件截图、指针链、带权图、代码截图的，直接压缩后放到 `assets/textbook/`，在对应段落插入；不要硬转 mermaid。
+   - 流程题（“先做什么、再做什么、什么时候回退”）优先补 `data/diagrams.js` 的 `process` 分类；没有图就自己画，或明确告诉用户“这张需要你上传原图”。
    - 代表一类题型的图，同时加入 `data/diagrams.js` 和图解库。
 4. **融进已有体系**：先找它属于哪科、哪章、哪个考点；优先补现有 `points` / `content/<id>.html` / `supplements-*`，不要新建孤立页面。确实没有合适考点时才建新 topic，并补 `chapter/order/title/kicker/takeaway/points`。
 5. **写成学习卡**：背诵清单（能直接背的短句）→ 理解（推导、例子、表格、图）→ 考场答法（怎么开头、怎么收口、易错）。正文里**不放完整例题**。

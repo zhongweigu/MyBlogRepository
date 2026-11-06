@@ -1,4 +1,5 @@
 import { topicById, chapterById, subjectById } from './data/index.js';
+import { recallPrompts } from './study.js';
 import { icon, escapeHtml, showOverlay, closeOverlay, toast } from './ui.js';
 
 const RATINGS = [
@@ -69,7 +70,9 @@ export function startRunner(store, queue, { title = '今日复习', onClose = nu
       <p class="runner-kicker">${escapeHtml(topic.kicker)}</p>
       <div class="runner-prompt">
         <span class="rp-label">${icon('target', 14)} 先回忆</span>
-        <p>${escapeHtml(topic.recall || '不看笔记，说出这个考点的 2~3 个关键词，再给出一条结论。')}</p>
+        <ol class="runner-prompts">
+          ${recallPrompts(topic).map((q) => `<li>${escapeHtml(q)}</li>`).join('')}
+        </ol>
       </div>
       <div class="runner-reveal" hidden>
         <div class="runner-takeaway">
@@ -77,8 +80,11 @@ export function startRunner(store, queue, { title = '今日复习', onClose = nu
           <p>${topic.takeaway}</p>
         </div>
         <ul class="runner-points">
-          ${topic.points.slice(0, 3).map((p) => `<li><span>${escapeHtml(p.t)}</span><small>${escapeHtml(p.lead)}</small></li>`).join('')}
+          ${topic.points.map((p) => `<li><span>${escapeHtml(p.t)}</span><small>${escapeHtml(p.lead)}</small></li>`).join('')}
         </ul>
+        ${topic.pitfalls?.length ? `<ul class="runner-pitfalls">
+          ${topic.pitfalls.slice(0, 3).map((p) => `<li><strong>${escapeHtml(p.t)}</strong>${escapeHtml(p.b)}</li>`).join('')}
+        </ul>` : ''}
         <a class="runner-link" href="#/topic/${topic.id}">打开完整考点 ${icon('arrowRight', 14)}</a>
       </div>
       <div class="runner-actions">

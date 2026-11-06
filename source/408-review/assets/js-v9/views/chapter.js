@@ -54,6 +54,20 @@ export function chapterView(store, chapterId) {
       </div>
     </div>
 
+    <details class="chapter-recite">
+      <summary>
+        <span>本章背诵清单</span>
+        <small>${topics.length} 个考点 · ${topics.reduce((n, t) => n + (t.points?.length || 0), 0)} 条</small>
+      </summary>
+      <div class="chapter-recite-grid">
+        ${topics.map((topic) => `<article class="chapter-recite-card">
+          <h3><a href="#/topic/${topic.id}">${escapeHtml(topic.title)}</a></h3>
+          <p>${topic.takeaway}</p>
+          <ol>${(topic.points || []).map((p) => `<li><strong>${escapeHtml(p.t)}</strong>${escapeHtml(p.lead)}</li>`).join('')}</ol>
+        </article>`).join('')}
+      </div>
+    </details>
+
     <div class="chapter-body-grid">
       <div class="chapter-main">
         <div class="ladder-head">

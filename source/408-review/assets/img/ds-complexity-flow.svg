@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" width="1100" height="560" role="img" aria-label="复杂度分析的判断流程">
+  <rect width="1100" height="560" fill="#fffdf8"/>
+  <g font-family="Avenir Next, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="40" y="40" fill="#b54634" font-size="12" font-weight="800" letter-spacing="2">COMPLEXITY · 判断流程</text>
+    <text x="40" y="70" fill="#1f2328" font-size="24" font-weight="700">拿到一段程序，先判断它属于哪一类</text>
+
+    <rect x="40" y="105" width="180" height="64" fill="#1f2328"/>
+    <text x="130" y="134" fill="#fffdf8" font-size="15" text-anchor="middle">看代码结构</text>
+    <text x="130" y="154" fill="#d9d2c4" font-size="10" text-anchor="middle">循环 / 递归 / 主定理</text>
+
+    <line x1="220" y1="137" x2="285" y2="137" stroke="#1f2328" stroke-width="1.2" marker-end="url(#a)"/>
+    <rect x="290" y="105" width="180" height="64" fill="#f8f2e7" stroke="#1f2328"/>
+    <text x="380" y="134" fill="#1f2328" font-size="14" text-anchor="middle">有循环？</text>
+    <text x="380" y="154" fill="#667078" font-size="10" text-anchor="middle">单层 / 嵌套 / 并列</text>
+
+    <line x1="470" y1="120" x2="540" y2="80" stroke="#14756f" stroke-width="1.3" marker-end="url(#b)"/>
+    <text x="492" y="105" fill="#14756f" font-size="10">是</text>
+    <rect x="545" y="45" width="500" height="168" fill="#e8f2ef" stroke="#14756f"/>
+    <text x="565" y="74" fill="#14756f" font-size="14" font-weight="700">循环计数：找基本运算 → 列次数表</text>
+    <text x="565" y="100" fill="#1f2328" font-size="11">① 确定循环变量与跳出条件；② 列表看第 t 轮的值；</text>
+    <text x="565" y="122" fill="#1f2328" font-size="11">③ 解出 t 与 n 的关系；④ 只留最高阶。</text>
+    <text x="565" y="150" fill="#667078" font-size="10">单层：t 就是执行次数；嵌套：内外相关就逐轮求和，无关就相乘。</text>
+    <text x="565" y="172" fill="#667078" font-size="10">并列：各段分别算，取最大；不要把所有循环都相乘。</text>
+
+    <line x1="380" y1="169" x2="380" y2="235" stroke="#a9651f" stroke-width="1.3" marker-end="url(#c)"/>
+    <text x="392" y="205" fill="#a9651f" font-size="10">否</text>
+    <rect x="290" y="240" width="180" height="64" fill="#f8f2e7" stroke="#a9651f"/>
+    <text x="380" y="269" fill="#1f2328" font-size="14" text-anchor="middle">是递归？</text>
+    <text x="380" y="289" fill="#667078" font-size="10" text-anchor="middle">写递推式</text>
+
+    <line x1="470" y1="255" x2="540" y2="240" stroke="#a9651f" stroke-width="1.3" marker-end="url(#c)"/>
+    <text x="492" y="244" fill="#a9651f" font-size="10">是</text>
+    <rect x="545" y="230" width="500" height="150" fill="#fbf4ea" stroke="#a9651f"/>
+    <text x="565" y="259" fill="#a9651f" font-size="14" font-weight="700">递归：写 T(n) = aT(n/b) + f(n)</text>
+    <text x="565" y="285" fill="#1f2328" font-size="11">① 数每次调用做了多少基本运算；② 数调用次数 / 递归树结点数；</text>
+    <text x="565" y="307" fill="#1f2328" font-size="11">③ 主定理比较 n^log_b a 与 f(n)；④ 不能直接用主定理就画递归树求和。</text>
+    <text x="565" y="335" fill="#667078" font-size="10">空间复杂度看递归栈深度，不要和时间复杂度混。</text>
+    <text x="565" y="357" fill="#667078" font-size="10">常见：二分 O(log n)、归并 O(n log n)、朴素斐波那契 O(2^n)。</text>
+
+    <line x1="380" y1="304" x2="380" y2="380" stroke="#355f91" stroke-width="1.3" marker-end="url(#d)"/>
+    <text x="392" y="342" fill="#355f91" font-size="10">否</text>
+    <rect x="290" y="385" width="180" height="60" fill="#eef2f8" stroke="#355f91"/>
+    <text x="380" y="412" fill="#1f2328" font-size="13" text-anchor="middle">无循环也无递归</text>
+    <text x="380" y="431" fill="#667078" font-size="10" text-anchor="middle">O(1)</text>
+
+    <rect x="40" y="465" width="1005" height="62" fill="#f8f2e7" stroke="#d9d2c4"/>
+    <text x="58" y="489" fill="#b54634" font-size="11" font-weight="700">最后检查</text>
+    <text x="58" y="510" fill="#1f2328" font-size="11">是否只保留最高阶、忽略常数？是否把并列写成相乘？是否把空间复杂度和时间复杂度混在一起？</text>
+  </g>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#1f2328"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#14756f"/></marker>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a9651f"/></marker>
+    <marker id="d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#355f91"/></marker>
+  </defs>
+</svg>

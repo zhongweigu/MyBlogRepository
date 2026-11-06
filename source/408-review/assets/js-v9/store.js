@@ -20,6 +20,15 @@ export const LEVELS = [
 
 const INTERVAL = { 1: 1, 2: 3, 3: 7, 4: 15 };
 
+function shuffle(list) {
+  const out = list.slice();
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 export function dateKey(d = new Date()) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -211,8 +220,12 @@ export class Store {
    */
   dailyQueue(limit = 10) {
     const due = this.dueTopics().map((id) => ({ id, kind: 'due' }));
-    const fresh = this.newTopics(limit).map((id) => ({ id, kind: 'new' }));
-    return [...due, ...fresh].slice(0, limit);
+    const dueIds = new Set(due.map((item) => item.id));
+    const fresh = this.newTopics(limit)
+      .filter((id) => !dueIds.has(id))
+      .map((id) => ({ id, kind: 'new' }));
+    // 到期优先入选，但顺序随机，避免每天总从同一章、同一顺序开始。
+    return shuffle([...due, ...fresh]).slice(0, limit);
   }
 
   streak() {

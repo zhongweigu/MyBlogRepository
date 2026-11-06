@@ -352,9 +352,10 @@ def strip_loose_examples(md_text: str) -> str:
     return md_text
 
 
-def convert_article(md_text: str, slots: list[str], mermaid_slots: list[str], source_key: str) -> tuple[str, list[tuple[Path, Path]]]:
-    md_text = strip_example_blocks(md_text)
-    md_text = strip_loose_examples(md_text)
+def convert_article(md_text: str, slots: list[str], mermaid_slots: list[str], source_key: str, keep_examples: bool = False) -> tuple[str, list[tuple[Path, Path]]]:
+    if not keep_examples:
+        md_text = strip_example_blocks(md_text)
+        md_text = strip_loose_examples(md_text)
     md_text, image_copies = rewrite_images(md_text, source_key)
 
     # 原帖用 <u>...</u> 单独成行表示小节标题，转成真正的标题，长文才有层级。
@@ -465,7 +466,11 @@ def convert_article(md_text: str, slots: list[str], mermaid_slots: list[str], so
         + '<div class="article-content">\n'
         + body_html
         + "\n</div>\n"
-        + '<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>'
+        + (
+            '<p class="article-source">内容整理自站内 408 笔记；这一节的例题保留在正文中，用于“边做边讲”，题库里另有同一道题的归档。</p>'
+            if keep_examples
+            else '<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>'
+        )
     ), image_copies
 
 
@@ -490,6 +495,8 @@ def main() -> None:
     # coa-4-4 的数据通路正文已手写补充（含 2015/2022 真题图），生成器不要覆盖。
     # 其余 topic 仍按 MAPPING 生成。
     MANUAL_TOPICS = {"coa-4-4"}
+    # 这两节是“边做边讲”的复杂度课，例题要留在正文里，不能只放题库。
+    KEEP_EXAMPLES = {"ds-1-1", "ds-1-2"}
 
     for topic_id, parts in MAPPING.items():
         if topic_id in MANUAL_TOPICS:
@@ -503,7 +510,9 @@ def main() -> None:
         md_text = "\n\n".join(chunks)
         slots: list[str] = []
         mermaid_slots: list[str] = []
-        article, copies = convert_article(md_text, slots, mermaid_slots, parts[0][0])
+        article, copies = convert_article(
+            md_text, slots, mermaid_slots, parts[0][0], keep_examples=topic_id in KEEP_EXAMPLES
+        )
         (OUT_CONTENT / f"{topic_id}.html").write_text(article, encoding="utf-8")
         articles += 1
         for src, dst in copies:

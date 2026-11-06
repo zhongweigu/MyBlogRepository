@@ -8,6 +8,7 @@ import {
 } from '../ui.js';
 import { questionCard } from '../components/question-card.js';
 import { afterArticle } from '../article.js';
+import { recallPrompts } from '../study.js';
 
 export function topicView(store, topicId) {
   const topic = topicById.get(topicId);
@@ -98,11 +99,17 @@ export function topicView(store, topicId) {
           <article class="study-card recite-card">
             <div class="sc-head"><span class="sc-icon">${icon('book', 16)}</span><div><p class="eyebrow">MEMORIZE</p><h2>背诵清单</h2></div><span class="sc-count">${topic.points.length} 条</span></div>
             <p class="sc-take">${topic.takeaway}</p>
-            ${topic.recall ? `<p class="sc-self"><b>先自问：</b>${escapeHtml(topic.recall)}</p>` : ''}
+            <div class="sc-prompts">
+              <b>先回忆</b>
+              <ol>${recallPrompts(topic).map((q) => `<li>${escapeHtml(q)}</li>`).join('')}</ol>
+            </div>
             <ol class="recite-list">
-              ${topic.points.slice(0, 6).map((p) => `<li><b>${escapeHtml(p.t)}</b><span>${escapeHtml(p.lead)}</span></li>`).join('')}
+              ${topic.points.map((p) => `<li><b>${escapeHtml(p.t)}</b><span>${escapeHtml(p.lead)}</span></li>`).join('')}
             </ol>
-            ${topic.points.length > 6 ? `<p class="sc-more">其余 ${topic.points.length - 6} 条在下方正文里展开。</p>` : ''}
+            ${topic.pitfalls?.length ? `<div class="sc-pitfalls">
+              <b>易错提醒</b>
+              <ul>${topic.pitfalls.slice(0, 3).map((p) => `<li><strong>${escapeHtml(p.t)}</strong>${escapeHtml(p.b)}</li>`).join('')}</ul>
+            </div>` : ''}
           </article>
 
           <article class="study-card answer-card">

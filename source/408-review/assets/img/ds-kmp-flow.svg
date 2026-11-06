@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" width="1100" height="520" role="img" aria-label="KMP 的 next 构造与匹配流程">
+  <rect width="1100" height="520" fill="#fffdf8"/>
+  <g font-family="Avenir Next, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="40" y="40" fill="#b54634" font-size="12" font-weight="800" letter-spacing="2">KMP · 两条流程</text>
+    <text x="40" y="72" fill="#1f2328" font-size="24" font-weight="700">先造 next，再拿 next 去匹配</text>
+
+    <rect x="40" y="105" width="470" height="350" fill="#e8f2ef" stroke="#14756f"/>
+    <text x="62" y="136" fill="#14756f" font-size="15" font-weight="700">① 构造 next / nextval</text>
+    <rect x="62" y="158" width="190" height="48" fill="#fffdf8" stroke="#14756f"/>
+    <text x="157" y="180" fill="#1f2328" font-size="12" text-anchor="middle">j=1, k=0, next[1]=0</text>
+    <text x="157" y="195" fill="#667078" font-size="9" text-anchor="middle">初始化</text>
+    <line x1="252" y1="182" x2="300" y2="182" stroke="#14756f" stroke-width="1.2" marker-end="url(#a)"/>
+    <rect x="305" y="158" width="180" height="48" fill="#fffdf8" stroke="#14756f"/>
+    <text x="395" y="180" fill="#1f2328" font-size="12" text-anchor="middle">比较 P[j] 与 P[k]</text>
+    <text x="395" y="195" fill="#667078" font-size="9" text-anchor="middle">相等 / 不相等</text>
+
+    <line x1="395" y1="206" x2="395" y2="242" stroke="#14756f" stroke-width="1.2" marker-end="url(#a)"/>
+    <rect x="305" y="247" width="180" height="54" fill="#fffdf8" stroke="#14756f"/>
+    <text x="395" y="268" fill="#1f2328" font-size="11" text-anchor="middle">相等：j++, k++, next[j]=k</text>
+    <text x="395" y="286" fill="#667078" font-size="9" text-anchor="middle">继续比较下一位</text>
+
+    <line x1="305" y1="273" x2="252" y2="273" stroke="#a9651f" stroke-width="1.2" marker-end="url(#b)"/>
+    <rect x="62" y="247" width="180" height="54" fill="#fffdf8" stroke="#a9651f"/>
+    <text x="152" y="268" fill="#1f2328" font-size="11" text-anchor="middle">不等：k = next[k]</text>
+    <text x="152" y="286" fill="#667078" font-size="9" text-anchor="middle">回退到更短的前后缀</text>
+    <line x1="152" y1="247" x2="152" y2="212" stroke="#a9651f" stroke-width="1.2" marker-end="url(#b)"/>
+    <text x="162" y="232" fill="#a9651f" font-size="9">k&gt;0</text>
+
+    <rect x="62" y="330" width="423" height="95" fill="#fffdf8" stroke="#d9d2c4"/>
+    <text x="80" y="354" fill="#b54634" font-size="11" font-weight="700">nextval 修正</text>
+    <text x="80" y="376" fill="#1f2328" font-size="10.5">若 P[j] == P[next[j]]，则 nextval[j] = nextval[next[j]]；</text>
+    <text x="80" y="396" fill="#1f2328" font-size="10.5">否则 nextval[j] = next[j]。目的：失配后不要滑到同一个字符上再失配一次。</text>
+
+    <rect x="535" y="105" width="525" height="350" fill="#fbf4ea" stroke="#a9651f"/>
+    <text x="557" y="136" fill="#a9651f" font-size="15" font-weight="700">② 用 next 做匹配</text>
+    <rect x="557" y="158" width="205" height="48" fill="#fffdf8" stroke="#a9651f"/>
+    <text x="660" y="180" fill="#1f2328" font-size="12" text-anchor="middle">i=1, j=1</text>
+    <text x="660" y="195" fill="#667078" font-size="9" text-anchor="middle">主串指针 i，模式指针 j</text>
+    <line x1="762" y1="182" x2="808" y2="182" stroke="#a9651f" stroke-width="1.2" marker-end="url(#b)"/>
+    <rect x="813" y="158" width="220" height="48" fill="#fffdf8" stroke="#a9651f"/>
+    <text x="923" y="180" fill="#1f2328" font-size="12" text-anchor="middle">S[i] == P[j]？</text>
+    <text x="923" y="195" fill="#667078" font-size="9" text-anchor="middle">相等继续，不等回退</text>
+
+    <line x1="923" y1="206" x2="923" y2="240" stroke="#14756f" stroke-width="1.2" marker-end="url(#a)"/>
+    <rect x="813" y="245" width="220" height="48" fill="#fffdf8" stroke="#14756f"/>
+    <text x="923" y="267" fill="#1f2328" font-size="11" text-anchor="middle">相等：i++, j++</text>
+    <text x="923" y="282" fill="#667078" font-size="9" text-anchor="middle">j &gt; m 则匹配成功</text>
+
+    <line x1="813" y1="269" x2="762" y2="269" stroke="#a9651f" stroke-width="1.2" marker-end="url(#b)"/>
+    <rect x="557" y="245" width="200" height="48" fill="#fffdf8" stroke="#a9651f"/>
+    <text x="657" y="267" fill="#1f2328" font-size="11" text-anchor="middle">不等：j = next[j]</text>
+    <text x="657" y="282" fill="#667078" font-size="9" text-anchor="middle">j=0 时 i++，j=1</text>
+    <line x1="657" y1="245" x2="657" y2="210" stroke="#a9651f" stroke-width="1.2" marker-end="url(#b)"/>
+
+    <rect x="557" y="330" width="476" height="95" fill="#fffdf8" stroke="#d9d2c4"/>
+    <text x="575" y="354" fill="#b54634" font-size="11" font-weight="700">为什么快</text>
+    <text x="575" y="376" fill="#1f2328" font-size="10.5">失配时主串指针 i 不回退，只把模式指针 j 退到 next[j]；</text>
+    <text x="575" y="396" fill="#1f2328" font-size="10.5">已经匹配过的前缀信息被 next 复用，时间复杂度 O(n+m)。</text>
+  </g>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#14756f"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a9651f"/></marker>
+  </defs>
+</svg>

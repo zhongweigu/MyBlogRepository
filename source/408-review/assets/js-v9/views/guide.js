@@ -47,7 +47,7 @@ export function guideView(store) {
           <div class="guide-two-col">
             <div class="guide-note-card">
               <h3>${icon('play', 16)} 今日队列</h3>
-              <p>首页只保留一个模块“每日知识点复习”，默认排 <strong>10 个考点</strong>：到期优先，不足的用新考点补齐。每次只显示一个考点，先回忆，再揭示，最后按 1–4 评分。</p>
+              <p>首页只保留一个模块“每日知识点复习”，每天随机排 <strong>10 个考点</strong>：到期优先入选，顺序打乱；每次只显示一个考点，先按“包括什么 / 步骤 / 公式 / 易错”回忆，再揭示，最后按 1–4 评分。</p>
             </div>
             <div class="guide-note-card">
               <h3>${icon('rotate', 16)} 间隔排期</h3>
@@ -66,7 +66,7 @@ export function guideView(store) {
 
         <section class="guide-section">
           <p class="eyebrow">03 · LIBRARY</p>
-          <h2>背诵、图解和术语</h2>
+          <h2>背诵、图解、术语和代码</h2>
           <div class="guide-steps">
             <div class="guide-step">
               <span class="gs-no">A</span>
@@ -79,6 +79,14 @@ export function guideView(store) {
             <div class="guide-step">
               <span class="gs-no">C</span>
               <div><h3>术语库</h3><p><a href="#/glossary">术语库</a>按科目筛选，也可以直接搜；核心术语手写定义，其余从 52 个考点的知识点里抽出，每个词都能跳回原考点。</p></div>
+            </div>
+            <div class="guide-step">
+              <span class="gs-no">D</span>
+              <div><h3>代码库</h3><p><a href="#/code">代码库</a>按章节收数据结构代码，每段保留所在小节和上下文说明；先读代码，再跳回对应考点。</p></div>
+            </div>
+            <div class="guide-step">
+              <span class="gs-no">E</span>
+              <div><h3>本章背诵清单</h3><p>章节页有“本章背诵清单”折叠区，把本章所有考点的一句话抓手和全部 points 汇总；复习一整章时先过这一张清单。</p></div>
             </div>
           </div>
         </section>
@@ -98,7 +106,7 @@ export function guideView(store) {
         <section class="guide-section" id="extend">
           <p class="eyebrow">05 · EXTEND</p>
           <h2>怎么继续往里加内容</h2>
-          <p class="guide-p">页面是纯静态的：考点结构在 <code>source/408-review/assets/js-v8/data/</code>，长文在 <code>source/408-review/assets/content/</code>，图片在 <code>assets/textbook/</code> 或 <code>assets/img/</code>。新增考点除了加数据，还要给这个 id 写一篇长文；维护步骤见仓库的 <code>docs/408-review-maintenance.md</code>。</p>
+          <p class="guide-p">页面是纯静态的：考点结构在 <code>source/408-review/assets/js-v9/data/</code>，长文在 <code>source/408-review/assets/content/</code>，图片在 <code>assets/textbook/</code> 或 <code>assets/img/</code>。新增考点除了加数据，还要给这个 id 写一篇长文；维护步骤见仓库的 <code>docs/408-review-maintenance.md</code>。</p>
           <pre class="code guide-code"><code>{
   id: 'ds-2-6',              // 唯一 id
   chapter: 'ds-2',           // 所属章节

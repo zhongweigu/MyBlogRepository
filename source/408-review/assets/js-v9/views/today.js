@@ -37,7 +37,7 @@ export function todayView(store) {
           : ''}
       </div>
       <h1>${headline}</h1>
-      <p class="daily-lede">到期优先，再用新考点补齐。每个考点先回忆一句话，再点开细读；不追求一次记完，追求下次还能想起来。</p>
+      <p class="daily-lede">每天从到期考点和新考点里随机抽 ${items.length || DAILY_LIMIT} 个；先按问题回忆，再展开要点。不追求一次记完，追求下次还能想起来。</p>
       <div class="daily-actions">
         ${items.length
           ? `<button type="button" class="btn btn-primary btn-lg" data-action="start-queue">
@@ -60,7 +60,7 @@ export function todayView(store) {
         <div>
           <p class="eyebrow">DAILY REVIEW</p>
           <h2 id="daily-module-title">每日知识点复习</h2>
-          <p>按顺序过一遍，回忆不上来就点“读全文”。</p>
+          <p>顺序每天打乱；先按“先回忆”的问题自测，回忆不上来就点“读全文”。</p>
         </div>
         <div class="daily-module-count">
           <b>${items.length}</b>
@@ -110,9 +110,9 @@ function dailyItem(item, index, store) {
   </li>`;
 }
 
-/** 全部有记录、且没有到期时，按掌握度和考频挑最该回看的考点。 */
+/** 全部有记录、且没有到期时，从最薄弱的考点池里随机抽。 */
 function fallbackTopics(store) {
-  return TOPICS
+  const pool = TOPICS
     .filter((topic) => store.levelOf(topic.id) < 4)
     .sort((a, b) => {
       const la = store.levelOf(a.id);
@@ -120,5 +120,15 @@ function fallbackTopics(store) {
       if (la !== lb) return la - lb;
       return (b.importance || 0) - (a.importance || 0);
     })
-    .slice(0, DAILY_LIMIT);
+    .slice(0, DAILY_LIMIT * 2);
+  return shuffle(pool).slice(0, DAILY_LIMIT);
+}
+
+function shuffle(list) {
+  const out = list.slice();
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }

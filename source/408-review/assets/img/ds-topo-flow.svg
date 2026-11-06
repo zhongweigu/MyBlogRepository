@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 460" width="1100" height="460" role="img" aria-label="拓扑排序流程">
+  <rect width="1100" height="460" fill="#fffdf8"/>
+  <g font-family="Avenir Next, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="40" y="40" fill="#b54634" font-size="12" font-weight="800" letter-spacing="2">TOPOLOGICAL SORT · 流程</text>
+    <text x="40" y="72" fill="#1f2328" font-size="24" font-weight="700">反复找入度为 0 的顶点，删掉它的出边</text>
+
+    <rect x="40" y="110" width="170" height="62" fill="#1f2328"/>
+    <text x="125" y="137" fill="#fffdf8" font-size="13" text-anchor="middle">统计入度</text>
+    <text x="125" y="156" fill="#d9d2c4" font-size="9" text-anchor="middle">每个顶点的 indegree</text>
+
+    <line x1="210" y1="141" x2="255" y2="141" stroke="#1f2328" stroke-width="1.2" marker-end="url(#a)"/>
+    <rect x="260" y="110" width="180" height="62" fill="#e8f2ef" stroke="#14756f"/>
+    <text x="350" y="137" fill="#1f2328" font-size="13" text-anchor="middle">入度 0 入队</text>
+    <text x="350" y="156" fill="#667078" font-size="9" text-anchor="middle">所有无前驱的顶点</text>
+
+    <line x1="440" y1="141" x2="485" y2="141" stroke="#14756f" stroke-width="1.2" marker-end="url(#b)"/>
+    <rect x="490" y="110" width="180" height="62" fill="#fbf4ea" stroke="#a9651f"/>
+    <text x="580" y="137" fill="#1f2328" font-size="13" text-anchor="middle">出队并输出</text>
+    <text x="580" y="156" fill="#667078" font-size="9" text-anchor="middle">加入拓扑序列</text>
+
+    <line x1="670" y1="141" x2="715" y2="141" stroke="#a9651f" stroke-width="1.2" marker-end="url(#c)"/>
+    <rect x="720" y="110" width="310" height="62" fill="#eef2f8" stroke="#355f91"/>
+    <text x="875" y="137" fill="#1f2328" font-size="13" text-anchor="middle">删掉它的所有出边</text>
+    <text x="875" y="156" fill="#667078" font-size="9" text-anchor="middle">邻接点的入度减 1</text>
+
+    <line x1="875" y1="172" x2="875" y2="220" stroke="#355f91" stroke-width="1.2" marker-end="url(#d)"/>
+    <rect x="720" y="225" width="310" height="54" fill="#fffdf8" stroke="#355f91"/>
+    <text x="875" y="247" fill="#1f2328" font-size="12" text-anchor="middle">入度变成 0？</text>
+    <text x="875" y="265" fill="#667078" font-size="9" text-anchor="middle">是 → 入队；否 → 暂时不动</text>
+    <line x1="720" y1="252" x2="675" y2="252" stroke="#355f91" stroke-width="1.2" marker-end="url(#d)"/>
+    <line x1="675" y1="252" x2="675" y2="172" stroke="#355f91" stroke-width="1.2"/>
+    <line x1="675" y1="172" x2="675" y2="160" stroke="#355f91" stroke-width="1.2" marker-end="url(#d)"/>
+    <text x="686" y="238" fill="#355f91" font-size="9">继续</text>
+
+    <rect x="40" y="225" width="610" height="125" fill="#f8f2e7" stroke="#d9d2c4"/>
+    <text x="58" y="252" fill="#b54634" font-size="11" font-weight="700">判据</text>
+    <text x="58" y="276" fill="#1f2328" font-size="11">队列空时：若已输出全部 n 个顶点，拓扑序列存在；若还有顶点未输出，说明有环。</text>
+    <text x="58" y="300" fill="#667078" font-size="10">邻接矩阵实现 O(n²)；邻接表 + 栈/队列实现 O(n+e)。</text>
+    <text x="58" y="324" fill="#667078" font-size="10">同一个 DAG 的拓扑序列不唯一；按不同入队顺序会得到不同结果。</text>
+  </g>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#1f2328"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#14756f"/></marker>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a9651f"/></marker>
+    <marker id="d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#355f91"/></marker>
+  </defs>
+</svg>

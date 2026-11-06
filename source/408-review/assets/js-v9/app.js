@@ -8,6 +8,7 @@ import { renderMath } from './article.js';
 import { glossaryView, filterGlossary } from './views/glossary.js';
 import { diagramsView } from './views/diagrams.js';
 import { questionsView } from './views/questions.js';
+import { codeView, filterCode } from './views/code.js';
 import { guideView } from './views/guide.js';
 import { startRunner } from './runner.js';
 import { openSearch } from './search.js';
@@ -117,6 +118,10 @@ function render({ scroll = true } = {}) {
       html = glossaryView(store, query);
       nav = 'glossary';
       title = '术语库';
+    } else if (name === 'code') {
+      html = codeView(store, query);
+      nav = 'code';
+      title = '代码库';
     } else if (name === 'diagrams') {
       html = diagramsView(store, query);
       nav = 'diagrams';
@@ -172,6 +177,9 @@ function afterRender(route) {
   }
   if (name === 'topic' && param) {
     hydrateTopicArticle(param);
+  }
+  if (name === 'code') {
+    renderMath(document.querySelector('.code-grid'));
   }
 }
 
@@ -471,6 +479,8 @@ document.addEventListener('change', (e) => {
 document.addEventListener('input', (e) => {
   const input = e.target.closest('[data-glossary-search]');
   if (input) filterGlossary(input.value);
+  const codeInput = e.target.closest('[data-code-search]');
+  if (codeInput) filterCode(codeInput.value);
 });
 
 document.addEventListener('keydown', (e) => {

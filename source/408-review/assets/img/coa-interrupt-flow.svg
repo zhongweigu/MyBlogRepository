@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 500" width="1100" height="500" role="img" aria-label="中断处理流程">
+  <rect width="1100" height="500" fill="#fffdf8"/>
+  <g font-family="Avenir Next, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="40" y="40" fill="#b54634" font-size="12" font-weight="800" letter-spacing="2">INTERRUPT · 流程</text>
+    <text x="40" y="72" fill="#1f2328" font-size="24" font-weight="700">从中断请求到返回原程序</text>
+
+    <rect x="40" y="110" width="190" height="64" fill="#1f2328"/>
+    <text x="135" y="137" fill="#fffdf8" font-size="13" text-anchor="middle">中断请求</text>
+    <text x="135" y="156" fill="#d9d2c4" font-size="9" text-anchor="middle">设备 / 异常置位</text>
+    <line x1="230" y1="142" x2="275" y2="142" stroke="#1f2328" stroke-width="1.2" marker-end="url(#a)"/>
+
+    <rect x="280" y="110" width="190" height="64" fill="#e8f2ef" stroke="#14756f"/>
+    <text x="375" y="137" fill="#1f2328" font-size="13" text-anchor="middle">判优 + 检查屏蔽</text>
+    <text x="375" y="156" fill="#667078" font-size="9" text-anchor="middle">优先级 / 中断允许位</text>
+    <line x1="470" y1="142" x2="515" y2="142" stroke="#14756f" stroke-width="1.2" marker-end="url(#b)"/>
+
+    <rect x="520" y="110" width="190" height="64" fill="#fbf4ea" stroke="#a9651f"/>
+    <text x="615" y="137" fill="#1f2328" font-size="13" text-anchor="middle">响应中断</text>
+    <text x="615" y="156" fill="#667078" font-size="9" text-anchor="middle">关中断、保存断点</text>
+    <line x1="710" y1="142" x2="755" y2="142" stroke="#a9651f" stroke-width="1.2" marker-end="url(#c)"/>
+
+    <rect x="760" y="110" width="290" height="64" fill="#eef2f8" stroke="#355f91"/>
+    <text x="905" y="137" fill="#1f2328" font-size="13" text-anchor="middle">中断隐指令（硬件）</text>
+    <text x="905" y="156" fill="#667078" font-size="9" text-anchor="middle">保存 PC / PSW，送入口地址</text>
+
+    <line x1="905" y1="174" x2="905" y2="218" stroke="#355f91" stroke-width="1.2" marker-end="url(#d)"/>
+    <rect x="760" y="223" width="290" height="64" fill="#fffdf8" stroke="#355f91"/>
+    <text x="905" y="250" fill="#1f2328" font-size="13" text-anchor="middle">执行中断服务程序 ISR</text>
+    <text x="905" y="269" fill="#667078" font-size="9" text-anchor="middle">保护现场 → 处理设备 → 恢复现场</text>
+
+    <line x1="760" y1="255" x2="715" y2="255" stroke="#355f91" stroke-width="1.2" marker-end="url(#d)"/>
+    <rect x="520" y="223" width="190" height="64" fill="#fbf4ea" stroke="#a9651f"/>
+    <text x="615" y="250" fill="#1f2328" font-size="13" text-anchor="middle">恢复断点 / PSW</text>
+    <text x="615" y="269" fill="#667078" font-size="9" text-anchor="middle">开中断</text>
+    <line x1="520" y1="255" x2="475" y2="255" stroke="#a9651f" stroke-width="1.2" marker-end="url(#c)"/>
+
+    <rect x="280" y="223" width="190" height="64" fill="#e8f2ef" stroke="#14756f"/>
+    <text x="375" y="250" fill="#1f2328" font-size="13" text-anchor="middle">返回原程序</text>
+    <text x="375" y="269" fill="#667078" font-size="9" text-anchor="middle">继续执行下一条指令</text>
+    <line x1="280" y1="255" x2="235" y2="255" stroke="#14756f" stroke-width="1.2" marker-end="url(#b)"/>
+
+    <rect x="40" y="223" width="190" height="64" fill="#1f2328"/>
+    <text x="135" y="250" fill="#fffdf8" font-size="13" text-anchor="middle">下一条指令</text>
+    <text x="135" y="269" fill="#d9d2c4" font-size="9" text-anchor="middle">回到取指周期</text>
+
+    <rect x="40" y="330" width="1010" height="125" fill="#f8f2e7" stroke="#d9d2c4"/>
+    <text x="58" y="357" fill="#b54634" font-size="11" font-weight="700">易错点</text>
+    <text x="58" y="381" fill="#1f2328" font-size="10.5">① 中断响应发生在一条指令执行结束之后，不是任意一条微指令之后（除异常）。</text>
+    <text x="58" y="403" fill="#1f2328" font-size="10.5">② 中断隐指令由硬件完成：关中断、保存断点、送入口；保护现场是 ISR 的软件动作。</text>
+    <text x="58" y="425" fill="#667078" font-size="9.5">③ 中断与 DMA 的优先级、响应时机、数据通路不同；DMA 请求通常在每个总线周期结束后响应。</text>
+  </g>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#1f2328"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#14756f"/></marker>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a9651f"/></marker>
+    <marker id="d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#355f91"/></marker>
+  </defs>
+</svg>
