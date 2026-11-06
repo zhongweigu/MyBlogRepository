@@ -1,12 +1,18 @@
 import { META, SUBJECTS, CHAPTERS, CHAINS } from './meta.js';
 import { CORE_TOPICS } from './topics-core.js';
 import { SX_TOPICS } from './topics-sx.js';
+import { SX_EXTRA } from './sx-extra.js';
 import { XZ_TOPICS } from './topics-xz.js';
 import { PENDING_TOPICS } from './topics-pending.js';
 
 export { META, SUBJECTS, CHAPTERS, CHAINS };
 
-export const TOPICS = [...CORE_TOPICS, ...SX_TOPICS, ...XZ_TOPICS, ...PENDING_TOPICS];
+export const TOPICS = [
+  ...CORE_TOPICS,
+  ...SX_TOPICS.map((t) => ({ ...t, ext: SX_EXTRA[t.id] || '' })),
+  ...XZ_TOPICS,
+  ...PENDING_TOPICS,
+];
 
 export const topicById = new Map(TOPICS.map((t) => [t.id, t]));
 export const chapterById = new Map(CHAPTERS.map((c) => [c.id, c]));

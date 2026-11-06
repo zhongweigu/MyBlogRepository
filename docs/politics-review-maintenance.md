@@ -10,7 +10,7 @@
 ## 1. 先记住这几件事
 
 1. **不编辑 `source/_posts/*.md`**。帖子是历史归档；新内容只进复习台。
-2. 三科并列，结构见 `assets/js-v5/data/meta.js`：
+2. 三科并列，结构见 `assets/js-v6/data/meta.js`：
    - **马原**：六板块 29 专题（`my-01`…`my-29`，长文在 `content/`）；
    - **史纲**：八板块 57 专题（`sx-038`…`sx-094`，来自《27 考研政治一页纸·知识点手册》）；
    - **新思想与法治**：两板块 6 专题（`xz-095`…`xz-100`，同一手册）。
@@ -29,7 +29,7 @@ source/politics-review/
 │   ├── css/politics.css           # 覆写层（accent、pending、小节样式）
 │   ├── favicon.svg
 │   ├── content/my-XX.html         # 每篇长文，按需 fetch
-│   └── js-v5/
+│   └── js-v6/
 │       ├── app.js                 # 路由：today / map / chapter / topic / glossary
 │       ├── store.js               # localStorage 进度、复习间隔（1/3/7/15 天）
 │       ├── stats.js               # 板块与专题统计（只算非 pending）
@@ -148,7 +148,7 @@ git commit -m "…"
 git push origin main
 ```
 
-> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v5` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
+> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v6` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
 
 ---
 

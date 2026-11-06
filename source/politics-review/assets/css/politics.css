@@ -152,6 +152,15 @@ mark.kw {
 .hb-article h2 { margin-bottom: 8px; }
 .hb-article .hb-lead { color: var(--ink-2); }
 .hb-article ul { margin: 10px 0; }
+.hb-extra {
+  padding: 18px 20px;
+  border: 1px solid var(--line-soft);
+  border-left: 3px solid var(--accent, var(--red));
+  border-radius: var(--radius-sm);
+  background: var(--card-2);
+}
+.hb-extra h2 { margin-top: 0; font-size: 17px; color: var(--accent-deep, var(--red)); }
+.hb-extra p { margin: 8px 0 0; color: var(--ink-2); }
 
 /* 三个科目一行排开 */
 .subject-switch { grid-template-columns: repeat(3, minmax(0, 1fr)); }

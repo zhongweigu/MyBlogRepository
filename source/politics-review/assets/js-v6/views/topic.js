@@ -262,6 +262,10 @@ function handbookArticle(topic) {
     ${p.lead ? `<p class="hb-lead">${markTerms(p.lead)}</p>` : ''}
     ${p.body || ''}
   </section>`).join('');
-  return `<div class="article-content hb-article">${sections}</div>
-    <p class="article-source">内容整理自《27 考研政治一页纸·知识点手册》${escapeHtml(topic.kicker || '')}，按原书顺序保留。</p>`;
+  const extra = topic.ext ? `<section class="hb-section hb-extra">
+    <h2>补充理解</h2>
+    ${topic.ext}
+  </section>` : '';
+  return `<div class="article-content hb-article">${sections}${extra}</div>
+    <p class="article-source">手册原文整理自《27 考研政治一页纸·知识点手册》${escapeHtml(topic.kicker || '')}；「补充理解」为背景与意义扩展。</p>`;
 }
