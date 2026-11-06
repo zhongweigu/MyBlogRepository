@@ -30,5 +30,16 @@
 </table></div>
 <p>判断方法：看指令是 IN/OUT 还是 load/store；看端口是否占用主存地址空间。独立编址的端口地址可以和主存地址重叠，靠指令/控制信号区分。</p>
 
+<h2 id="io-bus-lines">I/O 总线的三组线分别传什么</h2>
+<div class="article-table"><table>
+<thead><tr><th>信号线</th><th>传输内容</th><th>方向 / 例子</th></tr></thead>
+<tbody>
+<tr><td>数据线</td><td>数据、命令字、状态字、中断类型号</td><td>双向；CPU 写命令字到控制端口，读状态字/数据，中断控制器送类型号</td></tr>
+<tr><td>地址线</td><td>端口地址、设备选择信号</td><td>CPU → 接口；选中数据/状态/控制端口</td></tr>
+<tr><td>控制线</td><td>读/写、中断请求/应答、总线请求/授权、时钟/复位等</td><td>按信号方向；如 IOR、IOW、INTR、INTA、HRQ、HLDA</td></tr>
+</tbody>
+</table></div>
+<p>常考判断：<strong>I/O 总线的数据线不只传数据</strong>。命令字、状态字、中断类型号都要经过数据线；地址线只负责选端口/设备，控制线负责“做什么、什么时候做”。</p>
+
 </div>
 <p class="article-source">内容整理自站内 408 笔记与新增专题；例题、真题与解析归入「真题」板块。</p>

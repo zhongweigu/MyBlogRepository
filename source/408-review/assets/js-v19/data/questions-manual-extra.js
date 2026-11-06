@@ -196,4 +196,147 @@ export const MANUAL_EXTRA_QUESTIONS = [
       <p><strong>（4）</strong> 取指阶段至少 <strong>7 个时钟周期</strong>：PCout、MARin → 发 Read、MDRin（主存读约 5 拍）→ MDRout、IRin → PC 增量。控制信号序列按“PC→MAR、Read、M→MDR、MDR→IR、PC+1”展开；单总线相邻操作不能同拍。</p>
       <p><strong>（5）</strong> 控制信号由控制单元（CU）产生；连到 CU 输入端的主要是 IR（操作码）和 FR（标志位），以及时钟/时序信号。ALU 的输出先送 FR 和 Z，不直接作为 CU 的控制输入。</p>`,
   },
+  {
+    id: 'q-2010-coa-21',
+    year: 2010,
+    no: '21',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-3'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['中断服务程序', '单级中断', '执行顺序'],
+    stem: '单级中断系统中，中断服务程序内的执行顺序是：<br>I. 保护现场<br>II. 开中断<br>III. 关中断<br>IV. 保存断点<br>V. 中断事件处理<br>VI. 恢复现场<br>VII. 中断返回',
+    options: ['I→V→VI→II→VII', 'III→I→V→VI→VII', 'III→IV→V→VI→VII', 'IV→I→V→VI→VII'],
+    answer: 'A',
+    analysis: `<p><strong>选 A。</strong> 这里要区分“广义的中断服务程序”和“狭义的中断事件处理”：</p>
+      <ul>
+      <li><strong>广义</strong>：从进入中断服务程序开始，包括保护现场（I）、中断事件处理（V）、恢复现场（VI）、开中断（II）、中断返回（VII）。</li>
+      <li><strong>狭义</strong>：只指其中的“中断事件处理”（V），它是广义服务程序里的一个环节。</li>
+      </ul>
+      <p>III 关中断、IV 保存断点属于<strong>中断隐指令</strong>，在进入服务程序之前由硬件完成，不算“服务程序内”的步骤，所以 B、C、D 都把响应阶段混进来了。</p>
+      <p>单级中断不允许多重嵌套，服务程序处理期间保持关中断；直到恢复现场后，才开中断并中断返回。因此顺序是 I→V→VI→II→VII。</p>`,
+  },
+  {
+    id: 'q-2011-coa-19',
+    year: 2011,
+    no: '19',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-4',
+    topics: ['coa-4-1', 'coa-6-3'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['指令周期', '空操作', '中断响应'],
+    stem: '假定不采用 Cache 和指令预取技术，且机器处于“开中断”状态。在下列有关指令执行的叙述中，错误的是：',
+    options: [
+      '每个指令周期中 CPU 都至少访问内存一次',
+      '每个指令周期一定大于等于一个 CPU 时钟周期',
+      '空操作指令的指令周期中任何寄存器的内容都不会被改变',
+      '当前程序在每条指令执行结束时都可能被外部中断打断',
+    ],
+    answer: 'C',
+    analysis: `<p><strong>选 C。</strong> 逐项看：</p>
+      <ul>
+      <li><strong>A 对</strong>：没有 Cache、没有指令预取，取指必须访问主存取指令，所以每个指令周期至少访问内存一次。</li>
+      <li><strong>B 对</strong>：一个指令周期由若干时钟周期组成，至少一个时钟周期。</li>
+      <li><strong>C 错</strong>：空操作指令虽然不做运算，但取指后 <strong>PC 仍要增量</strong>，MAR、MDR、IR 等寄存器也会参与取指；说“任何寄存器都不改变”太绝对。</li>
+      <li><strong>D 对</strong>：开中断时，CPU 在每条指令执行结束时检查中断请求，有可能响应外部中断；“可能”不是“一定”。</li>
+      </ul>`,
+  },
+  {
+    id: 'q-2011-coa-21',
+    year: 2011,
+    no: '21',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-3'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['中断屏蔽字', '中断优先级'],
+    stem: '某计算机有五级中断 L4～L0，中断屏蔽字为 M4M3M2M1M0，Mi=1（0≤i≤4）表示对 Li 级中断进行屏蔽。若中断响应优先级从高到低的顺序是 L4→L0→L2→L1→L3，则 <strong>L1</strong> 的中断处理程序中设置的中断屏蔽字是：',
+    options: ['11110', '01101', '00011', '01010'],
+    answer: 'D',
+    analysis: `<p><strong>选 D。</strong> 在 L1 的服务程序中：</p>
+      <ul>
+      <li>比 L1 响应优先级高的有 L4、L0、L2，应允许它们打断，所以 M4=0、M0=0、M2=0。</li>
+      <li>L1 自己不能再嵌套自己，M1=1。</li>
+      <li>L3 比 L1 低，应屏蔽，M3=1。</li>
+      </ul>
+      <p>按 M4 M3 M2 M1 M0 排列就是 <strong>0 1 0 1 0</strong>，即 01010。</p>
+      <p>易错：题目问的是 L1，不是 L4；若问 L4（最高响应优先级），则应屏蔽所有更低级及自身，不能套本题答案。</p>`,
+  },
+  {
+    id: 'q-io-bus-data-lines',
+    year: null,
+    no: '',
+    label: '选择',
+    subject: 'coa',
+    chapter: 'coa-5',
+    topics: ['coa-5-2', 'coa-6-1'],
+    type: '选择',
+    difficulty: 2,
+    tags: ['I/O 总线', '数据线', '命令字', '状态字', '中断类型号'],
+    stem: '下列选项中，在 I/O 总线的数据线上传输的信息包括：<br>I. I/O 接口中的命令字<br>II. I/O 接口中的状态字<br>III. 中断类型号',
+    options: ['仅 I、II', '仅 I、III', '仅 II、III', 'I、II、III'],
+    answer: 'D',
+    analysis: `<p><strong>选 D。</strong> I/O 总线的数据线不只传“纯数据”，CPU 与接口之间的命令字、接口返回的状态字、中断控制器送来的中断类型号，都要经过数据线传送：</p>
+      <ul>
+      <li><strong>命令字</strong>：CPU 写到接口的控制端口，告诉接口启动、允许中断等。</li>
+      <li><strong>状态字</strong>：接口送到 CPU，表示就绪、忙、错误等。</li>
+      <li><strong>中断类型号</strong>：CPU 响应中断时，中断控制器通过数据线送类型号，CPU 再用它查中断向量表。</li>
+      </ul>
+      <p>地址线负责送端口地址/设备选择；控制线负责读/写、中断请求/应答、总线请求/授权等。不要把“数据线”理解成只传用户数据。</p>`,
+  },
+  {
+    id: 'q-2012-coa-22',
+    year: 2012,
+    no: '22',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-3'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['中断隐指令', '中断响应'],
+    stem: '响应外部中断的过程中，中断隐指令完成的操作，除保护断点外，还包括：<br>I. 关中断<br>II. 保存通用寄存器的内容<br>III. 形成中断服务程序入口地址并送 PC',
+    options: ['仅 I、II', '仅 I、III', '仅 II、III', 'I、II、III'],
+    answer: 'B',
+    analysis: `<p><strong>选 B。</strong> 中断隐指令由硬件完成：关中断（I）、保存断点、形成服务程序入口并送 PC（III）。</p>
+      <p>通用寄存器的内容由<strong>中断服务程序</strong>用指令压栈保护（II 不属于隐指令）。所以选“仅 I、III”。</p>`,
+  },
+  {
+    id: 'q-2014-coa-21',
+    year: 2014,
+    no: '21',
+    label: '真题',
+    subject: 'coa',
+    chapter: 'coa-6',
+    topics: ['coa-6-1'],
+    type: '选择',
+    difficulty: 2,
+    score: '2 分',
+    tags: ['I/O 接口', 'I/O 端口', '编址'],
+    stem: '下列有关 I/O 接口的叙述中，错误的是：',
+    options: [
+      '状态端口和控制端口可以合用同一个寄存器',
+      'I/O 接口中 CPU 可访问的寄存器称为 I/O 端口',
+      '采用独立编址方式时，I/O 端口地址和主存地址可能相同',
+      '采用统一编址方式时，CPU 不能用访存指令访问 I/O 端口',
+    ],
+    answer: 'D',
+    analysis: `<p><strong>选 D。</strong> 逐项看：</p>
+      <ul>
+      <li><strong>A 对</strong>：状态端口和控制端口可以合用一个寄存器，不同位分别表示状态和控制。</li>
+      <li><strong>B 对</strong>：CPU 可访问的接口寄存器就是 I/O 端口。</li>
+      <li><strong>C 对</strong>：独立编址的端口地址空间和主存地址空间是两套，地址值可以相同，靠指令/控制信号区分。</li>
+      <li><strong>D 错</strong>：统一编址（存储器映射）正是把端口映射到主存地址空间，CPU 可以用普通 load/store 访存指令访问 I/O 端口。</li>
+      </ul>`,
+  },
 ];
