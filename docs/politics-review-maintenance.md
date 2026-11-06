@@ -10,10 +10,13 @@
 ## 1. 先记住这几件事
 
 1. **不编辑 `source/_posts/*.md`**。帖子是历史归档；新内容只进复习台。
-2. 只有 **马原** 一科。六个板块、29 个专题，结构见 `assets/js-v4/data/meta.js`。
-3. 三个模块：**今日**（每日 8 个专题）、**知识地图**、**术语库**。用户明确不要真题、图解、评论、英文版。
-4. 29 个专题全部已写；`topics-pending.js` 现在是空数组，留作以后扩展。
-5. 样式直接复用 `/408-review/assets/css/app.css`，本页只加载 `assets/css/politics.css` 做覆写（朱红主色、待补标记）。
+2. 三科并列，结构见 `assets/js-v5/data/meta.js`：
+   - **马原**：六板块 29 专题（`my-01`…`my-29`，长文在 `content/`）；
+   - **史纲**：八板块 57 专题（`sx-038`…`sx-094`，来自《27 考研政治一页纸·知识点手册》）；
+   - **新思想与法治**：两板块 6 专题（`xz-095`…`xz-100`，同一手册）。
+3. 三个模块：**今日**（每日 8 个专题，按科目轮转）、**知识地图**（`?subject=my|sx|xz`）、**术语库**（按科目筛）。用户明确不要真题、图解、评论、英文版。
+4. `topics-pending.js` 现在是空数组，留作以后扩展。
+5. 样式直接复用 `/408-review/assets/css/app.css`，本页只加载 `assets/css/politics.css` 做覆写（朱红/青/赭三色、待补标记）。
 
 ---
 
@@ -26,7 +29,7 @@ source/politics-review/
 │   ├── css/politics.css           # 覆写层（accent、pending、小节样式）
 │   ├── favicon.svg
 │   ├── content/my-XX.html         # 每篇长文，按需 fetch
-│   └── js-v4/
+│   └── js-v5/
 │       ├── app.js                 # 路由：today / map / chapter / topic / glossary
 │       ├── store.js               # localStorage 进度、复习间隔（1/3/7/15 天）
 │       ├── stats.js               # 板块与专题统计（只算非 pending）
@@ -34,11 +37,13 @@ source/politics-review/
 │       ├── article.js             # 公式 / mermaid 按需加载
 │       ├── ui.js                  # 图标、footer、通用片段
 │       ├── data/
-│       │   ├── meta.js            # 科目、六个板块、横向脉络
-│       │   ├── topics-core.js     # 专题 1–15 的速记层
-│       │   ├── topics-pending.js  # 专题 16–29 占位
+│       │   ├── meta.js            # 科目、板块、横向脉络
+│       │   ├── topics-core.js     # 马原 1–29 的速记层
+│       │   ├── topics-sx.js       # 史纲 57 个知识点（handbook: true）
+│       │   ├── topics-xz.js       # 新思想与法治 6 个知识点（handbook: true）
+│       │   ├── topics-pending.js  # 待补占位（当前为空）
 │       │   ├── glossary.js        # 术语库
-│       │   └── index.js           # 合并、索引
+│       │   └── index.js           # 合并、索引（每日队列按科目轮转）
 │       └── views/                 # today / map / chapter / topic / glossary
 ```
 
@@ -95,6 +100,22 @@ source/politics-review/
 - 公式用 `$...$`，页面会自动加载 MathJax；没有公式的页面不会加载。
 - 正文不写完整例题和真题（用户明确不要）。
 
+### 4.1 手册类专题（史纲 / 新思想与法治）
+
+这类专题不写 `content/*.html`，而是把内容放进 `topics-sx.js` / `topics-xz.js` 的 `points[].body`，并标 `handbook: true`：
+
+```js
+H('sx-092', 'sx-c8', 2, '会议大观（上）', '知识点 092',
+  '一句话抓手', '先自问的问题', 5, [
+    { t: '中共一大 1921', lead: '一句速记', body: '<p>原书细节……</p>' },
+  ])
+```
+
+- `topic.js` 的 `handbookArticle` 会把每个 point 渲染成 `<h2>t</h2><p>lead</p>body`，不再 fetch。
+- 章节按手册目录分组；`order` 用章内顺序，`id` 保留手册知识点编号（sx-038…sx-094 / xz-095…xz-100）。
+- 手册里的口诀、辨析、易错项原样保留；发现原书笔误（如「二十三中」应为二十届三中全会）按正确表述写，并在该专题里注明。
+- 新增科目：在 `meta.js` 的 `SUBJECTS` / `CHAPTERS` 增加科目与板块，再建 `topics-xx.js`，在 `data/index.js` 里加入 `TOPICS`；地图会自动出现科目 tab，术语库按科目筛选。
+
 ---
 
 ## 5. 今日队列
@@ -127,7 +148,7 @@ git commit -m "…"
 git push origin main
 ```
 
-> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v4` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
+> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v5` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
 
 ---
 

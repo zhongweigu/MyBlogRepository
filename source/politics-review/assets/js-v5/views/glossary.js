@@ -1,26 +1,28 @@
 import { GLOSSARY } from '../data/glossary.js';
-import { CHAPTERS, chapterById, topicById } from '../data/index.js';
+import { SUBJECTS, chapterById, topicById } from '../data/index.js';
 import { escapeHtml, icon, footer } from '../ui.js';
 
+const subjectOfChapter = (chapterId) => chapterById.get(chapterId)?.subject;
+
 export function glossaryView(store, query = {}) {
-  const chapter = query.chapter && chapterById.has(query.chapter) ? query.chapter : 'all';
-  const list = chapter === 'all' ? GLOSSARY : GLOSSARY.filter((item) => item.chapter === chapter);
+  const subject = query.subject && SUBJECTS[query.subject] ? query.subject : 'all';
+  const list = subject === 'all' ? GLOSSARY : GLOSSARY.filter((item) => subjectOfChapter(item.chapter) === subject);
   const core = list.filter((item) => item.kind === '核心');
   const rest = list.filter((item) => item.kind !== '核心');
-  const tabs = CHAPTERS.filter((c) => GLOSSARY.some((i) => i.chapter === c.id));
+  const tabs = Object.values(SUBJECTS).filter((s) => GLOSSARY.some((i) => subjectOfChapter(i.chapter) === s.id));
 
   return `<section class="view view-glossary">
     <header class="lib-hero">
       <p class="eyebrow">GLOSSARY · 术语库</p>
       <h1>先把词说清楚，再谈理解。</h1>
-      <p class="lib-lede">核心术语给一句话定义，基础术语补上边界。按板块筛，或直接搜；每个词都能跳回它所在的专题。</p>
+      <p class="lib-lede">核心术语给一句话定义，基础术语补上边界。按科目筛，或直接搜；每个词都能跳回它所在的专题。</p>
       <div class="lib-meta"><span><b>${GLOSSARY.length}</b> 个术语</span><span>核心 <b>${GLOSSARY.filter((i) => i.kind === '核心').length}</b> 个</span><span>随笔记持续补充</span></div>
     </header>
 
     <div class="glossary-toolbar">
-      <div class="lib-tabs" role="group" aria-label="板块筛选">
-        <a class="lib-tab ${chapter === 'all' ? 'is-active' : ''}" href="#/glossary">全部<span>${GLOSSARY.length}</span></a>
-        ${tabs.map((c) => `<a class="lib-tab ${chapter === c.id ? 'is-active' : ''}" href="#/glossary?chapter=${c.id}">${escapeHtml(c.short)}<span>${GLOSSARY.filter((i) => i.chapter === c.id).length}</span></a>`).join('')}
+      <div class="lib-tabs" role="group" aria-label="科目筛选">
+        <a class="lib-tab ${subject === 'all' ? 'is-active' : ''}" href="#/glossary">全部<span>${GLOSSARY.length}</span></a>
+        ${tabs.map((s) => `<a class="lib-tab ${subject === s.id ? 'is-active' : ''}" href="#/glossary?subject=${s.id}">${escapeHtml(s.name)}<span>${GLOSSARY.filter((i) => subjectOfChapter(i.chapter) === s.id).length}</span></a>`).join('')}
       </div>
       <label class="glossary-search">
         <span>${icon('search', 15)}</span>

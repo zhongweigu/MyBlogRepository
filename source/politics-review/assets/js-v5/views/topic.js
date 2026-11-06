@@ -23,7 +23,7 @@ export function topicView(store, topicId) {
   const t = today();
   const pending = !!topic.pending;
 
-  return `<section class="view view-topic is-my">
+  return `<section class="view view-topic is-${subject?.id || 'my'}">
     <nav class="breadcrumb" aria-label="面包屑">
       <a href="#/map">知识地图</a>
       <span class="bc-sep">/</span>
@@ -220,6 +220,14 @@ export async function hydrateTopicArticle(topicId) {
   const topic = topicById.get(topicId);
   if (!topic) return;
 
+  // 手册类专题：正文直接来自数据里的 points[].body，不需要 fetch。
+  if (topic.handbook) {
+    host.innerHTML = handbookArticle(topic);
+    host.classList.add('is-loaded');
+    await afterArticle(host);
+    return;
+  }
+
   try {
     const res = await fetch(`/politics-review/assets/content/${topicId}.html`, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`article ${res.status}`);
@@ -245,4 +253,15 @@ function fallbackArticle(topic) {
     <p class="article-fallback-note">这个专题的长文还在整理，先保留速记版。</p>
     ${points}
   </div>`;
+}
+
+/** 一页纸手册的专题：每个 point 就是原文的一小节。 */
+function handbookArticle(topic) {
+  const sections = (topic.points || []).map((p) => `<section class="hb-section">
+    <h2>${escapeHtml(p.t)}</h2>
+    ${p.lead ? `<p class="hb-lead">${markTerms(p.lead)}</p>` : ''}
+    ${p.body || ''}
+  </section>`).join('');
+  return `<div class="article-content hb-article">${sections}</div>
+    <p class="article-source">内容整理自《27 考研政治一页纸·知识点手册》${escapeHtml(topic.kicker || '')}，按原书顺序保留。</p>`;
 }

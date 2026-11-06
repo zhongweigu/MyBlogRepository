@@ -253,8 +253,8 @@ export function progressRing(pct, size = 92, stroke = 6) {
   </div>`;
 }
 
-export function subjectClass() {
-  return 'is-my';
+export function subjectClass(subjectId) {
+  return `is-${subjectId || 'my'}`;
 }
 
 export function chapterLabel(chapter) {

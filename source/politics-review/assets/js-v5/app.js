@@ -1,5 +1,5 @@
 import { Store, today } from './store.js';
-import { topicById, chapterById, topicsOfChapter, subjectOf } from './data/index.js';
+import { topicById, chapterById, topicsOfChapter, subjectOf, subjectById } from './data/index.js';
 import { todayView } from './views/today.js';
 import { mapView } from './views/map.js';
 import { chapterView } from './views/chapter.js';
@@ -84,7 +84,8 @@ function render({ scroll = true } = {}) {
     } else if (name === 'map') {
       html = mapView(store, route.query);
       nav = 'map';
-      title = '知识地图';
+      const sid = route.query.subject && subjectById.has(route.query.subject) ? route.query.subject : 'my';
+      title = `知识地图 · ${subjectById.get(sid)?.name || ''}`;
     } else if (name === 'chapter') {
       html = chapterView(store, parts[1]);
       nav = 'map';

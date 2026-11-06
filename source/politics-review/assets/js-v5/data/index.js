@@ -1,10 +1,12 @@
 import { META, SUBJECTS, CHAPTERS, CHAINS } from './meta.js';
 import { CORE_TOPICS } from './topics-core.js';
+import { SX_TOPICS } from './topics-sx.js';
+import { XZ_TOPICS } from './topics-xz.js';
 import { PENDING_TOPICS } from './topics-pending.js';
 
 export { META, SUBJECTS, CHAPTERS, CHAINS };
 
-export const TOPICS = [...CORE_TOPICS, ...PENDING_TOPICS].sort((a, b) => a.order - b.order);
+export const TOPICS = [...CORE_TOPICS, ...SX_TOPICS, ...XZ_TOPICS, ...PENDING_TOPICS];
 
 export const topicById = new Map(TOPICS.map((t) => [t.id, t]));
 export const chapterById = new Map(CHAPTERS.map((c) => [c.id, c]));
@@ -12,7 +14,24 @@ export const subjectById = new Map(Object.values(SUBJECTS).map((s) => [s.id, s])
 
 /** 已经有正文的专题：每日队列、进度统计、术语抽取只看这些 */
 export const REVIEWABLE_TOPICS = TOPICS.filter((t) => !t.pending);
-export const REVIEWABLE_IDS = REVIEWABLE_TOPICS.map((t) => t.id);
+
+/**
+ * 每日队列用的专题顺序：按科目轮转，避免 70 个专题排成「马原全学完才轮到史纲」。
+ */
+export const REVIEWABLE_IDS = (() => {
+  const groups = Object.values(SUBJECTS).map((subject) => subject.chapters
+    .flatMap((cid) => TOPICS.filter((t) => t.chapter === cid).sort((a, b) => a.order - b.order))
+    .filter((t) => !t.pending)
+    .map((t) => t.id));
+  const out = [];
+  const max = Math.max(0, ...groups.map((g) => g.length));
+  for (let i = 0; i < max; i += 1) {
+    for (const group of groups) {
+      if (group[i]) out.push(group[i]);
+    }
+  }
+  return out;
+})();
 
 /** 科目 → 章 → 专题 的完整有序结构（含待补专题，地图要显示全貌） */
 export const SUBJECT_LIST = Object.values(SUBJECTS).map((subject) => {

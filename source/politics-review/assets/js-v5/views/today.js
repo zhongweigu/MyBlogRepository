@@ -89,7 +89,7 @@ function dailyItem(item, index, store) {
   const subject = chapter ? subjectById.get(chapter.subject) : null;
   const level = store.levelOf(topic.id);
   const kindLabel = kind === 'new' ? '新专题' : kind === 'extra' ? '抽查' : '到期';
-  return `<li class="daily-item ${subjectClass()}">
+  return `<li class="daily-item ${subjectClass(subject?.id)}">
     <span class="di-no">${String(index + 1).padStart(2, '0')}</span>
     <div class="di-main">
       <div class="di-meta">

@@ -1,9 +1,10 @@
-import { SUBJECT_LIST, CHAINS, topicById } from '../data/index.js';
+import { SUBJECTS, SUBJECT_LIST, CHAINS, topicById } from '../data/index.js';
 import { subjectStats, chapterStats } from '../stats.js';
 import { icon, escapeHtml, importanceBars, footer, sectionHead, progressRing } from '../ui.js';
 
-export function mapView(store) {
-  const subject = SUBJECT_LIST[0];
+export function mapView(store, query = {}) {
+  const subjectId = query.subject && SUBJECTS[query.subject] ? query.subject : 'my';
+  const subject = SUBJECT_LIST.find((s) => s.id === subjectId) || SUBJECT_LIST[0];
   const stats = subjectStats(store, subject.id);
   const lastTopic = store.state.lastTopic ? topicById.get(store.state.lastTopic) : null;
   const lastChapter = lastTopic ? lastTopic.chapter : null;
@@ -15,13 +16,16 @@ export function mapView(store) {
     })?.id || subject.chapters[0]?.id);
 
   const chains = CHAINS.filter((c) => c.subject === subject.id);
+  const isMy = subject.id === 'my';
 
-  return `<section class="view view-map is-my">
+  return `<section class="view view-map is-${subject.id}">
     <header class="map-head">
       <div>
         <p class="eyebrow">KNOWLEDGE MAP</p>
         <h1>知识地图</h1>
-        <p class="lede">从导论到科学社会主义，六个板块、二十九个专题。先把框架走一遍，再往里填细节；点章节展开专题，点专题进入阅读。</p>
+        <p class="lede">${isMy
+          ? '从导论到科学社会主义，六个板块、二十九个专题。先把框架走一遍，再往里填细节；点章节展开专题，点专题进入阅读。'
+          : `按《27 考研政治一页纸·知识点手册》整理：${subject.chapters.length} 个板块、${stats.total} 个知识点。点章节展开，点专题读原文。`}</p>
       </div>
       <div class="map-head-side">
         ${progressRing(stats.pct, 84, 6)}
@@ -32,7 +36,21 @@ export function mapView(store) {
       </div>
     </header>
 
-    <section class="subject-hero is-my">
+    <div class="subject-switch" role="tablist" aria-label="选择科目">
+      ${SUBJECT_LIST.map((s) => {
+        const st = subjectStats(store, s.id);
+        return `<a class="subject-tab is-${s.id} ${s.id === subject.id ? 'is-active' : ''}" href="#/map?subject=${s.id}" role="tab" aria-selected="${s.id === subject.id}">
+          <span class="st-no">${s.no}</span>
+          <span class="st-body">
+            <span class="st-name">${escapeHtml(s.name)}</span>
+            <span class="st-en">${s.en}</span>
+          </span>
+          <span class="st-pct"><b>${st.pct}%</b><span>${st.mastered} / ${st.total} 掌握</span></span>
+        </a>`;
+      }).join('')}
+    </div>
+
+    <section class="subject-hero is-${subject.id}">
       <div class="sh-copy">
         <p class="eyebrow">SUBJECT ${subject.no} · ${subject.en}</p>
         <h2>${escapeHtml(subject.name)}</h2>

@@ -12,7 +12,7 @@ export function chapterView(store, chapterId) {
   const chapterChains = CHAINS.filter((c) => c.steps.some((s) => topics.some((t) => t.id === s.topic)));
   const t = today();
 
-  return `<section class="view view-chapter is-my">
+  return `<section class="view view-chapter is-${subject?.id || 'my'}">
     <nav class="breadcrumb" aria-label="面包屑">
       <a href="#/map">知识地图</a>
       <span class="bc-sep">/</span>

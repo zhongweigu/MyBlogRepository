@@ -114,3 +114,47 @@ mark.kw {
 .trap-list li:first-child { padding-top: 0; border-top: 0; }
 .trap-list b { display: block; margin-bottom: 3px; font-size: 13px; color: var(--ink); }
 .trap-list p { margin: 0; color: var(--ink-2); font-size: 13px; line-height: 1.8; }
+
+/* ---------- 多科目：史纲=青、新思想与法治=赭 ---------- */
+.view-map.is-sx,
+.view-chapter.is-sx,
+.view-topic.is-sx,
+.subject-hero.is-sx,
+.daily-item.is-sx,
+.runner-card.is-sx {
+  --accent: var(--teal);
+  --accent-soft: var(--teal-soft);
+  --accent-soft-2: color-mix(in srgb, var(--teal) 7%, var(--card));
+  --accent-deep: var(--teal-deep);
+}
+
+.view-map.is-xz,
+.view-chapter.is-xz,
+.view-topic.is-xz,
+.subject-hero.is-xz,
+.daily-item.is-xz,
+.runner-card.is-xz {
+  --accent: var(--amber);
+  --accent-soft: var(--amber-soft);
+  --accent-soft-2: color-mix(in srgb, var(--amber) 7%, var(--card));
+  --accent-deep: var(--amber-deep);
+}
+
+.subject-tab.is-my.is-active { border-left: 3px solid var(--red); }
+.subject-tab.is-sx.is-active { border-left: 3px solid var(--teal); }
+.subject-tab.is-xz.is-active { border-left: 3px solid var(--amber); }
+.subject-tab.is-my .st-pct b { color: var(--red); }
+.subject-tab.is-sx .st-pct b { color: var(--teal); }
+.subject-tab.is-xz .st-pct b { color: var(--amber); }
+
+/* ---------- 手册类专题：原文小节 ---------- */
+.hb-article .hb-section + .hb-section { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line-soft); }
+.hb-article h2 { margin-bottom: 8px; }
+.hb-article .hb-lead { color: var(--ink-2); }
+.hb-article ul { margin: 10px 0; }
+
+/* 三个科目一行排开 */
+.subject-switch { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 760px) {
+  .subject-switch { grid-template-columns: 1fr; }
+}
