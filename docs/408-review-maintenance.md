@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v11/
+│   ├── js-v12/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -54,7 +54,7 @@ source/408-review/
 └── ...
 ```
 
-脚本：`scripts/build-review-content.py`（切长文、压图片、删正文例题；`coa-4-3`/`coa-4-4`/`coa-4-5`/`coa-4-6` 手写跳过，`ds-1-1`/`ds-1-2` 保留例题）、`scripts/extract-questions.py`（抽取题库）、`scripts/extract-code.py`（抽取数据结构代码）。
+脚本：`scripts/build-review-content.py`（切长文、压图片、删正文例题；`coa-4-3`/`coa-4-4`/`coa-4-5`/`coa-4-6`/`coa-5-1` 手写跳过，`ds-1-1`/`ds-1-2` 保留例题）、`scripts/extract-questions.py`（抽取题库）、`scripts/extract-code.py`（抽取数据结构代码）。
 
 - 考点页只加载当前那篇 `content/<id>.html`，共 52 篇，不会把所有长文塞进主 JS。
 - 图片是普通静态文件，靠 `skip_render` 复制。
@@ -105,7 +105,7 @@ source/408-review/
 
 **A. 从站内帖子生成（推荐，适用于已有帖子）**
 
-`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 47 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）和 `coa-5-2`（中断与 I/O）是手写文件，脚本会跳过、不要覆盖：
+`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线）和 `coa-5-2`（中断与 I/O）是手写文件，脚本会跳过、不要覆盖：
 
 ```powershell
 python scripts/build-review-content.py
@@ -346,6 +346,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `coa-4-4`（数据通路与控制信号）在 `content/coa-4-4.html` 手写维护；生成器的 `MANUAL_TOPICS` 已跳过它。新增组合/状态元件、时钟、单总线、2015-43/44、2022-43 的内容直接改这个文件。
 - `coa-4-5`（微程序控制器）在 `content/coa-4-5.html` 手写维护；结构、工作流程、字段直接编码和红框常考点都直接改这个文件，生成器跳过。
 - `coa-4-6`（多处理器）在 `content/coa-4-6.html` 手写维护；SISD/SIMD/MISD/MIMD、SMP、多核、硬件多线程都直接改这个文件，生成器跳过。
+- `coa-5-1`（总线）在 `content/coa-5-1.html` 手写维护；核心特征、分类、带宽、结构、南北桥、事务、突发/串并行、四种定时都直接改这个文件，生成器跳过。
 - `coa-5-2`（中断与 I/O）原帖没有对应长文，`content/coa-5-2.html` 是手写补充；后续可直接扩写该文件。
 - 今日队列是考点级，不是知识点级；`points` 用于搜索/速记，不单独记录 SRS 进度。
 - 题库是“完整题目”优先：自动抽取会跳过没有年份、没有选项、没有分问的短小例；如果发现漏题，先检查它是否有 `<u>例题`/`<u>练习` 标记，没有就补到 `questions-manual-extra.js`。

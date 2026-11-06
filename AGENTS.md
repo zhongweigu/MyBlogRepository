@@ -356,7 +356,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 用户明确不要：评论、路线 / 纲领、P0–P3 优先级、英文版；不要加回。
 - 视觉参考 `docs.cpl.icu/kangaroo-review/site/`：网格纸、衬线标题、硬边卡片、红色索引；不要大圆角 + 重阴影。
 - 所有图片必须落地到 `assets/textbook/` 或 `assets/img/`，在正文对应段落插入；不要只堆文末。
-- 原帖图片可用 `python scripts/build-review-content.py` 生成（47 篇 + 图片）；`coa-4-3` / `coa-4-4` / `coa-4-5` / `coa-4-6` / `coa-5-2` 是手写长文，脚本会跳过；`ds-1-1` / `ds-1-2` 的例题要保留在正文里（边做边讲），由 `KEEP_EXAMPLES` 控制。
+- 原帖图片可用 `python scripts/build-review-content.py` 生成（46 篇 + 图片）；`coa-4-3` / `coa-4-4` / `coa-4-5` / `coa-4-6` / `coa-5-1` / `coa-5-2` 是手写长文，脚本会跳过；`ds-1-1` / `ds-1-2` 的例题要保留在正文里（边做边讲），由 `KEEP_EXAMPLES` 控制。
 - 题目、代码、流程图的自动抽取/生成脚本改完要一起跑；数据结构长文改动后跑 `extract-code.py`。
 - 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。
 - **题目归题库**：完整例题/真题统一进 `questions.js` / `questions-extra.js` / `questions-manual-extra.js`；正文不保留例题和答案解析。存储专题里没有选项、没有分问的小例题不录。
