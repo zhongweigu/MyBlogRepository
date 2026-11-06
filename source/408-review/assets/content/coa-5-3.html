@@ -1,0 +1,120 @@
+<div class="article-content">
+<h2 id="irq-overview">中断：CPU 被“叫走”再回来的全过程</h2>
+<p>中断是 408 计组和操作系统共同的重点。计组关心的是<strong>硬件怎么响应、断点怎么保存、数据怎么流</strong>；操作系统关心的是<strong>中断处理程序、屏蔽、嵌套和返回</strong>。这一节按时间顺序，从设备发出请求开始，一直走到 IRET 返回。</p>
+<p>先记住一条主线：<strong>中断源请求 → 中断控制器判优/屏蔽 → CPU 在指令边界响应 → 硬件隐指令保存 PSW/PC 并查向量 → 服务程序保护现场、处理设备 → 恢复现场 → IRET 返回断点</strong>。</p>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/img/coa-interrupt-timeline.svg" data-action="zoom-image" data-src="/408-review/assets/img/coa-interrupt-timeline.svg" data-caption="中断从请求到返回的完整时间线：设备请求、控制器判优、CPU 响应、隐指令、服务程序、IRET">
+    <img class="article-img" src="/408-review/assets/img/coa-interrupt-timeline.svg" alt="中断从请求到返回的时间线：设备请求、中断控制器判优、CPU 指令结束检查、INTA 取类型号、保存 PSW/PC、查向量表、服务程序、IRET 返回" loading="lazy" decoding="async">
+  </a>
+  <figcaption>整条路径分五段：设备侧请求、CPU 指令边界、硬件隐指令、软件服务程序、IRET 返回。</figcaption>
+</figure>
+
+<h2 id="irq-source">起点：中断源发出请求</h2>
+<p>中断源可以是外设（键盘、磁盘、网卡）、时钟，也可以是异常（缺页、除零）。以键盘为例：</p>
+<ol>
+  <li>按键产生扫描码，键盘控制器把数据放入接口的数据缓冲寄存器，并把状态寄存器的“就绪”位置 1。</li>
+  <li>键盘接口向中断控制器发中断请求（IRQ 线）。</li>
+  <li>中断控制器检查该请求是否被屏蔽、优先级如何；若允许，向 CPU 发 <strong>INTR</strong> 信号。</li>
+  <li>请求会保持，直到 CPU 响应、接口清除请求（或控制器 EOI）。</li>
+</ol>
+<p>多个设备同时请求时，由中断控制器按<strong>硬件排队优先级</strong>选一个；被屏蔽的请求不会送到 CPU。注意：硬件优先级决定“谁先被响应”，不决定“进入服务程序后谁还能打断谁”，后者看屏蔽字。</p>
+
+<h2 id="irq-when">CPU 什么时候响应</h2>
+<p>CPU 不是在任意时刻跳走，通常只在<strong>一条指令执行结束</strong>时检查中断请求。响应要同时满足：</p>
+<ul>
+  <li><strong>开中断</strong>：IF=1（可屏蔽中断）；不可屏蔽中断不受 IF 影响。</li>
+  <li><strong>当前指令执行结束</strong>：保证断点是一条完整指令的边界；异常可在指令执行中产生，是另一条路径。</li>
+  <li><strong>有未被屏蔽的中断请求</strong>：中断控制器已经把请求送到 CPU。</li>
+</ul>
+<p>满足后，CPU 进入<strong>中断周期</strong>：发出中断应答（INTA），中断控制器把<strong>中断类型号</strong>送到数据总线。类型号不是入口地址，只是查向量表的索引。</p>
+<p>如果 CPU 正在执行更高优先级的中断服务程序，或者 IF=0，当前请求要等待；这就是“中断响应时机”和“中断嵌套”的区别。</p>
+
+<h2 id="irq-hidden">硬件隐指令：保存断点、找到入口</h2>
+<p>CPU 响应后，硬件自动执行一组操作，称为<strong>中断隐指令</strong>。它不是一条真正的机器指令，而是硬件在中断周期里完成的一组微操作：</p>
+<ol>
+  <li><strong>关中断</strong>：保存旧 PSW（含 IF、模式位等），把 IF 清 0，防止响应过程被新的中断打断。</li>
+  <li><strong>保存断点</strong>：把当前 PC（已经被中断指令更新为<strong>下一条指令地址</strong>）和旧 PSW 压入内存栈，或存入指定单元；SP 随之下移。</li>
+  <li><strong>取中断类型号</strong>：通过 INTA 从控制器取得类型号。</li>
+  <li><strong>查中断向量表</strong>：用类型号 × 表项大小得到偏移，从内存读出该中断的<strong>服务程序入口地址</strong>，送入 PC。</li>
+  <li><strong>切换模式/栈</strong>：从用户态切到内核态，必要时切换到内核栈。</li>
+</ol>
+<p>数据流可以拆成三条：</p>
+<ul>
+  <li><strong>请求/应答</strong>：设备 → 中断控制器 → CPU（INTR / INTA / 类型号）。</li>
+  <li><strong>保存断点</strong>：CPU 的 PC、PSW → 内存栈（写总线）。</li>
+  <li><strong>取入口</strong>：内存中的向量表 → CPU 的 PC（读总线）。</li>
+</ul>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/img/coa-interrupt-stack.svg" data-action="zoom-image" data-src="/408-review/assets/img/coa-interrupt-stack.svg" data-caption="中断栈帧与中断向量表：旧 PSW、旧 PC、通用寄存器；类型号查表得到入口地址">
+    <img class="article-img" src="/408-review/assets/img/coa-interrupt-stack.svg" alt="中断栈帧与中断向量表：旧 PSW、旧 PC、通用寄存器压栈；类型号乘表项大小查向量表得到服务程序入口" loading="lazy" decoding="async">
+  </a>
+  <figcaption>隐指令保存旧 PSW/PC；服务程序保存通用寄存器。IRET 按相反顺序弹出。</figcaption>
+</figure>
+
+<h2 id="irq-isr">服务程序：保护现场、处理设备、恢复现场</h2>
+<p>硬件只保存了 PC/PSW，通用寄存器还没保存。服务程序通常按下面的顺序执行：</p>
+<ol>
+  <li><strong>保护现场</strong>：把本程序要用的通用寄存器压栈（软件指令）。</li>
+  <li><strong>开中断</strong>：如果允许中断嵌套，在保护现场后开中断；不允许则保持关中断。</li>
+  <li><strong>处理设备</strong>：读状态寄存器判断事件，读/写数据端口搬运数据，清除接口的中断请求，必要时向中断控制器发 EOI。</li>
+  <li><strong>恢复现场</strong>：把通用寄存器弹出栈。</li>
+  <li><strong>关中断</strong>：防止恢复过程被新的中断打断（具体顺序依系统而定）。</li>
+  <li><strong>开中断并 IRET</strong>：IRET 从栈中弹出旧 PSW 和旧 PC，回到断点。</li>
+</ol>
+<p>键盘例子：CPU 在服务程序里从数据端口读扫描码 → 送键盘缓冲区 → 清接口就绪位/发 EOI → 恢复现场 → IRET。数据从设备接口的数据缓冲寄存器经系统数据总线进入 CPU 寄存器，再写入内存缓冲区；这条数据通路和普通 I/O 读一样。</p>
+
+<h2 id="irq-return">最后返回到哪里</h2>
+<p>“返回断点”要分类型，不能一律说当前指令：</p>
+<div class="article-table"><table>
+<thead><tr><th>类型</th><th>例子</th><th>返回地址</th><th>原因</th></tr></thead>
+<tbody>
+<tr><td>外中断</td><td>键盘、磁盘、时钟</td><td>被中断指令的<strong>下一条指令</strong></td><td>当前指令已执行完，PC 已增量；中断是异步事件</td></tr>
+<tr><td>故障 fault</td><td>缺页、除零、非法操作数</td><td><strong>当前指令</strong>重新执行</td><td>故障排除后要重试当前指令</td></tr>
+<tr><td>陷阱 trap</td><td>系统调用、断点</td><td><strong>下一条指令</strong></td><td>有意陷入，处理完继续</td></tr>
+<tr><td>终止 abort</td><td>硬件故障</td><td><strong>不返回</strong></td><td>无法恢复</td></tr>
+</tbody>
+</table></div>
+<p>所以外中断的“断点”是下一条指令地址；故障异常的“断点”是当前指令地址。这是选择题最爱设的陷阱。</p>
+
+<h2 id="irq-nested">多重中断：谁能打断谁</h2>
+<p>进入服务程序后，如果开中断且当前<strong>屏蔽字</strong>允许，更高处理优先级的中断可以打断当前服务程序，形成嵌套。判断分两步：</p>
+<ol>
+  <li><strong>响应顺序</strong>：多个请求同时到达，先看硬件排队优先级。</li>
+  <li><strong>处理顺序</strong>：进入某个服务程序后，看当前屏蔽字是否允许其他中断；0 允许、1 屏蔽。</li>
+</ol>
+<p>嵌套时栈按后进先出：高优先级中断的 PSW/PC/寄存器先入栈，先返回；回到被打断的服务程序，再返回主程序。未被响应的中断要等 CPU 回到主程序后才能再次响应。</p>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-multiple-interrupt.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-multiple-interrupt.webp" data-caption="多重中断和屏蔽字：硬件排队优先级、处理优先级、判断流程和执行轨迹">
+    <img class="article-img" src="/408-review/assets/textbook/coa-multiple-interrupt.webp" alt="多重中断和中断屏蔽字思维导图：硬件排队优先级、处理优先级、判断流程、执行轨迹" loading="lazy" decoding="async">
+  </a>
+  <figcaption>硬件排队决定响应顺序；屏蔽字决定进入服务程序后能否被更高处理优先级打断。</figcaption>
+</figure>
+
+<h2 id="irq-full">把整条路径串一遍</h2>
+<ol>
+  <li>设备完成/需要服务，置请求；中断控制器判优、查屏蔽，向 CPU 发 INTR。</li>
+  <li>CPU 执行完当前指令，检查 IF、请求和优先级；满足则响应。</li>
+  <li>CPU 发 INTA，控制器送回中断类型号。</li>
+  <li>硬件隐指令：关中断，旧 PSW、旧 PC 入栈，类型号查向量表，入口送 PC，切换内核态。</li>
+  <li>服务程序：保护通用寄存器 → 开中断（可嵌套）→ 读状态/读写数据端口/清请求 → 恢复现场。</li>
+  <li>IRET：从栈弹出旧 PSW、旧 PC；外中断返回到下一条指令，故障返回当前指令重试。</li>
+</ol>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-interrupt-flow.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-interrupt-flow.webp" data-caption="中断响应和处理思维导图：响应条件、隐指令、中断源识别、单级中断处理">
+    <img class="article-img" src="/408-review/assets/textbook/coa-interrupt-flow.webp" alt="中断响应和处理思维导图：中断响应、中断源识别、单级中断处理" loading="lazy" decoding="async">
+  </a>
+  <figcaption>把这张图和上面的时间线对照看：左边是“响应”，右边是“处理”。</figcaption>
+</figure>
+
+<h2 id="irq-pitfalls">易错点</h2>
+<ul>
+  <li>中断通常在<strong>指令边界</strong>响应，不是任意时钟周期；异常可在指令执行中产生。</li>
+  <li><strong>中断隐指令</strong>由硬件完成，主要保存 PC/PSW；通用寄存器由服务程序保存。</li>
+  <li><strong>中断向量</strong>是服务程序入口地址；中断类型号只是查表索引。</li>
+  <li>外中断返回<strong>下一条指令</strong>；故障异常返回<strong>当前指令</strong>重新执行。</li>
+  <li>硬件优先级高 ≠ 一定能打断当前服务程序；能否嵌套看<strong>屏蔽字</strong>。</li>
+  <li>中断请求要一直保持到被响应/清除；DMA 请求通常在总线周期结束时响应，优先级通常更高。</li>
+  <li>中断服务程序要清除设备请求/发 EOI，否则可能刚返回又立刻再次中断。</li>
+</ul>
+</div>
+<p class="article-source">本考点为新增专题：按 408 计组 I/O 系统与操作系统中断机制整理；重点保留请求、响应、隐指令、服务程序、返回地址和多重中断的完整链路。</p>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" width="1100" height="620" role="img" aria-label="中断栈帧与中断向量表">
+  <rect width="1100" height="620" fill="#fffdf8"/>
+  <g font-family="Avenir Next, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="40" y="36" fill="#b54634" font-size="12" font-weight="800" letter-spacing="2">INTERRUPT STACK / VECTOR · 栈帧与向量表</text>
+    <text x="40" y="66" fill="#1f2328" font-size="24" font-weight="700">保存了什么，返回时怎么恢复</text>
+
+    <text x="55" y="108" fill="#355f91" font-size="14" font-weight="700">内存栈（向低地址增长）</text>
+    <rect x="55" y="125" width="430" height="360" fill="#eef2f8" stroke="#355f91"/>
+    <line x1="55" y1="205" x2="485" y2="205" stroke="#355f91" stroke-width="1"/>
+    <line x1="55" y1="285" x2="485" y2="285" stroke="#355f91" stroke-width="1"/>
+    <line x1="55" y1="365" x2="485" y2="365" stroke="#355f91" stroke-width="1"/>
+    <line x1="55" y1="445" x2="485" y2="445" stroke="#355f91" stroke-width="1"/>
+
+    <text x="70" y="154" fill="#667078" font-size="10">高地址</text>
+    <text x="70" y="180" fill="#1f2328" font-size="11">主程序栈帧 / 旧数据</text>
+    <text x="70" y="234" fill="#1f2328" font-size="11">旧 PSW（中断前的程序状态字）</text>
+    <text x="70" y="260" fill="#667078" font-size="9">隐指令压入：保存中断前的 IF、模式等</text>
+    <text x="70" y="314" fill="#1f2328" font-size="11">旧 PC（断点：下一条指令地址）</text>
+    <text x="70" y="340" fill="#667078" font-size="9">隐指令压入：IRET 后从这里继续</text>
+    <text x="70" y="394" fill="#1f2328" font-size="11">服务程序保存的通用寄存器</text>
+    <text x="70" y="420" fill="#667078" font-size="9">软件压栈：R0…Rn（保护现场）</text>
+    <text x="70" y="474" fill="#1f2328" font-size="11">服务程序局部变量 / 临时数据</text>
+    <text x="70" y="500" fill="#667078" font-size="9">栈向低地址增长，SP 指向当前栈顶</text>
+
+    <line x1="485" y1="445" x2="550" y2="445" stroke="#b54634" stroke-width="2" marker-end="url(#a)"/>
+    <text x="500" y="432" fill="#b54634" font-size="10" font-weight="700">SP</text>
+    <text x="500" y="465" fill="#b54634" font-size="9">栈顶</text>
+
+    <text x="590" y="108" fill="#a9651f" font-size="14" font-weight="700">中断向量表</text>
+    <rect x="590" y="125" width="450" height="200" fill="#fbf4ea" stroke="#a9651f"/>
+    <text x="610" y="152" fill="#1f2328" font-size="11">类型号 × 4（或 ×8） = 表项偏移</text>
+    <line x1="590" y1="170" x2="1040" y2="170" stroke="#a9651f"/>
+    <text x="610" y="194" fill="#1f2328" font-size="10">类型号 0：入口地址 A0</text>
+    <text x="610" y="222" fill="#1f2328" font-size="10">类型号 1：入口地址 A1</text>
+    <text x="610" y="250" fill="#1f2328" font-size="10">类型号 2：入口地址 A2</text>
+    <text x="610" y="278" fill="#1f2328" font-size="10">……</text>
+    <text x="610" y="306" fill="#667078" font-size="9">向量 = 入口地址；类型号只是索引，不是入口</text>
+
+    <rect x="590" y="355" width="450" height="125" fill="#e8f2ef" stroke="#14756f"/>
+    <text x="610" y="382" fill="#14756f" font-size="13" font-weight="700">数据流</text>
+    <text x="610" y="406" fill="#1f2328" font-size="10">① 设备→中断控制器→CPU：请求 / 类型号</text>
+    <text x="610" y="428" fill="#1f2328" font-size="10">② CPU→内存栈：旧 PSW、旧 PC</text>
+    <text x="610" y="450" fill="#1f2328" font-size="10">③ 内存向量表→CPU：入口地址→PC</text>
+    <text x="610" y="472" fill="#1f2328" font-size="10">④ IRET：栈→PSW/PC，返回断点</text>
+
+    <rect x="55" y="515" width="985" height="75" fill="#fff8f4" stroke="#b54634"/>
+    <text x="75" y="541" fill="#b54634" font-size="11" font-weight="700">读图顺序</text>
+    <text x="75" y="563" fill="#1f2328" font-size="10">响应时：关中断 → 旧 PSW 入栈 → 旧 PC 入栈 → 取类型号 → 查向量表 → 入口送 PC；服务程序再压通用寄存器。</text>
+    <text x="75" y="583" fill="#1f2328" font-size="10">返回时：弹通用寄存器 → 恢复现场 → IRET 弹 PSW/PC；栈后进先出，嵌套中断按相反顺序返回。</text>
+  </g>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#b54634"/></marker>
+  </defs>
+</svg>
