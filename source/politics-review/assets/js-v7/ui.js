@@ -200,7 +200,7 @@ function trapOverlayKeys(e) {
 
 export function footer() {
   return `<footer class="site-foot">
-    <div class="foot-brand">${icon('book', 16)}<span><strong>政治复习台</strong> · 把马原串成一张网</span></div>
+    <div class="foot-brand">${icon('book', 16)}<span><strong>政治复习台</strong> · 马原 · 史纲 · 新思想与法治</span></div>
     <div class="foot-meta">进度只保存在本机 · 静态页面 · <a href="#/glossary">术语</a> · <a href="#/map">知识地图</a> · <a href="/">返回博客</a></div>
   </footer>`;
 }

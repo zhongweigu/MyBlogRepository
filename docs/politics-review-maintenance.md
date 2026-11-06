@@ -10,7 +10,7 @@
 ## 1. 先记住这几件事
 
 1. **不编辑 `source/_posts/*.md`**。帖子是历史归档；新内容只进复习台。
-2. 三科并列，结构见 `assets/js-v6/data/meta.js`：
+2. 三科并列，结构见 `assets/js-v7/data/meta.js`：
    - **马原**：六板块 29 专题（`my-01`…`my-29`，长文在 `content/`）；
    - **史纲**：八板块 57 专题（`sx-038`…`sx-094`，来自《27 考研政治一页纸·知识点手册》）；
    - **新思想与法治**：两板块 6 专题（`xz-095`…`xz-100`，同一手册）。
@@ -29,7 +29,7 @@ source/politics-review/
 │   ├── css/politics.css           # 覆写层（accent、pending、小节样式）
 │   ├── favicon.svg
 │   ├── content/my-XX.html         # 每篇长文，按需 fetch
-│   └── js-v6/
+│   └── js-v7/
 │       ├── app.js                 # 路由：today / map / chapter / topic / glossary
 │       ├── store.js               # localStorage 进度、复习间隔（1/3/7/15 天）
 │       ├── stats.js               # 板块与专题统计（只算非 pending）
@@ -102,18 +102,26 @@ source/politics-review/
 
 ### 4.1 手册类专题（史纲 / 新思想与法治）
 
-这类专题不写 `content/*.html`，而是把内容放进 `topics-sx.js` / `topics-xz.js` 的 `points[].body`，并标 `handbook: true`：
+这类专题不写 `content/*.html`，内容放在 `data/` 里的两个地方：
+
+- `topics-sx.js` / `topics-xz.js` 的 `points`：**速记层**，一句话一条，供背诵清单、今日队列、回忆模式使用；
+- `sx-articles.js`：**正文层**，按专题 id 写详细讲解（时间、地点、经过、意义），把手册里的背诵句用 `<mark>` 标出。
 
 ```js
-H('sx-092', 'sx-c8', 2, '会议大观（上）', '知识点 092',
-  '一句话抓手', '先自问的问题', 5, [
-    { t: '中共一大 1921', lead: '一句速记', body: '<p>原书细节……</p>' },
+// topics-sx.js
+H('sx-038', 'sx-c1', 1, '三元里抗英与太平天国', '知识点 038',
+  '一句话抓手', '先自问的问题', 3, [
+    { t: '三元里抗英', lead: '第一次大规模反侵略武装斗争' },
   ])
+
+// sx-articles.js
+'sx-038': '<p>1841 年 5 月，广州三元里……<mark>这是中国人民第一次大规模的反侵略武装斗争</mark>。</p>'
 ```
 
-- `topic.js` 的 `handbookArticle` 会把每个 point 渲染成 `<h2>t</h2><p>lead</p>body`，不再 fetch。
+- 有 `article` 的专题（史纲 57 篇）由 `articleFromData` 渲染；没有的（新思想与法治）退回 `handbookArticle`，按 `points[].body` 渲染。
+- 扩写只改 `sx-articles.js`，**不要动 `points`**——它是背诵层，越短越好。
 - 章节按手册目录分组；`order` 用章内顺序，`id` 保留手册知识点编号（sx-038…sx-094 / xz-095…xz-100）。
-- 手册里的口诀、辨析、易错项原样保留；发现原书笔误（如「二十三中」应为二十届三中全会）按正确表述写，并在该专题里注明。
+- 手册里的口诀、辨析、易错项原样保留；发现原书笔误（如「二十三中」应为二十届三中全会）按正确表述写。
 - 新增科目：在 `meta.js` 的 `SUBJECTS` / `CHAPTERS` 增加科目与板块，再建 `topics-xx.js`，在 `data/index.js` 里加入 `TOPICS`；地图会自动出现科目 tab，术语库按科目筛选。
 
 ---
@@ -148,7 +156,7 @@ git commit -m "…"
 git push origin main
 ```
 
-> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v6` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
+> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v7` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
 
 ---
 

@@ -375,11 +375,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 入口 `/politics-review/`，`_config.yml` 的 `skip_render` 已加 `politics-review/**`；样式直接复用 `/408-review/assets/css/app.css`，本页只追加 `assets/css/politics.css`（换朱红主色、待补标记）。
 - 三科并列：**马原**（六板块 29 专题）、**史纲**（八板块 57 专题，来自《27 考研政治一页纸·知识点手册》037–094）、**新思想与法治**（两板块 6 专题，手册 095–100）。
 - 三个模块：**今日**（每日 8 个专题的滚动队列，按科目轮转）、**知识地图**（`#/map?subject=my|sx|xz` 切换科目）、**术语库**（按科目筛）。用户明确不要真题、图解、评论、英文版；不要加回。
-- 数据在 `assets/js-v6/data/`：`topics-core.js`（马原 1–29，长文在 `assets/content/<id>.html`）、`topics-sx.js`（史纲，`handbook: true`）、`topics-xz.js`（新思想与法治，`handbook: true`）、`topics-pending.js`（空数组）、`glossary.js`、`meta.js`（科目 / 板块 / 横向脉络）。
-- **手册类专题**：`handbook: true` 的专题不 fetch 长文，直接把 `points[].body` 按知识点小节渲染（`topic.js` 的 `handbookArticle`）。史纲的扩展理解单独放在 `data/sx-extra.js`（按专题 id），专题页在原文后渲染「补充理解」；扩写只加 `sx-extra.js`，不要动 `points`（速记层留给背诵清单与每日队列）。
+- 数据在 `assets/js-v7/data/`：`topics-core.js`（马原 1–29，长文在 `assets/content/<id>.html`）、`topics-sx.js`（史纲，`handbook: true`）、`topics-xz.js`（新思想与法治，`handbook: true`）、`topics-pending.js`（空数组）、`glossary.js`、`meta.js`（科目 / 板块 / 横向脉络）。
+- **手册类专题**：`handbook: true` 的专题不 fetch 长文。史纲的正文是 `data/sx-articles.js` 里的详细讲解（按专题 id），背诵句用 `<mark>` 标出；没有 article 的（新思想与法治）才退回 `points[].body` 渲染。速记层 `points` 保持简短，只给背诵清单与每日队列用，不要为了扩写去改它。
 - **题眼机制**：`ui.js` 的 `markTerms()` 自动把「根本、唯一、决定、核心、实质、本质属性、前提、标志」等判定词标红，今日卡片、背诵清单、章节列表、回忆模式都走它；专题页另有「题眼：选择题常改这几个字」卡片，内容来自 `topic.pitfalls`。新增专题时把易被改字的表述写进 `pitfalls`，就会自动出现在这张卡片里。
 - 用户发来新笔记/图片时：不再改博客帖子。马原补 `points` 与 `content/my-XX.html`；史纲/其他补 `topics-sx.js` / `topics-xz.js` 的 `points[].body`；补术语，按需补 `links` 与 `CHAINS`。
 - 新增专题：马原 `id` 用 `my-XX`（chapter `my-c1`…`my-c6`）；史纲 `sx-NNN`（`sx-c1`…`sx-c8`）；其他 `xz-NNN`（`xz-c1`/`xz-c2`）。不要改已有 id。
 - 长篇按「定义 → 条件/关系 → 易错点」写，保留教材原话；`points` 只写能背的短句，长文放 `content/`。
 - 验证：`npx hexo generate` 后本地起 `python -m http.server --directory public`，用 headless Chrome 看 `#/today`、`#/map`、改动的 `#/topic/<id>`、`#/glossary`。注意 headless 的 `--window-size=500` 实际视口约 518px，截图右侧会被裁 18px，不是布局溢出。
-- 缓存：改 JS/CSS 时递增 `assets/js-v6` 目录或 `politics.css?v=...`。
+- 缓存：改 JS/CSS 时递增 `assets/js-v7` 目录或 `politics.css?v=...`。

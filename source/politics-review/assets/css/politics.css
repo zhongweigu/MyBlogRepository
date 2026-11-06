@@ -80,13 +80,15 @@ mark.kw {
 [data-theme="dark"] mark.kw { background: color-mix(in srgb, var(--red) 24%, transparent); }
 
 /* 长文里的 <mark> 用同一套淡红底，别用浏览器默认的荧光黄 */
-.article-body mark {
+.article-body mark,
+.article-content mark {
   padding: 0 2px;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--red) 12%, transparent);
+  background: color-mix(in srgb, var(--red) 18%, transparent);
   color: inherit;
 }
-[data-theme="dark"] .article-body mark { background: color-mix(in srgb, var(--red) 24%, transparent); }
+[data-theme="dark"] .article-body mark,
+[data-theme="dark"] .article-content mark { background: color-mix(in srgb, var(--red) 24%, transparent); }
 
 .trap-card {
   margin-top: 22px;
