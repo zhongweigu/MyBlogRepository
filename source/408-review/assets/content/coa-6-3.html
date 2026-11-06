@@ -122,6 +122,36 @@
   <figcaption>硬件排队决定响应顺序；屏蔽字决定进入服务程序后能否被更高处理优先级打断。</figcaption>
 </figure>
 
+<h2 id="irq-mask-example">例题：4 个中断源同时请求，轨迹怎么画</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-interrupt-mask-example.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-interrupt-mask-example.webp" data-caption="4 个中断源 A/B/C/D 同时请求：屏蔽字表、CPU 执行轨迹与处理优先级 C>A>D>B">
+    <img class="article-img" src="/408-review/assets/textbook/coa-interrupt-mask-example.webp" alt="4 个中断源同时请求的屏蔽字与 CPU 执行轨迹：硬件响应顺序 A>B>C>D，处理优先级 C>A>D>B" loading="lazy" decoding="async">
+  </a>
+  <figcaption>先按硬件排队定响应顺序，进入服务程序后再按屏蔽字决定能否嵌套。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>服务程序</th><th>A</th><th>B</th><th>C</th><th>D</th><th>允许谁打断自己</th></tr></thead>
+<tbody>
+<tr><td>A</td><td>1</td><td>1</td><td>0</td><td>1</td><td>只有 C</td></tr>
+<tr><td>B</td><td>0</td><td>1</td><td>0</td><td>0</td><td>A、C、D</td></tr>
+<tr><td>C</td><td>1</td><td>1</td><td>1</td><td>1</td><td>都不能</td></tr>
+<tr><td>D</td><td>0</td><td>1</td><td>0</td><td>1</td><td>A、C</td></tr>
+</tbody>
+</table></div>
+<p>0 表示允许，1 表示屏蔽。硬件排队顺序是 A&gt;B&gt;C&gt;D；由屏蔽关系推出的处理优先级是 <strong>C&gt;A&gt;D&gt;B</strong>。</p>
+<ol>
+  <li>四个请求同时到达，先按<strong>硬件排队</strong>选 A，响应 A。</li>
+  <li>A 的屏蔽字只允许 C（C 位为 0），B、D 都被屏蔽；所以 C 打断 A，响应 C。</li>
+  <li>C 的屏蔽字全为 1，谁都不能打断 C；C 执行完返回 A。</li>
+  <li>A 继续执行完，返回主程序。此时 B、D 仍未响应；按硬件顺序 B 先于 D，响应 B。</li>
+  <li>B 的屏蔽字允许 D（D 位为 0），D 打断 B；D 的屏蔽字不允许 B，D 执行完返回 B。</li>
+  <li>B 执行完返回主程序，轨迹结束。</li>
+</ol>
+<p>所以轨迹是：<strong>主程序 → A → C → A → 主程序 → B → D → B → 主程序</strong>。</p>
+<p><strong>为什么不是一开始就响应 C？</strong> 四个请求同时到达时，硬件只按排队顺序选 A；C 的“处理优先级最高”只决定进入服务程序后能不能打断别人，不参与第一次响应排序。</p>
+<p><strong>为什么 A 之后是 C，不是 B？</strong> B 的硬件优先级虽然高于 C，但 A 的屏蔽字把 B 屏蔽了；当前可响应的只有 C。硬件优先级只在“当前未被屏蔽的请求”之间比较。</p>
+<p><strong>为什么 A 结束后要回主程序才响应 B？</strong> B 在 A 的服务程序里一直被屏蔽，不能嵌套；A 的返回地址是主程序，A 结束后 CPU 回到主程序上下文。B 仍处于未响应状态，CPU 在回到主程序后、执行下一条主程序指令前响应 B。不是“必须先执行一段主程序”，而是“必须先退出 A 的服务程序”。</p>
+
 <h2 id="irq-full">把整条路径串一遍</h2>
 <ol>
   <li>设备完成/需要服务，置请求；中断控制器判优、查屏蔽，向 CPU 发 INTR。</li>

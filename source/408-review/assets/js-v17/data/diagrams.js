@@ -317,6 +317,16 @@ export const DIAGRAMS = [
     why: '对比记“开中断时机”：单级全程关；多重在保护现场后开、恢复现场前关。',
   },
   {
+    id: 'dg-interrupt-mask-example',
+    subject: 'coa',
+    group: 'process',
+    topic: 'coa-6-3',
+    title: '4 个中断源的屏蔽字与执行轨迹',
+    src: '/408-review/assets/textbook/coa-interrupt-mask-example.webp',
+    caption: '硬件排队 A>B>C>D；屏蔽字推出处理优先级 C>A>D>B；轨迹：主→A→C→A→主→B→D→B→主。',
+    why: '同时请求先按硬件排队；进入服务后 B 被 A 屏蔽，所以 C 先于 B；B 必须等 A 退出后才能响应。',
+  },
+  {
     id: 'dg-address-path',
     subject: 'coa',
     group: 'address',
