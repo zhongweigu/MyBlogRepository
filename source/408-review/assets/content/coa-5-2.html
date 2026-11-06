@@ -58,5 +58,118 @@
 </tbody>
 </table></div>
 <p>常考判断：中断隐指令由硬件完成；中断响应后 PC 指向服务程序入口；断点现场要保存；DMA 传送不经过 CPU 的通用寄存器；DMA 与中断可以同时存在，但 DMA 请求通常优先级更高。</p>
+
+<h2 id="io-interface">I/O 接口的基本结构</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-io-interface.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-io-interface.webp" data-caption="I/O 接口基本结构：数据缓冲寄存器、状态/控制寄存器、地址译码和 I/O 控制逻辑、外设界面控制逻辑">
+    <img class="article-img" src="/408-review/assets/textbook/coa-io-interface.webp" alt="I/O 接口基本结构：主机侧系统总线通过数据线、地址线、控制线连接数据缓冲寄存器、状态控制寄存器、地址译码和 I/O 控制逻辑，再经外设界面控制逻辑连接设备侧" loading="lazy" decoding="async">
+  </a>
+  <figcaption>左侧主机侧接系统总线，右侧设备侧接接口电缆；中间四类部件各管一件事。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>部件</th><th>功能</th><th>常考点</th></tr></thead>
+<tbody>
+<tr><td>数据缓冲寄存器</td><td>暂存 CPU 与设备之间传送的数据，做速度匹配和格式转换</td><td>解决 CPU 与外设速度差异；DMA 也有数据缓冲寄存器</td></tr>
+<tr><td>状态/控制寄存器</td><td>状态位（就绪、忙、错误）供 CPU 查询；控制位（启动、中断允许）由 CPU 写入</td><td>程序查询读状态、中断方式靠状态/控制位</td></tr>
+<tr><td>地址译码和 I/O 控制逻辑</td><td>识别 CPU 送来的端口地址，产生片选和读写控制，选择内部寄存器</td><td>端口地址不同，选中的寄存器不同</td></tr>
+<tr><td>外设界面控制逻辑</td><td>把系统总线的并行信号转换成设备要求的时序/电平，完成串并转换、设备握手</td><td>面向设备侧，处理“接口电缆”上的数据/状态/控制</td></tr>
+</tbody>
+</table></div>
+<p>主机侧看接口：CPU 通过数据线读写接口寄存器，通过地址线选端口，通过控制线发读/写命令；设备侧看接口：数据、状态、控制三组信号与设备握手。接口是“CPU 与设备之间的翻译和缓冲”。</p>
+
+<h2 id="io-port">I/O 端口及其编址</h2>
+<p><strong>I/O 端口</strong>是接口中可被 CPU 直接访问的寄存器（数据端口、状态端口、控制端口）。CPU 用端口地址选中它，再读写其中的内容。端口不等于接口：接口是整体，端口是接口里可编址的寄存器。</p>
+<div class="article-table"><table>
+<thead><tr><th>编址方式</th><th>做法</th><th>优点</th><th>缺点</th></tr></thead>
+<tbody>
+<tr><td>独立编址（I/O 空间）</td><td>I/O 端口单独编址，用专用 IN/OUT 指令访问</td><td>不占主存地址空间；I/O 指令和主存指令区分明显</td><td>需要专用指令和控制信号；寻址方式不如访存丰富</td></tr>
+<tr><td>统一编址（存储器映射）</td><td>端口和主存单元统一编址，用普通 load/store 访问</td><td>可用全部访存指令和寻址方式；控制简单</td><td>占用主存地址空间；需译码区分是内存还是 I/O</td></tr>
+</tbody>
+</table></div>
+<p>判断方法：看指令是 IN/OUT 还是 load/store；看端口是否占用主存地址空间。独立编址的端口地址可以和主存地址重叠，靠指令/控制信号区分。</p>
+
+<h2 id="io-modes-flow">三种 I/O 方式的流程</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-io-methods.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-io-methods.webp" data-caption="三种 I/O 方式流程：程序查询、中断、DMA">
+    <img class="article-img" src="/408-review/assets/textbook/coa-io-methods.webp" alt="三种 I/O 方式流程思维导图：程序直接控制方式、中断控制方式、DMA 控制方式" loading="lazy" decoding="async">
+  </a>
+  <figcaption>三种方式的核心差别是“谁等、谁搬、CPU 介入到什么程度”。</figcaption>
+</figure>
+<h3>程序查询方式</h3>
+<ol>
+  <li>CPU 预置传送参数（内存缓冲区、设备地址、字计数）。</li>
+  <li>启动外设。</li>
+  <li>读外设状态，判断是否就绪；未就绪就循环查询。</li>
+  <li>就绪后传送一个数据，修改内存地址和字计数。</li>
+  <li>判断是否传送完；未完继续查询，完成则结束。</li>
+</ol>
+<p>独占查询会让 CPU 一直忙等；定时查询是周期性地查，查询间隔与设备传输速率有关。优点是简单，缺点是 CPU 与外设完全串行，浪费 CPU。</p>
+<h3>中断控制方式</h3>
+<ol>
+  <li>CPU 启动外设后继续执行其他程序，不必等待。</li>
+  <li>外设完成一个数据单元后向 CPU 发中断请求。</li>
+  <li>CPU 在满足条件时响应，转中断服务程序传送数据。</li>
+  <li>服务结束返回原程序；下一个数据再重复。</li>
+</ol>
+<p>外设与 CPU 可以并行，但每传一个数据仍要一次中断和一段服务程序，适合中低速、随机 I/O。</p>
+<h3>DMA 控制方式</h3>
+<ol>
+  <li>CPU 初始化 DMA 控制器：内存起始地址、设备地址、传送长度、方向。</li>
+  <li>CPU 发“启动 DMA”命令，之后不再参与数据搬运。</li>
+  <li>DMA 控制器申请总线，获得后给出内存地址、发读写命令，在设备与主存之间直接传数据。</li>
+  <li>每传一次，地址计数器加 1、长度计数器减 1；计数值为 0 表示完成。</li>
+  <li>DMA 向 CPU 发“DMA 结束”中断，CPU 做校验等后处理。</li>
+</ol>
+<p>DMA 适合磁盘、网卡等成块高速设备；CPU 只在开始和结束介入。</p>
+
+<h2 id="irq-flow">中断响应与处理流程</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-interrupt-flow.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-interrupt-flow.webp" data-caption="中断响应和处理：响应条件、中断隐指令、中断源识别、单级中断处理">
+    <img class="article-img" src="/408-review/assets/textbook/coa-interrupt-flow.webp" alt="中断响应和处理思维导图：中断响应、中断源识别、单级中断处理" loading="lazy" decoding="async">
+  </a>
+  <figcaption>响应由硬件完成；处理由中断服务程序完成；两者不要混。</figcaption>
+</figure>
+<p><strong>响应条件</strong>：开中断（IF=1）、当前指令执行结束、有未被屏蔽的中断请求。三个条件同时满足才会响应。</p>
+<p><strong>中断隐指令</strong>（硬件自动完成，不是真正的机器指令）：关中断 → 保存断点（PC）→ 形成中断服务程序入口（中断向量）→ 修改 CPU 模式位（如进入内核态）。</p>
+<p><strong>单级中断处理</strong>：保护现场（通用寄存器、PSW）→ 执行中断服务程序 → 恢复现场 → 开中断 → 中断返回。单级处理期间一般不允许新的中断嵌套。</p>
+<p><strong>中断源识别</strong>：软件查询法按优先级依次查询异常/中断状态寄存器，先查到先处理；硬件向量法给每个中断源分配类型号，用类型号查中断向量表，取出服务程序入口送 PC。中断向量是入口地址，不是中断类型号本身。</p>
+
+<h2 id="multiple-irq">多重中断与中断屏蔽</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-multiple-interrupt.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-multiple-interrupt.webp" data-caption="多重中断和中断屏蔽字：硬件排队优先级、处理优先级、判断流程和执行轨迹">
+    <img class="article-img" src="/408-review/assets/textbook/coa-multiple-interrupt.webp" alt="多重中断和中断屏蔽字思维导图：硬件排队优先级、处理优先级、判断流程、执行轨迹" loading="lazy" decoding="async">
+  </a>
+  <figcaption>硬件排队决定“谁先被响应”，屏蔽字决定“响应后谁还能打断谁”。</figcaption>
+</figure>
+<ul>
+  <li><strong>硬件排队优先级</strong>：多个请求同时到达时，决定响应顺序；响应顺序不一定等于最终处理顺序。</li>
+  <li><strong>处理优先级</strong>：由中断屏蔽字体现。屏蔽字中 0 表示允许中断，1 表示屏蔽；某中断服务程序执行时，只有未被当前屏蔽字屏蔽、且满足响应条件的中断才能打断它。</li>
+  <li><strong>判断流程</strong>：先按硬件排队确定响应顺序；进入服务程序后，再看屏蔽字是否允许更高处理优先级的中断嵌套；被嵌套的服务程序在高优先级处理完后继续。</li>
+  <li><strong>执行轨迹</strong>：主程序 → 中断响应 → 服务程序 A → 更高优先级 B 嵌套 → 返回 A → 返回主程序。未被响应的中断要等 CPU 回到主程序后才能再次响应。</li>
+</ul>
+<p>易错：硬件优先级高 ≠ 一定能打断当前服务程序；能不能嵌套看当前屏蔽字。屏蔽字是“处理优先级”的工具，不是响应条件本身。</p>
+
+<h2 id="dma-flow">DMA 传送流程与控制器</h2>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-dma-flow.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-dma-flow.webp" data-caption="DMA 传送流程与 DMA 控制器结构：预处理、数据传送、后处理；HRQ/HLDA、地址计数器、长度计数器、数据缓冲寄存器">
+    <img class="article-img" src="/408-review/assets/textbook/coa-dma-flow.webp" alt="DMA 传送流程：CPU 预处理设置 AR、DAR、WC 并启动设备，DMA 控制器通过 HRQ/HLDA 申请总线，用地址计数器、长度计数器、数据缓冲寄存器完成传送，结束后中断 CPU 做后处理" loading="lazy" decoding="async">
+  </a>
+  <figcaption>左：CPU 的预处理 → 数据传送 → 后处理；右：DMA 控制器内部与系统总线的连接。</figcaption>
+</figure>
+<ol>
+  <li><strong>预处理</strong>：CPU 把主存起始地址送 AR（地址计数器）、设备地址送 DAR、传送长度送 WC（字计数器），启动设备。</li>
+  <li><strong>申请总线</strong>：DMA 控制器发 HRQ，CPU 响应后发 HLDA，DMA 获得总线控制权。</li>
+  <li><strong>传送</strong>：DMA 给出主存地址，发读/写命令，在设备与主存之间传数据；每传一次，地址计数器 +1、长度计数器 −1。</li>
+  <li><strong>结束</strong>：WC=0 时，DMA 发中断请求，CPU 转入中断服务程序做数据校验、结束处理。</li>
+  <li><strong>归还总线</strong>：DMA 释放总线，CPU 继续执行主程序。</li>
+</ol>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-dma-block-word.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-dma-block-word.webp" data-caption="DMA 的块传输与单字传输：任务规模与每次占用总线的粒度">
+    <img class="article-img" src="/408-review/assets/textbook/coa-dma-block-word.webp" alt="DMA 的块传输和单字传输思维导图：块传输以数据块为单位，单字传输又称周期挪用，每次申请一个总线周期传一个字" loading="lazy" decoding="async">
+  </a>
+  <figcaption>“块传输”是任务规模，“单字传输”是每次占用总线的粒度；块传输通常由多次单字传送组成。</figcaption>
+</figure>
+<p><strong>块传输</strong>：DMA 面向一整块数据，CPU 设置参数并启动后，整块交给 DMA 控制器；完成后 DMA 用中断通知 CPU。<strong>单字传输</strong>（周期挪用）：DMA 每次只申请一个总线周期，传一个字/一个基本单位，然后归还总线，下次再申请。两者不是对立关系：块传输是总任务，实际占用总线时可以按单字逐次传。</p>
+<p>DMA 与 CPU 争总线的三种方式：停止 CPU 访存（简单但 CPU 长时间不能访存）、周期挪用（最常用）、交替访问（CPU 与 DMA 分时使用总线）。DMA 请求通常在总线周期结束时响应，优先级通常高于中断。</p>
 </div>
-<p class="article-source">本考点原帖没有单独的长文，以上按 408 教材与站内速记整理；重点保留中断响应、三种 I/O 方式和 DMA 的对比。</p>
+<p class="article-source">本考点原帖没有单独的长文，以上按 408 教材与站内速记整理；重点保留 I/O 接口、端口编址、三种 I/O 方式、中断响应/多重中断和 DMA 流程。</p>
