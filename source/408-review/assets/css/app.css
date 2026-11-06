@@ -3077,3 +3077,10 @@ h1, h2, h3, h4,
     scroll-behavior: auto !important;
   }
 }
+
+/* 末尾兜底：后面追加的桌面双栏规则会覆盖前面的 1024 断点，这里再收一次。 */
+@media (max-width: 1024px) {
+  .topic-layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .topic-rail { display: none; }
+  .topic-article { width: 100%; min-width: 0; }
+}
