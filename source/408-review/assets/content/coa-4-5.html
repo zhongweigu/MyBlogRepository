@@ -108,5 +108,82 @@
 </tbody>
 </table></div>
 <p>微指令一般分为操作控制字段和顺序控制字段（下址字段）。</p>
+
+<h2 id="microprogram-structure">微程序控制器：结构、流程与编码</h2>
+<p>微程序控制器把“控制信号”存进控制存储器 CM：一条机器指令对应一段微程序，一段微程序由若干条微指令组成，一条微指令又包含若干微命令。理解它，抓住“<strong>地址怎么来、微指令怎么取、控制信号怎么发、下一条地址怎么定</strong>”这条链即可。</p>
+
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-microprogram-structure.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-microprogram-structure.webp" data-caption="微程序控制器的基本结构：CM、CMDR、CMAR、微地址形成部件、顺序逻辑和地址译码">
+    <img class="article-img" src="/408-review/assets/textbook/coa-microprogram-structure.webp" alt="微程序控制器的基本结构：控制存储器 CM、微指令寄存器 CMDR、微地址寄存器 CMAR、微地址形成部件、顺序逻辑和地址译码" loading="lazy" decoding="async">
+  </a>
+  <figcaption>CM 存微程序；CMAR 存微地址；CMDR 存当前微指令；控制字段送 CPU 内部和系统总线，下址字段参与形成下一条微地址。</figcaption>
+</figure>
+
+<h3>基本结构：一条微指令怎么走</h3>
+<ul>
+  <li><strong>控制存储器 CM</strong>：存放各机器指令对应的微程序，通常用 ROM；按地址寻访，一个地址存一条微指令。</li>
+  <li><strong>CMAR（μPC）</strong>：微地址寄存器，接收微地址形成部件送来的地址，为读 CM 做准备。</li>
+  <li><strong>CMDR（μIR）</strong>：微指令寄存器，存放从 CM 取出的微指令；位数等于微指令字长。</li>
+  <li><strong>微地址形成部件</strong>：根据机器指令操作码、微程序入口、顺序逻辑和标志，形成初始微地址或后继微地址。</li>
+  <li><strong>顺序逻辑</strong>：结合下址字段、标志和 CLK，决定下一条微指令地址；支持增量、断定和分支。</li>
+  <li><strong>地址译码</strong>：把 CMAR 中的微地址译成 CM 的存储单元选择信号。</li>
+</ul>
+
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-microprogram-workflow.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-microprogram-workflow.webp" data-caption="微程序控制器的工作原理：取指、间址、执行、中断各段微程序通过下地址衔接">
+    <img class="article-img" src="/408-review/assets/textbook/coa-microprogram-workflow.webp" alt="微程序控制器的工作原理：取指微程序、间址微程序、中断微程序和 LDA/STA 执行微程序通过下地址衔接" loading="lazy" decoding="async">
+  </a>
+  <figcaption>微程序按“取指 → 间址 → 执行 → 中断”分段；每段末尾用下址字段或断定方式跳到下一段。</figcaption>
+</figure>
+
+<h3>工作流程：四段微程序怎么接</h3>
+<ol>
+  <li><strong>取指周期微程序</strong>：所有指令公用。把 PC 送 MAR、发读命令、MDR 送 IR、PC 增量；结束时按 IR 操作码形成对应执行微程序的入口地址。</li>
+  <li><strong>间址周期微程序</strong>：只有间接寻址指令才进入；根据寻址方式形成有效地址。</li>
+  <li><strong>执行周期微程序</strong>：不同指令不同，例如 LDA 取数、STA 存数；每条微指令发出本拍控制信号，并由下址字段/断定方式决定下一条微指令。</li>
+  <li><strong>中断周期微程序</strong>：有中断请求且允许时进入；保存断点、送中断服务程序入口，最后回到取指周期。</li>
+</ol>
+<p>“下地址”是微程序控制器特有的部件：它让微指令可以顺序执行，也可以按断定方式跳到另一段微程序；机器指令的操作码负责给出<strong>入口地址</strong>，微指令的下址字段负责给出<strong>段内/段间后继地址</strong>。</p>
+
+<h3>字段直接编码：位数怎么算</h3>
+<p>字段直接编码把互斥的微命令放在同一段，段内编码后再译码；相容的微命令放在不同段，可以同时有效。每个小段通常还要留一个“不发出任何微命令”的状态，所以一段有 n 个互斥微命令时，至少需要</p>
+<p>$$\\lceil \\log_2(n+1) \\rceil$$</p>
+<p>位；如果题目明确“不单独留空操作状态”，才用 $\\lceil \\log_2 n \\rceil$。分段不能太宽：段越大，译码线路越复杂、译码越慢。</p>
+
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-microinstruction-encoding.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-microinstruction-encoding.webp" data-caption="字段直接编码：操作控制字段分段，每段译码后发出控制信号，段尾留下址字段">
+    <img class="article-img" src="/408-review/assets/textbook/coa-microinstruction-encoding.webp" alt="字段直接编码：操作控制字段分成若干段，每段经译码后发出控制信号，末尾是下地址字段" loading="lazy" decoding="async">
+  </a>
+  <figcaption>每个小段独立译码；互斥微命令同段，相容微命令不同段。</figcaption>
+</figure>
+
+<p><strong>例：</strong>某控制器采用字段直接编码，操作控制字段共有 33 个微命令，构成 5 个互斥类，分别有 7、3、12、5、6 个微命令。求操作控制字段至少多少位。</p>
+<p>分别计算：7 → $\\lceil \\log_2 8 \\rceil=3$；3 → $\\lceil \\log_2 4 \\rceil=2$；12 → $\\lceil \\log_2 13 \\rceil=4$；5 → $\\lceil \\log_2 6 \\rceil=3$；6 → $\\lceil \\log_2 7 \\rceil=3$。合计 <strong>3+2+4+3+3 = 15 位</strong>。不能直接对 33 取 $\\log_2$，因为互斥类之间是分段独立编码的。</p>
+
+<h3>常考点：红框里的是什么</h3>
+<figure class="article-figure">
+  <a class="figure-link" href="/408-review/assets/textbook/coa-microprogram-mindmap.webp" data-action="zoom-image" data-src="/408-review/assets/textbook/coa-microprogram-mindmap.webp" data-caption="微程序控制器知识地图：基本概念、基本结构、硬布线与微程序比较、微指令格式、地址形成、设计步骤">
+    <img class="article-img" src="/408-review/assets/textbook/coa-microprogram-mindmap.webp" alt="微程序控制器知识地图：基本概念、基本结构、硬布线与微程序比较、微指令格式、地址形成、设计步骤，红框为常考点" loading="lazy" decoding="async">
+  </a>
+  <figcaption>红框是常考区：基本概念、基本结构、硬布线/微程序比较、微指令格式、地址形成方式。</figcaption>
+</figure>
+<ul>
+  <li><strong>基本概念</strong>：微命令是控制部件发出的最小控制信号；微操作是执行部件收到微命令后完成的最基本操作；一条微指令包含若干微命令；一段微程序对应一条机器指令；微周期是取出一条微指令并执行所需的时间。</li>
+  <li><strong>寄存器对照</strong>：CMAR 对应 MAR（存微地址 / 主存地址）；CMDR 对应 IR（存微指令 / 机器指令）；CM 对应主存（存微程序 / 程序）。</li>
+  <li><strong>硬布线 vs 微程序</strong>：硬布线组合逻辑直接产生信号，快、不规整、难改，常用于 RISC；微程序从 CM 取微指令译码，慢、规整、易改，常用于 CISC。</li>
+  <li><strong>微指令格式</strong>：水平型并行控制信号多、微指令长、微程序短；垂直型控制信号少、需译码、微程序长。编码方式分直接编码、字段直接编码、字段间接编码。</li>
+  <li><strong>地址形成</strong>：增量方式用当前地址 +1；断定方式由下址字段直接给出，或按条件码在多个候选地址中选择；机器指令操作码决定微程序入口。</li>
+  <li><strong>设计步骤</strong>：写出微操作命令及节拍安排 → 确定微指令格式 → 编写微指令码点。</li>
+</ul>
+
+<div class="article-table"><table>
+<thead><tr><th>对照</th><th>主存储器 / 机器指令</th><th>控制存储器 / 微指令</th></tr></thead>
+<tbody>
+<tr><td>地址寄存器</td><td>MAR</td><td>CMAR（μPC）</td></tr>
+<tr><td>数据/指令寄存器</td><td>MDR / IR</td><td>CMDR（μIR）</td></tr>
+<tr><td>存储内容</td><td>程序和数据</td><td>微程序（微指令序列）</td></tr>
+<tr><td>地址来源</td><td>PC / 寻址</td><td>微地址形成部件 / 下址字段</td></tr>
+</tbody>
+</table></div>
 </div>
 <p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>
