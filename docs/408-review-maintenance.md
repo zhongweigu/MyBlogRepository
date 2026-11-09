@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v25/
+│   ├── js-v26/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -382,6 +382,6 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `os-1-2` 讲模式切换时复用了计组「中断完整流程」的 `assets/img/coa-interrupt-timeline.svg` 和 `assets/textbook/coa-interrupt-single-multiple.webp`；重点写清“旧 PSW 保存后、handler 第一条指令前”这个切换点，不要改成“设备请求时”或“服务程序执行中”。
 - `os-1-5` 的 1/2 型 VMM 层次图用 `.vm-stack-grid` / `.vm-layer` 的 HTML/CSS，不用图片；桌面双列、手机自动单列。
 - 科目主题色为紫（`--violet`）。`views/map.js` / `chapter.js` / `topic.js` / `runner.js` / `questions.js` 都通过 `ui.js` 的 `subjectClass()` 取 `is-os`，新增科目时不要再写 `coa ? is-coa : is-ds` 的三元。
-- 真题还没有 OS 题，题库存量仍为 165；以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'`，`topics` 指向 `os-1-1` 到 `os-1-5`。
+- 已录入 14 道 OS 真题（2009–2023 选择题 + 2021-46、2023-46 综合题），题库存量为 179；以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'`，`topics` 指向 `os-1-1` 到 `os-1-5`。
 - 后续加 OS 章节：在 `meta.js` 加 `os-2` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改 `os-1-1` 到 `os-1-5` 的 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
