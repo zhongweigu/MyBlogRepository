@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v23/
+│   ├── js-v24/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -373,6 +373,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 
 - 数据在 `data/os.js`，由 `data/index.js` 并入 `TOPICS`；`meta.js` 的 `SUBJECTS.os`、`CHAPTERS` 的 `os-1` 已登记。
 - 长文手写在 `assets/content/os-1-1.html`、`os-1-2.html`，**不要**交给 `build-review-content.py` 生成，也不要从帖子切段。
+- `os-1-2` 讲模式切换时复用了计组「中断完整流程」的 `assets/img/coa-interrupt-timeline.svg` 和 `assets/textbook/coa-interrupt-single-multiple.webp`；重点写清“旧 PSW 保存后、handler 第一条指令前”这个切换点，不要改成“设备请求时”或“服务程序执行中”。
 - 科目主题色为紫（`--violet`）。`views/map.js` / `chapter.js` / `topic.js` / `runner.js` / `questions.js` 都通过 `ui.js` 的 `subjectClass()` 取 `is-os`，新增科目时不要再写 `coa ? is-coa : is-ds` 的三元。
 - 真题还没有 OS 题，题库存量仍为 165；以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'`，`topics` 指向这两个考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-2` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改 `os-1-1` / `os-1-2` 的 id。

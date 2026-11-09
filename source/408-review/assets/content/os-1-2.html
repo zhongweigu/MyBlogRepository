@@ -8,7 +8,7 @@
 <li><a href="#mode-psw">二、PSW 与模式位</a></li>
 <li><a href="#mode-two">三、用户态与内核态各自能做什么</a></li>
 <li><a href="#mode-priv">四、特权指令与非特权指令</a></li>
-<li><a href="#mode-switch">五、模式切换的通道</a></li>
+<li><a href="#mode-switch">五、模式切换的通道与时间点</a></li>
 <li><a href="#mode-when">六、什么时候在用户态，什么时候在内核态</a></li>
 <li><a href="#kernel-support">七、内核的支撑功能：时钟、中断、原语</a></li>
 <li><a href="#kernel-resource">八、内核的资源管理功能</a></li>
@@ -81,40 +81,78 @@
 </ul>
 <p>把“系统调用”说成“特权指令”是错的；把“陷入指令”说成“内核态指令”也不准确——它由用户态执行，执行后 CPU 才进入内核态。</p>
 
-<h2 id="mode-switch">五、模式切换的通道</h2>
-<p>用户态不能直接跳到内核态，必须经过硬件认可的“门”。硬件事件分两类：<strong>中断</strong>（异步）和<strong>异常</strong>（同步）；系统调用则利用异常中的<strong>陷入</strong>（trap）主动进入内核。它们都会让 CPU 保存当前 PSW/PC，切换到内核态，并跳到相应的处理程序。</p>
+<h2 id="mode-switch">五、模式切换的通道与时间点</h2>
+<p>用户态不能直接跳到内核态，必须经过硬件认可的“门”。硬件事件分两类：<strong>中断</strong>（异步）和<strong>异常</strong>（同步）；系统调用则利用异常中的<strong>陷入</strong>（trap）主动进入内核。入口动作的共同点是：保存旧 PSW/PC，切换到内核态，跳到处理程序。</p>
 <p class="mermaid-hint">图较宽，手机上可左右滑动查看。</p>
-<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#6b4c72", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4f3555", "lineColor": "#6b4c72", "tertiaryColor": "#f8f2f9", "edgeLabelBackground": "#f8f2f9", "fontSize": "15px"}, "flowchart": {"nodeSpacing": 16, "rankSpacing": 60, "curve": "basis", "htmlLabels": true, "padding": 6, "useMaxWidth": false, "wrappingWidth": 1000}}}%%
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#6b4c72", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4f3555", "lineColor": "#6b4c72", "tertiaryColor": "#f8f2f9", "edgeLabelBackground": "#f8f2f9", "fontSize": "14px"}, "flowchart": {"nodeSpacing": 10, "rankSpacing": 26, "curve": "basis", "htmlLabels": true, "padding": 5, "useMaxWidth": false, "wrappingWidth": 1000}}}%%
 flowchart LR
   U["用户态<br/>非特权指令"] -->|"中断 / 异常 / 陷入"| K["内核态<br/>可执行特权指令"]
-  K -->|"返回指令 / IRET<br/>恢复 PSW、PC"| U
+  K -->|"返回 / IRET<br/>恢复 PSW、PC"| U
 
   classDef user fill:#f8f2f9,stroke:#6b4c72,color:#2f2333,stroke-width:1.5px
   classDef kernel fill:#6b4c72,stroke:#4f3555,color:#ffffff,stroke-width:2px
   class U user
   class K kernel
 </pre>
-<p>内核态内部再发生中断/异常，仍是内核态，只是嵌套；用户态执行普通指令也不会换模式。这两条“同态内”的路径没有画进图里，避免把状态图画成一团。</p>
-<p>一次典型的“用户态 → 内核态”切换，硬件大致做这些事：</p>
-<ol>
-<li>保存被中断指令的<strong>断点</strong>（PC）和当前 <strong>PSW</strong>；有的机器保存到内核栈，有的用影子寄存器/专用寄存器；</li>
-<li>把 CPU 模式位改成内核态；</li>
-<li>根据中断/异常类型取得<strong>处理程序入口</strong>（中断向量/异常向量）；</li>
-<li>跳到处理程序，由软件保存通用寄存器等现场，再处理事件。</li>
-</ol>
-<p>返回时执行中断/异常返回指令（IRET、ERET、sysexit 等），从栈中恢复 PSW 和 PC；如果返回到用户程序，模式位随之恢复成用户态，CPU 回到断点继续执行。注意：<strong>模式位的改变是硬件在进入/返回时完成的</strong>，不是用户程序自己写的。</p>
-<p>“中断、异常、陷入”三者的区别可以先用一张表建立框架，具体的中断响应、向量、嵌套在 I/O 与中断章节再展开：</p>
+<p>下面直接复用计组「中断完整流程」里的时间线。注意看图中的<strong>第⑤步“中断隐指令”</strong>：模式位就是在这个硬件动作组里改写的，不是设备一请求就改，也不是服务程序执行到某条指令才改。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="中断从请求到返回的时间线：设备请求、控制器判优、CPU 指令结束检查、中断隐指令、服务程序、IRET 返回" data-src="/408-review/assets/img/coa-interrupt-timeline.svg" href="/408-review/assets/img/coa-interrupt-timeline.svg">
+<img alt="中断从请求到返回的时间线：设备请求、控制器判优、CPU 指令结束检查、中断隐指令保存 PSW 和 PC、切换内核态、查向量表、服务程序、IRET 返回" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-interrupt-timeline.svg"/>
+</a>
+<figcaption>中断全流程。第⑤步中断隐指令包含“保存旧 PSW/PC → 切换内核态/内核栈 → 取向量送 PC”，模式切换就发生在这一组硬件动作中。</figcaption>
+</figure>
+<p>设备请求可以随时到达，但可屏蔽中断通常只在<strong>指令边界</strong>被采样；请求要一直保持到 CPU 响应或设备清除。异常则不同：它在当前指令执行过程中产生，所以“事件发生”比外中断更早，但模式切换仍在异常响应阶段完成。</p>
+<p>把第⑤步再拆细，模式位的改写点可以写成下面这张表。<strong>关键不是“第几条机器指令”，而是“旧状态已保存、处理程序第一条指令尚未执行”这个硬件窗口。</strong></p>
 <div class="article-table"><table>
-<thead><tr><th>事件</th><th>来源</th><th>同步性</th><th>典型例子</th><th>返回行为</th></tr></thead>
+<thead><tr><th>时间点</th><th>硬件在做什么</th><th>PSW 模式位</th></tr></thead>
 <tbody>
-<tr><td>外部中断</td><td>CPU 外部设备/时钟</td><td>异步，可在两条指令之间发生</td><td>I/O 完成、时钟中断、控制台输入</td><td>返回下一条指令</td></tr>
-<tr><td>故障 fault</td><td>当前指令执行中发现错误</td><td>同步</td><td>缺页、除零、非法指令、地址越界</td><td>修复后重新执行当前指令（或终止进程）</td></tr>
-<tr><td>陷入 trap</td><td>当前指令主动触发</td><td>同步</td><td>系统调用、断点、单步</td><td>返回下一条指令</td></tr>
-<tr><td>终止 abort</td><td>硬件严重错误</td><td>同步/不可恢复</td><td>总线错误、硬件校验错</td><td>通常不返回，终止进程或停机</td></tr>
+<tr><td>请求到达</td><td>设备置中断请求；异常由当前指令触发</td><td>用户态；外中断要等到指令边界才响应</td></tr>
+<tr><td>CPU 响应</td><td>外中断：当前指令执行完，进入中断周期；异常：在指令执行中检测到</td><td>尚未改写</td></tr>
+<tr><td>保存旧状态</td><td>旧 PSW（含模式位、IF）、PC，必要时旧 SP 入栈或存入指定单元</td><td>旧 PSW 记录的是用户态，这是以后能返回的前提</td></tr>
+<tr><td><strong>切换点</strong></td><td>硬件改写模式位、切换到内核栈；取中断/异常向量并转入处理程序</td><td><strong>内核态</strong></td></tr>
+<tr><td>处理程序第一条指令</td><td>软件保存通用寄存器，开始处理设备/异常</td><td>内核态</td></tr>
+<tr><td>IRET / ERET</td><td>恢复旧 PSW 和 PC</td><td>若返回用户程序，恢复为用户态；嵌套返回仍是内核态</td></tr>
+</tbody>
+</table></div>
+<p>因此，准确说法是：<strong>模式切换发生在中断/异常响应阶段的硬件隐指令内，旧 PSW 已经保存之后、处理程序第一条指令执行之前。</strong>它不是一条可以用“执行到第几条指令”来定位的机器指令，而是硬件在中断周期完成的一组微操作。不同体系结构的细节不同：x86 在加载内核代码段、切换内核栈时改变 CPL；RISC-V 在进入 trap 时更新特权级；但共同边界都是“旧状态可恢复、handler 尚未开始”。</p>
+<p>教材常把隐指令写成“关中断 → 保存断点 → 引出中断服务程序”。这里的“关中断”和“保存旧 PSW”是同一组硬件动作的两面：既要防止响应过程被新中断打断，又必须把旧的 IF、模式位随旧 PSW 一起保存下来，否则 IRET 无法恢复原来的用户态和中断允许状态。不要把这三步理解成三条真正的机器指令。</p>
+
+<h3>单级中断与多重中断：入口相同，处理阶段不同</h3>
+<p>单级中断和多重中断（可嵌套中断）的<strong>响应阶段完全相同</strong>：都要关中断、保存旧 PSW/PC、切换内核态、取向量并转入服务程序。差别发生在进入服务程序之后。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="单级中断与多重中断的响应/处理流程对比：响应阶段相同，差别在保存现场后是否开中断" data-src="/408-review/assets/textbook/coa-interrupt-single-multiple.webp" href="/408-review/assets/textbook/coa-interrupt-single-multiple.webp">
+<img alt="单级中断与多重中断流程对比：两者响应阶段都包括关中断、保存断点、中断服务程序寻址；单级处理期间不开中断，多重中断在保存现场后开中断以允许嵌套" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/coa-interrupt-single-multiple.webp"/>
+</a>
+<figcaption>响应阶段两者相同；单级中断处理期间不打开中断，多重中断在保存现场后开中断，允许更高处理优先级的中断嵌套。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>阶段</th><th>单级中断</th><th>多重中断</th></tr></thead>
+<tbody>
+<tr><td>响应与模式切换</td><td>保存旧 PSW/PC → 切内核态 → 取向量</td><td>完全相同</td></tr>
+<tr><td>进入服务程序后</td><td>保持关中断，处理期间不响应新中断</td><td>保存通用寄存器和屏蔽字后开中断，允许嵌套</td></tr>
+<tr><td>嵌套</td><td>不允许</td><td>更高处理优先级的中断可以打断当前服务程序</td></tr>
+<tr><td>退出</td><td>恢复现场和屏蔽字 → 开中断 → IRET</td><td>先关中断 → 恢复现场和屏蔽字 → 开中断 → IRET</td></tr>
+<tr><td>模式位</td><td>只在用户态进入时切到内核态，IRET 回用户态</td><td>最外层进入时切一次；嵌套中断仍在内核态，不重复切换</td></tr>
+</tbody>
+</table></div>
+<p>所以“单级/多重”不影响模式切换的<strong>时间点</strong>，只影响进入内核后还能不能被另一个中断打断。多重中断嵌套时，被打断的是内核态的服务程序，不是用户程序；嵌套返回也仍然在内核态，直到最外层 IRET 才恢复用户态。</p>
+
+<h3>返回：IRET 把模式恢复</h3>
+<p>返回时执行中断/异常返回指令（IRET、ERET、sysexit 等），从栈中恢复旧 PSW 和 PC。旧 PSW 里保存着用户态模式位和原来的 IF，所以<strong>返回用户态与恢复中断允许状态是同一个动作</strong>；如果返回到被嵌套的内核服务程序，则模式位保持内核态。注意：进入时是硬件切到内核态，返回时也是硬件按旧 PSW 恢复，不是用户程序自己改模式位。</p>
+
+<h3>异常、故障与系统调用：入口时间差在哪</h3>
+<p>外中断在<strong>指令边界</strong>响应；异常由当前指令在执行中触发，因此“产生事件”的时间更早，但“切换到内核态”仍然发生在异常响应阶段、handler 第一条指令之前。系统调用则是用户程序执行陷入指令后，由硬件按异常入口进入内核。</p>
+<div class="article-table"><table>
+<thead><tr><th>事件</th><th>产生时间</th><th>模式切换点</th><th>返回行为</th></tr></thead>
+<tbody>
+<tr><td>外部中断</td><td>设备/时钟异步请求；通常在指令边界被采样</td><td>中断响应隐指令内，handler 之前</td><td>返回下一条指令</td></tr>
+<tr><td>故障 fault</td><td>当前指令执行中发现错误（缺页、除零、越界等）</td><td>异常响应隐指令内，handler 之前</td><td>修复后重新执行当前指令，或终止进程</td></tr>
+<tr><td>陷入 trap</td><td>当前指令主动触发（系统调用、断点、单步）</td><td>执行陷入指令后、内核服务例程之前</td><td>返回下一条指令</td></tr>
+<tr><td>终止 abort</td><td>硬件严重错误</td><td>进入终止处理程序前</td><td>通常不返回，终止进程或停机</td></tr>
 </tbody>
 </table></div>
 <p>这张表里最重要的是“返回哪条指令”：外部中断和陷阱返回<strong>下一条</strong>，故障返回<strong>当前这条</strong>重试。缺页就是典型：指令访问的页不在内存，硬件触发缺页异常，内核把页调进来、更新页表，再返回当前指令重新执行；如果返回下一条，这次访存就丢了。</p>
-<p>还要注意：如果 CPU 已经在内核态，又发生中断/异常，它仍然是内核态，只是可能发生<strong>嵌套</strong>，不叫“用户态 → 内核态切换”。模式切换只在特权级真的改变时发生。</p>
+<p>还要注意：如果 CPU 已经在内核态，又发生中断/异常，它仍然是内核态，只是可能发生<strong>嵌套</strong>，不叫“用户态 → 内核态切换”。模式切换只在特权级真的改变时发生；单级/多重、是否嵌套，都不改变这个判断。</p>
 
 <h2 id="mode-when">六、什么时候在用户态，什么时候在内核态</h2>
 <p>不要背“某个进程永远在内核态”这种说法。同一个进程会随着执行内容在两种状态之间来回切换；判断依据是<strong>当前正在执行哪段代码、处理什么事件</strong>。</p>
