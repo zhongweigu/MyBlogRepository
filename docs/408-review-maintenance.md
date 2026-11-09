@@ -1,4 +1,4 @@
-﻿# 408 复习台 · 维护手册
+# 408 复习台 · 维护手册
 
 > 适用对象：以后接手这个页面的 agent。用户会持续发来新的考点、知识点和图片，要求「提取、补充、加进复习台」，**不再改博客帖子**。
 >
@@ -24,13 +24,13 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v22/
+│   ├── js-v23/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
 │   │   ├── data/
 │   │   │   ├── meta.js            # 科目、章节、跨章脉络
-│   │   │   ├── ds.js / coa.js     # 原有考点
+│   │   │   ├── ds.js / coa.js / os.js  # 原有考点（OS 从 2026-11-09 开始）
 │   │   │   ├── ds-extra.js        # 新增 DS 考点
 │   │   │   ├── coa-extra.js       # 新增 COA 考点
 │   │   │   ├── supplements-*.js   # 原有考点的补充点/图/题
@@ -56,7 +56,7 @@ source/408-review/
 
 脚本：`scripts/build-review-content.py`（切长文、压图片、删正文例题；`coa-4-3`/`coa-4-4`/`coa-4-5`/`coa-4-6`/`coa-5-1` 手写跳过，`ds-1-1`/`ds-1-2` 保留例题）、`scripts/extract-questions.py`（抽取题库）、`scripts/extract-code.py`（抽取数据结构代码）。
 
-- 考点页只加载当前那篇 `content/<id>.html`，共 55 篇，不会把所有长文塞进主 JS。
+- 考点页只加载当前那篇 `content/<id>.html`，共 57 篇，不会把所有长文塞进主 JS。
 - 图片是普通静态文件，靠 `skip_render` 复制。
 - 进度只存浏览器 `localStorage`，没有后端。
 
@@ -69,9 +69,10 @@ source/408-review/
 先看 `data/meta.js` 里的 `CHAPTERS`：
 
 - 数据结构 6 章：`ds-1` 复杂度、`ds-2` 线性、`ds-3` 树、`ds-4` 图、`ds-5` 查找、`ds-6` 排序
-- 组成原理 5 章：`coa-1` 概述、`coa-2` 数据表示、`coa-3` 存储、`coa-4` 指令与 CPU、`coa-5` 总线与 I/O
+- 组成原理 6 章：`coa-1` 概述、`coa-2` 数据表示、`coa-3` 存储、`coa-4` 指令与 CPU、`coa-5` 总线、`coa-6` 输入/输出
+- 操作系统：`os-1` 概述，目前含 `os-1-1` 发展分类、`os-1-2` CPU 模式与内核
 
-新考点加到对应章节的 `ds-extra.js` / `coa-extra.js`；如果只是给已有考点补内容，改 `supplements-ds.js` / `supplements-coa.js`，或直接改 base 文件。
+新考点加到对应章节的 `ds-extra.js` / `coa-extra.js` / `os.js`；如果只是给已有考点补内容，改 `supplements-ds.js` / `supplements-coa.js`，或直接改 base 文件。
 
 ### 3.2 数据字段（最少）
 
@@ -105,7 +106,7 @@ source/408-review/
 
 **A. 从站内帖子生成（推荐，适用于已有帖子）**
 
-`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线概念）、`coa-5-2`（总线结构/事务/定时）、`coa-6-1`（I/O 接口与端口）、`coa-6-2`（I/O 方式与 DMA）和 `coa-6-3`（中断完整流程）是手写文件，脚本会跳过、不要覆盖：
+`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线概念）、`coa-5-2`（总线结构/事务/定时）、`coa-6-1`（I/O 接口与端口）、`coa-6-2`（I/O 方式与 DMA）、`coa-6-3`（中断完整流程）和 `os-1-1` / `os-1-2` 是手写文件，脚本会跳过、不要覆盖：
 
 ```powershell
 python scripts/build-review-content.py
@@ -215,10 +216,10 @@ python scripts/build-review-content.py
 
 ### 3.7 术语库与图解库
 
-- `data/glossary.js`：`CORE_TERMS` 手写核心术语；其余从 52 个考点的 `points` 自动抽取（术语 = 知识点标题，释义 = `lead`）。术语页支持科目筛选和搜索。
+- `data/glossary.js`：`CORE_TERMS` 手写核心术语；其余从 57 个考点的 `points` 自动抽取（术语 = 知识点标题，释义 = `lead`）。术语页支持科目筛选和搜索。
 - `data/diagrams.js`：`DIAGRAMS` 每项字段：
   ```js
-  { id, subject: 'ds'|'coa', group, topic, title, src, caption, why }
+  { id, subject: 'ds'|'coa'|'os', group, topic, title, src, caption, why }
   ```
   `src` 必须是 `assets/img/` 或 `assets/textbook/` 下真实存在的文件；`why` 写“这类题怎么用这张图”。`group: 'process'` 专门放流程 / 读图类：复杂度判断、KMP、拓扑排序、指令周期、中断流程、DFS/BFS、流水线等。
 - **流程类优先**：凡是“xxx 的流程 / 步骤 / 判断顺序”，先想能不能画成一张流程图；不要只写文字。缺图可以用 SVG 画，也可以让用户上传原图。
@@ -262,9 +263,9 @@ npx hexo generate
 1. 打开本次改动的考点页：长文加载、公式/图正常、没有横向溢出；
 2. 如果改了题目：打开 `#/questions`，确认题数、题目和解析出现，再点一次对应考点链接；
 3. 390px 宽度看改动页；
-4. 只检查本次涉及的 `assets/content/<id>.html` 和图片是否 200，不需要遍历全部 55 篇。
+4. 只检查本次涉及的 `assets/content/<id>.html` 和图片是否 200，不需要遍历全部 57 篇。
 
-**全量 55 篇只在以下情况跑**：改了路由、数据 schema、批量图片重写、模板/CSS 大改。日常加一个知识点或一道题，不要跑全量。
+**全量 57 篇只在以下情况跑**：改了路由、数据 schema、批量图片重写、模板/CSS 大改。日常加一个知识点或一道题，不要跑全量。
 
 发布：
 
@@ -313,7 +314,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 5. **写成学习卡**：背诵清单（能直接背的短句）→ 理解（推导、例子、表格、图）→ 考场答法（怎么开头、怎么收口、易错）。正文里**不放完整例题**。
 6. **题目入库**：能自动识别的走 `scripts/extract-questions.py`；裸题补到 `questions-manual-extra.js`。每题写 `topics`、答案和解析；解析最后一句尽量点出“这题在考哪个考点”。同时从正文里删掉这道题。
 7. **顺手更新术语/图解**：新术语加到 `CORE_TERMS` 或依赖自动抽取；新代表图加到 `DIAGRAMS`。
-8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 52 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
+8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 57 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
 9. **提交**：源帖不改；只提交复习台、脚本和手册相关文件。
 
 ---
@@ -352,7 +353,27 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `coa-6-1`（I/O 接口与端口）在 `content/coa-6-1.html` 手写维护。
 - `coa-6-2`（I/O 方式与 DMA）在 `content/coa-6-2.html` 手写维护。
 - `coa-6-3`（中断完整流程）在 `content/coa-6-3.html` 手写维护；从中断源请求到 IRET 返回、数据流、栈帧和多重中断都直接改这个文件。
+- `os-1-1`（操作系统的发展与分类）在 `content/os-1-1.html` 手写维护；人工操作、脱机 I/O、单道/多道批处理、分时、实时、微机/网络/分布式/嵌入式都直接改这个文件。
+- `os-1-2`（CPU 工作模式与 OS 内核）在 `content/os-1-2.html` 手写维护；PSW 模式位、特权指令、模式切换、内核支撑功能与资源管理都直接改这个文件。
 - 今日队列是考点级，不是知识点级；`points` 用于搜索/速记，不单独记录 SRS 进度。
 - 题库是“完整题目”优先：自动抽取会跳过没有年份、没有选项、没有分问的短小例；如果发现漏题，先检查它是否有 `<u>例题`/`<u>练习` 标记，没有就补到 `questions-manual-extra.js`。
 - 自动抽取的题干和解析来自原帖；如果原帖解析太薄，先在 `questions-manual-extra.js` 补，或在源帖补充后再抽取。
 - Netlify / Cloudflare 对 `assets/*` 可能仍给 4 小时缓存；当前用 `js-vN` 目录 + CSS query 版本化绕过，发布后让用户走一次新 URL。
+
+---
+
+## 10. 操作系统章节（2026-11-09 起）
+
+操作系统作为第三个科目接入，`id` 前缀 `os`，目前只有第一章：
+
+| 章节 | 考点 | 主题 |
+| --- | --- | --- |
+| `os-1` 概述 | `os-1-1` | 操作系统的发展与分类 |
+| | `os-1-2` | CPU 工作模式与操作系统内核 |
+
+- 数据在 `data/os.js`，由 `data/index.js` 并入 `TOPICS`；`meta.js` 的 `SUBJECTS.os`、`CHAPTERS` 的 `os-1` 已登记。
+- 长文手写在 `assets/content/os-1-1.html`、`os-1-2.html`，**不要**交给 `build-review-content.py` 生成，也不要从帖子切段。
+- 科目主题色为紫（`--violet`）。`views/map.js` / `chapter.js` / `topic.js` / `runner.js` / `questions.js` 都通过 `ui.js` 的 `subjectClass()` 取 `is-os`，新增科目时不要再写 `coa ? is-coa : is-ds` 的三元。
+- 真题还没有 OS 题，题库存量仍为 165；以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'`，`topics` 指向这两个考点。
+- 后续加 OS 章节：在 `meta.js` 加 `os-2` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改 `os-1-1` / `os-1-2` 的 id。
+- 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
