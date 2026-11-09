@@ -1,0 +1,152 @@
+<div class="article-content">
+<p>用户代码里写一句 <code>read(fd, buf, n)</code>，看起来像调用了一个普通函数，实际上它可能跨越了用户态和内核态之间最硬的一条边界。理解系统调用，关键不是背“有哪些函数”，而是看清三件事：<strong>谁在用户态准备参数、哪条指令真正陷入内核、内核又怎样把结果送回来</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>8 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#syscall-what">一、系统调用不是普通函数调用</a></li>
+<li><a href="#syscall-read">二、从 read() 到 syscall：用户态做了什么</a></li>
+<li><a href="#syscall-code">三、把示例代码逐行拆开</a></li>
+<li><a href="#syscall-kernel">四、内核入口、分发与返回</a></li>
+<li><a href="#syscall-trap">五、trap、int、syscall 与“软中断”</a></li>
+<li><a href="#syscall-api">六、系统调用、库函数与 API 的边界</a></li>
+<li><a href="#syscall-cost">七、开销、错误与安全</a></li>
+<li><a href="#syscall-pitfalls">八、常见误区与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="syscall-what">一、系统调用不是普通函数调用</h2>
+<p>普通函数调用发生在同一个特权级里：调用者和被调用者都在用户态，CPU 不换模式，只是把返回地址压栈、跳到函数入口。系统调用不同：用户程序要让内核替它做一件自己无权做的事，必须<strong>主动触发一次受控的异常</strong>，让 CPU 切换到内核态。</p>
+<p>为什么不能直接调用内核函数？因为内核函数运行在内核态，能改页表、关中断、访问设备。如果用户程序能任意跳进内核函数，保护边界就形同虚设。所以操作系统只暴露一组<strong>固定入口</strong>：用户程序把“要什么服务、参数是什么”放进约定好的寄存器，执行一条陷入指令；CPU 按硬件约定跳到内核入口，内核再根据编号分发。</p>
+<div class="article-table"><table>
+<thead><tr><th>对比</th><th>普通函数调用</th><th>系统调用</th></tr></thead>
+<tbody>
+<tr><td>特权级</td><td>不变，仍在用户态</td><td>用户态 → 内核态 → 用户态</td></tr>
+<tr><td>入口</td><td>编译器/链接器确定的函数地址</td><td>硬件异常/陷入入口，再由内核查表分发</td></tr>
+<tr><td>参数传递</td><td>栈或寄存器，调用约定</td><td>ABI 约定的寄存器（x86-64：rdi/rsi/rdx…）</td></tr>
+<tr><td>能否被抢占/阻塞</td><td>普通函数一般不主动阻塞</td><td>内核服务可能睡眠、等待 I/O、触发调度</td></tr>
+<tr><td>开销</td><td>压栈、跳转、返回</td><td>模式切换、现场保存、参数校验、数据拷贝</td></tr>
+</tbody>
+</table></div>
+<p>所以“系统调用”是<strong>接口</strong>，不是一条具体的机器指令。用户程序看到的是 read、write、fork 这些函数；真正让 CPU 跨边界的是函数内部的陷入指令。</p>
+
+<h2 id="syscall-read">二、从 read() 到 syscall：用户态做了什么</h2>
+<p>下面以 x86-64 Linux 的 <code>read(fd, buf, nbytes)</code> 为例。用户代码调用的是 C 库里的 <code>read()</code>，它通常是一个很薄的包装函数：</p>
+<ol>
+<li><strong>准备参数</strong>：文件描述符 <code>fd</code> 放入 <code>rdi</code>，缓冲区地址 <code>buf</code> 放入 <code>rsi</code>，字节数 <code>nbytes</code> 放入 <code>rdx</code>；</li>
+<li><strong>放系统调用号</strong>：Linux x86-64 上 <code>read</code> 的编号是 0，放入 <code>rax</code>；</li>
+<li><strong>执行陷入指令</strong>：<code>syscall</code> 让 CPU 进入内核；</li>
+<li><strong>取返回值</strong>：内核把读到的字节数或负错误码放回 <code>rax</code>；库函数再按需设置 <code>errno</code>。</li>
+</ol>
+<pre class="mermaid is-narrow">%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#6b4c72", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4f3555", "lineColor": "#6b4c72", "tertiaryColor": "#f8f2f9", "edgeLabelBackground": "#f8f2f9", "fontSize": "14px"}, "flowchart": {"nodeSpacing": 10, "rankSpacing": 28, "curve": "basis", "htmlLabels": true, "padding": 5, "useMaxWidth": false, "wrappingWidth": 1000}}}%%
+flowchart TB
+  U["用户态：调用 read() 包装函数"] --> R["寄存器：rax=0<br/>rdi=fd，rsi=buf，rdx=n"]
+  R --> S["执行 syscall 指令"]
+  S --> K["内核入口：保存现场、切内核栈"]
+  K --> T["按 rax 查系统调用表"]
+  T --> H["sys_read：校验参数、读文件、拷贝数据"]
+  H --> B["sysret：恢复现场、回到用户态"]
+  B --> O["rax 返回字节数或错误码"]
+
+  classDef user fill:#f8f2f9,stroke:#6b4c72,color:#2f2333,stroke-width:1.3px
+  classDef kernel fill:#eee3f0,stroke:#6b4c72,color:#2f2333,stroke-width:1.3px
+  classDef key fill:#6b4c72,stroke:#4f3555,color:#ffffff,stroke-width:2px
+  class U,R,O user
+  class K,T,H,B kernel
+  class S key
+</pre>
+<p>注意图中“用户态”和“内核态”的分界：<code>read()</code> 的函数体、参数准备、<code>syscall</code> 指令的取指，都还在用户态；CPU 是在执行 <code>syscall</code> 时进入内核的。内核服务例程执行完，才通过返回指令回到用户态。</p>
+
+<h2 id="syscall-code">三、把示例代码逐行拆开</h2>
+<p>下面是一段<strong>简化后的原始系统调用</strong>写法，方便看清寄存器约定；实际 C 库的 <code>read()</code> 还会处理取消点、<code>errno</code>、符号版本等细节，但跨边界的那一步不变。</p>
+<pre><code>; x86-64 Linux：read(fd, buf, nbytes) 的简化写法
+mov rdi, fd        ; 第 1 个参数：文件描述符
+mov rsi, buf       ; 第 2 个参数：用户缓冲区地址
+mov rdx, nbytes    ; 第 3 个参数：最多读多少字节
+mov rax, 0         ; read 的系统调用号（Linux x86-64）
+syscall            ; 触发系统调用，进入内核
+; 返回值在 rax：
+;   &gt;= 0：实际读到的字节数（0 表示 EOF）
+;   &lt; 0：负错误码，例如 -EFAULT、-EBADF
+mov [nread], rax   ; 把返回值保存到用户变量
+</code></pre>
+<div class="article-table"><table>
+<thead><tr><th>寄存器</th><th>本例中的用途</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>rax</code></td><td>系统调用号 / 返回值</td><td>调用前放 0；返回后放字节数或负错误码</td></tr>
+<tr><td><code>rdi</code></td><td>第 1 个参数</td><td>文件描述符 fd</td></tr>
+<tr><td><code>rsi</code></td><td>第 2 个参数</td><td>用户缓冲区地址 buf</td></tr>
+<tr><td><code>rdx</code></td><td>第 3 个参数</td><td>要读取的字节数 nbytes</td></tr>
+<tr><td><code>rcx / r11</code></td><td>被 <code>syscall</code> 使用</td><td>分别保存返回 RIP 和 RFLAGS；用户代码不要依赖它们的原值</td></tr>
+</tbody>
+</table></div>
+<p>这张表只对 x86-64 Linux 成立；换架构、换操作系统，系统调用号、参数寄存器和陷入指令都会变。408 不会要求背具体编号，但会考“参数/编号放哪、哪条指令陷入、返回值在哪”这类<strong>机制</strong>。</p>
+
+<h2 id="syscall-kernel">四、内核入口、分发与返回</h2>
+<p>CPU 执行 <code>syscall</code> 后，硬件会完成一次受控的异常进入：保存返回地址和标志、切换栈、跳到内核预先登记的入口。内核入口再做这些事：</p>
+<ol>
+<li><strong>保存现场</strong>：把用户寄存器、栈指针等保存到内核栈或进程的上下文结构；</li>
+<li><strong>按编号分发</strong>：用 <code>rax</code> 作为索引查<strong>系统调用表</strong>，得到 <code>sys_read</code> 等服务例程的入口；</li>
+<li><strong>校验参数</strong>：检查 fd 是否合法、buf 是否在用户地址空间、长度是否越界；用户指针不能直接解引用；</li>
+<li><strong>执行服务</strong>：读文件/设备、拷贝数据；如果需要等待 I/O，当前进程可能睡眠，调度器切换到别的进程；</li>
+<li><strong>返回</strong>：把结果写入 <code>rax</code>，恢复现场，执行 <code>sysret</code>（或 <code>iret</code>）回到用户态。</li>
+</ol>
+<p>这里有两个“切换”要分清：<strong>模式切换</strong>是 CPU 从用户态到内核态，几乎每次系统调用都会发生；<strong>进程切换</strong>是内核决定换另一个进程运行，只有服务阻塞或时间片到期等情况下才发生。一次只读缓存数据的 <code>read</code> 可能只有模式切换，没有进程切换。</p>
+<p>返回时，内核把结果放在 <code>rax</code>。原始系统调用用负值表示错误（Linux 常见 <code>-1</code> 到 <code>-4095</code>）；C 库包装函数会把它翻译成“返回 -1，并设置 <code>errno</code>”。所以用户看到的是 <code>read() == -1</code>，而不是负数错误码，这两层不要混。</p>
+
+<h2 id="syscall-trap">五、trap、int、syscall 与“软中断”</h2>
+<p>用户给的导图里写“系统调用本质就是中断”，这句话要分语境。严格说：<strong>系统调用通过“陷入/异常”进入内核，它是同步事件，不是外部设备中断。</strong>如果把“中断”广义地理解为“打断当前控制流、进入内核”，那它可以算一类；如果按 408 常说的“外部中断 vs 异常”，它属于异常中的 trap。</p>
+<div class="article-table"><table>
+<thead><tr><th>名称</th><th>触发方式</th><th>同步性</th><th>典型例子</th><th>是不是系统调用</th></tr></thead>
+<tbody>
+<tr><td>外部中断</td><td>设备/时钟发 IRQ</td><td>异步，通常在指令边界响应</td><td>键盘、磁盘完成、时钟</td><td>不是</td></tr>
+<tr><td>陷入 trap</td><td>当前指令主动触发</td><td>同步</td><td><code>syscall</code>、<code>int 0x80</code>、断点</td><td>是（系统调用的入口）</td></tr>
+<tr><td>故障 fault</td><td>当前指令执行中出错</td><td>同步</td><td>缺页、除零、越界</td><td>不是</td></tr>
+<tr><td>终止 abort</td><td>硬件严重错误</td><td>同步/不可恢复</td><td>总线错误、校验错</td><td>不是</td></tr>
+<tr><td>Linux softirq</td><td>内核延迟处理机制</td><td>由内核在合适时机执行</td><td>网络收包的下半部</td><td>不是</td></tr>
+</tbody>
+</table></div>
+<p>几个术语的关系可以这样记：</p>
+<ul>
+<li><strong>trap（自陷）</strong>：由指令主动触发、处理完返回下一条指令的同步异常；系统调用是典型 trap。</li>
+<li><strong>int</strong>：x86 的软件中断指令，例如 <code>int 0x80</code>；它也能从用户态进入内核，但现代 64 位系统更常用 <code>syscall</code>。</li>
+<li><strong>syscall</strong>：x86-64 的快速系统调用指令；它不等于“系统调用”这个抽象接口，只是入口指令。</li>
+<li><strong>软中断</strong>：408 语境下常把 <code>int</code>/<code>syscall</code> 这类“由软件指令触发的中断”叫软中断；但 Linux 的 <code>softirq</code> 是内核延后处理机制，和系统调用不是一回事。</li>
+</ul>
+<p>所以更准确的说法是：<strong>系统调用是用户程序请求内核服务的接口；它通过陷入指令以同步异常的方式进入内核。</strong>不要把它说成“设备中断”，也不要把 Linux 的 softirq 当成系统调用的实现。</p>
+
+<h2 id="syscall-api">六、系统调用、库函数与 API 的边界</h2>
+<p>“系统调用”经常被和“库函数”“API”混着说。三者是不同层次：</p>
+<div class="article-table"><table>
+<thead><tr><th>层次</th><th>例子</th><th>是否一定进内核</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>C 库函数</td><td><code>read</code>、<code>printf</code>、<code>memcpy</code></td><td>不一定</td><td>库函数可能完全在用户态完成，也可能内部调用系统调用</td></tr>
+<tr><td>系统调用</td><td><code>sys_read</code>、<code>sys_write</code>、<code>sys_fork</code></td><td>是</td><td>内核入口和实现，运行在内核态</td></tr>
+<tr><td>编程接口/API</td><td>POSIX、Win32 API</td><td>不一定</td><td>API 是规范；底层可能是一个或多个系统调用</td></tr>
+</tbody>
+</table></div>
+<p>例如 <code>printf</code> 通常先把格式化结果写进用户态缓冲区，缓冲区满或调用 <code>fflush</code> 时才执行 <code>write</code> 系统调用；<code>memcpy</code> 一般只是用户态的内存拷贝，不会进内核。反过来，<code>read</code> 在 C 库里是函数，但它内部确实会触发系统调用。判断时不要看“名字像不像系统调用”，要看它有没有跨特权级。</p>
+
+<h2 id="syscall-cost">七、开销、错误与安全</h2>
+<p>系统调用比普通函数调用贵，原因不止“换了个模式”：</p>
+<ul>
+<li><strong>模式切换</strong>：保存/恢复 PSW、PC、栈指针和部分寄存器，切换内核栈；</li>
+<li><strong>参数校验</strong>：内核不能相信用户传来的指针、长度、fd，要检查合法性；</li>
+<li><strong>数据拷贝</strong>：用户缓冲区与内核缓冲区之间可能要复制大量数据；</li>
+<li><strong>可能的阻塞与调度</strong>：等待 I/O 时进程睡眠，触发进程切换。</li>
+</ul>
+<p>所以高性能程序会尽量<strong>批量读写、减少小系统调用、用缓冲区合并操作</strong>；但优化不能以绕过保护为代价。内核侧则要用 <code>copy_from_user</code>/<code>copy_to_user</code> 一类机制安全搬运数据，防止用户指针非法、越界，或在中途被另一个线程改掉（TOCTOU 一类问题）。</p>
+<p>“用户态发起”不意味着用户态能控制内核做什么：系统调用号决定入口，参数要经过内核校验，权限（文件属主、能力位、地址空间）仍由内核判断。用户只能<strong>请求</strong>，不能<strong>命令</strong>内核绕过规则。</p>
+
+<h2 id="syscall-pitfalls">八、常见误区与收束</h2>
+<ul>
+<li><strong>“read() 就是系统调用指令”</strong>：read() 是库函数；真正跨边界的是它内部的 syscall/int 指令。</li>
+<li><strong>“系统调用就是外部中断”</strong>：系统调用是同步 trap，由指令主动触发；外部中断由设备异步触发。</li>
+<li><strong>“软中断就是系统调用”</strong>：408 的“软中断”常指软件中断指令；Linux softirq 是另一套内核机制。</li>
+<li><strong>“系统调用号就是服务程序地址”</strong>：编号只是系统调用表的索引，表项里才是入口。</li>
+<li><strong>“内核可以直接使用用户指针”</strong>：必须校验并安全拷贝，不能信任用户地址。</li>
+<li><strong>“系统调用一定导致进程切换”</strong>：不一定；只读缓存、快速服务可能只进出内核，仍回原进程。</li>
+</ul>
+<p>把这一节收成一条链：<strong>用户调用库函数 → 参数/编号进寄存器 → 执行 syscall/int → CPU 陷入内核 → 查系统调用表 → 校验并执行服务 → sysret/iret 返回 → 库函数处理返回值</strong>。这条链把“用户态发起”“陷入”“内核服务”“返回”四件事串在了一起。</p>
+</div>
+<p class="article-source">内容整理自操作系统教材的通用框架；x86-64 寄存器与系统调用号为示例，具体以目标平台 ABI 为准。</p>
