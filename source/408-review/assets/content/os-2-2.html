@@ -1,0 +1,124 @@
+<div class="article-content">
+<p>进程既是资源分配单位，又是调度单位。但一个进程里如果只有一条执行流，它一旦阻塞，整个进程就停住；创建/切换进程又要换地址空间，代价高。线程把这两件事拆开：<strong>资源仍然归进程，CPU 调度交给线程</strong>。理解线程，重点不是“线程更轻”，而是看清<strong>哪些资源共享、哪些私有、谁来调度</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#thread-why">一、为什么需要线程</a></li>
+<li><a href="#thread-compare">二、进程与线程的分工</a></li>
+<li><a href="#thread-share">三、共享什么，私有什么</a></li>
+<li><a href="#thread-ult">四、ULT：用户级线程</a></li>
+<li><a href="#thread-kst">五、KST：内核级线程</a></li>
+<li><a href="#thread-models">六、多线程模型</a></li>
+<li><a href="#thread-pitfalls">七、切换、同步与易错点</a></li>
+</ul></div>
+</details>
+
+<h2 id="thread-why">一、为什么需要线程</h2>
+<p>如果进程既是资源单位又是调度单位，会有两个问题：</p>
+<ul>
+<li><strong>切换贵</strong>：进程切换要换页表、刷新 TLB、保存完整现场；</li>
+<li><strong>并发粒度粗</strong>：一个进程只有一个执行流，进程内某段代码阻塞，整个进程都停。</li>
+</ul>
+<p>线程把“执行流”从进程里拆出来：同一进程可以有多个线程，它们共享地址空间和打开文件，但各自有寄存器、PC、栈和 TCB。这样，一个线程等待 I/O 时，另一个线程还可以继续跑；线程切换通常不用换地址空间，开销比进程切换小。</p>
+<p>但“轻”不是免费的：线程共享地址空间，任何线程都能读写其他线程的栈和全局变量，数据竞争和同步问题比进程更直接。</p>
+
+<h2 id="thread-compare">二、进程与线程的分工</h2>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>进程</th><th>线程</th></tr></thead>
+<tbody>
+<tr><td>定位</td><td>资源分配的基本单位</td><td>调度/分派的基本单位</td></tr>
+<tr><td>地址空间</td><td>独立</td><td>同一进程内共享</td></tr>
+<tr><td>拥有资源</td><td>地址空间、文件、设备等</td><td>基本不拥有资源，依附于进程</td></tr>
+<tr><td>私有内容</td><td>PCB、页表、地址空间</td><td>寄存器、PC、栈、TCB</td></tr>
+<tr><td>切换开销</td><td>较大，可能换页表/TLB</td><td>较小，同进程内通常不换页表</td></tr>
+<tr><td>通信</td><td>需要共享存储/消息/管道</td><td>直接读写共享变量（需同步）</td></tr>
+<tr><td>健壮性</td><td>进程间隔离较好</td><td>一个线程崩溃可能拖垮整个进程</td></tr>
+</tbody>
+</table></div>
+<p>所以“线程是轻量级进程”这个说法只对了一半：它轻在切换和资源共享，但代价是隔离性变差。</p>
+
+<h2 id="thread-share">三、共享什么，私有什么</h2>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="线程调度层次：OS 内核把处理机分给进程，用户空间的线程调度代码再调度进程内的多个线程" data-src="/408-review/assets/textbook/os-thread-schedule.webp" href="/408-review/assets/textbook/os-thread-schedule.webp">
+<img alt="线程调度层次：OS 内核调度处理机，用户空间的线程调度代码把 CPU 分给进程 1 内的线程 1、线程 2、线程 3" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-thread-schedule.webp"/>
+</a>
+<figcaption>这张图是 ULT 的视角：内核只把 CPU 分给进程，进程内的线程库再决定哪个线程运行。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>共享</th><th>私有</th></tr></thead>
+<tbody>
+<tr><td>代码段、数据段、堆</td><td>寄存器现场（通用寄存器、PC、PSW）</td></tr>
+<tr><td>打开的文件、当前目录</td><td>用户栈和内核栈</td></tr>
+<tr><td>信号处理函数、地址空间</td><td>线程 ID、TCB、优先级/调度信息</td></tr>
+<tr><td>进程的资源和权限</td><td>线程局部存储（TLS）</td></tr>
+</tbody>
+</table></div>
+<p>“共享堆、私有栈”意味着：一个线程 <code>malloc</code> 出来的内存，其他线程可以直接访问；但一个线程的局部变量在它自己的栈上，其他线程要拿到地址才能访问——而语言/运行时通常不鼓励这样。线程之间没有 MMU 保护，栈溢出或野指针可能破坏其他线程的数据。</p>
+
+<h2 id="thread-ult">四、ULT：用户级线程</h2>
+<p><strong>ULT（User-Level Thread）</strong>把线程的创建、切换、调度都放在用户空间的线程库里，内核只看到一个普通的单线程进程。线程库维护线程表和 TCB，切换时保存/恢复用户寄存器，不需要陷入内核。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="ULT：多个用户级线程由用户空间的线程库管理，内核只看到进程" data-src="/408-review/assets/textbook/os-ult.webp" href="/408-review/assets/textbook/os-ult.webp">
+<img alt="ULT 结构：用户空间内有三个用户级线程，经线程库汇入一个进程；内核空间只看到该进程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-ult.webp"/>
+</a>
+<figcaption>ULT 的线程切换在用户空间完成；内核调度对象仍是整个进程。</figcaption>
+</figure>
+<p><strong>优点：</strong></p>
+<ul>
+<li>线程切换不需要模式切换，开销小；</li>
+<li>进程可以为自己的线程选择专用调度算法；</li>
+<li>线程库在用户空间实现，可移植，甚至能在不支持线程的 OS 上运行。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>内核只识别进程，每次只能把一个 CPU 分给整个进程；同一进程的多个 ULT 无法在多核上真正并行；</li>
+<li>一个 ULT 发起阻塞系统调用（如 read）时，内核会阻塞整个进程，其他 ULT 也跑不了；</li>
+<li>内核级事件（时钟、I/O）只能打断进程，线程库再决定切换哪个线程。</li>
+</ul>
+
+<h2 id="thread-kst">五、KST：内核级线程</h2>
+<p><strong>KST（Kernel-Level Thread）</strong>由内核直接管理：每个线程有内核中的 TCB，内核调度器直接调度线程。用户线程通过系统调用创建/销毁内核线程，线程切换要进入内核。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="KST：每个用户级线程对应一个内核级线程，内核直接调度线程" data-src="/408-review/assets/textbook/os-kst.webp" href="/408-review/assets/textbook/os-kst.webp">
+<img alt="KST 结构：用户空间三个用户级线程分别对应内核空间三个内核级线程，内核级线程再汇入进程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-kst.webp"/>
+</a>
+<figcaption>KST 的调度对象是内核级线程；一个线程阻塞，内核可以调度同进程其他线程或其他进程。</figcaption>
+</figure>
+<p><strong>优点：</strong></p>
+<ul>
+<li>多核/多处理机上，同一进程的多个线程可以分到不同 CPU，真正并行；</li>
+<li>一个线程阻塞时，内核可以调度同进程其他线程，或调度其他进程；</li>
+<li>内核可以直接利用时钟中断做抢占式线程调度。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>线程切换要进内核，模式切换和调度开销更大；</li>
+<li>TCB 放在内核空间，占内核内存；</li>
+<li>线程创建/销毁/同步更多依赖系统调用。</li>
+</ul>
+
+<h2 id="thread-models">六、多线程模型</h2>
+<div class="article-table"><table>
+<thead><tr><th>模型</th><th>用户线程 : 内核线程</th><th>特点</th></tr></thead>
+<tbody>
+<tr><td>多对一</td><td>多个 ULT → 一个 KST</td><td>接近 ULT；切换快，但一个阻塞全阻塞，不能多核并行</td></tr>
+<tr><td>一对一</td><td>一个 ULT → 一个 KST</td><td>并发/并行好，但线程创建和切换开销大，内核线程数量受限</td></tr>
+<tr><td>多对多</td><td>多个 ULT → 多个 KST</td><td>复用内核线程，兼顾并行和开销；实现复杂</td></tr>
+</tbody>
+</table></div>
+<p>很多系统还会用“两层模型”：既有多对多，也允许某些线程绑定到专用内核线程。模型的选择本质上是<strong>并行度、切换开销、内核资源</strong>三者的折中。</p>
+
+<h2 id="thread-pitfalls">七、切换、同步与易错点</h2>
+<p>线程切换保存/恢复寄存器、PC、SP 和 TCB；同一进程的线程共享页表，所以通常不换地址空间、不刷新 TLB。进程切换则可能换页表，代价更高。</p>
+<p>线程共享地址空间，必须用互斥锁、信号量、条件变量等保护共享数据。一个线程打开的文件，其他线程也能读写；这也意味着“线程安全”不是自动的。</p>
+<ul>
+<li><strong>“线程有独立地址空间”</strong>：同一进程的线程共享地址空间；只有进程之间独立。</li>
+<li><strong>“ULT 切换一定要进内核”</strong>：ULT 的线程切换由用户库完成，不需要模式切换。</li>
+<li><strong>“ULT 一个线程阻塞不影响其他线程”</strong>：ULT 的阻塞系统调用会让整个进程阻塞。</li>
+<li><strong>“KST 没有开销”</strong>：KST 切换要进内核，TCB 也占内核资源。</li>
+<li><strong>“线程越多越好”</strong>：线程创建/切换/同步都有开销，还会争用 CPU、Cache 和内存。</li>
+</ul>
+<p>把这一节收成一句话：<strong>进程管资源，线程管执行；ULT 在用户空间调度、快但怕阻塞，KST 在内核调度、能并行但有切换开销。</strong></p>
+</div>
+<p class="article-source">内容整理自《进程与线程》导图与操作系统教材通用框架；具体线程库和内核实现随平台而异。</p>

@@ -1,0 +1,131 @@
+<div class="article-content">
+<p>程序只是磁盘上的指令和数据，真正“跑起来”之后，内核要同时维护它的地址空间、寄存器现场、状态、优先级、打开的文件和等待的事件。把这些东西打包起来，才得到一个<strong>进程</strong>。理解进程，关键是抓住两条线：<strong>它由什么组成</strong>，以及<strong>它在什么状态下、下一步能去哪里</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>8 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#proc-program">一、程序与进程：静态与动态</a></li>
+<li><a href="#proc-pcb">二、进程实体与 PCB</a></li>
+<li><a href="#proc-image">三、进程映像：虚拟地址空间里有什么</a></li>
+<li><a href="#proc-state">四、五种状态与合法转换</a></li>
+<li><a href="#proc-control">五、创建、终止、阻塞与唤醒</a></li>
+<li><a href="#proc-comm">六、进程通信的三种方式</a></li>
+<li><a href="#proc-switch">七、进程切换与模式切换</a></li>
+<li><a href="#proc-pitfalls">八、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="proc-program">一、程序与进程：静态与动态</h2>
+<p><strong>程序</strong>是存放在磁盘上的指令和数据集合，是静态的；<strong>进程</strong>是程序的一次执行实例，是动态的，有创建、就绪、运行、阻塞、终止的生命周期。同一个程序运行两次，会得到两个不同的进程：它们可以有不同的 PID、不同的寄存器和不同的地址空间。</p>
+<p>进程和程序不是一一对应：一个程序可以对应多个进程；一个进程也可以通过 <code>exec</code> 换成另一个程序。程序本身不占 CPU，进程才参与调度。</p>
+<div class="article-table"><table>
+<thead><tr><th>对比</th><th>程序</th><th>进程</th></tr></thead>
+<tbody>
+<tr><td>存在形式</td><td>静态文件/指令集合</td><td>运行中的执行实例</td></tr>
+<tr><td>生命周期</td><td>长期存放在磁盘</td><td>创建到终止，有状态变化</td></tr>
+<tr><td>资源</td><td>不拥有运行资源</td><td>拥有地址空间、PCB、打开文件等</td></tr>
+<tr><td>并发性</td><td>本身不能并发执行</td><td>多个进程可以并发/并行</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="proc-pcb">二、进程实体与 PCB</h2>
+<p>教材通常把进程实体（进程映像）概括为三部分：<strong>代码段、数据段、PCB</strong>。其中 PCB（Process Control Block，进程控制块）是内核为进程建立的数据结构，也是<strong>进程存在的唯一标志</strong>：内核靠 PCB 才知道“这个进程是谁、现在什么状态、现场在哪、占了哪些资源”。</p>
+<div class="article-table"><table>
+<thead><tr><th>PCB 字段</th><th>内容</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td>进程标识符</td><td>外部标识符（用户可见的名字/编号）、内部标识符（内核用的唯一 PID）</td><td>区分进程，方便用户访问和内核管理</td></tr>
+<tr><td>处理机状态</td><td>通用寄存器、PC、PSW、用户栈指针/内核栈指针</td><td>进程被切换出去后，下次能恢复现场继续执行</td></tr>
+<tr><td>进程调度信息</td><td>状态、优先级、等待事件、已等待/已执行时间等</td><td>调度器据此选进程、判断是否阻塞/唤醒</td></tr>
+<tr><td>进程控制信息</td><td>程序和数据地址、页表起始地址、同步通信机制、资源清单、链接指针</td><td>定位地址空间、管理资源和队列</td></tr>
+</tbody>
+</table></div>
+<p>PCB 放在<strong>内核区</strong>，用户程序不能直接读写。进程切换时，内核把当前寄存器现场写回旧 PCB，再从新 PCB 恢复现场；这也是“进程切换比线程切换贵”的原因之一。</p>
+
+<h2 id="proc-image">三、进程映像：虚拟地址空间里有什么</h2>
+<p>进程看到的不是物理内存，而是一段<strong>虚拟地址空间</strong>。操作系统给每个进程造出“我独占一大片内存”的假象，实际由页表把虚拟页映射到物理页框；不同进程可以复用同一份物理内存，但彼此不可见。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="进程映像：内核空间在高地址，用户空间从低地址到高地址依次为代码段、数据段、堆、共享库映射、用户栈" data-src="/408-review/assets/textbook/os-process-image.webp" href="/408-review/assets/textbook/os-process-image.webp">
+<img alt="进程映像地址空间：高地址为内核空间，低地址到高地址依次为只读代码段、读写数据段、动态堆、共享库映射区、用户栈" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-process-image.webp"/>
+</a>
+<figcaption>内核区对用户不可见；用户栈从高地址向低地址增长，堆向高地址增长；共享库映射让多个进程共享同一份物理代码。</figcaption>
+</figure>
+<p>从低地址到高地址，典型布局是：</p>
+<ul>
+<li><strong>只读代码段</strong>（.init/.text/.rodata）：程序的指令和只读常量，可被多个进程共享；</li>
+<li><strong>读写数据段</strong>（.data/.bss）：全局变量、静态变量；</li>
+<li><strong>堆</strong>：<code>malloc/new</code> 动态分配，向高地址增长；</li>
+<li><strong>共享库映射区</strong>：动态链接库（DLL/.so）映射进来，多个进程共享同一份物理副本；</li>
+<li><strong>用户栈</strong>：函数调用、局部变量、返回地址，从用户空间高地址向低地址增长；</li>
+<li><strong>内核空间</strong>：内核代码/数据映射在高地址，用户态不可访问；PCB 等内核数据结构也在这里。</li>
+</ul>
+<p>“栈向低地址、堆向高地址”不是任意规定：栈需要可预测地向调用链深处扩展，堆需要向空闲区扩展；两者相向生长，中间留出共享库和未使用区。进程的 PCB 不在用户栈里，而在内核区。</p>
+
+<h2 id="proc-state">四、五种状态与合法转换</h2>
+<p>进程最基本的状态是三种：<strong>就绪</strong>（资源够，只差 CPU）、<strong>执行</strong>（占用 CPU）、<strong>阻塞</strong>（等待 I/O 或事件，主动让出 CPU）。再加上<strong>创建</strong>和<strong>终止</strong>，就是五状态模型。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="进程状态转换：创建→就绪→执行；执行→就绪（时间片完/被抢占）；执行→阻塞（I/O 请求）；阻塞→就绪（I/O 完成）；执行→终止" data-src="/408-review/assets/textbook/os-process-state.webp" href="/408-review/assets/textbook/os-process-state.webp">
+<img alt="进程状态图：创建到就绪，就绪与执行之间由调度和时间片转换，执行到阻塞由 I/O 请求，阻塞到就绪由 I/O 完成，执行到终止" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-process-state.webp"/>
+</a>
+<figcaption>阻塞→执行没有直接边；被唤醒后必须先进入就绪队列，再等调度。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>转换</th><th>触发</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>创建 → 就绪</td><td>PCB/资源初始化完成，插入就绪队列</td><td>进程已具备运行条件</td></tr>
+<tr><td>就绪 → 执行</td><td>调度器选中</td><td>分配 CPU，恢复现场</td></tr>
+<tr><td>执行 → 就绪</td><td>时间片用完、被更高优先级抢占</td><td>被动让出 CPU，仍可运行</td></tr>
+<tr><td>执行 → 阻塞</td><td>请求 I/O、等待事件、block 原语</td><td>主动行为，进入等待队列</td></tr>
+<tr><td>阻塞 → 就绪</td><td>I/O 完成、事件发生、wakeup</td><td>被唤醒，进入就绪队列</td></tr>
+<tr><td>执行 → 终止</td><td>正常结束或异常终止</td><td>回收资源与 PCB</td></tr>
+</tbody>
+</table></div>
+<p>两条“不存在的边”要记牢：<strong>阻塞不能直接变执行</strong>（必须先就绪、再被调度）；<strong>就绪不能主动变阻塞</strong>（没有 CPU 就无法发起阻塞操作）。</p>
+
+<h2 id="proc-control">五、创建、终止、阻塞与唤醒</h2>
+<h3>1. 创建</h3>
+<p>创建进程通常包括：分配唯一 PID、申请 PCB、分配地址空间和资源、初始化 PCB（状态、PC、栈指针、优先级等）、插入就绪队列。父进程创建子进程时，子进程可以继承父进程的打开文件、缓冲区等资源；也可以加载新程序。</p>
+<p>类 Unix 的 <code>fork</code> 让子进程成为父进程的副本（现代实现常用写时复制），<code>exec</code> 再把子进程替换成新程序。题目没有明确说 <code>fork</code>/<code>exec</code> 时，不要自行套用“子进程复制父进程全部变量”的细节，按题目给出的语义做。</p>
+
+<h3>2. 终止</h3>
+<p>进程正常结束或异常终止后，内核回收它的内存、打开文件、设备等资源，撤销 PCB，并处理父子关系。教材口径常强调：撤销父进程时通常要同时撤销其子进程；实际系统还有孤儿进程被 init/托孤、僵尸进程等待父进程回收等机制，考试按题目口径。</p>
+
+<h3>3. 阻塞与唤醒</h3>
+<p><strong>阻塞</strong>是进程主动调用 <code>block</code> 原语：保存现场，把 PCB 状态改为阻塞，插入相应事件的等待队列，然后调度其他进程。<strong>唤醒</strong>是等待的事件发生时，由内核（或另一个进程）调用 <code>wakeup</code>：把进程从等待队列移到就绪队列，状态改为就绪；它还要等调度器选中才能运行。</p>
+<p>所以 block 是“自己把自己挂起”，wakeup 是“别人/事件把它叫醒”。一个进程不能阻塞另一个进程；它只能通过 V 操作、消息到达等方式间接唤醒。</p>
+
+<h2 id="proc-comm">六、进程通信的三种方式</h2>
+<div class="article-table"><table>
+<thead><tr><th>方式</th><th>做法</th><th>优点</th><th>边界/代价</th></tr></thead>
+<tbody>
+<tr><td>共享存储</td><td>通信进程映射同一块共享内存，直接读写</td><td>最快，适合大量数据</td><td>必须自己同步互斥，否则数据竞争</td></tr>
+<tr><td>消息传递</td><td>以格式化消息为单位，send/receive</td><td>适合分布式、天然按消息同步</td><td>拷贝/系统调用开销；有阻塞/非阻塞、缓冲/无缓冲之分</td></tr>
+<tr><td>管道</td><td>连接读进程和写进程的共享文件（pipe）</td><td>简单，按字节流</td><td>半双工、通常有界；空时读阻塞、满时写阻塞</td></tr>
+</tbody>
+</table></div>
+<p>管道同一时刻只能有一个方向传输；如果要双向，通常用两个管道。管道是<strong>有界缓冲区</strong>：写满后写进程阻塞，读空后读进程阻塞，这本身就是一种同步。</p>
+
+<h2 id="proc-switch">七、进程切换与模式切换</h2>
+<p>进程切换要保存旧进程的现场（寄存器、PC、PSW、SP、页表基址等）到 PCB，更新队列/状态；再恢复新进程的现场，切换地址空间（页表基址、TLB 等）。模式切换只是 CPU 从用户态进内核态，仍然可能是同一个进程。</p>
+<div class="article-table"><table>
+<thead><tr><th>对比</th><th>模式切换</th><th>进程切换</th></tr></thead>
+<tbody>
+<tr><td>改变</td><td>CPU 特权级</td><td>当前运行的进程</td></tr>
+<tr><td>地址空间</td><td>不换</td><td>通常换页表，可能刷新 TLB</td></tr>
+<tr><td>触发</td><td>中断/异常/陷入/返回</td><td>调度器决定换进程</td></tr>
+<tr><td>开销</td><td>保存/恢复部分现场</td><td>完整上下文 + 地址空间 + 调度开销</td></tr>
+</tbody>
+</table></div>
+<p>一次系统调用可能只发生模式切换；只有内核决定“换另一个进程”时，才是进程切换。把这两件事分开，后面线程切换、调度开销才不会混。</p>
+
+<h2 id="proc-pitfalls">八、易错点与收束</h2>
+<ul>
+<li><strong>“程序就是进程”</strong>：程序是静态的；进程是执行实例，有 PCB、状态和生命周期。</li>
+<li><strong>“阻塞可以直接变执行”</strong>：阻塞被唤醒后先进就绪队列，必须再被调度。</li>
+<li><strong>“就绪可以主动变阻塞”</strong>：只有正在执行的进程才能主动请求 I/O 而阻塞。</li>
+<li><strong>“PCB 在用户空间”</strong>：PCB 是内核数据结构，放在内核区。</li>
+<li><strong>“进程切换只保存 PC”</strong>：还要保存通用寄存器、PSW、SP、页表基址等，并更新 PCB/队列。</li>
+<li><strong>“父进程终止，子进程一定自动终止”</strong>：取决于系统策略；按题目口径判断，不要绝对化。</li>
+</ul>
+<p>把这一节收成一条链：<strong>程序 + 数据 + PCB → 进程映像 → 五状态转换 → 创建/阻塞/唤醒/终止 → 通信 → 切换</strong>。后面线程、调度、同步和死锁，都是在这条链上继续加问题。</p>
+</div>
+<p class="article-source">内容整理自《进程与线程》导图与操作系统教材通用框架；fork/exec 等实现细节以题目和平台为准。</p>

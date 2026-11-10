@@ -1,0 +1,138 @@
+<div class="article-content">
+<p>死锁不是“某个进程等太久”，而是一组进程<strong>互相等待对方手里的资源</strong>，没有外力介入就永远推进不了。它和饥饿的区别、四个必要条件的用法、银行家算法怎样判断安全状态，是这一节的主线。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>9 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#dead-def">一、死锁的定义与饥饿的区别</a></li>
+<li><a href="#dead-conditions">二、四个必要条件</a></li>
+<li><a href="#dead-graph">三、资源分配图与化简</a></li>
+<li><a href="#dead-prevent">四、死锁预防：破坏条件</a></li>
+<li><a href="#dead-safe">五、安全状态与不安全状态</a></li>
+<li><a href="#dead-banker">六、银行家算法</a></li>
+<li><a href="#dead-example">七、一个不安全状态的例子</a></li>
+<li><a href="#dead-detect">八、检测与解除</a></li>
+<li><a href="#dead-pitfalls">九、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="dead-def">一、死锁的定义与饥饿的区别</h2>
+<p><strong>死锁</strong>：一组进程中的每一个进程都在等待一个事件，而这个事件只能由该组中的其他进程引发。直白地说，大家各自占着一些资源，又在等别人释放，形成闭环，谁都动不了。</p>
+<p><strong>饥饿</strong>：进程长期得不到 CPU 或某类资源，推进被明显延迟，但系统仍然可能推进；只要调度策略改变或资源到来，它还有机会。死锁是“没有外力就永远无法推进”，饥饿是“可能永远轮不到，但不是互相等待的闭环”。</p>
+<div class="article-table"><table>
+<thead><tr><th>对比</th><th>死锁</th><th>饥饿</th></tr></thead>
+<tbody>
+<tr><td>本质</td><td>循环等待，进程互相卡死</td><td>长期得不到资源/CPU</td></tr>
+<tr><td>能否自行恢复</td><td>通常不能，需要外部干预</td><td>调度策略改变后可能恢复</td></tr>
+<tr><td>涉及进程</td><td>至少两个（单进程也可能自锁）</td><td>可以只有一个</td></tr>
+<tr><td>典型原因</td><td>资源分配不当、P 顺序相反</td><td>优先级/短作业优先导致低优先级长期等待</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="dead-conditions">二、四个必要条件</h2>
+<div class="article-table"><table>
+<thead><tr><th>条件</th><th>含义</th><th>破坏思路</th></tr></thead>
+<tbody>
+<tr><td>互斥</td><td>资源一次只能被一个进程占用</td><td>尽量把资源改造成可共享（如 SPOOLing），但很多资源不能</td></tr>
+<tr><td>请求并保持</td><td>已持有至少一个资源，又请求新资源且不释放旧的</td><td>一次性申请全部资源；或请求新资源前先释放已有资源</td></tr>
+<tr><td>不可抢占</td><td>已分配的资源不能被强行夺走</td><td>允许剥夺，或要求进程回退</td></tr>
+<tr><td>循环等待</td><td>存在进程—资源的循环等待链</td><td>给资源编号，按序申请</td></tr>
+</tbody>
+</table></div>
+<p>四个条件是“必要条件”不是“充分条件”：同时满足才<strong>可能</strong>死锁；破坏其中一个就<strong>不会</strong>因这四个条件组合而死锁。预防就是付出资源利用率/并发度的代价去破坏其中一个。</p>
+
+<h2 id="dead-graph">三、资源分配图与化简</h2>
+<p>资源分配图：进程画成圆圈，资源画成方框，方框里的圆点表示该类资源的实例数；请求边是进程 → 资源，分配边是资源 → 进程。</p>
+<ul>
+<li><strong>单实例资源</strong>：图中出现环 → 一定死锁；没有环 → 一定无死锁。</li>
+<li><strong>多实例资源</strong>：有环不一定死锁，要看能否把所有边都消掉（化简）。</li>
+</ul>
+<p>化简方法：找一个“请求量不超过当前可用资源”的进程，假设它运行完并释放资源，删除它的边、增加可用资源；重复。若最后能消掉所有边，图可完全简化，无死锁；否则死锁。</p>
+
+<h2 id="dead-prevent">四、死锁预防：破坏条件</h2>
+<ul>
+<li><strong>破坏互斥</strong>：把独占资源改造成共享（如打印机的 SPOOLing 队列）。但很多资源本质上不能共享，通用性差。</li>
+<li><strong>破坏请求并保持</strong>：进程一次性申请所有资源；或申请新资源前释放已持有的资源。前者资源利用率低，后者可能反复申请/释放。</li>
+<li><strong>破坏不可抢占</strong>：允许抢占资源，被抢的进程回退/重试。实现复杂，可能丢失工作。</li>
+<li><strong>破坏循环等待</strong>：给资源编号，所有进程按递增顺序申请，不能反向。简单有效，但编号可能与实际使用顺序冲突，降低并发。</li>
+</ul>
+<p>预防是<strong>静态</strong>的策略：在分配前就限制请求方式，保证死锁不会发生，代价是资源利用率/并发度。</p>
+
+<h2 id="dead-safe">五、安全状态与不安全状态</h2>
+<p>系统处于<strong>安全状态</strong>：存在一个进程推进顺序（安全序列），按这个顺序，每个进程都能获得它尚需的资源并顺利完成。安全状态一定不会死锁。</p>
+<p><strong>不安全状态</strong>：找不到安全序列。它只是“可能死锁”，不是“已经死锁”；系统仍可能因为实际请求顺序不同而完成，但无法保证。</p>
+<div class="article-table"><table>
+<thead><tr><th>状态</th><th>是否存在安全序列</th><th>是否一定死锁</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>安全</td><td>存在</td><td>不会</td><td>可按安全序列分配</td></tr>
+<tr><td>不安全</td><td>不存在</td><td>可能</td><td>可能死锁，也可能侥幸完成</td></tr>
+<tr><td>死锁</td><td>不存在</td><td>已经</td><td>已经形成循环等待</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="dead-banker">六、银行家算法</h2>
+<p>银行家算法属于<strong>死锁避免</strong>：每次请求时先“试分配”，再用安全性算法检查是否仍存在安全序列；安全才真正分配，不安全就回滚并让进程等待。</p>
+<p>需要的矩阵：</p>
+<ul>
+<li><code>Available</code>：当前可用资源向量；</li>
+<li><code>Max</code>：每个进程的最大需求；</li>
+<li><code>Allocation</code>：已分配；</li>
+<li><code>Need = Max − Allocation</code>：尚需。</li>
+</ul>
+<p>安全性算法：令 <code>Work = Available</code>，反复找一个 <code>Need_i ≤ Work</code> 且未完成的进程，假设它完成并释放 <code>Allocation_i</code>，令 <code>Work += Allocation_i</code>；能找完所有进程就安全，否则不安全。</p>
+<p>请求处理：检查 <code>Request_i ≤ Need_i</code> 且 <code>Request_i ≤ Available</code>；试分配后运行安全性算法；安全则提交，不安全则回滚、让进程等待。</p>
+<h3>一个安全例子</h3>
+<div class="article-table"><table>
+<thead><tr><th>进程</th><th>Allocation (A,B,C)</th><th>Need (A,B,C)</th></tr></thead>
+<tbody>
+<tr><td>P1</td><td>(1,0,0)</td><td>(1,0,0)</td></tr>
+<tr><td>P2</td><td>(0,1,0)</td><td>(2,1,0)</td></tr>
+<tr><td>P3</td><td>(0,0,1)</td><td>(1,0,1)</td></tr>
+</tbody>
+</table></div>
+<p>当前 <code>Available = (2,2,0)</code>。按 P1 → P2 → P3：</p>
+<ul>
+<li>P1 需要 (1,0,0) ≤ (2,2,0)，完成后 Work = (3,2,0)；</li>
+<li>P2 需要 (2,1,0) ≤ (3,2,0)，完成后 Work = (3,3,0)；</li>
+<li>P3 需要 (1,0,1) ≤ (3,3,0)，完成后 Work = (3,3,1)。</li>
+</ul>
+<p>所以安全序列是 P1, P2, P3（可能不唯一），系统安全。</p>
+
+<h2 id="dead-example">七、一个不安全状态的例子</h2>
+<p>下面这张表是某一时刻的资源快照，<code>Available = (0,2,1)</code>：</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="银行家算法资源快照：四个进程的已分配资源、尚需资源和当前可用资源 (0,2,1)" data-src="/408-review/assets/textbook/os-banker-table.webp" href="/408-review/assets/textbook/os-banker-table.webp">
+<img alt="银行家算法表格：P1 至 P4 的已分配资源、尚需资源，以及当前可用资源 R1=0、R2=2、R3=1" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-banker-table.webp"/>
+</a>
+<figcaption>按这张表找不到安全序列：P1、P4 可完成，但之后仍无法满足 P2/P3 的 R2=3。</figcaption>
+</figure>
+<p>试着找安全序列：</p>
+<ul>
+<li>P1 需要 (0,0,1) ≤ (0,2,1)，完成，Work = (0,2,1) + (2,0,0) = (2,2,1)；</li>
+<li>P4 需要 (2,0,0) ≤ (2,2,1)，完成，Work = (2,2,1) + (0,0,1) = (2,2,2)；</li>
+<li>P2 需要 (1,3,2)，R2 需要 3 &gt; 2；P3 需要 (1,3,1)，R2 也要 3 &gt; 2，都无法完成。</li>
+</ul>
+<p>所以这张快照<strong>没有安全序列</strong>，是不安全状态。注意：不安全不等于已经死锁；如果 P2/P3 的实际请求顺序恰好能错开，系统仍可能完成。但银行家算法不能保证，因此会拒绝可能导致不安全的请求。</p>
+
+<h2 id="dead-detect">八、检测与解除</h2>
+<p><strong>检测</strong>：定期检查资源分配图/等待图。单实例资源可用等待图找环；多实例资源用化简算法。检测频率越高，发现越早，但开销越大。</p>
+<p><strong>解除</strong>：</p>
+<ul>
+<li><strong>资源剥夺</strong>：从某些进程强行拿走资源，分配给死锁进程；被剥夺者回退/重试；</li>
+<li><strong>撤销进程</strong>：终止一个或多个死锁进程，释放资源；</li>
+<li><strong>进程回退</strong>：让进程回退到某个检查点，重新执行。</li>
+</ul>
+<p>选择“受害者”要综合考虑优先级、已运行时间、剩余工作量、资源类型和回退代价，避免同一进程反复被选中而饥饿。</p>
+
+<h2 id="dead-pitfalls">九、易错点与收束</h2>
+<ul>
+<li><strong>“有环一定死锁”</strong>：单实例资源图有环一定死锁；多实例有环不一定，需化简。</li>
+<li><strong>“不安全一定死锁”</strong>：不安全只是可能死锁；系统仍可能完成。</li>
+<li><strong>“死锁 = 饥饿”</strong>：死锁是循环等待、无法推进；饥饿是长期得不到资源但可能推进。</li>
+<li><strong>“破坏互斥最容易”</strong>：很多资源必须互斥；通常从请求并保持、不可抢占、循环等待入手。</li>
+<li><strong>“银行家算法能预防所有死锁”</strong>：它要求预知 Max，只保证不进入不安全状态；实际系统未必采用。</li>
+<li><strong>“安全序列唯一”</strong>：安全序列可能不唯一，找到一个就说明安全。</li>
+</ul>
+<p>把这一节收成一句话：<strong>死锁看四个条件和循环等待；预防靠破坏条件，避免靠银行家算法保持安全，检测靠资源图化简，解除靠剥夺/撤销/回退。</strong></p>
+</div>
+<p class="article-source">内容整理自《进程与线程》导图与操作系统教材通用框架；银行家算法示例为教学用资源快照。</p>

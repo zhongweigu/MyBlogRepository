@@ -1,0 +1,130 @@
+<div class="article-content">
+<p>调度算法不是一堆名字，而是在“先来后到、短作业优先、响应比、优先级、时间片、多队列”这些规则里做选择。每个算法都要回答四个问题：<strong>怎么选、能不能抢占、对谁有利、会不会饥饿</strong>。这一节把常见算法放在同一张表里比较，再用一组小例子算一遍。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>9 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#alg-fcfs">一、FCFS：先来先服务</a></li>
+<li><a href="#alg-sjf">二、SJF / SRTN：短作业优先</a></li>
+<li><a href="#alg-hrrn">三、HRRN：高响应比优先</a></li>
+<li><a href="#alg-priority">四、优先级调度</a></li>
+<li><a href="#alg-rr">五、时间片轮转 RR</a></li>
+<li><a href="#alg-mlq">六、多级队列与多级反馈队列</a></li>
+<li><a href="#alg-example">七、同一组进程的对比</a></li>
+<li><a href="#alg-choose">八、怎么选：场景与代价</a></li>
+<li><a href="#alg-pitfalls">九、易错点</a></li>
+</ul></div>
+</details>
+
+<h2 id="alg-fcfs">一、FCFS：先来先服务</h2>
+<p>按进程到达就绪队列的先后顺序调度，<strong>非抢占</strong>。实现最简单，但会出现<strong>护航效应</strong>：一个长作业先到，后面所有短作业都要等它跑完。</p>
+<ul>
+<li>对长作业、CPU 繁忙型进程有利；</li>
+<li>对短作业、I/O 繁忙型进程不利；</li>
+<li>平均等待时间通常较差，但不会饥饿。</li>
+</ul>
+
+<h2 id="alg-sjf">二、SJF / SRTN：短作业优先</h2>
+<p><strong>SJF（Shortest Job First）</strong>每次选估计运行时间最短的作业，通常是非抢占。若新到作业比当前作业的<strong>剩余时间</strong>更短就抢占，则是 <strong>SRTN（Shortest Remaining Time Next）</strong>。</p>
+<p>SJF 在“所有作业同时可运行、非抢占”的前提下，平均等待时间最优：把短作业放前面，后面所有作业的等待时间都会减少。这个结论可以用交换相邻作业的顺序证明，但前提是运行时间已知、没有抢占和 I/O 干扰。</p>
+<ul>
+<li>优点：平均等待/周转时间短；</li>
+<li>缺点：需要预知运行时间（通常只能估计），长作业可能<strong>饥饿</strong>；</li>
+<li>SRTN 响应更好，但抢占和估计误差的代价更大。</li>
+</ul>
+
+<h2 id="alg-hrrn">三、HRRN：高响应比优先</h2>
+<p>HRRN 每次选择<strong>响应比</strong>最高的作业：</p>
+$$R = \frac{\text{等待时间} + \text{要求服务时间}}{\text{要求服务时间}}$$
+<p>等待时间越长，响应比越高；要求服务时间越短，响应比也越高。这样既照顾短作业，又让长作业随着等待变久而“涨价”，缓解 SJF 的长作业饥饿。HRRN 通常是非抢占的，在当前作业结束/阻塞时重新计算。</p>
+<ul>
+<li>优点：兼顾短作业和长作业，不会无限饥饿；</li>
+<li>缺点：每次调度都要计算响应比，且仍需预知服务时间。</li>
+</ul>
+
+<h2 id="alg-priority">四、优先级调度</h2>
+<p>每个进程有一个优先级，调度器选优先级最高的。优先级可以是<strong>静态</strong>（创建时确定）或<strong>动态</strong>（随等待时间/运行情况调整）；可以是抢占或非抢占。</p>
+<ul>
+<li>优点：能体现任务重要性，适合实时/交互系统；</li>
+<li>缺点：低优先级进程可能饥饿；</li>
+<li>解决：<strong>老化（aging）</strong>——等待越久，优先级逐渐提高。</li>
+</ul>
+<p>“优先级高”不等于“运行时间短”；优先级调度和 SJF 是两套不同的选择标准，不要混。</p>
+
+<h2 id="alg-rr">五、时间片轮转 RR</h2>
+<p>就绪进程排成队列，每个进程执行一个<strong>时间片 q</strong>；时间片用完，时钟中断把进程排到队尾，调度下一个。RR 是抢占式的，但抢占只由时间片触发。</p>
+<ul>
+<li>q 太大 → 退化为 FCFS，响应变慢；</li>
+<li>q 太小 → 切换/分派开销占比高，吞吐量下降；</li>
+<li>适合分时/交互系统，响应较公平；</li>
+<li>对短作业友好，但所有进程都要排队，长作业也不会饥饿。</li>
+</ul>
+<p>RR 的“公平”是就绪队列层面的公平，不是按优先级；如果系统有优先级，通常会把优先级和时间片结合（多级队列/MLFQ）。</p>
+
+<h2 id="alg-mlq">六、多级队列与多级反馈队列</h2>
+<p><strong>多级队列</strong>把不同类型的进程放进不同就绪队列，例如前台交互队列用 RR、后台批处理队列用 FCFS；队列之间固定优先级，只有高优先级队列空时才调度低优先级队列。它的问题是低优先级队列可能饥饿。</p>
+<p><strong>多级反馈队列（MLFQ）</strong>让进程在队列之间<strong>动态移动</strong>：</p>
+<ul>
+<li>设置多个就绪队列，优先级从高到低；</li>
+<li>优先级越高的队列，时间片越小；优先级越低的队列，时间片越大；</li>
+<li>每个队列内部通常用 FCFS；</li>
+<li>新进程进入最高优先级队列；</li>
+<li>仅当第 1～i−1 级队列为空时，才调度第 i 级队列；</li>
+<li>进程用完整个时间片还没完成，就降入下一级队列；</li>
+<li>因 I/O 阻塞的进程，阻塞结束后通常回到原队列（具体规则看题目）；</li>
+<li>如果更高优先级队列来了新进程，当前进程被抢占，放回本级队尾。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="多级反馈队列：1/2/3 级队列优先级递减、时间片递增；进程用完时间片逐级下降，完成或阻塞后退出" data-src="/408-review/assets/textbook/os-mlfq.webp" href="/408-review/assets/textbook/os-mlfq.webp">
+<img alt="多级反馈队列调度：三级队列，1 级队列时间片最短、优先级最高；未完成的进程下降到下一级队列，完成后退出" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-mlfq.webp"/>
+</a>
+<figcaption>MLFQ 的核心是“新进程先给高优先级小时间片；用完还没完成就降级；高优先级队列空才跑低优先级”。</figcaption>
+</figure>
+<p>MLFQ 兼顾交互响应和吞吐量：交互型短作业在高优先级队列很快完成；CPU 密集型长作业逐级下降，用更大的时间片减少切换。代价是规则复杂，低优先级队列仍可能饥饿，需要定期提升（boost）所有进程的优先级来兜底。</p>
+
+<h2 id="alg-example">七、同一组进程的对比</h2>
+<p>设三个进程，时间单位相同：</p>
+<div class="article-table"><table>
+<thead><tr><th>进程</th><th>到达时间</th><th>服务时间</th></tr></thead>
+<tbody>
+<tr><td>P1</td><td>0</td><td>3</td></tr>
+<tr><td>P2</td><td>1</td><td>6</td></tr>
+<tr><td>P3</td><td>2</td><td>4</td></tr>
+</tbody>
+</table></div>
+<div class="article-table"><table>
+<thead><tr><th>算法</th><th>执行顺序</th><th>平均等待</th><th>平均周转</th></tr></thead>
+<tbody>
+<tr><td>FCFS</td><td>P1 → P2 → P3</td><td>(0+2+7)/3 = 3</td><td>(3+8+11)/3 ≈ 7.33</td></tr>
+<tr><td>SJF（非抢占）</td><td>P1 → P3 → P2</td><td>(0+6+1)/3 ≈ 2.33</td><td>(3+12+5)/3 ≈ 6.67</td></tr>
+<tr><td>RR（q=2）</td><td>P1 → P2 → P3 → P1 → P2 → P3 → P2</td><td>(4+6+5)/3 = 5</td><td>(7+12+9)/3 ≈ 9.33</td></tr>
+</tbody>
+</table></div>
+<p>这组数说明：SJF 的平均等待最短，但 P2 被推到很晚；RR 的平均等待反而更长，但每个进程都能较早得到一次响应。选算法时要看目标，不是只看“平均等待”一个数。</p>
+
+<h2 id="alg-choose">八、怎么选：场景与代价</h2>
+<div class="article-table"><table>
+<thead><tr><th>算法</th><th>抢占</th><th>适合</th><th>主要问题</th></tr></thead>
+<tbody>
+<tr><td>FCFS</td><td>否</td><td>批处理、简单系统</td><td>护航效应、短作业等待长</td></tr>
+<tr><td>SJF</td><td>否</td><td>作业时间可估计的批处理</td><td>长作业饥饿、需预知时间</td></tr>
+<tr><td>SRTN</td><td>是</td><td>短作业多、追求平均等待</td><td>抢占开销、长作业饥饿</td></tr>
+<tr><td>HRRN</td><td>否</td><td>兼顾长短作业</td><td>计算响应比、仍需服务时间</td></tr>
+<tr><td>优先级</td><td>可选</td><td>实时、重要任务</td><td>低优先级饥饿，需老化</td></tr>
+<tr><td>RR</td><td>是</td><td>分时/交互</td><td>时间片难选，切换开销</td></tr>
+<tr><td>MLFQ</td><td>是</td><td>通用交互系统</td><td>规则复杂，仍可能饥饿</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="alg-pitfalls">九、易错点</h2>
+<ul>
+<li><strong>“SJF 一定最好”</strong>：只在平均等待时间这个指标、特定前提下最优；长作业会饥饿。</li>
+<li><strong>“FCFS 对短作业友好”</strong>：长作业先到会拖住后面短作业，产生护航效应。</li>
+<li><strong>“HRRN 是抢占式”</strong>：通常非抢占，当前进程结束/阻塞时才重新计算。</li>
+<li><strong>“RR 时间片越小越好”</strong>：太小导致频繁切换，分派开销占比升高。</li>
+<li><strong>“MLFQ 优先级越高时间片越大”</strong>：通常相反，高优先级队列时间片更小。</li>
+<li><strong>“多级队列 = 多级反馈队列”</strong>：前者队列固定、进程不移动；后者进程会降级/提升。</li>
+</ul>
+<p>把这一节收成一句话：<strong>FCFS 看到达，SJF 看服务时间，HRRN 看等待/服务比，优先级看重要程度，RR 看时间片，MLFQ 看“多队列 + 动态降级”。</strong></p>
+</div>
+<p class="article-source">内容整理自《进程与线程》导图与操作系统教材通用框架；MLFQ 的具体降级/提升规则以题目为准。</p>
