@@ -2458,6 +2458,12 @@ pre.code code { padding: 0; background: none; color: inherit; font-size: inherit
 .article-body .article-figure .figure-link:hover::after { opacity: 1; }
 .article-body .article-img { display: block; width: auto; max-width: 100%; max-height: 680px; margin: 0 auto; border-radius: 6px; background: #fff; }
 .article-body .article-figure figcaption { margin-top: 8px; color: var(--ink-3); font-size: 10.5px; line-height: 1.65; text-align: center; }
+.article-body .state7-hint { display: none; margin: 8px 0 0; color: var(--ink-3); font-size: 11px; text-align: center; }
+.article-body .state7-wrap { overflow-x: auto; overflow-y: hidden; margin: 0; padding: 0; background: #fff; }
+.article-body .state7-wrap img { display: block; width: 700px; max-width: none; max-height: none; margin: 0; border-radius: 0; }
+@media (max-width: 760px) {
+  .article-body .state7-hint { display: block; }
+}
 
 .article-details {
   margin: 16px 0 20px;

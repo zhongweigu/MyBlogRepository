@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="600" viewBox="0 0 700 600" role="img" aria-labelledby="title desc">
+  <title id="title">进程七状态模型</title>
+  <desc id="desc">创建、就绪、运行、阻塞、终止，以及就绪挂起和阻塞挂起之间的转换。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,3 L0,6 Z" fill="#6b4c72"/>
+    </marker>
+    <style>
+      .state { fill:#f8f2f9; stroke:#6b4c72; stroke-width:1.8; }
+      .state.run { fill:#6b4c72; stroke:#4f3555; }
+      .state.blocked { fill:#fdf2e9; stroke:#b37a4e; }
+      .state.susp { fill:#fffaf5; stroke:#b37a4e; stroke-dasharray:6 4; }
+      .state.term { fill:#f4f1f6; stroke:#9b8aa3; }
+      .label { font: 600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif; fill:#2f2333; text-anchor:middle; dominant-baseline:middle; }
+      .label.white { fill:#fff; }
+      .edge { fill:none; stroke:#6b4c72; stroke-width:1.5; }
+      .edge.blocked { stroke:#b37a4e; }
+      .edge.dash { stroke-dasharray:5 4; }
+      .lbl { font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif; fill:#4f3555; text-anchor:middle; paint-order:stroke; stroke:#fbf8fc; stroke-width:4px; stroke-linejoin:round; }
+      .legend { font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif; fill:#6b5a70; }
+      .note { font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif; fill:#6b5a70; }
+    </style>
+  </defs>
+
+  <rect width="700" height="600" fill="#fbf8fc"/>
+
+  <!-- 创建、就绪、运行、终止 -->
+  <rect class="state" x="40" y="80" width="100" height="50" rx="10"/>
+  <text class="label" x="90" y="106">创建</text>
+
+  <rect class="state" x="210" y="80" width="100" height="50" rx="10"/>
+  <text class="label" x="260" y="106">就绪</text>
+
+  <rect class="state run" x="390" y="80" width="100" height="50" rx="10"/>
+  <text class="label white" x="440" y="106">运行</text>
+
+  <rect class="state term" x="570" y="80" width="90" height="50" rx="10"/>
+  <text class="label" x="615" y="106">终止</text>
+
+  <!-- 阻塞与挂起态 -->
+  <rect class="state blocked" x="120" y="430" width="120" height="50" rx="10"/>
+  <text class="label" x="180" y="456">阻塞</text>
+
+  <rect class="state susp" x="300" y="430" width="130" height="50" rx="10"/>
+  <text class="label" x="365" y="456">阻塞挂起</text>
+
+  <rect class="state susp" x="500" y="430" width="130" height="50" rx="10"/>
+  <text class="label" x="565" y="456">就绪挂起</text>
+
+  <!-- 基本生命周期 -->
+  <path class="edge" d="M140 105 L210 105" marker-end="url(#arrow)"/>
+  <text class="lbl" x="175" y="92">接纳</text>
+
+  <path class="edge" d="M310 105 L390 105" marker-end="url(#arrow)"/>
+  <text class="lbl" x="350" y="92">调度</text>
+
+  <path class="edge" d="M490 105 L570 105" marker-end="url(#arrow)"/>
+  <text class="lbl" x="530" y="92">结束</text>
+
+  <!-- 运行 -> 就绪：时间片/抢占 -->
+  <path class="edge" d="M440 80 C440 38, 260 38, 260 80" marker-end="url(#arrow)"/>
+  <text class="lbl" x="350" y="30">时间片到 / 被抢占</text>
+
+  <!-- 运行 -> 阻塞：等待事件 -->
+  <path class="edge blocked" d="M390 118 C330 220, 260 350, 240 430" marker-end="url(#arrow)"/>
+  <text class="lbl" x="335" y="270">等待事件</text>
+
+  <!-- 阻塞 -> 就绪：事件发生 -->
+  <path class="edge blocked" d="M150 430 C190 320, 250 220, 260 130" marker-end="url(#arrow)"/>
+  <text class="lbl" x="205" y="300">事件发生</text>
+
+  <!-- 就绪 -> 就绪挂起：换出 -->
+  <path class="edge" d="M310 130 C350 230, 470 330, 500 430" marker-end="url(#arrow)"/>
+  <text class="lbl" x="435" y="250">换出</text>
+
+  <!-- 就绪挂起 -> 就绪：激活（走右侧大弧，避免与换出线重叠） -->
+  <path class="edge" d="M630 430 C655 310, 520 190, 310 130" marker-end="url(#arrow)"/>
+  <text class="lbl" x="590" y="300">激活</text>
+
+  <!-- 阻塞 <-> 阻塞挂起 -->
+  <path class="edge blocked" d="M240 455 L300 455" marker-end="url(#arrow)"/>
+  <text class="lbl" x="270" y="442">换出</text>
+
+  <path class="edge blocked" d="M300 470 L240 470" marker-end="url(#arrow)"/>
+  <text class="lbl" x="270" y="488">激活</text>
+
+  <!-- 阻塞挂起 -> 就绪挂起：挂起期间事件发生 -->
+  <path class="edge blocked" d="M430 455 L500 455" marker-end="url(#arrow)"/>
+  <text class="lbl" x="465" y="442">事件发生</text>
+
+  <!-- 图例 -->
+  <rect x="40" y="535" width="18" height="12" rx="3" fill="#6b4c72"/>
+  <text class="legend" x="66" y="546">运行态</text>
+
+  <rect x="150" y="535" width="18" height="12" rx="3" fill="#f8f2f9" stroke="#6b4c72" stroke-width="1.5"/>
+  <text class="legend" x="176" y="546">活动态（在主存）</text>
+
+  <rect x="320" y="535" width="18" height="12" rx="3" fill="#fffaf5" stroke="#b37a4e" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text class="legend" x="346" y="546">挂起态（映像在外存）</text>
+
+  <text class="note" x="40" y="575">挂起 = 换出到外存；激活 = 换入主存。挂起态必须先激活，才可能被调度。</text>
+</svg>

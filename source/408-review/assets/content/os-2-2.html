@@ -1,4 +1,4 @@
-<div class="article-content">
+﻿<div class="article-content">
 <p>进程既是资源分配单位，又是调度单位。但一个进程里如果只有一条执行流，它一旦阻塞，整个进程就停住；创建/切换进程又要换地址空间，代价高。线程把这两件事拆开：<strong>资源仍然归进程，CPU 调度交给线程</strong>。理解线程，重点不是“线程更轻”，而是看清<strong>哪些资源共享、哪些私有、谁来调度</strong>。</p>
 
 <details class="article-toc">
@@ -8,7 +8,7 @@
 <li><a href="#thread-compare">二、进程与线程的分工</a></li>
 <li><a href="#thread-share">三、共享什么，私有什么</a></li>
 <li><a href="#thread-ult">四、ULT：用户级线程</a></li>
-<li><a href="#thread-kst">五、KST：内核级线程</a></li>
+<li><a href="#thread-klt">五、KLT：内核级线程</a></li>
 <li><a href="#thread-models">六、多线程模型</a></li>
 <li><a href="#thread-entity">七、线程实体：TCB、栈与“线程映像”</a></li>
 <li><a href="#thread-why-ult">八、KLT 里为什么还有用户级线程</a></li>
@@ -80,13 +80,13 @@
 <li>内核级事件（时钟、I/O）只能打断进程，线程库再决定切换哪个线程。</li>
 </ul>
 
-<h2 id="thread-kst">五、KST：内核级线程</h2>
-<p><strong>KST（Kernel-Level Thread）</strong>由内核直接管理：每个线程有内核中的 TCB，内核调度器直接调度线程。用户线程通过系统调用创建/销毁内核线程，线程切换要进入内核。</p>
+<h2 id="thread-klt">五、KLT：内核级线程</h2>
+<p><strong>KLT（Kernel-Level Thread）</strong>由内核直接管理：每个线程有内核中的 TCB，内核调度器直接调度线程。用户线程通过系统调用创建/销毁内核线程，线程切换要进入内核。</p>
 <figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="KST：每个用户级线程对应一个内核级线程，内核直接调度线程" data-src="/408-review/assets/textbook/os-kst.webp" href="/408-review/assets/textbook/os-kst.webp">
-<img alt="KST 结构：用户空间三个用户级线程分别对应内核空间三个内核级线程，内核级线程再汇入进程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-kst.webp"/>
+<a class="figure-link" data-action="zoom-image" data-caption="KLT：每个用户级线程对应一个内核级线程，内核直接调度线程" data-src="/408-review/assets/textbook/os-klt.webp" href="/408-review/assets/textbook/os-klt.webp">
+<img alt="KLT 结构：用户空间三个用户级线程分别对应内核空间三个内核级线程，内核级线程再汇入进程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-klt.webp"/>
 </a>
-<figcaption>KST 的调度对象是内核级线程；一个线程阻塞，内核可以调度同进程其他线程或其他进程。</figcaption>
+<figcaption>KLT 的调度对象是内核级线程；一个线程阻塞，内核可以调度同进程其他线程或其他进程。</figcaption>
 </figure>
 <p><strong>优点：</strong></p>
 <ul>
@@ -105,9 +105,9 @@
 <div class="article-table"><table>
 <thead><tr><th>模型</th><th>用户线程 : 内核线程</th><th>特点</th></tr></thead>
 <tbody>
-<tr><td>多对一</td><td>多个 ULT → 一个 KST</td><td>接近 ULT；切换快，但一个阻塞全阻塞，不能多核并行</td></tr>
-<tr><td>一对一</td><td>一个 ULT → 一个 KST</td><td>并发/并行好，但线程创建和切换开销大，内核线程数量受限</td></tr>
-<tr><td>多对多</td><td>多个 ULT → 多个 KST</td><td>复用内核线程，兼顾并行和开销；实现复杂</td></tr>
+<tr><td>多对一</td><td>多个 ULT → 一个 KLT</td><td>接近 ULT；切换快，但一个阻塞全阻塞，不能多核并行</td></tr>
+<tr><td>一对一</td><td>一个 ULT → 一个 KLT</td><td>并发/并行好，但线程创建和切换开销大，内核线程数量受限</td></tr>
+<tr><td>多对多</td><td>多个 ULT → 多个 KLT</td><td>复用内核线程，兼顾并行和开销；实现复杂</td></tr>
 </tbody>
 </table></div>
 <p>很多系统还会用“两层模型”：既有多对多，也允许某些线程绑定到专用内核线程。模型的选择本质上是<strong>并行度、切换开销、内核资源</strong>三者的折中。</p>
@@ -117,21 +117,21 @@
 <div class="article-table"><table>
 <thead><tr><th>组成</th><th>放在哪</th><th>作用</th></tr></thead>
 <tbody>
-<tr><td>TCB（线程控制块）</td><td>ULT 在用户空间线程库；KST 在内核空间</td><td>线程 ID、状态、寄存器现场、栈指针、优先级、等待事件、链接指针</td></tr>
+<tr><td>TCB（线程控制块）</td><td>ULT 在用户空间线程库；KLT 在内核空间</td><td>线程 ID、状态、寄存器现场、栈指针、优先级、等待事件、链接指针</td></tr>
 <tr><td>用户栈</td><td>进程的用户地址空间</td><td>函数调用、局部变量、返回地址；每个线程独立</td></tr>
-<tr><td>内核栈</td><td>内核空间（KST 必需）</td><td>线程进入内核/中断时保存现场，不能和用户栈混用</td></tr>
+<tr><td>内核栈</td><td>内核空间（KLT 必需）</td><td>线程进入内核/中断时保存现场，不能和用户栈混用</td></tr>
 <tr><td>TLS</td><td>进程地址空间中的线程局部区</td><td>每个线程一份的全局/静态变量，如 errno、线程私有缓存</td></tr>
 <tr><td>寄存器现场</td><td>切换时保存到 TCB/内核栈</td><td>通用寄存器、PC、PSW、SP、浮点/SIMD 状态</td></tr>
 </tbody>
 </table></div>
 <p>所以“线程映像”如果非要类比，只能说它是<strong>线程执行上下文 + 私有栈 + TCB</strong>，不含独立的代码/数据/页表。线程切换保存的是这套上下文；同一进程的线程切换通常不换页表，因此比进程切换轻。进程切换则要换地址空间（页表基址、TLB），并保存/恢复 PCB。</p>
-<p>线程的栈也不能和进程的“用户栈”混为一谈：进程映像里画的那段用户栈，是多线程进程里<strong>主线程</strong>的栈；其他线程各自有栈，通常由线程库在堆/匿名映射区分配。KST 还要为每个线程准备内核栈。</p>
+<p>线程的栈也不能和进程的“用户栈”混为一谈：进程映像里画的那段用户栈，是多线程进程里<strong>主线程</strong>的栈；其他线程各自有栈，通常由线程库在堆/匿名映射区分配。KLT 还要为每个线程准备内核栈。</p>
 
 <h2 id="thread-why-ult">八、KLT 里为什么还有用户级线程</h2>
 <p>“内核级线程”说的是<strong>内核能识别、能直接调度的实体</strong>；“用户级线程”说的是<strong>应用程序看到的线程对象/线程库</strong>。两者不是互斥的层次，而是“用户态的管理对象”和“内核里的调度实体”之间的映射关系。</p>
 <ul>
-<li>一对一模型中，程序员用 pthread 创建一个用户线程，线程库再通过 <code>clone</code> 等系统调用创建一个内核线程；用户线程是句柄，内核线程是调度单位。内核看到的是 KST，但用户程序仍然在创建/管理用户级线程。</li>
-<li>多对多模型中，多个用户线程复用少量内核线程；线程库负责在用户态切换，内核只调度内核线程。这时既有 ULT 的灵活性，又有 KST 的并行能力。</li>
+<li>一对一模型中，程序员用 pthread 创建一个用户线程，线程库再通过 <code>clone</code> 等系统调用创建一个内核线程；用户线程是句柄，内核线程是调度单位。内核看到的是 KLT，但用户程序仍然在创建/管理用户级线程。</li>
+<li>多对多模型中，多个用户线程复用少量内核线程；线程库负责在用户态切换，内核只调度内核线程。这时既有 ULT 的灵活性，又有 KLT 的并行能力。</li>
 <li>即使是一对一，线程库仍要管理用户栈、TLS、线程创建/销毁、同步对象；这些是用户态职责，不能因为“内核能看到线程”就消失。</li>
 </ul>
 <p>所以“KLT 里还有用户级线程”不是矛盾：<strong>KLT 是内核的调度对象，ULT 是用户程序的并发抽象</strong>；一个 KLT 可以承载一个或多个 ULT，具体看模型。</p>
@@ -148,9 +148,10 @@
 <li><strong>“线程有独立地址空间”</strong>：同一进程的线程共享地址空间；只有进程之间独立。</li>
 <li><strong>“ULT 切换一定要进内核”</strong>：ULT 的线程切换由用户库完成，不需要模式切换。</li>
 <li><strong>“ULT 一个线程阻塞不影响其他线程”</strong>：ULT 的阻塞系统调用会让整个进程阻塞。</li>
-<li><strong>“KST 没有开销”</strong>：KST 切换要进内核，TCB 也占内核资源。</li>
+<li><strong>“KLT 没有开销”</strong>：KLT 切换要进内核，TCB 也占内核资源。</li>
 <li><strong>“线程越多越好”</strong>：线程创建/切换/同步都有开销，还会争用 CPU、Cache 和内存。</li>
 </ul>
-<p>把这一节收成一句话：<strong>进程管资源，线程管执行；ULT 在用户空间调度、快但怕阻塞，KST 在内核调度、能并行但有切换开销。</strong></p>
+<p>把这一节收成一句话：<strong>进程管资源，线程管执行；ULT 在用户空间调度、快但怕阻塞，KLT 在内核调度、能并行但有切换开销。</strong></p>
 </div>
 <p class="article-source">内容整理自《进程与线程》导图与操作系统教材通用框架；具体线程库和内核实现随平台而异。</p>
+

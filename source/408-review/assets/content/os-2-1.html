@@ -184,6 +184,13 @@ PA     = (PFN &lt;&lt; 12) | offset</code></pre>
 <li>阻塞挂起 → 就绪挂起：事件在挂起期间发生，仍在外存，等激活；</li>
 <li>运行 → 就绪/阻塞/终止，和简单模型一致；运行态也可能因换出直接进入挂起态（具体系统而定）。</li>
 </ul>
+<p class="state7-hint">左右滑动查看完整状态图 →</p>
+<figure class="article-figure state7-figure">
+<div class="state7-wrap">
+<img alt="进程七状态模型：创建、就绪、运行、阻塞、终止，以及就绪挂起和阻塞挂起；就绪与阻塞可换出为挂起态，挂起态激活后回到内存" class="article-img" decoding="async" height="600" loading="lazy" src="/408-review/assets/img/os-process-state-7.svg" width="700"/>
+</div>
+<figcaption>七状态模型：实线框是在主存的活动态，虚线框是挂起态；挂起态必须先激活，才可能被调度。</figcaption>
+</figure>
 <p>“激活”只把映像换回主存，不等于立刻运行；换入后还要看它是就绪还是仍阻塞。中级调度负责在内存和外存之间挑选进程换入/换出，目标是控制多道程度、缓解内存压力；换得太频繁会抖动。</p>
 <div class="article-table"><table>
 <thead><tr><th>模型</th><th>状态</th><th>适用</th></tr></thead>
