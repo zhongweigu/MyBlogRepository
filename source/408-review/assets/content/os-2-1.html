@@ -2,7 +2,7 @@
 <p>程序只是磁盘上的指令和数据，真正“跑起来”之后，内核要同时维护它的地址空间、寄存器现场、状态、优先级、打开的文件和等待的事件。把这些东西打包起来，才得到一个<strong>进程</strong>。理解进程，关键是抓住两条线：<strong>它由什么组成</strong>，以及<strong>它在什么状态下、下一步能去哪里</strong>。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>8 节</span></summary>
+<summary>本页目录 <span>11 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#proc-program">一、程序与进程：静态与动态</a></li>
 <li><a href="#proc-pcb">二、进程实体与 PCB</a></li>
@@ -11,7 +11,10 @@
 <li><a href="#proc-control">五、创建、终止、阻塞与唤醒</a></li>
 <li><a href="#proc-comm">六、进程通信的三种方式</a></li>
 <li><a href="#proc-switch">七、进程切换与模式切换</a></li>
-<li><a href="#proc-pitfalls">八、易错点与收束</a></li>
+<li><a href="#proc-va">八、进程映像如何落到物理内存</a></li>
+<li><a href="#proc-suspend">九、挂起、激活与复杂状态模型</a></li>
+<li><a href="#proc-fork">十、fork 与父进程撤销</a></li>
+<li><a href="#proc-pitfalls">十一、易错点与收束</a></li>
 </ul></div>
 </details>
 
@@ -117,7 +120,103 @@
 </table></div>
 <p>一次系统调用可能只发生模式切换；只有内核决定“换另一个进程”时，才是进程切换。把这两件事分开，后面线程切换、调度开销才不会混。</p>
 
-<h2 id="proc-pitfalls">八、易错点与收束</h2>
+<h2 id="proc-va">八、进程映像如何落到物理内存</h2>
+<p>“每个进程以为自己独占整个虚拟内存”只是<strong>地址空间抽象</strong>：CPU 产生的是虚拟地址，真正访问主存前要经过 MMU 和页表转换成物理地址。所有进程的虚拟地址空间里都有一段<strong>内核区</strong>，但这些内核区通常映射到<strong>同一份物理内核</strong>，不是每个进程复制一份内核。</p>
+
+<h3>1. 虚拟地址怎么切</h3>
+<p>设页大小 4KB（2¹²），32 位虚拟地址就切成 <code>VPN（页号） | offset（页内偏移）</code>：低 12 位是 offset，高位是 VPN。页大小必须是 2 的幂，页框也按页对齐，所以：</p>
+<pre><code>VPN    = VA &gt;&gt; 12
+offset = VA &amp; 0x0FFF
+PA     = (PFN &lt;&lt; 12) | offset</code></pre>
+<p>例如 VA = <code>0x00403ABC</code>：VPN = <code>0x00403</code>，offset = <code>0xABC</code>；若页表项给出 PFN = <code>0x1A2</code>，则 PA = <code>0x1A2ABC</code>。转换只替换“页号”，页内偏移原样保留，这就是“按页对齐”的含义。</p>
+
+<h3>2. 一次访问的完整路径</h3>
+<ol>
+<li><strong>CPU 发出虚拟地址</strong>：指令取指、load/store 都先产生 VA。</li>
+<li><strong>MMU 查 TLB</strong>：TLB 是页表项的高速缓存，命中就直接得到 PFN；未命中进入页表遍历。</li>
+<li><strong>页表遍历</strong>：MMU 用页表基址寄存器（PTBR/CR3）找到页表，按 VPN 逐级查 PTE；多级页表每一级都取出下一级页表的物理基址。</li>
+<li><strong>PTE 有效且权限允许</strong>：取出 PFN，与 offset 拼成 PA，访问 Cache/主存；同时可能更新 TLB 和 PTE 的 Accessed 位。</li>
+<li><strong>PTE 无效或权限不符</strong>：MMU 触发<strong>缺页异常/保护异常</strong>，CPU 切换到内核态，跳到缺页处理程序。</li>
+</ol>
+
+<h3>3. 缺页时操作系统做什么</h3>
+<ol>
+<li>内核根据 VA 找到该进程的 VMA（已映射区域），判断地址是否合法、权限是否匹配；不合法就发送 SIGSEGV，进程终止。</li>
+<li>合法但页不在主存：分配一个空闲页框；若没有空闲页框，按页面置换算法选一个受害者页，若脏页先写回磁盘。</li>
+<li>从磁盘/交换区把所需页读入页框；更新 PTE 的 present 位和 PFN；必要时更新页表上级项、刷新 TLB。</li>
+<li>返回用户态，<strong>重新执行</strong>刚才那条指令；这次 TLB/页表命中，访问完成。</li>
+</ol>
+<p>这里软硬件分工很清楚：<strong>地址翻译、TLB 查找、触发异常</strong>由 MMU/CPU 硬件完成；<strong>缺页处理、页面置换、磁盘 I/O、页表更新</strong>由操作系统软件完成。TLB 未命中不一定是缺页，可能只是缓存没命中，硬件走页表就能解决。</p>
+
+<h3>4. 主存与外存的对换</h3>
+<p>虚拟存储把主存当磁盘的缓存：页表项的 present 位表示页是否在内存；不在时 PTE 里存交换区位置（或由操作系统另建结构记录）。缺页处理把页换入，内存紧张时把不常用页换出。换出脏页要写回，换出干净页可直接丢弃。页面置换和 medium-term scheduling（进程级挂起/激活）是不同层次：前者换页，后者换整个进程映像。</p>
+
+<h3>5. 内核区为什么是共享的</h3>
+<p>每个进程的页表都把高地址的内核区映射到同一组物理页，因此进入内核后不需要“换一套内核代码”。页表项用 U/S 位标记内核页为 supervisor-only，用户态访问会触发保护异常。注意这是通用模型；x86 的 KPTI 等机制会在用户态切换页表以隔离内核映射，但“内核只有一份”这个事实不变。</p>
+<div class="article-table"><table>
+<thead><tr><th>问题</th><th>答案</th></tr></thead>
+<tbody>
+<tr><td>页内偏移会变吗？</td><td>不变；VA 和 PA 的 offset 相同，只有页号被替换。</td></tr>
+<tr><td>页表本身放在哪？</td><td>主存中，由 PTBR 指向；多级页表本身也按页对齐。</td></tr>
+<tr><td>TLB 命中还要查页表吗？</td><td>不需要；TLB 就是页表项的缓存。</td></tr>
+<tr><td>缺页一定要读磁盘吗？</td><td>不一定；可能是页表未建立、权限错误或页在交换区，但典型的“不在主存”需要 I/O。</td></tr>
+<tr><td>每个进程有独立内核吗？</td><td>没有；内核代码/数据共享，页表把内核区映射到同一物理内核。</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="proc-suspend">九、挂起、激活与复杂状态模型</h2>
+<p>三状态/五状态模型假设所有进程都在主存。实际系统内存不够时，会把某些进程的<strong>整个进程映像</strong>换到外存，这就是“挂起”。挂起不是阻塞：阻塞是等事件，挂起是“暂时不在主存”。一个进程可以既阻塞又被挂起。</p>
+<div class="article-table"><table>
+<thead><tr><th>状态</th><th>在不在主存</th><th>能不能运行</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>就绪</td><td>在</td><td>只差 CPU</td><td>活动就绪</td></tr>
+<tr><td>阻塞</td><td>在</td><td>不能，等事件</td><td>活动阻塞</td></tr>
+<tr><td>就绪挂起</td><td>不在</td><td>激活并调度后能运行</td><td>映像在外存，事件已满足</td></tr>
+<tr><td>阻塞挂起</td><td>不在</td><td>不能，等事件</td><td>映像在外存且仍在等事件</td></tr>
+</tbody>
+</table></div>
+<p>复杂模型通常写成七状态：<strong>创建、就绪、运行、阻塞、就绪挂起、阻塞挂起、终止</strong>。关键转换：</p>
+<ul>
+<li>就绪 → 就绪挂起：内存紧张，换出；</li>
+<li>阻塞 → 阻塞挂起：阻塞进程被换出；</li>
+<li>就绪挂起 → 就绪：激活（换入），等调度；</li>
+<li>阻塞挂起 → 阻塞：先激活但事件还没发生；</li>
+<li>阻塞挂起 → 就绪挂起：事件在挂起期间发生，仍在外存，等激活；</li>
+<li>运行 → 就绪/阻塞/终止，和简单模型一致；运行态也可能因换出直接进入挂起态（具体系统而定）。</li>
+</ul>
+<p>“激活”只把映像换回主存，不等于立刻运行；换入后还要看它是就绪还是仍阻塞。中级调度负责在内存和外存之间挑选进程换入/换出，目标是控制多道程度、缓解内存压力；换得太频繁会抖动。</p>
+<div class="article-table"><table>
+<thead><tr><th>模型</th><th>状态</th><th>适用</th></tr></thead>
+<tbody>
+<tr><td>三状态</td><td>就绪、运行、阻塞</td><td>只考虑 CPU 调度，忽略创建/终止和换出</td></tr>
+<tr><td>五状态</td><td>新建、就绪、运行、阻塞、终止</td><td>一般 OS 原理题</td></tr>
+<tr><td>七状态</td><td>五状态 + 就绪挂起、阻塞挂起</td><td>引入虚拟存储/对换、中级调度</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="proc-fork">十、fork 与父进程撤销</h2>
+<p><code>fork()</code> 创建一个子进程。父进程和子进程从同一条 <code>fork</code> 之后继续执行，但返回值不同：子进程得到 0，父进程得到子进程 PID，失败返回 -1。</p>
+<pre><code>pid_t pid = fork();
+if (pid == 0) {
+    /* 子进程 */
+} else if (pid &gt; 0) {
+    /* 父进程，pid 是子进程号 */
+} else {
+    /* fork 失败 */
+}</code></pre>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>相同/继承</th><th>不同/独立</th></tr></thead>
+<tbody>
+<tr><td>代码与数据</td><td>逻辑上复制父进程的地址空间</td><td>写时复制后各自有私有物理页；修改互不影响</td></tr>
+<tr><td>打开文件</td><td>继承文件描述符表，共享同一个打开文件描述</td><td>文件偏移量共享；各自关闭不影响对方</td></tr>
+<tr><td>身份</td><td>UID/GID、环境变量、当前目录、信号处理方式</td><td>PID、PPID、返回值、未决信号、资源统计</td></tr>
+<tr><td>执行流</td><td>从 fork 返回处继续</td><td>父子并发执行；谁先跑由调度决定</td></tr>
+</tbody>
+</table></div>
+<p>父子生命周期：父进程可以 <code>wait/waitpid</code> 等子进程结束并回收退出状态；子进程先结束而父进程没 wait，会留下<strong>僵尸进程</strong>（PCB/退出状态还在）；父进程先结束，子进程成为<strong>孤儿进程</strong>，由 init/systemd 或 subreaper 收养。子进程可以 <code>exec</code> 换成新程序，地址空间被替换，但 PID 和部分属性保留。</p>
+<p>“撤销父进程时子进程怎么办”在具体实现中不同：经典教材口径常写“撤销父进程要同时撤销其所有子进程”；Unix/Linux 实际是把孤儿进程重新托孤给 init，不一定杀死；Windows 可用 Job Object 把进程组一起终止。考试按题目/教材口径，工程实现按平台语义，不要把两者混成绝对结论。</p>
+
+<h2 id="proc-pitfalls">十一、易错点与收束</h2>
 <ul>
 <li><strong>“程序就是进程”</strong>：程序是静态的；进程是执行实例，有 PCB、状态和生命周期。</li>
 <li><strong>“阻塞可以直接变执行”</strong>：阻塞被唤醒后先进就绪队列，必须再被调度。</li>

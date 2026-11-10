@@ -2,7 +2,7 @@
 <p>并发进程/线程共享资源时，最难的不是“同时运行”，而是“同时改同一份数据”。同步与互斥要解决两类问题：<strong>互斥</strong>——临界资源一次只让一个进程用；<strong>同步</strong>——多个进程必须按某个先后次序推进。判断一个方法好不好，就看它是否同时满足互斥、进展、有限等待，最好还能让权等待。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>10 节</span></summary>
+<summary>本页目录 <span>11 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#sync-critical">一、临界资源、临界区与四条准则</a></li>
 <li><a href="#sync-single">二、单标志法</a></li>
@@ -12,14 +12,15 @@
 <li><a href="#sync-sem">六、信号量与 P/V</a></li>
 <li><a href="#sync-monitor">七、管程与条件变量</a></li>
 <li><a href="#sync-compare">八、方法对比：谁忙等，谁饥饿</a></li>
-<li><a href="#sync-patterns">九、互斥、同步、生产者-消费者</a></li>
-<li><a href="#sync-pitfalls">十、易错点</a></li>
+<li><a href="#sync-sim">九、代码级模拟：卡住、解锁与错误</a></li>
+<li><a href="#sync-patterns">十、互斥、同步、生产者-消费者</a></li>
+<li><a href="#sync-pitfalls">十一、易错点</a></li>
 </ul></div>
 </details>
 
 <h2 id="sync-critical">一、临界资源、临界区与四条准则</h2>
 <p><strong>临界资源</strong>是一次只允许一个进程使用的资源，例如打印机、共享变量、共享缓冲区。<strong>临界区</strong>是进程中访问临界资源的那段代码。典型的临界区结构是：</p>
-<pre><code>进入区：检查/加锁，确保互斥
+<pre data-code-skip="true"><code>进入区：检查/加锁，确保互斥
 临界区：访问共享资源
 退出区：解锁，唤醒等待者
 剩余区：不访问临界资源</code></pre>
@@ -37,7 +38,7 @@
 
 <h2 id="sync-single">二、单标志法</h2>
 <p>用一个 <code>turn</code> 表示“轮到谁进”：</p>
-<pre><code>turn = 0;  // 0 表示轮到 P0
+<pre><code class="language-c">turn = 0;  // 0 表示轮到 P0
 
 P0: while (turn != 0);  // 等
     临界区
@@ -50,7 +51,7 @@ P1: while (turn != 1);
 
 <h2 id="sync-double">三、双标志法</h2>
 <h3>1. 先检查，后设置</h3>
-<pre><code>flag[0] = flag[1] = false;
+<pre><code class="language-c">flag[0] = flag[1] = false;
 
 Pi: while (flag[j]);   // 先看对方想不想进
     flag[i] = true;    // 再声明自己想进
@@ -59,7 +60,7 @@ Pi: while (flag[j]);   // 先看对方想不想进
 <p>“检查”和“设置”不是原子操作：P0 检查 flag[1] 为 false，还没来得及设置，P1 也检查 flag[0] 为 false，于是双方都进入。它违反<strong>忙则等待</strong>（互斥失败）。</p>
 
 <h3>2. 先设置，后检查</h3>
-<pre><code>flag[0] = flag[1] = false;
+<pre><code class="language-c">flag[0] = flag[1] = false;
 
 Pi: flag[i] = true;    // 先声明
     while (flag[j]);   // 再看对方
@@ -69,7 +70,7 @@ Pi: flag[i] = true;    // 先声明
 
 <h2 id="sync-peterson">四、Peterson 算法</h2>
 <p>Peterson 用 <code>flag</code> 表示“想进”，用 <code>turn</code> 表示“谦让”：</p>
-<pre><code>flag[0] = flag[1] = false;
+<pre><code class="language-c">flag[0] = flag[1] = false;
 turn = 0;
 
 Pi: flag[i] = true;        // 我想进
@@ -82,7 +83,7 @@ Pi: flag[i] = true;        // 我想进
 <h2 id="sync-hw">五、硬件方法：关中断、TS、Swap</h2>
 <p><strong>关中断</strong>：进入临界区前关中断，退出后开中断。单处理机上，关中断期间不会发生进程切换，因此能保证互斥。但它是特权操作，不能让用户随便用；多处理机上其他 CPU 仍在运行，关本 CPU 的中断并不能阻止它们；而且关中断会影响整个系统的响应。它只适合内核短临界区。</p>
 <p><strong>Test-and-Set（TS）</strong>：原子地“读出旧值并置 true”：</p>
-<pre><code>bool TS(bool *lock) {
+<pre><code class="language-c">bool TS(bool *lock) {
     bool old = *lock;
     *lock = true;
     return old;
@@ -95,7 +96,7 @@ lock = false;</code></pre>
 
 <h2 id="sync-sem">六、信号量与 P/V</h2>
 <p>408 还会考信号量，导图只列了软件/硬件/管程，这里补上。信号量是一个整型变量加一个等待队列，P/V 必须原子执行：</p>
-<pre><code>P(S):  S.value--;
+<pre><code class="language-c">P(S):  S.value--;
        if (S.value < 0) block(S.queue);
 
 V(S):  S.value++;
@@ -124,6 +125,18 @@ V(S):  S.value++;
 <li>被唤醒的进程还要重新竞争管程锁；条件可能又变了，所以通常用 <code>while</code> 重新检查条件。</li>
 </ul>
 <p>互斥锁保护“进入管程”，条件变量负责“等条件”。两者不能互相替代：条件变量本身不计数、不提供互斥。</p>
+<h3>管程和信号量：谁用、在哪用</h3>
+<div class="article-table"><table>
+<thead><tr><th>对比</th><th>信号量</th><th>管程</th></tr></thead>
+<tbody>
+<tr><td>层次</td><td>低层同步原语，计数器 + 等待队列</td><td>高层语言/运行时构造，共享数据 + 过程 + 条件变量</td></tr>
+<tr><td>互斥</td><td>要自己 P/V 包住临界区</td><td>进入管程过程自动互斥，退出自动释放</td></tr>
+<tr><td>等待</td><td>P 可能阻塞；V 计数，不会丢失</td><td>condition.wait 释放管程并阻塞；signal 无等待者会丢失</td></tr>
+<tr><td>谁使用</td><td>内核和应用程序都可以；系统调用/线程库封装</td><td>主要给应用程序员；编译器/运行时实现</td></tr>
+<tr><td>典型场景</td><td>资源计数、内核锁、驱动、PV 经典题</td><td>Java <code>synchronized</code>/条件变量、C# lock、并发容器</td></tr>
+</tbody>
+</table></div>
+<p>两者都能在用户程序里用，但“管程”通常不是操作系统直接提供的系统调用，而是语言/库基于互斥锁和条件变量实现的抽象；信号量既可能是内核对象，也可能是用户态库实现的计数原语。换句话说：<strong>信号量更靠近“机制”，管程更靠近“编程抽象”</strong>。</p>
 
 <h2 id="sync-compare">八、方法对比：谁忙等，谁饥饿</h2>
 <div class="article-table"><table>
@@ -139,7 +152,38 @@ V(S):  S.value++;
 </tbody>
 </table></div>
 
-<h2 id="sync-patterns">九、互斥、同步、生产者-消费者</h2>
+<h2 id="sync-sim">九、代码级模拟：卡住、解锁与错误</h2>
+<p>下面把每种方法放进两个进程 P0/P1 的交替执行里，重点看三件事：<strong>谁在等、等什么变量、什么动作能把它放行</strong>。代码已同步到代码库的「操作系统」章节。</p>
+<div class="article-table"><table>
+<thead><tr><th>方法</th><th>什么时候卡住</th><th>什么时候解锁</th><th>典型错误</th></tr></thead>
+<tbody>
+<tr><td>单标志</td><td><code>turn != i</code> 时自旋</td><td>对方退出时写 <code>turn = i</code></td><td>P0 退出后 P1 不进来，P0 也不能再进；资源空闲却进不去，违背空闲让进</td></tr>
+<tr><td>双标志先检查</td><td>几乎不卡（检查时对方还没设置）</td><td>退出时清自己的 flag</td><td>P0 检查→P1 检查→P0 设置→P1 设置，双方都进临界区，违背忙则等待</td></tr>
+<tr><td>双标志后检查</td><td>双方都设置 flag 后互相自旋</td><td>理论上要等对方清 flag，但没人能进</td><td>双方都谦让，永久等待；互斥成立但进展/有限等待失败</td></tr>
+<tr><td>Peterson</td><td><code>flag[j] && turn == j</code> 时自旋</td><td>对方退出时 <code>flag[j] = false</code></td><td>仍是忙等；只保证两个进程；多进程需扩展</td></tr>
+<tr><td>TS</td><td><code>TS</code> 返回 true 时自旋</td><td>持锁者写 <code>lock = false</code></td><td>无等待队列，可能总被新来者抢到；不保证有限等待</td></tr>
+<tr><td>Swap</td><td>交换后局部变量仍为 true 时自旋</td><td>持锁者写 <code>lock = false</code></td><td>同 TS，忙等且可能饥饿</td></tr>
+<tr><td>信号量</td><td>P 后 <code>value &lt; 0</code>，进程阻塞</td><td>V 把 <code>value</code> 加到 ≤0 时唤醒一个</td><td>初值错、P 顺序反、漏 V、V 多于 P，都会互斥失效/死锁/计数错</td></tr>
+<tr><td>管程</td><td><code>cond.wait()</code> 释放管程并阻塞</td><td><code>cond.signal()</code> 唤醒等待者</td><td>signal 无等待者会丢失；用 if 而不是 while 可能条件已变仍继续</td></tr>
+</tbody>
+</table></div>
+<h3>1. 单标志：互斥对，但会“空等”</h3>
+<p>设 <code>turn=0</code>。P0 进入临界区，P1 在 <code>while(turn != 1)</code> 自旋；P0 退出写 <code>turn=1</code>，P1 被放行。若 P1 根本不想进，P0 退出后 turn 仍是 1，P0 下一次想进就会永远等一个不会写 turn 的 P1。临界区明明空闲，P0 却进不去——这就是“空闲让进”被破坏。</p>
+<h3>2. 双标志先检查：检查和设置之间的窗口</h3>
+<p>P0 检查 <code>flag[1]</code> 为 false，还没执行 <code>flag[0]=true</code> 就被切换；P1 也检查 <code>flag[0]</code> 为 false；然后两者各自设置自己的 flag 并进入。双方都以为对方不想进，互斥被破坏。根因是“检查”和“设置”不是原子操作。</p>
+<h3>3. 双标志后检查：都举手，谁也不让</h3>
+<p>P0 先 <code>flag[0]=true</code>，P1 再 <code>flag[1]=true</code>；P0 看到 <code>flag[1]</code> 为 true 自旋，P1 看到 <code>flag[0]</code> 为 true 也自旋。两人都持有“想进”的标志，但都不肯退，形成死等。互斥是成立的，错在进展/有限等待。</p>
+<h3>4. Peterson：最后写 turn 的人让对方</h3>
+<p>P0 设 <code>flag[0]=true; turn=1</code>；P1 设 <code>flag[1]=true; turn=0</code>。若 P1 后写 turn，则 P0 看到 <code>flag[1] && turn==1</code> 为真而等待，P1 进入；P1 退出清 <code>flag[1]</code>，P0 的条件变假，P0 进入。它用 turn 打破“双方都等”的僵局，但等待仍是自旋，且只适合两个进程。</p>
+<h3>5. TS / Swap：硬件原子指令，仍可能饿</h3>
+<p>TS 把“读旧值 + 置 true”做成一条原子指令。lock=false 时，P0 的 TS 返回 false 并拿到锁；P1 的 TS 返回 true，只能自旋。P0 解锁后，P1 下一次 TS 才可能拿到。问题是没有排队：P0 刚解锁又立刻 TS，P1 可能一直抢不到，因此不保证有限等待。Swap 同理，只是用原子交换实现“测试并加锁”。</p>
+<h3>6. 信号量：值的变化就是状态机</h3>
+<p>互斥量 <code>S=1</code>。P0 执行 P：<code>S--</code> 变 0，不阻塞，进入；P1 执行 P：<code>S--</code> 变 -1，阻塞。P0 执行 V：<code>S++</code> 变 0，发现 ≤0，唤醒 P1；P1 进入。若 P0 在 P1 执行 P 之前就 V，S 回到 1，P1 的 P 不会阻塞——信号量“记得”这次释放，这是它和条件变量的重要区别。</p>
+<h3>7. 管程：wait 释放锁，signal 只唤醒</h3>
+<p>消费者在 <code>notEmpty.wait()</code> 时释放管程锁并阻塞；生产者进入管程、放入数据、<code>notEmpty.signal()</code>，唤醒消费者。消费者被唤醒后要重新竞争管程锁，且条件可能被其他线程改变，所以必须用 <code>while (!condition) wait();</code> 重新检查。若用 <code>if</code>，被唤醒后直接往下走，可能读到空缓冲区。</p>
+<p>代码库已收录单标志、双标志、Peterson、TS、信号量等片段；看代码时对照这张表，先找“共享变量”，再找“谁写它、谁读它、读写之间有没有原子性”。</p>
+
+<h2 id="sync-patterns">十、互斥、同步、生产者-消费者</h2>
 <p>互斥是“不能同时进”，同步是“必须先 A 后 B”。生产者-消费者是两者叠加的典型：</p>
 <ul>
 <li>缓冲区是临界资源，生产者和消费者不能同时改队列 → 互斥信号量 <code>mutex=1</code>；</li>
@@ -149,7 +193,7 @@ V(S):  S.value++;
 </ul>
 <p>这里 P 的顺序很关键：如果先 P(mutex) 再 P(empty)，生产者在缓冲区满时会持有 mutex 睡眠，消费者无法进入取数据，可能死锁。一般原则是<strong>先 P 同步信号量，再 P 互斥信号量</strong>；V 的顺序通常相反，但要看具体资源。</p>
 
-<h2 id="sync-pitfalls">十、易错点</h2>
+<h2 id="sync-pitfalls">十一、易错点</h2>
 <ul>
 <li><strong>“单标志法满足空闲让进”</strong>：turn 固定给另一方时，即使临界区空闲，当前进程也不能进。</li>
 <li><strong>“双标志先检查能保证互斥”</strong>：检查和设置不是原子操作，双方可能同时通过检查。</li>

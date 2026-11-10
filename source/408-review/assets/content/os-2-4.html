@@ -2,7 +2,7 @@
 <p>调度算法不是一堆名字，而是在“先来后到、短作业优先、响应比、优先级、时间片、多队列”这些规则里做选择。每个算法都要回答四个问题：<strong>怎么选、能不能抢占、对谁有利、会不会饥饿</strong>。这一节把常见算法放在同一张表里比较，再用一组小例子算一遍。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>9 节</span></summary>
+<summary>本页目录 <span>13 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#alg-fcfs">一、FCFS：先来先服务</a></li>
 <li><a href="#alg-sjf">二、SJF / SRTN：短作业优先</a></li>
@@ -12,7 +12,11 @@
 <li><a href="#alg-mlq">六、多级队列与多级反馈队列</a></li>
 <li><a href="#alg-example">七、同一组进程的对比</a></li>
 <li><a href="#alg-choose">八、怎么选：场景与代价</a></li>
-<li><a href="#alg-pitfalls">九、易错点</a></li>
+<li><a href="#alg-scope">九、作业调度还是进程调度</a></li>
+<li><a href="#alg-sjf-opt">十、SJF 最优的前提</a></li>
+<li><a href="#alg-tie">十一、切换和新进程同时发生</a></li>
+<li><a href="#alg-smp">十二、多处理机调度</a></li>
+<li><a href="#alg-pitfalls">十三、易错点</a></li>
 </ul></div>
 </details>
 
@@ -116,7 +120,71 @@ $$R = \frac{\text{等待时间} + \text{要求服务时间}}{\text{要求服务�
 </tbody>
 </table></div>
 
-<h2 id="alg-pitfalls">九、易错点</h2>
+<h2 id="alg-scope">九、作业调度还是进程调度</h2>
+<p>同一个算法名字，放在“作业调度”和“进程调度”里，输入队列和代价不一样。作业调度从外存选作业进入内存，频率低、要分配资源；进程调度从就绪队列选进程上 CPU，频率高、只切换 CPU。</p>
+<div class="article-table"><table>
+<thead><tr><th>算法</th><th>作业调度</th><th>进程调度</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>FCFS</td><td>常用</td><td>可用</td><td>按到达顺序；作业/进程都可</td></tr>
+<tr><td>SJF</td><td>常用</td><td>可用</td><td>需要预知/估计运行时间；作业调度更典型</td></tr>
+<tr><td>HRRN</td><td>常用</td><td>可用</td><td>响应比需要等待时间和服务时间</td></tr>
+<tr><td>优先级</td><td>常用</td><td>常用</td><td>作业优先级和进程优先级可以分开设</td></tr>
+<tr><td>RR</td><td>不常用</td><td>常用</td><td>作业没有“时间片轮转”的语义；RR 面向就绪进程</td></tr>
+<tr><td>多级队列/MLFQ</td><td>不常用</td><td>常用</td><td>按进程类型/行为动态调整，属于进程调度</td></tr>
+</tbody>
+</table></div>
+<p>所以“FCFS、SJF、HRRN 适合批处理作业调度；RR、优先级、MLFQ 更适合分时/交互的进程调度”是常见搭配，但不是绝对禁令：SJF 也能做进程调度，只是要估计 CPU burst。</p>
+
+<h2 id="alg-sjf-opt">十、SJF 最优的前提</h2>
+<p>“所有作业同时到达、运行时间已知”时，SJF 的平均等待时间和平均周转时间最优。原因可以用交换论证：如果两个相邻作业中长的在前、短的在后，交换它们不会影响前面作业的完成时间，但会让短作业提前完成，后面作业的等待时间总和减少；不断交换，直到短作业在前。</p>
+<p>这个结论有条件：</p>
+<ul>
+<li>所有作业在 t=0 同时到达（或都可立即运行）；</li>
+<li>运行时间已知且不变；</li>
+<li>非抢占、无 I/O 阻塞、切换开销忽略；</li>
+<li>平均周转 = 平均等待 + 平均服务时间，服务时间总和固定，所以两者同时最优。</li>
+</ul>
+<p>如果到达时间不同，非抢占 SJF 不一定最优（CPU 可能先跑一个长作业，而短作业马上就到）；抢占式 SRTN 在“已知剩余时间”的前提下更优。考试如果说“同时到达”，就按上面的前提用 SJF；如果说“随时到达”，要看清是否允许抢占。</p>
+
+<h2 id="alg-tie">十一、切换和新进程同时发生</h2>
+<p>调度题有时会让“时间片用完”和“新进程到达”落在同一时刻。算法本身没有规定事件顺序，所以必须先约定：</p>
+<ul>
+<li><strong>抢占式优先级</strong>：新进程优先级更高就抢占；更低就让当前进程继续/按时间片处理。优先级相同再按队列规则。</li>
+<li><strong>RR</strong>：时间片用完的进程和新到进程都要入就绪队列；常见约定是“先处理时间片到期，把当前进程放队尾，再让新进程入队”，但也可反过来。题目没规定时，写清你的假设。</li>
+<li><strong>SJF/SRTN</strong>：比较服务时间/剩余时间；相同则按到达先后，仍相同用 PID 等确定性规则。</li>
+<li><strong>FCFS</strong>：按到达先后；完全相同则任意/按 PID。</li>
+</ul>
+<p>考试通常避免“完全同时”的歧义，或者明确“同时到达按编号/按到达先处理”。真正实现里用事件队列和时间戳排序，保证确定性；不要在两个约定之间反复横跳，否则同一组数据会算出不同答案。</p>
+
+<h2 id="alg-smp">十二、多处理机调度</h2>
+<p>多处理机/多核调度要多考虑两件事：<strong>把任务放哪个 CPU</strong>，以及<strong>任务在 CPU 之间迁移的代价</strong>。</p>
+<h3>1. 非对称 vs 对称</h3>
+<div class="article-table"><table>
+<thead><tr><th>方式</th><th>做法</th><th>优点</th><th>缺点</th></tr></thead>
+<tbody>
+<tr><td>非对称多处理（AMP）</td><td>一个主处理器负责调度/I/O，其他处理器执行任务</td><td>实现简单，控制集中</td><td>主处理器瓶颈/单点故障，扩展性差</td></tr>
+<tr><td>对称多处理（SMP）</td><td>每个 CPU 都运行调度器，共享就绪队列/锁</td><td>可扩展、负载更均衡</td><td>并发访问队列要加锁，缓存一致性/迁移开销</td></tr>
+</tbody>
+</table></div>
+<h3>2. 处理器亲和性</h3>
+<p><strong>亲和性</strong>是“尽量让任务继续在同一个 CPU 上跑”，因为该 CPU 的 Cache/TLB 还留着它的数据。软亲和允许迁移，只是优先留在原 CPU；硬亲和用绑定把任务钉在某个 CPU 上，不再迁移。硬亲和适合实时/性能敏感任务，但会降低负载均衡能力。</p>
+<h3>3. 就绪队列：公共 vs 私有</h3>
+<div class="article-table"><table>
+<thead><tr><th>队列</th><th>负载均衡</th><th>亲和性</th><th>问题</th></tr></thead>
+<tbody>
+<tr><td>公共就绪队列</td><td>好：空闲 CPU 直接取队首</td><td>弱：任务可能被任意 CPU 取走</td><td>全局队列锁竞争、缓存冷启动</td></tr>
+<tr><td>私有就绪队列</td><td>差：某个 CPU 可能空闲，另一个积压</td><td>好：任务倾向留在本 CPU</td><td>需要迁移机制来平衡</td></tr>
+</tbody>
+</table></div>
+<p>注意别记反：<strong>公共队列“好平衡、弱亲和”，私有队列“好亲和、难平衡”</strong>。公共队列不是“亲和性好”，它恰恰容易让任务换 CPU。</p>
+<h3>4. 推迁移与拉迁移</h3>
+<ul>
+<li><strong>推迁移（push migration）</strong>：某个 CPU 发现自己负载过高，主动把任务推到其他 CPU 的就绪队列；</li>
+<li><strong>拉迁移（pull migration）</strong>：某个 CPU 空闲，主动从忙 CPU 的队列拉任务；</li>
+<li>实际系统常两者结合，周期性检查 + 事件触发；迁移要考虑亲和性、NUMA 距离和迁移成本。</li>
+</ul>
+
+<h2 id="alg-pitfalls">十三、易错点</h2>
 <ul>
 <li><strong>“SJF 一定最好”</strong>：只在平均等待时间这个指标、特定前提下最优；长作业会饥饿。</li>
 <li><strong>“FCFS 对短作业友好”</strong>：长作业先到会拖住后面短作业，产生护航效应。</li>

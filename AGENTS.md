@@ -350,9 +350,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 先回忆用 `study.js` 的 `recallPrompts()`：包括哪些 / 步骤 / 公式 / 易错四类问题；背诵清单列全部 points + 前三条 pitfalls；章节页有「本章背诵清单」。
 - 考点页正文在 `assets/content/<topic-id>.html`，按需 fetch；`topic.points` 只是速记层。
 - 考点页结构：背诵清单 / 考场答法（由 points 派生）→ 理解长文 → 图解（正文图 + 自绘 SVG）→ 关联真题。
-- 新增 `views/glossary.js` + `data/glossary.js`（术语库）、`views/diagrams.js` + `data/diagrams.js`（代表题型/流程图解）、`views/code.js` + `data/code.js`（数据结构代码库）；导航已接入。
+- 新增 `views/glossary.js` + `data/glossary.js`（术语库）、`views/diagrams.js` + `data/diagrams.js`（代表题型/流程图解）、`views/code.js` + `data/code.js`（数据结构与 OS 知识点代码库）；导航已接入。
 - 操作系统是第三个科目（`os`），目前 `os-1` 概述（发展、CPU 模式、系统调用、引导、虚拟机）和 `os-2` 进程与线程（进程控制、线程、调度指标、调度算法、同步互斥、死锁）共 11 个考点；数据在 `data/os.js`，长文在 `content/os-*.html` 手写维护。科目主题色用 `--violet`，视图统一走 `subjectClass()`，不要再写 `coa ? is-coa : is-ds` 的三元。
-- **代码库**由 `python scripts/extract-code.py` 从 `content/ds-*.html` 抽取；改完数据结构长文要重跑。
+- **代码库**由 `python scripts/extract-code.py` 从 `content/ds-*.html` 和 `content/os-2-5.html` 抽取；改完数据结构/OS 同步长文要重跑。
 - **流程类图解**放 `data/diagrams.js` 的 `process` 分类；缺图自己画 SVG，或明确让用户上传。
 - 用户明确不要：评论、路线 / 纲领、P0–P3 优先级、英文版；不要加回。
 - 视觉参考 `docs.cpl.icu/kangaroo-review/site/`：网格纸、衬线标题、硬边卡片、红色索引；不要大圆角 + 重阴影。

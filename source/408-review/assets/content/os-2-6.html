@@ -48,6 +48,22 @@
 <li><strong>多实例资源</strong>：有环不一定死锁，要看能否把所有边都消掉（化简）。</li>
 </ul>
 <p>化简方法：找一个“请求量不超过当前可用资源”的进程，假设它运行完并释放资源，删除它的边、增加可用资源；重复。若最后能消掉所有边，图可完全简化，无死锁；否则死锁。</p>
+<h3>例：P1 和 P2 的资源图怎么化简</h3>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="资源分配图：R1 三个实例（P1 持有两个、P2 持有一个），R2 两个实例都被 P2 持有；P1 请求 R2，P2 请求 R1" data-src="/408-review/assets/textbook/os-deadlock-graph.webp" href="/408-review/assets/textbook/os-deadlock-graph.webp">
+<img alt="资源分配图：R1 与 R2 两个资源方框，P1 与 P2 两个进程圆圈；R1 的三个实例分配给 P1 两个、P2 一个，R2 的两个实例都分配给 P2；P1 请求 R2，P2 请求 R1" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-deadlock-graph.webp"/>
+</a>
+<figcaption>绿色箭头是分配边（资源→进程），蓝色箭头是请求边（进程→资源）；R1 共 3 个实例，R2 共 2 个实例。</figcaption>
+</figure>
+<p>读图：</p>
+<ul>
+<li>R1 有 3 个圆点：2 个分配给 P1，1 个分配给 P2；</li>
+<li>R2 有 2 个圆点：都分配给 P2；</li>
+<li>P1 请求 R2 一个实例，P2 请求 R1 一个实例；</li>
+<li>当前 R1、R2 都没有空闲实例。</li>
+</ul>
+<p>化简时，找“请求量 ≤ 当前可用量”的进程：P1 要 R2，但 R2 可用 0；P2 要 R1，但 R1 可用 0。没有任何进程能先完成，所以一条边都消不掉，图<strong>不可完全简化</strong>，系统处于死锁。环是 P1 → R2 → P2 → R1 → P1；在多实例图里“有环”不必然死锁，但这里没有空闲实例可以打破环，所以真的死锁。</p>
+<p>反过来，如果 R2 还剩一个空闲实例，P1 就能先完成并释放它持有的 2 个 R1 和 1 个 R2；P2 随后也能完成，环就被打破。这说明：<strong>多实例资源图要看“可用量”，不能只看有没有环</strong>。</p>
 
 <h2 id="dead-prevent">四、死锁预防：破坏条件</h2>
 <ul>

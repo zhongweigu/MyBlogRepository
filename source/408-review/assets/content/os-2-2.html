@@ -2,7 +2,7 @@
 <p>进程既是资源分配单位，又是调度单位。但一个进程里如果只有一条执行流，它一旦阻塞，整个进程就停住；创建/切换进程又要换地址空间，代价高。线程把这两件事拆开：<strong>资源仍然归进程，CPU 调度交给线程</strong>。理解线程，重点不是“线程更轻”，而是看清<strong>哪些资源共享、哪些私有、谁来调度</strong>。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>7 节</span></summary>
+<summary>本页目录 <span>10 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#thread-why">一、为什么需要线程</a></li>
 <li><a href="#thread-compare">二、进程与线程的分工</a></li>
@@ -10,7 +10,10 @@
 <li><a href="#thread-ult">四、ULT：用户级线程</a></li>
 <li><a href="#thread-kst">五、KST：内核级线程</a></li>
 <li><a href="#thread-models">六、多线程模型</a></li>
-<li><a href="#thread-pitfalls">七、切换、同步与易错点</a></li>
+<li><a href="#thread-entity">七、线程实体：TCB、栈与“线程映像”</a></li>
+<li><a href="#thread-why-ult">八、KLT 里为什么还有用户级线程</a></li>
+<li><a href="#thread-os">九、延伸：pthreads、Linux clone 与常见实现</a></li>
+<li><a href="#thread-pitfalls">十、切换、同步与易错点</a></li>
 </ul></div>
 </details>
 
@@ -109,7 +112,36 @@
 </table></div>
 <p>很多系统还会用“两层模型”：既有多对多，也允许某些线程绑定到专用内核线程。模型的选择本质上是<strong>并行度、切换开销、内核资源</strong>三者的折中。</p>
 
-<h2 id="thread-pitfalls">七、切换、同步与易错点</h2>
+<h2 id="thread-entity">七、线程实体：TCB、栈与“线程映像”</h2>
+<p>线程没有“像进程映像那样的一整套独立地址空间”。它寄生在进程的地址空间里：代码段、数据段、堆、共享库都复用进程的；线程自己需要的是<strong>执行上下文</strong>——寄存器、PC、栈指针、栈、TCB，以及线程局部存储（TLS）。</p>
+<div class="article-table"><table>
+<thead><tr><th>组成</th><th>放在哪</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td>TCB（线程控制块）</td><td>ULT 在用户空间线程库；KST 在内核空间</td><td>线程 ID、状态、寄存器现场、栈指针、优先级、等待事件、链接指针</td></tr>
+<tr><td>用户栈</td><td>进程的用户地址空间</td><td>函数调用、局部变量、返回地址；每个线程独立</td></tr>
+<tr><td>内核栈</td><td>内核空间（KST 必需）</td><td>线程进入内核/中断时保存现场，不能和用户栈混用</td></tr>
+<tr><td>TLS</td><td>进程地址空间中的线程局部区</td><td>每个线程一份的全局/静态变量，如 errno、线程私有缓存</td></tr>
+<tr><td>寄存器现场</td><td>切换时保存到 TCB/内核栈</td><td>通用寄存器、PC、PSW、SP、浮点/SIMD 状态</td></tr>
+</tbody>
+</table></div>
+<p>所以“线程映像”如果非要类比，只能说它是<strong>线程执行上下文 + 私有栈 + TCB</strong>，不含独立的代码/数据/页表。线程切换保存的是这套上下文；同一进程的线程切换通常不换页表，因此比进程切换轻。进程切换则要换地址空间（页表基址、TLB），并保存/恢复 PCB。</p>
+<p>线程的栈也不能和进程的“用户栈”混为一谈：进程映像里画的那段用户栈，是多线程进程里<strong>主线程</strong>的栈；其他线程各自有栈，通常由线程库在堆/匿名映射区分配。KST 还要为每个线程准备内核栈。</p>
+
+<h2 id="thread-why-ult">八、KLT 里为什么还有用户级线程</h2>
+<p>“内核级线程”说的是<strong>内核能识别、能直接调度的实体</strong>；“用户级线程”说的是<strong>应用程序看到的线程对象/线程库</strong>。两者不是互斥的层次，而是“用户态的管理对象”和“内核里的调度实体”之间的映射关系。</p>
+<ul>
+<li>一对一模型中，程序员用 pthread 创建一个用户线程，线程库再通过 <code>clone</code> 等系统调用创建一个内核线程；用户线程是句柄，内核线程是调度单位。内核看到的是 KST，但用户程序仍然在创建/管理用户级线程。</li>
+<li>多对多模型中，多个用户线程复用少量内核线程；线程库负责在用户态切换，内核只调度内核线程。这时既有 ULT 的灵活性，又有 KST 的并行能力。</li>
+<li>即使是一对一，线程库仍要管理用户栈、TLS、线程创建/销毁、同步对象；这些是用户态职责，不能因为“内核能看到线程”就消失。</li>
+</ul>
+<p>所以“KLT 里还有用户级线程”不是矛盾：<strong>KLT 是内核的调度对象，ULT 是用户程序的并发抽象</strong>；一个 KLT 可以承载一个或多个 ULT，具体看模型。</p>
+
+<h2 id="thread-os">九、延伸：pthreads、Linux clone 与常见实现</h2>
+<p>POSIX 线程（pthreads）是应用编程接口，不是实现。Linux 的 NPTL 采用一对一模型：每个 pthread 对应一个内核调度实体；底层用 <code>clone</code> 创建，传入 <code>CLONE_VM</code>（共享地址空间）、<code>CLONE_FS</code>（共享文件系统信息）、<code>CLONE_FILES</code>（共享文件描述符表）、<code>CLONE_SIGHAND</code>（共享信号处理）等标志，于是新实体与父实体共享资源，但有自己的寄存器/栈，成为“线程”。</p>
+<p>Windows 的线程由内核对象表示，内核直接调度；Java 的线程在主流 JVM 上通常映射到 OS 线程；Go 的 goroutine 是运行时管理的 M:N 用户态调度，多个 goroutine 复用到若干 OS 线程。这些例子说明：<strong>“线程”既可以是语言/库的概念，也可以是内核的调度实体，关键是看谁创建、谁调度、共享什么</strong>。</p>
+<p>外部资料可以重点看三处：pthreads 的线程创建/join、Linux `clone` 的标志位、以及 Go scheduler 的 G-M-P 模型。它们分别对应“用户接口”“内核实现”“M:N 调度”三个层次。</p>
+
+<h2 id="thread-pitfalls">十、切换、同步与易错点</h2>
 <p>线程切换保存/恢复寄存器、PC、SP 和 TCB；同一进程的线程共享页表，所以通常不换地址空间、不刷新 TLB。进程切换则可能换页表，代价更高。</p>
 <p>线程共享地址空间，必须用互斥锁、信号量、条件变量等保护共享数据。一个线程打开的文件，其他线程也能读写；这也意味着“线程安全”不是自动的。</p>
 <ul>

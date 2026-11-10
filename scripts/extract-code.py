@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-从数据结构长文里抽取代码块，生成 data/code.js。
+从数据结构与 OS 知识点长文里抽取代码块，生成 data/code.js。
 说明性文字取代码前最近的一段；标题取最近的 h2/h3/h4。
 用法：python scripts/extract-code.py
 """
@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "source" / "408-review" / "assets" / "content"
-OUT = ROOT / "source" / "408-review" / "assets" / "js-v27" / "data" / "code.js"
+OUT = ROOT / "source" / "408-review" / "assets" / "js-v28" / "data" / "code.js"
 
 # 只收知识点里的代码；复杂度例题、例题/练习/习题里的代码不收。
 SKIP_TOPICS = {"ds-1-1", "ds-1-2"}
@@ -28,7 +28,8 @@ def clean(text: str) -> str:
 
 def main() -> None:
     snippets = []
-    for path in sorted(CONTENT.glob("ds-*.html")):
+    paths = sorted(CONTENT.glob("ds-*.html")) + [CONTENT / "os-2-5.html"]
+    for path in paths:
         topic = path.stem
         if topic in SKIP_TOPICS:
             continue
@@ -48,7 +49,7 @@ def main() -> None:
                     last_para = text
             elif getattr(node, "name", None) == "code":
                 pre = node.find_parent("pre")
-                if not pre:
+                if not pre or pre.get("data-code-skip") is not None:
                     continue
                 if node.find_parent("details") is not None:
                     summary = node.find_parent("details").find("summary")
@@ -77,7 +78,7 @@ def main() -> None:
                 })
 
     OUT.write_text(
-        "/**\n * 由 scripts/extract-code.py 从数据结构长文自动抽取。\n"
+        "/**\n * 由 scripts/extract-code.py 从数据结构与 OS 知识点长文自动抽取。\n"
         " * 不要手改；要调整标题/说明，先改 content 或脚本后重跑。\n */\n\n"
         "export const CODE_SNIPPETS = "
         + json.dumps(snippets, ensure_ascii=False, indent=2)

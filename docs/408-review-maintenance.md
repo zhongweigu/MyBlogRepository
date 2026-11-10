@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v27/
+│   ├── js-v28/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -227,13 +227,13 @@ python scripts/build-review-content.py
 
 ### 3.8 代码库
 
-- `scripts/extract-code.py` 从 `content/ds-*.html` 自动抽取 `<pre><code>`，取最近的 `h2/h3/h4` 当标题、代码前最近一段当说明，输出 `data/code.js`。**只收知识点代码**：跳过 `ds-1-1`/`ds-1-2`（复杂度例题）、标题含“例题/练习/习题/真题/题目”、以及 summary 含“答案/解析/查看”的折叠块。
+- `scripts/extract-code.py` 从 `content/ds-*.html` 和 `content/os-2-5.html` 自动抽取 `<pre><code>`，取最近的 `h2/h3/h4` 当标题、代码前最近一段当说明，输出 `data/code.js`。**只收知识点代码**：跳过 `ds-1-1`/`ds-1-2`（复杂度例题）、标题含“例题/练习/习题/真题/题目”、summary 含“答案/解析/查看”的折叠块，以及带 `data-code-skip` 的 `<pre>`。
 - 页面路由 `#/code`，按章节筛选 + 搜索；顶部导航「代码」、移动端底部也有入口。
-- 改完数据结构长文后重跑：
+- 改完数据结构/OS 同步长文后重跑：
   ```powershell
   python scripts/extract-code.py
   ```
-  只收数据结构代码；计组不建代码库。
+  代码库收数据结构和 OS 知识点代码；计组不建代码库。
 
 ---
 
@@ -387,7 +387,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 长文手写在 `assets/content/os-1-1.html` 到 `os-2-6.html`，**不要**交给 `build-review-content.py` 生成，也不要从帖子切段。
 - `os-1-2` 讲模式切换时复用了计组「中断完整流程」的 `assets/img/coa-interrupt-timeline.svg` 和 `assets/textbook/coa-interrupt-single-multiple.webp`；重点写清“旧 PSW 保存后、handler 第一条指令前”这个切换点，不要改成“设备请求时”或“服务程序执行中”。
 - `os-1-5` 的 1/2 型 VMM 层次图用 `.vm-stack-grid` / `.vm-layer` 的 HTML/CSS，不用图片；桌面双列、手机自动单列。
-- `os-2` 的图片在 `assets/textbook/`：`os-process-image.webp`、`os-process-state.webp`、`os-thread-schedule.webp`、`os-ult.webp`、`os-kst.webp`、`os-mlfq.webp`、`os-banker-table.webp`；正文按段落插入，不要只堆文末。
+- `os-2` 的图片在 `assets/textbook/`：`os-process-image.webp`、`os-process-state.webp`、`os-thread-schedule.webp`、`os-ult.webp`、`os-kst.webp`、`os-mlfq.webp`、`os-banker-table.webp`、`os-deadlock-graph.webp`；正文按段落插入，不要只堆文末。
 - 科目主题色为紫（`--violet`）。`views/map.js` / `chapter.js` / `topic.js` / `runner.js` / `questions.js` 都通过 `ui.js` 的 `subjectClass()` 取 `is-os`，新增科目时不要再写 `coa ? is-coa : is-ds` 的三元。
 - 已录入 14 道 OS 真题（2009–2023 选择题 + 2021-46、2023-46 综合题），题库存量为 179；以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` 或 `os-2`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-3` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
