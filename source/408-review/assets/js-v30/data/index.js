@@ -9,6 +9,7 @@ import { COA_SUPPLEMENTS } from './supplements-coa.js';
 import { QUESTIONS as CURATED_QUESTIONS } from './questions.js';
 import { EXTRA_QUESTIONS } from './questions-extra.js';
 import { MANUAL_EXTRA_QUESTIONS } from './questions-manual-extra.js';
+import { PV_QUESTIONS } from './questions-pv.js';
 
 export { META, SUBJECTS, CHAPTERS, CHAINS };
 
@@ -52,7 +53,7 @@ function questionFingerprint(q) {
 
 // 手写题优先；自动抽取只补手写题没覆盖到的。按题干前 64 字去重。
 const seenQuestions = new Set();
-export const QUESTIONS = [...CURATED_QUESTIONS, ...EXTRA_QUESTIONS, ...MANUAL_EXTRA_QUESTIONS].filter((q) => {
+export const QUESTIONS = [...CURATED_QUESTIONS, ...EXTRA_QUESTIONS, ...MANUAL_EXTRA_QUESTIONS, ...PV_QUESTIONS].filter((q) => {
   const key = questionFingerprint(q);
   if (seenQuestions.has(key)) return false;
   seenQuestions.add(key);
