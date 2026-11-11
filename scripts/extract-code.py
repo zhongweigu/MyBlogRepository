@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 从数据结构与 OS 知识点长文里抽取代码块，生成 data/code.js。
 说明性文字取代码前最近的一段；标题取最近的 h2/h3/h4。
@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "source" / "408-review" / "assets" / "content"
-OUT = ROOT / "source" / "408-review" / "assets" / "js-v31" / "data" / "code.js"
+OUT = ROOT / "source" / "408-review" / "assets" / "js-v32" / "data" / "code.js"
 
 # 只收知识点里的代码；复杂度例题、例题/练习/习题里的代码不收。
 SKIP_TOPICS = {"ds-1-1", "ds-1-2"}
@@ -97,3 +97,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
