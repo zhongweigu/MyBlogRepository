@@ -1,0 +1,95 @@
+<div class="article-content">
+<p>PV 大题不是“默写代码”，而是先做关系翻译，再套模板，最后按并发交错检查。下面这套流程适用于生产者-消费者、读者-写者、哲学家，也适用于“银行、渡口、理发店”这类换皮题。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#pv5-read">一、先读题：把场景翻成三类关系</a></li>
+<li><a href="#pv5-type">二、定类型与初值</a></li>
+<li><a href="#pv5-write">三、写代码的顺序</a></li>
+<li><a href="#pv5-check">四、按交错检查</a></li>
+<li><a href="#pv5-real">五、真题策略：先抓主模型</a></li>
+<li><a href="#pv5-answer">六、怎么写得像标准答案</a></li>
+<li><a href="#pv5-pitfalls">七、常见失分点</a></li>
+</ul></div>
+</details>
+
+<h2 id="pv5-read">一、先读题：把场景翻成三类关系</h2>
+<p>拿到题，先在草稿上写三行：</p>
+<div class="article-table"><table>
+<thead><tr><th>问题</th><th>对应关系</th><th>例子</th></tr></thead>
+<tbody>
+<tr><td>谁和谁不能同时？</td><td>互斥</td><td>缓冲区、共享变量、打印机</td></tr>
+<tr><td>最多几个同时？</td><td>资源数量限制</td><td>N 个座位、N 台设备、最多 4 人</td></tr>
+<tr><td>谁做完谁才能做？</td><td>同步</td><td>先生产后消费、先写后读、A 完成后 B</td></tr>
+</tbody>
+</table></div>
+<p>读者-写者还要多画一张<strong>角色矩阵</strong>：读-读可以，读-写不行，写-写不行。哲学家要标出“资源—人”的环：谁持有哪根、还想要哪根。不要一上来写 <code>P(mutex)</code>。</p>
+
+<h2 id="pv5-type">二、定类型与初值</h2>
+<div class="article-table"><table>
+<thead><tr><th>关系</th><th>信号量</th><th>初值</th><th>P/V 位置</th></tr></thead>
+<tbody>
+<tr><td>一个临界资源</td><td><code>mutex</code></td><td>1</td><td>临界区前后</td></tr>
+<tr><td>N 个名额/资源</td><td><code>resource</code></td><td>N</td><td>用前 P、用完 V</td></tr>
+<tr><td>A 先于 B</td><td><code>sync</code></td><td>0</td><td>A 后 V、B 前 P</td></tr>
+<tr><td>读者整体 vs 写者</td><td><code>rw</code></td><td>1</td><td>第一个读者 P、最后一个读者 V</td></tr>
+<tr><td>保护读者计数</td><td><code>mutex</code></td><td>1</td><td>count 读写前后</td></tr>
+<tr><td>写者公平入口</td><td><code>w</code></td><td>1</td><td>读者/写者进入前 P、离开入口 V</td></tr>
+</tbody>
+</table></div>
+<p>初值是最容易失分的地方：同步量设 1 会让后继直接通过；资源量设 0 会让所有人一开始阻塞；empty/full 互换会让生产者一上来就以为缓冲区满/空。</p>
+
+<h2 id="pv5-write">三、写代码的顺序</h2>
+<ol>
+<li>先写信号量声明和初值；</li>
+<li>再写每个进程的<strong>骨架</strong>（while、生产/读/思考）；</li>
+<li>在“需要条件”的位置插 P，在“条件成立”的位置插 V；</li>
+<li>最后用 mutex 包住临界区；</li>
+<li>按“先同步/资源 P，再互斥 P；先互斥 V，再通知 V”检查顺序。</li>
+</ol>
+<p>不要先写 <code>P(mutex)</code> 再想“我还在等什么”。先把“等什么条件”写出来，再决定它是不是 mutex。</p>
+
+<h2 id="pv5-check">四、按交错检查</h2>
+<p>写完后，至少走三种交错：</p>
+<ul>
+<li><strong>最满/最空</strong>：缓冲区满时生产者会不会拿着 mutex 睡眠？缓冲区空时消费者会不会？</li>
+<li><strong>第一个/最后一个</strong>：读者-写者中第一个读者是否 P(rw)？最后一个是否 V(rw)？</li>
+<li><strong>循环申请</strong>：多个资源是否按同一顺序？哲学家是否可能五个人各持一根？</li>
+</ul>
+<p>检查四件事：每个 P 是否有 V、每个进程是否覆盖、初值是否匹配、是否可能死锁/饥饿。语法顺不代表并发对。</p>
+
+<h2 id="pv5-real">五、真题策略：先抓主模型</h2>
+<p>408 的 PV 大题大多不是“全新模型”，而是经典模型的换皮：</p>
+<div class="article-table"><table>
+<thead><tr><th>题目外壳</th><th>主模型</th><th>先抓什么</th></tr></thead>
+<tbody>
+<tr><td>生产者/消费者、消息队列、流水线</td><td>生产者-消费者</td><td>empty/full + mutex + P 顺序</td></tr>
+<tr><td>读者/写者、查询/更新、黑白名单</td><td>读者-写者</td><td>角色矩阵 + count + rw</td></tr>
+<tr><td>哲学家、多人多资源、设备组合</td><td>多资源申请</td><td>死锁环 + 限制/顺序</td></tr>
+<tr><td>银行、理发店、渡口</td><td>资源数量 + 同步</td><td>座位/窗口数 + 先来后到</td></tr>
+</tbody>
+</table></div>
+<p>导图列出的 PV 真题年份包括 2009、2011、2013、2014、2015、2017、2019、2020、2021；其中生产者-消费者和读者-写者是主线，哲学家更常以“防死锁方案”出现。做题时先判断主模型，再补题目特有的一句话约束。</p>
+
+<h2 id="pv5-answer">六、怎么写得像标准答案</h2>
+<ul>
+<li>先写“信号量定义 + 初值”，让阅卷人看到你的模型；</li>
+<li>每个进程写成独立函数，不要把多个角色混在一个函数里；</li>
+<li>P/V 成对、缩进清楚；临界区用注释标出；</li>
+<li>题目问“为什么”时，用“互斥/同步/资源 + 死锁四条件”回答，不要只写“这样不会错”；</li>
+<li>如果题目要求“说明理由”，把“谁等谁、谁唤醒谁”写出来。</li>
+</ul>
+
+<h2 id="pv5-pitfalls">七、常见失分点</h2>
+<ul>
+<li><strong>把同步当互斥</strong>：A 先于 B 需要 <code>sync=0</code>，不是再加一把 mutex。</li>
+<li><strong>P 顺序反</strong>：生产者先 P(mutex) 再 P(empty)，满缓冲区时死锁。</li>
+<li><strong>初值错</strong>：empty/full 互换、resource 设 0、sync 设 1。</li>
+<li><strong>count 不保护</strong>：读者-写者中 count 丢更新，rw 提前/延迟释放。</li>
+<li><strong>只写一个进程</strong>：生产者-消费者要写生产者和消费者两套；读者-写者要写读者和写者两套。</li>
+<li><strong>哲学家只加 mutex</strong>：没有改变“持有并等待”的结构，仍可能死锁。</li>
+</ul>
+<p>把这一节收成一句话：<strong>先关系、后初值、再代码、最后按交错检查；PV 题考的是建模，不是背模板。</strong></p>
+</div>
+<p class="article-source">内容整理自《PV 专题》导图、PPT 与操作系统教材通用框架。</p>

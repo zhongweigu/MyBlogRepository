@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "source" / "408-review" / "assets" / "content"
-OUT = ROOT / "source" / "408-review" / "assets" / "js-v29" / "data" / "code.js"
+OUT = ROOT / "source" / "408-review" / "assets" / "js-v30" / "data" / "code.js"
 
 # 只收知识点里的代码；复杂度例题、例题/练习/习题里的代码不收。
 SKIP_TOPICS = {"ds-1-1", "ds-1-2"}
@@ -28,7 +28,13 @@ def clean(text: str) -> str:
 
 def main() -> None:
     snippets = []
-    paths = sorted(CONTENT.glob("ds-*.html")) + [CONTENT / "os-2-5.html"]
+    paths = sorted(CONTENT.glob("ds-*.html")) + [
+        CONTENT / "os-2-5.html",
+        CONTENT / "os-3-1.html",
+        CONTENT / "os-3-2.html",
+        CONTENT / "os-3-3.html",
+        CONTENT / "os-3-4.html",
+    ]
     for path in paths:
         topic = path.stem
         if topic in SKIP_TOPICS:

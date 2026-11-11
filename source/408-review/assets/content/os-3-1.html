@@ -1,0 +1,145 @@
+<div class="article-content">
+<p>PV 题看起来是“写几个 P、几个 V”，真正的难点是先把题目翻成并发约束。信号量只是一个<strong>整数计数器 + 等待队列</strong>；P 是“我要满足条件/拿资源”，V 是“我让条件成立/还资源”。把互斥、资源数量限制、同步这三类关系分清，代码只是套模板。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>8 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#pv-why">一、PV 到底在解决什么</a></li>
+<li><a href="#pv-sem">二、信号量的结构与 P/V 语义</a></li>
+<li><a href="#pv-mutex">三、互斥模型</a></li>
+<li><a href="#pv-resource">四、资源数量限制</a></li>
+<li><a href="#pv-sync">五、同步模型</a></li>
+<li><a href="#pv-order">六、P/V 的顺序与死锁</a></li>
+<li><a href="#pv-five">七、五步法</a></li>
+<li><a href="#pv-check">八、检查清单与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="pv-why">一、PV 到底在解决什么</h2>
+<p>并发进程之间只有三类约束：</p>
+<div class="article-table"><table>
+<thead><tr><th>约束</th><th>题目里的说法</th><th>信号量</th><th>初值</th></tr></thead>
+<tbody>
+<tr><td>互斥</td><td>同一个资源/变量/缓冲区，同一时刻只能一个人用</td><td>mutex</td><td>1</td></tr>
+<tr><td>资源数量限制</td><td>最多 N 个进程同时做某件事，或有 N 个名额/座位/设备</td><td>resource</td><td>N</td></tr>
+<tr><td>同步</td><td>A 做完以后 B 才能做；先生产后消费</td><td>sync</td><td>0</td></tr>
+</tbody>
+</table></div>
+<p>互斥是“不能同时”，资源限制是“最多几个”，同步是“谁先谁后”。这三类可以叠加：生产者-消费者就是“同步 + 互斥”，读者-写者是“角色不对称的互斥”，哲学家是“多个资源组合申请”。</p>
+
+<h2 id="pv-sem">二、信号量的结构与 P/V 语义</h2>
+<p>一个记录型信号量可以看成：</p>
+<pre><code class="language-c">typedef struct {
+    int value;          // 可用资源数；负数绝对值 = 等待进程数
+    Queue queue;        // 阻塞在该信号量上的进程队列
+} semaphore;
+
+void P(semaphore S) {   // wait / 申请
+    S.value--;
+    if (S.value &lt; 0) block(S.queue);
+}
+
+void V(semaphore S) {   // signal / 释放
+    S.value++;
+    if (S.value &lt;= 0) wakeup(S.queue);
+}</code></pre>
+<ul>
+<li><code>value &gt;= 0</code>：还有多少可用资源/名额；</li>
+<li><code>value &lt; 0</code>：没有资源，绝对值是等待队列长度；</li>
+<li>P 可能阻塞，V 可能唤醒；P/V 必须<strong>原子</strong>执行。</li>
+</ul>
+<p>P 的“减一”不是简单的计数：它先占用一个资源，若占用后变负，说明资源已经不够，当前进程要睡眠。V 的“加一”也不是简单归还：若加完仍 ≤0，说明有人在等，要唤醒一个。</p>
+<p>同一个 P/V 在不同场景下语义不同：互斥/资源场景是“拿/还”，同步场景是“等/通知”。不要把“P 就是加锁”背死。</p>
+
+<h2 id="pv-mutex">三、互斥模型</h2>
+<p>临界资源一次只允许一个进程访问，初值 <code>mutex=1</code>：</p>
+<pre><code class="language-c">semaphore mutex = 1;
+
+P1() {
+    while (1) {
+        P(mutex);
+        临界区;          // 访问共享变量/缓冲区/设备
+        V(mutex);
+        剩余区;
+    }
+}
+
+P2() {
+    while (1) {
+        P(mutex);
+        临界区;
+        V(mutex);
+        剩余区;
+    }
+}</code></pre>
+<p>第一个进程 P 后 value 从 1 变 0，进入临界区；第二个进程 P 后变 -1，阻塞。第一个进程 V 后 value 回到 0，唤醒第二个。互斥成立，且阻塞等待满足让权等待。</p>
+<p>P/V 必须成对，且 V 要放在所有退出路径上；临界区内不能有“永远不返回”的路径，否则锁永远不释放。</p>
+
+<h2 id="pv-resource">四、资源数量限制</h2>
+<p>有 N 个相同资源/名额，初值 <code>resource=N</code>：</p>
+<pre><code class="language-c">semaphore resource = N;
+
+process() {
+    while (1) {
+        P(resource);     // 申请一个名额
+        使用资源;
+        V(resource);     // 归还名额
+    }
+}</code></pre>
+<p>前 N 个进程可以直接通过，第 N+1 个开始阻塞；每释放一个名额，唤醒一个等待者。互斥是 N=1 的特例：<code>mutex</code> 就是“只有一个名额的资源信号量”。</p>
+<p>题目说“最多 4 人同时进餐”“最多 3 个进程读”“有 5 台设备”时，优先想到资源信号量，而不是给每个人再加一把互斥锁。</p>
+
+<h2 id="pv-sync">五、同步模型</h2>
+<p>A 完成后 B 才能做，初值 <code>sync=0</code>：</p>
+<pre><code class="language-c">semaphore sync = 0;
+
+A() {
+    操作A;
+    V(sync);             // 通知：A 已经完成
+}
+
+B() {
+    P(sync);             // 等待：A 完成的通知
+    操作B;
+}</code></pre>
+<p>如果 B 先执行，P 后 value 变 -1，B 阻塞；A 执行 V 后 value 回到 0，唤醒 B。如果 A 先执行，V 后 value 变 1，B 再 P 时 value 变 0，不阻塞——信号量“记住”了这次通知。</p>
+<p>同步信号量初值为什么是 0？因为“事件还没发生”。设成 1 等于告诉后继进程“已经发生过”，B 会直接通过，顺序就被破坏。</p>
+
+<h2 id="pv-order">六、P/V 的顺序与死锁</h2>
+<p>当一个进程需要多个信号量时，P 的顺序可能造成死锁。典型反例：</p>
+<pre><code class="language-c">// 错误：两个进程以相反顺序申请
+P1: P(S1); P(S2);
+P2: P(S2); P(S1);</code></pre>
+<p>P1 拿到 S1、P2 拿到 S2，双方再等对方，形成循环等待。解决方法是<strong>所有进程按同一顺序申请</strong>，或把多个资源合并成一个资源信号量。</p>
+<p>生产者-消费者里的“先 P(empty) 再 P(mutex)”也是顺序问题：如果先拿 mutex 再等 empty，缓冲区满时生产者会拿着锁睡眠，消费者无法进入，死锁。一般原则：<strong>先 P 同步/资源，再 P 互斥</strong>；V 先释放互斥，再通知。</p>
+
+<h2 id="pv-five">七、五步法</h2>
+<ol>
+<li><strong>找关系</strong>：列出谁和谁互斥、最多几个、谁必须先于谁。</li>
+<li><strong>定类型</strong>：一个临界资源 → mutex；N 个名额 → resource；A 先于 B → sync。</li>
+<li><strong>设初值</strong>：mutex=1，resource=N，sync=0；读者-写者另有 count=0、rw=1、count 的保护 mutex=1。</li>
+<li><strong>套模板</strong>：互斥夹住临界区；同步“前驱 V、后继 P”；资源“用时 P、用完 V”。</li>
+<li><strong>检查</strong>：每个进程是否覆盖、P/V 是否成对、P 顺序是否可能循环等待、计数是否超过资源数。</li>
+</ol>
+<div class="article-table"><table>
+<thead><tr><th>题目信号</th><th>优先判断</th><th>初值</th></tr></thead>
+<tbody>
+<tr><td>“同一时刻只能一个”</td><td>互斥</td><td>1</td></tr>
+<tr><td>“最多 N 个”/“N 个资源”</td><td>资源数量限制</td><td>N</td></tr>
+<tr><td>“A 完成后 B 才能”</td><td>同步</td><td>0</td></tr>
+<tr><td>“读者可以同时，写者不能”</td><td>角色矩阵 + count</td><td>rw=1, mutex=1, count=0</td></tr>
+<tr><td>“每人需要两个资源”</td><td>多资源组合 + 死锁</td><td>chopsticks=1，另加限制</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="pv-check">八、检查清单与收束</h2>
+<ul>
+<li><strong>初值</strong>：同步量是不是 0？资源量是不是 N？empty/full 有没有互换？</li>
+<li><strong>P 顺序</strong>：有没有拿着 mutex 去等同步量/资源？多个信号量是否按同一顺序？</li>
+<li><strong>V 配对</strong>：每个 P 是否都有 V？异常/退出路径是否释放？</li>
+<li><strong>覆盖</strong>：每个生产者/消费者/读者/写者进程都写了吗？只写一个进程会漏分。</li>
+<li><strong>死锁/饥饿</strong>：多个资源是否形成环？读者优先是否饿死写者？</li>
+</ul>
+<p>把这一节收成一句话：<strong>PV 不是代码模板，而是把“互斥、资源、同步”翻译成信号量；先关系、后初值、再代码、最后按交错检查。</strong></p>
+</div>
+<p class="article-source">内容整理自《PV 专题》导图、PPT 与操作系统教材通用框架。</p>

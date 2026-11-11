@@ -1,0 +1,141 @@
+<div class="article-content">
+<p>读者-写者不是“所有人抢一把锁”。它考的是<strong>角色不对称</strong>：读者之间可以同时读，读者和写者不能同时，写者和写者也不能同时。做这道题，先画“谁可以和谁同时”的矩阵，再决定谁和谁互斥。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#rw-rule">一、四条规则与角色矩阵</a></li>
+<li><a href="#rw-idea">二、把读者看成一个整体</a></li>
+<li><a href="#rw-code">三、读者优先代码</a></li>
+<li><a href="#rw-count">四、count 为什么还要 mutex</a></li>
+<li><a href="#rw-fair">五、写者饥饿与 w 信号量</a></li>
+<li><a href="#rw-compare">六、读者优先/写者优先/公平</a></li>
+<li><a href="#rw-pitfalls">七、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="rw-rule">一、四条规则与角色矩阵</h2>
+<p>读者-写者问题的经典要求：</p>
+<ol>
+<li>允许多个读者同时对文件读；</li>
+<li>只允许一个写者写；</li>
+<li>写者写时，不允许其他读者或写者工作；</li>
+<li>写者开始写之前，已有读者和写者都要退出。</li>
+</ol>
+<div class="article-table"><table>
+<thead><tr><th>角色组合</th><th>能否同时</th><th>原因</th></tr></thead>
+<tbody>
+<tr><td>读者 + 读者</td><td>可以</td><td>读不改变数据，可以共享</td></tr>
+<tr><td>读者 + 写者</td><td>不可以</td><td>写会改变数据，读可能读到不一致</td></tr>
+<tr><td>写者 + 写者</td><td>不可以</td><td>两个写会互相覆盖</td></tr>
+</tbody>
+</table></div>
+<p>所以不是“共享文件 → 所有人互斥”，而是“写者与所有人互斥，读者之间放行”。这就是读者-写者的核心。</p>
+
+<h2 id="rw-idea">二、把读者看成一个整体</h2>
+<p>把“所有读者”当成一个整体，让它和写者互斥：</p>
+<ul>
+<li>第一个读者到达时，代表读者整体去抢 <code>rw</code>，把写者挡住；</li>
+<li>后续读者不需要再抢 <code>rw</code>，直接加入读；</li>
+<li>最后一个读者离开时，代表读者整体释放 <code>rw</code>，放写者进来。</li>
+</ul>
+<p>因此需要两个东西：<code>rw</code>（读者整体/写者的互斥）和 <code>count</code>（当前读者数）。<code>count</code> 是普通整数，不是信号量——它不需要排队，也不限制读者上限；但多个读者同时修改它，必须用 <code>mutex</code> 保护。</p>
+
+<h2 id="rw-code">三、读者优先代码</h2>
+<pre><code class="language-c">semaphore rw = 1;      // 写者与“读者整体”互斥
+semaphore mutex = 1;   // 保护 count
+int count = 0;         // 当前读者数
+
+writer() {
+    while (1) {
+        P(rw);
+        写文件;
+        V(rw);
+    }
+}
+
+reader() {
+    while (1) {
+        P(mutex);
+        if (count == 0) P(rw);  // 第一个读者挡住写者
+        count++;
+        V(mutex);
+
+        读文件;
+
+        P(mutex);
+        count--;
+        if (count == 0) V(rw);  // 最后一个读者放行写者
+        V(mutex);
+    }
+}</code></pre>
+<p>走一遍：第一个读者 <code>count=0</code>，执行 <code>P(rw)</code> 拿到文件；第二个读者看到 <code>count=1</code>，不再 P(rw)，直接读。写者此时 P(rw) 会阻塞。最后一个读者 <code>count</code> 减到 0，V(rw)，写者被唤醒。</p>
+
+<h2 id="rw-count">四、count 为什么还要 mutex</h2>
+<p>读者虽然只读文件，但他们会<strong>修改 count</strong>。对 count 来说，每个读者都是“写者”：两个读者同时执行 <code>count++</code>，可能都读到旧值 0，最后 count 只加了一次。于是：</p>
+<ul>
+<li>第一个读者可能重复 P(rw)（如果都以为自己是第一个）；</li>
+<li>最后一个读者可能提前 V(rw)，写者与读者并发；</li>
+<li>读者数量错误，导致 rw 永远不释放或提前释放。</li>
+</ul>
+<p>所以 count 的“读—改—写”必须放在 <code>P(mutex)/V(mutex)</code> 内。注意 mutex 只保护 count，不保护整个读文件过程；读操作本身可以并发。</p>
+
+<h2 id="rw-fair">五、写者饥饿与 w 信号量</h2>
+<p>上面的代码是<strong>读者优先</strong>：只要还有读者在，写者就得等；读者不断到达时，写者可能永远进不去，发生写者饥饿。</p>
+<p>要让写者相对公平，增加一个入口信号量 <code>w=1</code>：读者和写者进入前都先 P(w)，离开入口时 V(w)；这样写者排队后，后来的读者不能不断插队。</p>
+<pre><code class="language-c">semaphore rw = 1;
+semaphore mutex = 1;
+semaphore w = 1;       // 入口排队，缓解写者饥饿
+int count = 0;
+
+writer() {
+    while (1) {
+        P(w);
+        P(rw);
+        写文件;
+        V(rw);
+        V(w);
+    }
+}
+
+reader() {
+    while (1) {
+        P(w);
+        P(mutex);
+        if (count == 0) P(rw);
+        count++;
+        V(mutex);
+        V(w);           // 进入读者整体后立刻释放入口
+
+        读文件;
+
+        P(mutex);
+        count--;
+        if (count == 0) V(rw);
+        V(mutex);
+    }
+}</code></pre>
+<p>写者等待时持有 w，后续读者在 P(w) 处排队，不能继续插队；已在读的读者读完后，最后一个释放 rw，写者进入。反过来，如果写者持续到达，读者也可能被挡在 w 外——所以这是“相对公平/写者优先”，不是绝对公平。</p>
+
+<h2 id="rw-compare">六、读者优先/写者优先/公平</h2>
+<div class="article-table"><table>
+<thead><tr><th>策略</th><th>做法</th><th>风险</th></tr></thead>
+<tbody>
+<tr><td>读者优先</td><td>只有第一个读者 P(rw)，后续读者直接加入</td><td>写者可能饥饿</td></tr>
+<tr><td>写者优先/相对公平</td><td>入口加 w，写者等待时挡住新读者</td><td>持续写者可能让读者等待</td></tr>
+<tr><td>严格公平</td><td>按到达顺序排队（如 FIFO 信号量/票据锁）</td><td>实现复杂，并发度可能下降</td></tr>
+</tbody>
+</table></div>
+<p>考试里如果题目没有特别要求“公平”，通常写读者优先版即可；如果题目明确“写者不被饿死”或“写者优先”，再加 w。不要默认加 w 就一定更好，它会改变读者/写者的相对优先级。</p>
+
+<h2 id="rw-pitfalls">七、易错点与收束</h2>
+<ul>
+<li><strong>“count 是信号量”</strong>：count 是计数变量，不需要排队；保护它的是 mutex。</li>
+<li><strong>“每个读者都 P(rw)”</strong>：只有第一个读者 P(rw)，否则读者之间也互斥，失去并发。</li>
+<li><strong>“最后一个读者不 V(rw)”</strong>：写者会永远等不到文件。</li>
+<li><strong>“count++ 不用保护”</strong>：多个读者同时改 count 会丢更新，可能导致 rw 提前/延迟释放。</li>
+<li><strong>“加 w 绝对公平”</strong>：w 只是入口排队；持续写者仍可能让读者等待。</li>
+</ul>
+<p>把这一节收成一句话：<strong>rw 管“读者整体 vs 写者”，mutex 管 count，count 管“第一个/最后一个读者”；w 只是可选的公平入口。</strong></p>
+</div>
+<p class="article-source">内容整理自《PV 专题》导图与 PPT；代码为教学用简化模型。</p>

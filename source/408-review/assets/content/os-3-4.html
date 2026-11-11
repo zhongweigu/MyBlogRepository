@@ -1,0 +1,115 @@
+<div class="article-content">
+<p>哲学家进餐考的不是“怎么吃”，而是<strong>一个进程需要同时占有多个资源才能继续时，资源申请顺序会不会形成环</strong>。每个哲学家先拿左筷子、再拿右筷子；如果五个人同时拿起左筷子，再等右筷子，就形成循环等待。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#ph-problem">一、问题与死锁根因</a></li>
+<li><a href="#ph-one">二、方法 1：最多 4 人</a></li>
+<li><a href="#ph-two">三、方法 2：原子拿两只</a></li>
+<li><a href="#ph-three">四、方法 3：奇偶顺序</a></li>
+<li><a href="#ph-compare">五、三种方法对比</a></li>
+<li><a href="#ph-check">六、怎么判断方案对不对</a></li>
+<li><a href="#ph-pitfalls">七、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="ph-problem">一、问题与死锁根因</h2>
+<p>五位哲学家围圆桌，五根筷子放在两两之间；吃饭需要左右两根，思考不需要。若每个人先拿左、再拿右：</p>
+<ul>
+<li>五个人同时拿起左筷子，每人都持有一根；</li>
+<li>每个人再请求右筷子，而右筷子在右边的人手里；</li>
+<li>形成 P0 等 P1、P1 等 P2……P4 等 P0 的循环等待。</li>
+</ul>
+<p>死锁四条件里，互斥（筷子只能一个人用）通常不能破坏；真正要破坏的是<strong>请求并保持</strong>或<strong>循环等待</strong>。三种经典解法分别从“限制人数”“原子拿两只”“改变申请顺序”入手。</p>
+
+<h2 id="ph-one">二、方法 1：最多 4 人</h2>
+<p>增加一个计数信号量 <code>count=4</code>，限制同时参与抢筷子的人数：</p>
+<pre><code class="language-c">semaphore count = 4;                 // 最多 4 人同时竞争
+semaphore chopsticks[5] = {1,1,1,1,1};
+
+philosopher(int i) {
+    while (1) {
+        think();
+        P(count);                     // 拿到“就餐资格”
+        P(chopsticks[i]);             // 左
+        P(chopsticks[(i + 1) % 5]);   // 右
+        eat();
+        V(chopsticks[i]);
+        V(chopsticks[(i + 1) % 5]);
+        V(count);                     // 归还就餐资格
+    }
+}</code></pre>
+<p>为什么不会死锁？五个人里最多四个能同时参与，至少一个人拿不到左筷子；不可能出现“五个人各持一根左筷子”的闭环。最终至少有一人能拿到两只、吃完释放，其他人再继续。</p>
+<p>代价：限制并发度；它不保证公平，某个哲学家仍可能长期抢不到。</p>
+
+<h2 id="ph-two">三、方法 2：原子拿两只</h2>
+<p>用一个 <code>mutex</code> 把“拿左 + 拿右”包成原子操作：要么两只都拿到，要么不拿：</p>
+<pre><code class="language-c">semaphore chopsticks[5] = {1,1,1,1,1};
+semaphore mutex = 1;                 // 保护“拿两只”的过程
+
+philosopher(int i) {
+    while (1) {
+        think();
+        P(mutex);
+        P(chopsticks[i]);
+        P(chopsticks[(i + 1) % 5]);
+        V(mutex);                    // 两只都拿到后释放入口锁
+        eat();
+        V(chopsticks[i]);
+        V(chopsticks[(i + 1) % 5]);
+    }
+}</code></pre>
+<p>它破坏“请求并保持”：哲学家不会拿着一只筷子去等另一只，因为拿两只的过程被串行化了。代价是拿筷子阶段完全串行，并发度低；如果右筷子不可用，当前哲学家会持有 mutex 阻塞，其他人也不能尝试，直到筷子释放。</p>
+
+<h2 id="ph-three">四、方法 3：奇偶顺序</h2>
+<p>奇数号哲学家先左后右，偶数号先右后左：</p>
+<pre><code class="language-c">semaphore chopsticks[5] = {1,1,1,1,1};
+
+philosopher(int i) {
+    while (1) {
+        think();
+        if (i % 2 == 1) {
+            P(chopsticks[i]);             // 奇数：先左
+            P(chopsticks[(i + 1) % 5]);   // 再右
+        } else {
+            P(chopsticks[(i + 1) % 5]);   // 偶数：先右
+            P(chopsticks[i]);             // 再左
+        }
+        eat();
+        V(chopsticks[i]);
+        V(chopsticks[(i + 1) % 5]);
+    }
+}</code></pre>
+<p>相邻哲学家的拿取顺序相反，不会出现“所有人都先拿左、再等右”的环。它破坏的是<strong>循环等待</strong>，实现也简单；但编号必须固定，且仍不解决饥饿。</p>
+
+<h2 id="ph-compare">五、三种方法对比</h2>
+<div class="article-table"><table>
+<thead><tr><th>方法</th><th>破坏什么</th><th>优点</th><th>代价</th></tr></thead>
+<tbody>
+<tr><td>最多 4 人</td><td>限制同时竞争，避免五人各持一根</td><td>简单，易记</td><td>并发度降低，不保证公平</td></tr>
+<tr><td>原子拿两只</td><td>请求并保持</td><td>不会出现“拿一只等另一只”</td><td>拿筷子串行，吞吐低</td></tr>
+<tr><td>奇偶顺序</td><td>循环等待</td><td>并发较好，代码简单</td><td>依赖编号，不保证公平</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="ph-check">六、怎么判断方案对不对</h2>
+<p>判断一个哲学家方案，不要只看“能不能吃”，要看：</p>
+<ol>
+<li>是否可能出现每个人都持有一根筷子、再等另一根？</li>
+<li>如果出现等待，是否一定有人能推进并释放资源？</li>
+<li>筷子的 P/V 是否成对？异常路径是否释放？</li>
+<li>是否限制了资源数量/申请顺序，而不是只加了一个没用的 mutex？</li>
+</ol>
+<p>例如“只给每个人加一把 mutex 保护拿左筷子”并不能防止五个人各持一根；互斥只保护单个筷子的操作，不改变“持有并等待”的结构。</p>
+
+<h2 id="ph-pitfalls">七、易错点与收束</h2>
+<ul>
+<li><strong>“最多 4 人一定公平”</strong>：只保证不死锁；某个哲学家仍可能饥饿。</li>
+<li><strong>“奇偶顺序改变了筷子数量”</strong>：筷子仍是 5 根，每人仍要 2 根；改变的是申请顺序。</li>
+<li><strong>“原子拿两只没有代价”</strong>：mutex 串行化拿筷子，并发度下降。</li>
+<li><strong>“哲学家问题只考死锁”</strong>：也可能问资源数量、P/V 顺序、饥饿与公平。</li>
+</ul>
+<p>把这一节收成一句话：<strong>哲学家死锁的根因是“持有并等待 + 循环等待”；限制人数、原子拿两只、奇偶顺序分别从不同角度破环。</strong></p>
+</div>
+<p class="article-source">内容整理自《PV 专题》导图与 PPT；代码为教学用简化模型。</p>

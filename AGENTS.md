@@ -351,21 +351,21 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools/image-atlas.ps1 `
 - 考点页正文在 `assets/content/<topic-id>.html`，按需 fetch；`topic.points` 只是速记层。
 - 考点页结构：背诵清单 / 考场答法（由 points 派生）→ 理解长文 → 图解（正文图 + 自绘 SVG）→ 关联真题。
 - 新增 `views/glossary.js` + `data/glossary.js`（术语库）、`views/diagrams.js` + `data/diagrams.js`（代表题型/流程图解）、`views/code.js` + `data/code.js`（数据结构与 OS 知识点代码库）；导航已接入。
-- 操作系统是第三个科目（`os`），目前 `os-1` 概述（发展、CPU 模式、系统调用、引导、虚拟机）和 `os-2` 进程与线程（进程控制、线程、调度指标、调度算法、同步互斥、死锁）共 11 个考点；数据在 `data/os.js`，长文在 `content/os-*.html` 手写维护。科目主题色用 `--violet`，视图统一走 `subjectClass()`，不要再写 `coa ? is-coa : is-ds` 的三元。
-- **代码库**由 `python scripts/extract-code.py` 从 `content/ds-*.html` 和 `content/os-2-5.html` 抽取；改完数据结构/OS 同步长文要重跑。
+- 操作系统是第三个科目（`os`），目前 `os-1` 概述（发展、CPU 模式、系统调用、引导、虚拟机）、`os-2` 进程与线程（进程控制、线程、调度指标、调度算法、同步互斥、死锁）和 `os-3` 信号量与 PV（三类模型、生产者-消费者、读者-写者、哲学家、做题策略）共 16 个考点；数据在 `data/os.js`，长文在 `content/os-*.html` 手写维护。科目主题色用 `--violet`，视图统一走 `subjectClass()`，不要再写 `coa ? is-coa : is-ds` 的三元。
+- **代码库**由 `python scripts/extract-code.py` 从 `content/ds-*.html`、`content/os-2-5.html`、`content/os-3-1.html` 到 `os-3-4.html` 抽取；改完数据结构/OS 同步/PV 长文要重跑。
 - **流程类图解**放 `data/diagrams.js` 的 `process` 分类；缺图自己画 SVG，或明确让用户上传。
 - 用户明确不要：评论、路线 / 纲领、P0–P3 优先级、英文版；不要加回。
 - 视觉参考 `docs.cpl.icu/kangaroo-review/site/`：网格纸、衬线标题、硬边卡片、红色索引；不要大圆角 + 重阴影。
 - 所有图片必须落地到 `assets/textbook/` 或 `assets/img/`，在正文对应段落插入；不要只堆文末。
-- 原帖图片可用 `python scripts/build-review-content.py` 生成（46 篇 + 图片）；`coa-4-3` / `coa-4-4` / `coa-4-5` / `coa-4-6` / `coa-5-1` / `coa-5-2` / `coa-6-1` / `coa-6-2` / `coa-6-3` 和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6` 是手写长文，脚本会跳过；`ds-1-1` / `ds-1-2` 的例题要保留在正文里（边做边讲），由 `KEEP_EXAMPLES` 控制。
+- 原帖图片可用 `python scripts/build-review-content.py` 生成（46 篇 + 图片）；`coa-4-3` / `coa-4-4` / `coa-4-5` / `coa-4-6` / `coa-5-1` / `coa-5-2` / `coa-6-1` / `coa-6-2` / `coa-6-3` 和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6`、`os-3-1` 到 `os-3-5` 是手写长文，脚本会跳过；`ds-1-1` / `ds-1-2` 的例题要保留在正文里（边做边讲），由 `KEEP_EXAMPLES` 控制。
 - 题目、代码、流程图的自动抽取/生成脚本改完要一起跑；数据结构长文改动后跑 `extract-code.py`。
 - 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。
 - **题目归题库**：完整例题/真题统一进 `questions.js` / `questions-extra.js` / `questions-manual-extra.js`；正文不保留例题和答案解析。存储专题里没有选项、没有分问的小例题不录。
 - **以历年真题为主**：不要批量手写选择题充数；真题页用「全部 / 选择题 / 大题」三个 tab 分开。代码库只收知识点代码，跳过例题/练习/复杂度题的代码。
 - 自动抽题：`python scripts/extract-questions.py`；正文去例题：`python scripts/build-review-content.py`。改完这两个脚本要同步跑。
 - 用户发图/知识点时：先判断是知识点还是完整题目；知识点要自行提取、总结、画 SVG 或贴截图并融入已有考点；完整题目入库并链接相关考点。
-- 验证提速：日常只查改动页 + 一个入口 + 390px，不每次全量 66 篇；只有改路由/schema/批量图片/模板时才全量。
-- 改完默认 `npx hexo generate`；只有改 `_config`、路由/schema、批量图片或生成异常时才 `npx hexo clean`。日常验证改动页 + 一个入口 + 390px，不全量跑 66 篇。
+- 验证提速：日常只查改动页 + 一个入口 + 390px，不每次全量 71 篇；只有改路由/schema/批量图片/模板时才全量。
+- 改完默认 `npx hexo generate`；只有改 `_config`、路由/schema、批量图片或生成异常时才 `npx hexo clean`。日常验证改动页 + 一个入口 + 390px，不全量跑 71 篇。
 - **缓存**：Netlify/Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 时必须递增 `assets/js-vN` 目录版本或 `app.css?v=...`，否则用户普通刷新仍会用旧文件。
 
 ---
