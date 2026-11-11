@@ -1,5 +1,6 @@
 <div class="article-content">
 <p>读者-写者不是“所有人抢一把锁”。它考的是<strong>角色不对称</strong>：读者之间可以同时读，读者和写者不能同时，写者和写者也不能同时。做这道题，先画“谁可以和谁同时”的矩阵，再决定谁和谁互斥。</p>
+<blockquote><p><strong>一句话总结：</strong>写者正常申请和释放“写”，读用 <code>count</code> 记录在读的读者数量；如果是第一个读者就阻止写，如果是最后一个读者就释放写。写者优先就是再给写者加一个高优先的互斥量，后来的读者会被这个信号量阻止。</p></blockquote>
 
 <details class="article-toc">
 <summary>本页目录 <span>7 节</span></summary>

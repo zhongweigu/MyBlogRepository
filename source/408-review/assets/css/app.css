@@ -1625,6 +1625,26 @@ pre.code code { padding: 0; background: none; color: inherit; font-size: inherit
 .q-card[data-open="true"] .q-body-inner { padding-bottom: 18px; }
 .q-stem { padding-top: 4px; color: var(--ink-2); font-size: 14px; line-height: 1.85; }
 .q-stem p { margin: 0 0 8px; }
+.q-stem pre, .q-analysis-body pre {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--card-2);
+  white-space: pre;
+}
+.q-stem pre code, .q-analysis-body pre code {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  white-space: pre;
+}
 .q-options { display: grid; gap: 6px; margin: 14px 0; list-style: none; }
 .opt { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--ink-2); font-size: 13px; line-height: 1.65; }
 .opt-letter { flex: none; width: 20px; height: 20px; margin-top: 1px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--ink-3); font-family: var(--mono); font-size: 9px; }

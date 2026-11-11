@@ -229,6 +229,7 @@ python scripts/build-review-content.py
 
 - `scripts/extract-code.py` 从 `content/ds-*.html`、`content/os-2-5.html`、`content/os-3-1.html` 到 `os-3-4.html` 自动抽取 `<pre><code>`，取最近的 `h2/h3/h4` 当标题、代码前最近一段当说明，输出 `data/code.js`。**只收知识点代码**：跳过 `ds-1-1`/`ds-1-2`（复杂度例题）、标题含“例题/练习/习题/真题/题目”、summary 含“答案/解析/查看”的折叠块，以及带 `data-code-skip` 的 `<pre>`。
 - 页面路由 `#/code`，按章节筛选 + 搜索；顶部导航「代码」、移动端底部也有入口。
+- 题目卡和解析里的 `<pre><code>` 必须覆盖全局 `code { white-space: nowrap }`；现有 `.q-stem pre, .q-analysis-body pre` 已设 `white-space: pre` 和横向滚动，否则真题代码会挤成一行。
 - 改完数据结构/OS 同步长文后重跑：
   ```powershell
   python scripts/extract-code.py
