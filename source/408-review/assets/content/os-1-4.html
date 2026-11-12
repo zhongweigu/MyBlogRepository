@@ -8,7 +8,7 @@
 <li><a href="#boot-terms">二、五个层次：固件、MBR、PBR、loader、内核</a></li>
 <li><a href="#boot-mbr">三、MBR：磁盘 LBA 0 的 512 字节</a></li>
 <li><a href="#boot-pbr">四、PBR：活动分区自己的 LBA 0</a></li>
-<li><a href="#boot-simple">五、简化背诵版</a></li>
+<li><a href="#boot-simple">五、流程骨架：先抓住接力链</a></li>
 <li><a href="#boot-detail">六、详细流程：从复位向量到第一个用户进程</a></li>
 <li><a href="#boot-uefi">七、BIOS/MBR 与 UEFI/GPT 的区别</a></li>
 <li><a href="#boot-interrupt">八、“引导由中断触发”该怎么理解</a></li>
@@ -85,13 +85,14 @@ flowchart TB
 </tbody>
 </table></div>
 
-<h2 id="boot-simple">五、简化背诵版</h2>
-<p>先背这条最短的链（以传统 BIOS/MBR 为例），考场上能快速把顺序排对：</p>
+<h2 id="boot-simple">五、流程骨架：先抓住接力链</h2>
+<p>先用一条最短的链把顺序串起来（以传统 BIOS/MBR 为例）；真正答题时，再补每一棒的职责和跳转条件：</p>
 <blockquote>
 <p><strong>加电 → POST → BIOS → 启动设备 → MBR → 活动分区 PBR → OS 引导程序 → 内核 → 第一个用户进程。</strong></p>
 </blockquote>
 <p>如果是 UEFI：<strong>加电 → POST → UEFI 固件 → 启动设备 → ESP 中的 .efi 引导程序 → OS 引导程序/内核。</strong>两条链的共同点是“固件先找到第一段引导代码，再由引导程序把内核送进内存”。</p>
 <p>如果题目只问“OS 引导经过哪些主要阶段”，这条链就够了；如果题目问“每一段在哪、由谁加载”，再展开成下一节的详细版。</p>
+<p>这条链不是硬背的顺序，而是<strong>能力逐层交接</strong>：固件只会用最基础的硬件接口读扇区，所以它只能把第一段引导代码搬进内存；MBR 只有 512 字节，放不下文件系统驱动，所以它只负责找活动分区并跳到 PBR；PBR 再加载OS 引导程序，后者才有能力读文件系统、把内核装进内存。每一棒都在解决“上一棒没有能力或没有必要做”的事，顺序自然就固定了。</p>
 
 <h2 id="boot-detail">六、详细流程：从复位向量到第一个用户进程</h2>
 <h3>1. 固件阶段：POST 与启动设备</h3>

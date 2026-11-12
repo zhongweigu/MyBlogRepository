@@ -1,5 +1,5 @@
 <div class="article-content">
-<p>PV 题看起来是“写几个 P、几个 V”，真正的难点是先把题目翻成并发约束。信号量只是一个<strong>整数计数器 + 等待队列</strong>；P 是“我要满足条件/拿资源”，V 是“我让条件成立/还资源”。把互斥、资源数量限制、同步这三类关系分清，代码只是套模板。</p>
+<p>PV 题看起来是“写几个 P、几个 V”，真正的难点是先把题目翻成并发约束。信号量只是一个<strong>整数计数器 + 等待队列</strong>；P 是“我要满足条件/拿资源”，V 是“我让条件成立/还资源”。把互斥、资源数量限制、同步这三类关系分清，代码只是把关系落到 P/V 上。</p>
 
 <details class="article-toc">
 <summary>本页目录 <span>8 节</span></summary>
@@ -118,7 +118,7 @@ P2: P(S2); P(S1);</code></pre>
 <li><strong>找关系</strong>：列出谁和谁互斥、最多几个、谁必须先于谁。</li>
 <li><strong>定类型</strong>：一个临界资源 → mutex；N 个名额 → resource；A 先于 B → sync。</li>
 <li><strong>设初值</strong>：mutex=1，resource=N，sync=0；读者-写者另有 count=0、rw=1、count 的保护 mutex=1。</li>
-<li><strong>套模板</strong>：互斥夹住临界区；同步“前驱 V、后继 P”；资源“用时 P、用完 V”。</li>
+<li><strong>落代码</strong>：互斥夹住临界区；同步“前驱 V、后继 P”；资源“用时 P、用完 V”。</li>
 <li><strong>检查</strong>：每个进程是否覆盖、P/V 是否成对、P 顺序是否可能循环等待、计数是否超过资源数。</li>
 </ol>
 <div class="article-table"><table>

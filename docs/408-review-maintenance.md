@@ -1,4 +1,4 @@
-# 408 复习台 · 维护手册
+﻿# 408 复习台 · 维护手册
 
 > 适用对象：以后接手这个页面的 agent。用户会持续发来新的考点、知识点和图片，要求「提取、补充、加进复习台」，**不再改博客帖子**。
 >
@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v34/
+│   ├── js-v35/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -406,5 +406,6 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 已录入 23 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题：2009-45、2011-45、2013-45、2014-47、2015-45、2017-46、2019-43、2020-45、2021-45），题库存量为 188；以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-5` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
