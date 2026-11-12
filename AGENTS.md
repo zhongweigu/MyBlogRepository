@@ -31,7 +31,6 @@
 - **缓存**：Netlify/Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 时必须递增 `assets/js-vN` 目录版本或 `app.css?v=...`，否则用户普通刷新仍会用旧文件。
 
 ---
----
 
 ## 21. 考研政治复习台（source/politics-review）
 
