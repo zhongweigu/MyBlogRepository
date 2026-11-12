@@ -1,0 +1,111 @@
+<div class="article-content">
+<p>分页要解决的是“连续分配留下的外部碎片”。把进程地址空间切成等长的<strong>页</strong>，把主存切成同样大小的<strong>页框</strong>，页可以离散地放进任意空闲页框；再用一张<strong>页表</strong>记录“第几页放在第几框”。地址转换的核心只有一句：<strong>页号换成页框号，页内偏移不变</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>8 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#pg-basic">一、页、页框、页表项、页表</a></li>
+<li><a href="#pg-addr">二、逻辑地址怎么切</a></li>
+<li><a href="#pg-trans">三、地址转换与 TLB</a></li>
+<li><a href="#pg-multi">四、多级页表</a></li>
+<li><a href="#pg-size">五、页表占多少内存</a></li>
+<li><a href="#pg-example">六、一个 32 位例子</a></li>
+<li><a href="#pg-pte">七、页表项里还有什么</a></li>
+<li><a href="#pg-pitfalls">八、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="pg-basic">一、页、页框、页表项、页表</h2>
+<div class="article-table"><table>
+<thead><tr><th>概念</th><th>含义</th><th>注意</th></tr></thead>
+<tbody>
+<tr><td>页</td><td>进程逻辑地址空间中的等长块</td><td>页号是逻辑概念</td></tr>
+<tr><td>页框/物理块</td><td>主存中的等长块</td><td>页框号是物理概念</td></tr>
+<tr><td>页表项 PTE</td><td>记录“页号 → 页框号”及控制位</td><td>存的是页框号，不是页号</td></tr>
+<tr><td>页表</td><td>一个进程一张，由页表项组成</td><td>起始地址放 PCB/页表基址寄存器</td></tr>
+</tbody>
+</table></div>
+<p>一个进程有多少页，页表里就有多少个页表项；页表项按页号索引，所以页表项本身不需要再存页号。页表放在主存内核区，因为主存被划分为页框，页表也占页框；普通页表可以跨多个页框。</p>
+
+<h2 id="pg-addr">二、逻辑地址怎么切</h2>
+<p>页大小是 2 的幂。设页大小 4KB（2¹²），逻辑地址就切成：</p>
+<pre><code>页号 VPN = 逻辑地址 &gt;&gt; 12
+页内偏移 offset = 逻辑地址 &amp; 0x0FFF</code></pre>
+<p>页号位数决定页表项数：页号 n 位 → 2ⁿ 个页表项。页内偏移位数决定页大小：offset 12 位 → 4KB。多级页表则把页号再切：页目录号 | 页号 | 页内偏移。</p>
+
+<h2 id="pg-trans">三、地址转换与 TLB</h2>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="分页地址转换：页表寄存器给出页表始址和长度，逻辑地址拆成页号与位移；页号查页表得块号，块号拼位移得物理地址；TLB 缓存页号到块号的映射" data-src="/408-review/assets/textbook/os-mem-paging.webp" href="/408-review/assets/textbook/os-mem-paging.webp">
+<img alt="分页地址转换图：页表寄存器、页表、快表 TLB，逻辑地址的页号查页表得到块号，再与位移拼接成物理地址" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-mem-paging.webp"/>
+</a>
+<figcaption>页表项存页框号；页内偏移不参与查表，最后原样拼到页框号后面。</figcaption>
+</figure>
+<ol>
+<li>CPU 给出逻辑地址，拆成页号 + 页内偏移；</li>
+<li>先查 TLB（快表）：命中直接得到页框号；</li>
+<li>未命中，用页表基址寄存器 + 页号 × 页表项大小，找到 PTE；</li>
+<li>检查页号是否越界（页表长度）、PTE 是否有效/权限是否允许；</li>
+<li>取页框号，拼上页内偏移，得到物理地址；</li>
+<li>把该映射填入 TLB，继续访问。</li>
+</ol>
+<p>TLB 是页表项的高速缓存，不是“页表本身”。TLB 未命中不一定缺页：可能只是缓存没命中，查页表就能解决；PTE 的 present 位为 0 才是缺页。进程切换时 TLB 要刷新或切换 ASID，否则会用到别的进程的映射。</p>
+
+<h2 id="pg-multi">四、多级页表</h2>
+<p>单级页表在地址空间很大时会占太多连续内存：例如 32 位地址、4KB 页、4B PTE，页表有 2²⁰ 项，共 4MB，还要连续存放。多级页表把页表本身再分页，用一张<strong>页目录</strong>（顶级页表）记录各二级页表的位置。</p>
+<ul>
+<li>逻辑地址：页目录号 | 页号 | 页内偏移；</li>
+<li>页目录号查页目录，得到二级页表所在页框；</li>
+<li>页号查二级页表，得到目标页框；</li>
+<li>目标页框 + 页内偏移 = 物理地址。</li>
+</ul>
+<p>多级页表的关键约束：<strong>每张页表最多占一个页框</strong>，这样页表可以离散存放，不需要一大片连续内存。页目录项个数 = 二级页表个数；二级页表项个数 = 每个二级页表能容纳的页数。页目录号 n 位 → 2ⁿ 个目录项；页号 n 位 → 每张二级页表 2ⁿ 项。</p>
+<p>多级页表节省的是“未使用页表”的空间，不是免费：每增加一级就多一次访存（TLB 未命中时），所以级数不是越多越好。</p>
+
+<h2 id="pg-size">五、页表占多少内存</h2>
+<p>常用公式：</p>
+<pre><code>页表项数 = 2^(页号位数) = 进程页数
+页表大小 = 页表项数 × PTE 大小
+页表占页框数 = ceil(页表大小 / 页大小)</code></pre>
+<p>多级页表要逐级算：页目录大小 = 页目录项数 × 目录项大小；每个二级页表大小 = 二级页表项数 × PTE 大小；再分别除以页大小，向上取整。</p>
+<div class="article-table"><table>
+<thead><tr><th>题目给什么</th><th>先算什么</th></tr></thead>
+<tbody>
+<tr><td>逻辑地址位数、页大小</td><td>页内偏移位数、页号位数、页数</td></tr>
+<tr><td>页表项大小</td><td>页表字节数、占多少页框</td></tr>
+<tr><td>多级地址结构</td><td>每级索引位数→每级表项数→每级表大小</td></tr>
+<tr><td>PTE 的物理地址</td><td>页表起始物理地址 + 索引 × PTE 大小</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="pg-example">六、一个 32 位例子</h2>
+<p>32 位逻辑地址、4KB 页、PTE 4B：</p>
+<ul>
+<li>offset 12 位，页号 20 位 → 2²⁰ 页；</li>
+<li>单级页表 2²⁰ × 4B = 4MB，占 1024 个页框；</li>
+<li>若改成二级页表：页目录号 10 位、页号 10 位、offset 12 位；</li>
+<li>页目录 2¹⁰ 项 × 4B = 4KB，正好一页；每个二级页表 2¹⁰ 项 × 4B = 4KB，也正好一页。</li>
+</ul>
+<p>这样每张表都只占一个页框，页表可以离散存放；代价是 TLB 未命中时要访问页目录、二级页表，再多一次访存。</p>
+
+<h2 id="pg-pte">七、页表项里还有什么</h2>
+<p>页表项不只有页框号，还常有：</p>
+<ul>
+<li><strong>有效位/present</strong>：页是否在内存；</li>
+<li><strong>修改位 dirty</strong>：换出时是否需要写回；</li>
+<li><strong>访问位</strong>：供 CLOCK/LRU 等算法使用；</li>
+<li><strong>保护位</strong>：读/写/执行、用户/内核；</li>
+<li><strong>外存地址</strong>：缺页时从哪调入。</li>
+</ul>
+<p>这些位是请求分页/虚拟存储的基础；普通分页题如果只问“页框号”，不要把这些位和页框号混在一起算。</p>
+
+<h2 id="pg-pitfalls">八、易错点与收束</h2>
+<ul>
+<li><strong>“页表项存页号”</strong>：页表项存页框号，页号是索引。</li>
+<li><strong>“每个进程只有一张页表”</strong>：每个进程有自己的页表；多级页表还有页目录和多张二级页表。</li>
+<li><strong>“多级页表每张可跨多个页框”</strong>：多级页表的设计目标之一是每张表最多占一个页框，便于离散存放。</li>
+<li><strong>“TLB 未命中就是缺页”</strong>：TLB 未命中可以查页表；PTE 无效才是缺页。</li>
+<li><strong>“页表大小 = 页数 × 页大小”</strong>：页表大小 = 页表项数 × PTE 大小，不是页数 × 页大小。</li>
+</ul>
+<p>把这一节收成一句话：<strong>页号查页表得页框号，偏移不变；多级页表把页表再分页，用页目录索引，每张表最多一页框。</strong></p>
+</div>
+<p class="article-source">内容整理自《内存管理》导图、教材图与操作系统通用框架。</p>
