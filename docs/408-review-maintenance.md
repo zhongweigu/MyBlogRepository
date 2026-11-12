@@ -1,4 +1,4 @@
-﻿# 408 复习台 · 维护手册
+# 408 复习台 · 维护手册
 
 > 适用对象：以后接手这个页面的 agent。用户会持续发来新的考点、知识点和图片，要求「提取、补充、加进复习台」，**不再改博客帖子**。
 >
@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v33/
+│   ├── js-v34/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -401,9 +401,10 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `os-2-1` 的七状态图是 `assets/img/os-process-state-7.svg`，固定 700px 宽、外包 `.state7-wrap` 横向滚动；手机不缩放文字。`os-2-2` 的内核级线程统一写 **KLT**（Kernel-Level Thread），不要写成 KST；图片 `os-klt.webp` 已裁掉原图底部的 KST 标题。
 - `os-3` 是从第二章同步互斥拆出的 **PV 专题**，不是教材第三章内存管理；`os-3-1` 讲三类模型与五步法，`os-3-2` / `os-3-3` / `os-3-4` 分别对应生产者-消费者、读者-写者、哲学家，`os-3-5` 收束做题策略。
 - `os-3` 的代码块用 `class="language-c"`，由 `extract-code.py` 收进代码库的「操作系统」章节；改 PV 代码后要重跑脚本。
-- `os-4` 是教材**第三章内存管理**，站点编号排在 PV 专题之后；图片在 `assets/textbook/`：`os-mem-paging.webp`、`os-mem-segmentation.webp`、`os-mem-segments.webp`、`os-mem-segpage.webp`，按段落插入。
+- `os-4` 是教材**第三章内存管理**，站点编号排在 PV 专题之后；图片在 `assets/textbook/`：`os-mem-paging.webp`、`os-mem-segmentation.webp`、`os-mem-segments.webp`（段页式的段内分页图）、`os-mem-segpage.webp`、`os-mem-partition-table.webp`、`os-mem-free-list.webp`，按段落插入。
 - 科目主题色为紫（`--violet`）。`views/map.js` / `chapter.js` / `topic.js` / `runner.js` / `questions.js` 都通过 `ui.js` 的 `subjectClass()` 取 `is-os`，新增科目时不要再写 `coa ? is-coa : is-ds` 的三元。
 - 已录入 23 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题：2009-45、2011-45、2013-45、2014-47、2015-45、2017-46、2019-43、2020-45、2021-45），题库存量为 188；以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-5` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 

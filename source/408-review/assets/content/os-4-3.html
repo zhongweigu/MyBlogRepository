@@ -16,13 +16,8 @@
 
 <h2 id="seg-idea">一、分段：按逻辑单位切</h2>
 <p>分段从程序员视角出发，把进程地址空间按逻辑划分为若干段，例如主程序段、子程序段、栈段、数据段。每段大小不等，每段有自己的段名/段号，段内地址从 0 开始。</p>
-<p><strong>主存并不预先按段划分</strong>：段是进程地址空间的逻辑划分，主存只是按空闲区分配；每个段离散地放入一个足够大的空闲区。这一点和“把主存切成段”是两回事。</p>
-<figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="进程的逻辑分段示例：主程序段、子程序段、数据段长度不同，段内地址都从 0 开始" data-src="/408-review/assets/textbook/os-mem-segments.webp" href="/408-review/assets/textbook/os-mem-segments.webp">
-<img alt="进程分段示例：主程序段、子程序段、数据段大小不同，每段内部地址从 0 开始" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-mem-segments.webp"/>
-</a>
-<figcaption>段是逻辑单位，长度由程序决定；页是物理单位，长度由系统固定。</figcaption>
-</figure>
+<p><strong>只有分段的系统，对主存没有任何预先划分</strong>：段是进程地址空间的逻辑划分，主存只是按空闲区分配；每个段离散地放入一个足够大的空闲区。不要把“进程被分成段”误认为“主存也被切成段”。这一点在段页式里才改变：段页式的主存像分页一样划分为页框，每个段再被切成整数个页。</p>
+<p>分段的地址空间是<strong>二维</strong>的：段号 + 段内偏移。程序员需要给出“哪个段、段内哪里”；分页的地址空间是<strong>一维</strong>的，页号和页内偏移由硬件从线性地址中切分，程序员看不到页。</p>
 
 <h2 id="seg-table">二、段表与地址转换</h2>
 <p>每个进程有一张<strong>段表</strong>，每个段占一个段表项，段表项至少包含：</p>
@@ -44,6 +39,24 @@
 </a>
 <figcaption>段表项同时存段长和基址；先做越界检查，再加基址。</figcaption>
 </figure>
+<h3>段表和页表到底差在哪</h3>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>页表</th><th>段表</th></tr></thead>
+<tbody>
+<tr><td>表项内容</td><td>页框号 + 控制位</td><td>段长 + 基址 + 控制位</td></tr>
+<tr><td>是否要长度检查</td><td>页大小固定，页内偏移不会超过页大小；越界由页号范围/页表长度保证</td><td>段长不固定，必须用段长检查段内偏移是否越界</td></tr>
+<tr><td>划分依据</td><td>物理等长块，对用户不可见</td><td>程序逻辑单位，对用户可见</td></tr>
+<tr><td>地址空间</td><td>一维（页号由硬件切）</td><td>二维（段号 + 段内偏移）</td></tr>
+</tbody>
+</table></div>
+<p>所以“段表项要存段长”不是多此一举：页的大小由系统固定，偏移天然不会超过一页；段的大小由程序决定，硬件必须拿段长做越界检查。</p>
+<h3>段共享怎么实现</h3>
+<p>段是逻辑单位，适合共享代码/只读数据。常见实现有两种：</p>
+<ul>
+<li><strong>共享段表</strong>：系统维护一张共享段表，表项记录共享段名、段长、物理基址、共享计数、权限等；各进程的段表项指向这个共享表项（或直接复制其基址/段长）。进程 attach 时计数加 1，detach 时减 1，计数为 0 才真正回收。</li>
+<li><strong>各自段表项指向同一物理段</strong>：每个进程的段表里都有一条段表项，段长相同、基址指向同一个物理段；共享关系靠操作系统维护的共享计数/权限表保证，回收时也要等最后一个进程释放。</li>
+</ul>
+<p>共享段一般要求代码/只读数据，权限要按“可读可执行、不可写”设置；如果共享段可写，还要考虑一致性和同步。分页也能共享（多个页表项指向同一页框），但共享粒度是固定页，不如按逻辑段共享自然。</p>
 
 <h2 id="seg-example">三、分段地址转换例子</h2>
 <p>逻辑地址（段号 2，段内偏移 30）：</p>
@@ -66,12 +79,21 @@
 <li>逻辑地址 = 段号 S | 页号 P | 页内偏移 W；</li>
 <li>转换：S 查段表→页表始址；P 查页表→页框号；页框号 + W = 物理地址。</li>
 </ul>
+<p>段页式的段表项<strong>不再存“段长 + 段始址”</strong>，而是存“页表长度 + 页表始址”：段长可以由“页表长度 × 页大小”得到（最后一页可能没用满），段在物理上也不再是一整块连续区，而是由若干页框拼成。主存在这里<strong>像分页一样划分页框</strong>，不再像纯分段那样“对主存不做划分”。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="段页式的段内分页：主程序段、子程序段、数据段各自包含整数个页，最后一页没用到的地方空着；主存按页框划分" data-src="/408-review/assets/textbook/os-mem-segments.webp" href="/408-review/assets/textbook/os-mem-segments.webp">
+<img alt="段页式示例：主程序段、子程序段、数据段分别包含整数个页，最后一页可能有未用空间" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-mem-segments.webp"/>
+</a>
+<figcaption>这张图属于段页式：每个段内包含整数个页，最后一页用不满就空着；主存按页框划分，段在物理上不必连续。</figcaption>
+</figure>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="段页式地址转换：段号 S 查段表得到页表长度和页表始址，页号 P 查页表得到块号 b，块号 b 拼页内地址 W 得物理地址" data-src="/408-review/assets/textbook/os-mem-segpage.webp" href="/408-review/assets/textbook/os-mem-segpage.webp">
 <img alt="段页式地址转换图：段表由段号、页表长度、页表始址组成，页表由页号、块号组成，逻辑地址段号 S、页号 P、页内地址 W 经两级查表得到物理地址" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-mem-segpage.webp"/>
 </a>
 <figcaption>段页式至少要查两次表：先段表找页表，再页表找页框；TLB 可缓存最终映射。</figcaption>
 </figure>
+<p>段页式也可以用 TLB：TLB 表项存放“段号 + 页号 → 物理块号”的映射，命中时直接得到页框号，跳过段表和页表两次查表；未命中才走“段表 → 页表”。进程切换时同样要刷新 TLB 或用 ASID 区分。</p>
+<p><strong>地址空间维度</strong>：分页是一维的（一个线性地址，硬件切页号/偏移）；分段和段页式是二维的（段号 + 段内偏移，段内再分页只是实现细节，程序员仍按“段 + 偏移”看）。这是三者最容易被忽略的区别。</p>
 
 <h2 id="seg-compare">六、分页 vs 分段 vs 段页式</h2>
 <div class="article-table"><table>
