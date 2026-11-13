@@ -23,6 +23,7 @@
 - 题目、代码、流程图的自动抽取/生成脚本改完要一起跑；数据结构长文改动后跑 `extract-code.py`。
 - 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。
 - **题目归题库**：完整例题/真题统一进 `questions.js` / `questions-extra.js` / `questions-manual-extra.js`；正文不保留例题和答案解析。存储专题里没有选项、没有分问的小例题不录。
+- **真题格式**：选项用字符串数组；表格用 HTML `<table>` 包在 `.q-table-wrap` 里；代码/伪代码用 `<pre><code class="language-c">`；地址结构、访问序列、地址计算用 `<pre><code class="language-text">`。不要把表格压成 `<br>`，也不要把结构化内容写成纯文本。
 - **以历年真题为主**：不要批量手写选择题充数；真题页用「全部 / 选择题 / 大题」三个 tab 分开。代码库只收知识点代码，跳过例题/练习/复杂度题的代码。
 - 自动抽题：`python scripts/extract-questions.py`；正文去例题：`python scripts/build-review-content.py`。改完这两个脚本要同步跑。
 - 用户发图/知识点时：先判断是知识点还是完整题目；知识点要自行提取、总结、画 SVG 或贴截图并融入已有考点；完整题目入库并链接相关考点。
