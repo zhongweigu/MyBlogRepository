@@ -1,4 +1,4 @@
-﻿# 408 复习台 · 维护手册
+# 408 复习台 · 维护手册
 
 > 适用对象：以后接手这个页面的 agent。用户会持续发来新的考点、知识点和图片，要求「提取、补充、加进复习台」，**不再改博客帖子**。
 >
@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v35/
+│   ├── js-v36/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -173,6 +173,8 @@ python scripts/build-review-content.py
 - `data/questions.js`：手写/早期的 29 道精选题，保留。
 - `data/questions-extra.js`：由 `scripts/extract-questions.py` 从两篇《408 考点强化》自动抽取，**不要手改**。
 - `data/questions-manual-extra.js`：源帖里没有 `<u>例题` 标记、但确实完整的“裸题”（例如 2010 队列、2025 复杂度、习题训练四题），手工补。
+- `data/questions-pv.js`：PV 专题真题（2009–2021，9 道）。
+- `data/questions-memory.js`：内存管理真题（2009–2022，16 道；选择题与综合题分开）。
 
 字段：
 
@@ -403,9 +405,10 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `os-3` 的代码块用 `class="language-c"`，由 `extract-code.py` 收进代码库的「操作系统」章节；改 PV 代码后要重跑脚本。
 - `os-4` 是教材**第三章内存管理**，站点编号排在 PV 专题之后；图片在 `assets/textbook/`：`os-mem-paging.webp`、`os-mem-segmentation.webp`、`os-mem-segments.webp`（段页式的段内分页图）、`os-mem-segpage.webp`、`os-mem-partition-table.webp`、`os-mem-free-list.webp`，按段落插入。
 - 科目主题色为紫（`--violet`）。`views/map.js` / `chapter.js` / `topic.js` / `runner.js` / `questions.js` 都通过 `ui.js` 的 `subjectClass()` 取 `is-os`，新增科目时不要再写 `coa ? is-coa : is-ds` 的三元。
-- 已录入 23 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题：2009-45、2011-45、2013-45、2014-47、2015-45、2017-46、2019-43、2020-45、2021-45），题库存量为 188；以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4`，`topics` 指向对应考点。
+- 已录入 39 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题 + 16 道内存管理题），题库存量为 204；内存题在 `data/questions-memory.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-5` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
 
