@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 680" role="img" aria-labelledby="title desc">
+  <title id="title">请求分页地址转换流程</title>
+  <desc id="desc">从虚拟地址开始，检查页号越界，查 TLB 和页表，判断页是否在内存；缺页时保存现场、调页、更新页表和 TLB，再重新执行指令；命中时更新访问位和修改位，拼成物理地址。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#35618f"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b45309"/>
+    </marker>
+    <style>
+      .box{fill:#f7fafc;stroke:#35618f;stroke-width:1.6;rx:8}
+      .box-fault{fill:#fff7ed;stroke:#b45309;stroke-width:1.6;rx:8}
+      .box-ok{fill:#eef7ee;stroke:#4d7c4d;stroke-width:1.6;rx:8}
+      .diamond{fill:#f3f7fb;stroke:#35618f;stroke-width:1.6}
+      .line{stroke:#35618f;stroke-width:1.8;fill:none;marker-end:url(#arrow)}
+      .line-red{stroke:#b45309;stroke-width:1.8;fill:none;marker-end:url(#arrow-red);stroke-dasharray:6 4}
+      .t{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:14px;fill:#1f2937;text-anchor:middle}
+      .ts{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:12px;fill:#5b6573;text-anchor:middle}
+      .lbl{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:12px;fill:#35618f}
+      .lbl-red{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:12px;fill:#b45309}
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="800" height="680" fill="#ffffff"/>
+
+  <rect class="box-ok" x="120" y="18" width="200" height="44"/>
+  <text class="t" x="220" y="45">CPU 给出虚拟地址</text>
+
+  <polygon class="diamond" points="220,90 320,130 220,170 120,130"/>
+  <text class="t" x="220" y="125">页号 &gt; 页表长度？</text>
+  <text class="t" x="220" y="145">越界检查</text>
+
+  <rect class="box" x="450" y="108" width="160" height="44"/>
+  <text class="t" x="530" y="135">越界中断，结束</text>
+
+  <polygon class="diamond" points="220,190 320,230 220,270 120,230"/>
+  <text class="t" x="220" y="225">TLB 命中？</text>
+  <text class="t" x="220" y="245">页号 + ASID</text>
+
+  <rect class="box-ok" x="450" y="208" width="160" height="44"/>
+  <text class="t" x="530" y="235">命中：得到页框号</text>
+
+  <rect class="box" x="120" y="308" width="200" height="44"/>
+  <text class="t" x="220" y="335">查页表：页表基址 + 页号</text>
+
+  <polygon class="diamond" points="220,390 320,430 220,470 120,430"/>
+  <text class="t" x="220" y="425">页在内存？</text>
+  <text class="t" x="220" y="445">有效位 / 存在位</text>
+
+  <rect class="box" x="120" y="508" width="200" height="44"/>
+  <text class="t" x="220" y="535">更新访问位、修改位</text>
+
+  <rect class="box-ok" x="120" y="590" width="200" height="44"/>
+  <text class="t" x="220" y="617">页框号 + 页内偏移</text>
+
+  <rect class="box-fault" x="450" y="408" width="180" height="44"/>
+  <text class="t" x="540" y="435">缺页：保存 CPU 现场</text>
+
+  <rect class="box-fault" x="450" y="490" width="180" height="44"/>
+  <text class="t" x="540" y="508">外存找页、调入内存</text>
+  <text class="ts" x="540" y="526">内存满则淘汰一页</text>
+
+  <rect class="box-fault" x="450" y="572" width="180" height="44"/>
+  <text class="t" x="540" y="599">更新页表 / TLB</text>
+
+  <path class="line" d="M220 62 V88"/>
+  <path class="line" d="M320 130 H448"/>
+  <text class="lbl" x="360" y="120">是</text>
+  <path class="line" d="M220 170 V188"/>
+  <text class="lbl" x="230" y="184">否</text>
+  <path class="line" d="M320 230 H448"/>
+  <text class="lbl" x="360" y="220">是</text>
+  <path class="line" d="M220 270 V306"/>
+  <text class="lbl" x="230" y="290">否</text>
+  <path class="line" d="M220 352 V388"/>
+  <path class="line" d="M320 430 H448"/>
+  <text class="lbl" x="360" y="420">否</text>
+  <path class="line" d="M220 470 V506"/>
+  <text class="lbl" x="230" y="488">是</text>
+  <path class="line" d="M220 552 V588"/>
+  <path class="line" d="M610 230 H700 V612 H322"/>
+  <text class="lbl" x="720" y="420" transform="rotate(90 720 420)">命中：直接拼物理地址</text>
+
+  <path class="line-red" d="M540 452 V488"/>
+  <path class="line-red" d="M540 534 V570"/>
+  <path class="line-red" d="M450 594 H390 V240 H322"/>
+  
+  </svg>
