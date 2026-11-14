@@ -1,0 +1,81 @@
+<div class="article-content">
+<p>文件管理的第一问不是“磁盘怎么分块”，而是“用户怎样用一个名字找到一份数据”。这条链是：<strong>文件名 → 目录项 → inode → 数据块</strong>。目录负责“按名查找”，inode 负责“记住文件在哪里、有多大、谁能用”。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#file-basic">一、文件是什么</a></li>
+<li><a href="#file-fcb">二、FCB：文件控制块</a></li>
+<li><a href="#file-inode">三、索引结点 inode</a></li>
+<li><a href="#file-dir">四、目录：文件名到 inode 的映射</a></li>
+<li><a href="#file-pitfalls">五、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="file-basic">一、文件是什么</h2>
+<p>文件是以文件名标识、由若干记录组成的有序集合，是外存上的逻辑存储单位。它有两个不同层面：</p>
+<ul>
+<li><strong>逻辑结构</strong>：从用户视角看，记录怎样排列、是否定长、是否按关键字组织；</li>
+<li><strong>物理结构</strong>：从磁盘视角看，文件占用哪些盘块、盘块之间怎样连接或索引。</li>
+</ul>
+<p>文件管理系统要同时解决三件事：按名找到文件（目录）、记住文件属性与位置（FCB/inode）、把文件逻辑块映射到磁盘块（物理结构）。</p>
+
+<h2 id="file-fcb">二、FCB：文件控制块</h2>
+<p>FCB（File Control Block）是操作系统为文件建立的属性集合。常见字段分三类：</p>
+<div class="article-table"><table>
+<thead><tr><th>类别</th><th>字段</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td>基本信息</td><td>文件名、物理位置、逻辑结构、物理结构</td><td>标识文件、找到数据、说明组织方式</td></tr>
+<tr><td>存取控制</td><td>文件主、用户权限（读/写/执行）</td><td>决定谁能怎样访问</td></tr>
+<tr><td>使用信息</td><td>创建时间、修改时间、当前打开/使用计数</td><td>管理生命周期和共享</td></tr>
+</tbody>
+</table></div>
+<p>早期系统把 FCB 直接放在目录项里，目录项很大，查目录时要读大量属性。引入 inode 后，目录项通常只保留<strong>文件名 + inode 号</strong>，把大部分属性移到 inode，目录更小、检索更快。</p>
+
+<h2 id="file-inode">三、索引结点 inode</h2>
+<p>inode 是文件的“元数据 + 数据块入口”。磁盘 inode 常驻外存的 inode 区；文件被打开时，inode 调入内存形成<strong>内存 inode</strong>。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="inode 结构：模式、所有者、时间戳、块大小、计数、直接块、一级/二级/三级间址" data-src="/408-review/assets/textbook/os-file-inode.webp" href="/408-review/assets/textbook/os-file-inode.webp">
+<img alt="inode 结构图：直接块、一级间址、二级间址、三级间址逐级指向数据块" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-inode.webp"/>
+</a>
+<figcaption>直接块指向数据；间址块整块用来装盘块号，逐级扩大可表示的文件范围。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>字段</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td>文件类型/权限/文件主</td><td>普通文件、目录、设备；读/写/执行权限</td></tr>
+<tr><td>文件长度</td><td>文件字节数或块数</td></tr>
+<tr><td>链接计数</td><td>指向该 inode 的目录项/硬链接数</td></tr>
+<tr><td>时间信息</td><td>创建、修改、访问时间</td></tr>
+<tr><td>数据块指针</td><td>直接块、一级/二级/三级间址</td></tr>
+<tr><td>访问计数（内存 inode）</td><td>当前有多少打开实例引用它</td></tr>
+</tbody>
+</table></div>
+<p><strong>inode 数量决定文件个数上限</strong>：磁盘再大，inode 用完也不能再创建新文件。inode 号是文件的内部编号；目录项保存它，文件名只是用户看到的别名。</p>
+
+<h2 id="file-dir">四、目录：文件名到 inode 的映射</h2>
+<p>目录本身也是文件，目录项是目录文件的记录。引入 inode 后，一个目录项至少包含：</p>
+<pre><code class="language-text">文件名 | inode 号</code></pre>
+<p>按名查找时，系统从根目录或当前目录开始，逐级读目录文件，拿到下一级 inode 号，直到目标文件。路径越长，查目录的磁盘 I/O 越多；目录项越小、目录越集中，查找越快。</p>
+<div class="article-table"><table>
+<thead><tr><th>目录结构</th><th>特点</th></tr></thead>
+<tbody>
+<tr><td>单级目录</td><td>全系统一张目录表；实现简单，但文件不能重名、查找慢、不便于多用户隔离</td></tr>
+<tr><td>两级目录</td><td>主目录 + 用户目录；不同用户可使用相同文件名</td></tr>
+<tr><td>树形目录</td><td>按路径逐级查找，支持同名文件分布在不同目录；便于分类和权限控制</td></tr>
+<tr><td>无环图目录</td><td>允许共享子目录/文件，用链接计数管理；实现复杂</td></tr>
+</tbody>
+</table></div>
+<p>目录项只存文件名和 inode 号，意味着<strong>文件名与文件数据解耦</strong>：同一个 inode 可以有多个名字（硬链接），同一个文件也可以被不同路径访问。</p>
+<p><strong>虚拟文件系统 VFS</strong> 是内核中的抽象层：它定义统一的文件/目录/inode 操作接口，让 ext4、FAT、NFS 等不同文件系统都能被同一套系统调用访问。VFS 不等于“运行在虚拟内存里的文件系统”，也不必然加快访问速度；它的价值是<strong>统一接口、屏蔽具体文件系统差异</strong>。</p>
+
+<h2 id="file-pitfalls">五、易错点与收束</h2>
+<ul>
+<li><strong>“目录项就是 inode”</strong>：目录项是“名字 + inode 号”，inode 是属性/数据块指针，二者不是一回事。</li>
+<li><strong>“一个文件名对应一个 inode”</strong>：硬链接让多个文件名共享同一个 inode；软链接是另一个文件，有自己的 inode。</li>
+<li><strong>“inode 里存文件名”</strong>：通常不存；文件名在目录项里，inode 存属性和数据块指针。</li>
+<li><strong>“inode 越多越好”</strong>：inode 占外存，数量在格式化时确定；太多浪费空间，太少限制文件个数。</li>
+</ul>
+<p>把这一节收成一句话：<strong>目录负责“名字→inode”，inode 负责“属性→数据块”，文件管理就是沿着这条链把名字变成磁盘上的数据。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>

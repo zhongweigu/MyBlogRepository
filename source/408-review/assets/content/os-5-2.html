@@ -1,0 +1,59 @@
+<div class="article-content">
+<p>逻辑结构回答的是“文件内部的记录怎样组织”，用户看到的是记录、记录号、关键字；磁盘看到的是盘块。先别把逻辑结构和物理结构混在一起：同一个顺序文件，物理上可以连续、链接或索引。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>4 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#log-seq">一、顺序文件</a></li>
+<li><a href="#log-index">二、索引文件</a></li>
+<li><a href="#log-indexseq">三、索引顺序文件</a></li>
+<li><a href="#log-compare">四、对比与易错点</a></li>
+</ul></div>
+</details>
+
+<h2 id="log-seq">一、顺序文件</h2>
+<p>顺序文件把记录按某种顺序依次排列，记录可以是定长，也可以是变长。</p>
+<ul>
+<li><strong>定长记录</strong>：第 i 条记录的地址 = 起始地址 + i × 记录长度，可直接随机定位。</li>
+<li><strong>变长记录</strong>：长度不同，不能直接用记录号算地址，通常要顺序扫描；要随机访问就得另建索引。</li>
+</ul>
+<p>顺序文件适合按顺序批量处理，磁盘读写连续、效率高；不适合按关键字随机检索变长记录。</p>
+
+<h2 id="log-index">二、索引文件</h2>
+<p>为变长记录文件建立一张<strong>索引表</strong>，每个记录对应一个表项：</p>
+<pre><code class="language-text">索引号 | 记录长度 | 指向记录的指针</code></pre>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="索引文件：索引表为每个记录建立索引项，指针指向逻辑文件中的记录" data-src="/408-review/assets/textbook/os-file-index.webp" href="/408-review/assets/textbook/os-file-index.webp">
+<img alt="索引文件示意图：索引表包含索引号、长度、指针，指向逻辑文件中的记录" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-index.webp"/>
+</a>
+<figcaption>索引文件用“额外的索引表”换取对变长记录的快速定位。</figcaption>
+</figure>
+<p>索引文件支持随机访问，检索速度快；代价是索引表本身占空间，记录增删要维护索引项。</p>
+
+<h2 id="log-indexseq">三、索引顺序文件</h2>
+<p>索引顺序文件是顺序文件与索引文件的结合：<strong>不是为每个记录建索引项，而是为一组记录的第一个记录建一个索引项</strong>，组内仍按顺序查找。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="索引顺序文件：索引表按关键字记录每组第一个记录的逻辑地址，组内顺序排列" data-src="/408-review/assets/textbook/os-file-index-seq.webp" href="/408-review/assets/textbook/os-file-index-seq.webp">
+<img alt="索引顺序文件示意图：索引表记录关键字和逻辑地址，指向逻辑文件中一组记录的首记录" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-index-seq.webp"/>
+</a>
+<figcaption>索引项少、组内顺序，兼顾顺序访问和按组随机定位。</figcaption>
+</figure>
+<p>查找时先用索引表定位到组，再在组内顺序查找。索引项数量约为“记录数 / 组大小”，比索引文件小很多；但如果组太大，组内查找仍慢。</p>
+
+<h2 id="log-compare">四、对比与易错点</h2>
+<div class="article-table"><table>
+<thead><tr><th>结构</th><th>索引粒度</th><th>随机访问</th><th>适用</th></tr></thead>
+<tbody>
+<tr><td>顺序文件</td><td>无索引</td><td>定长可算地址；变长通常不能</td><td>顺序批量处理</td></tr>
+<tr><td>索引文件</td><td>每个记录一个索引项</td><td>支持</td><td>变长记录、按记录随机访问</td></tr>
+<tr><td>索引顺序文件</td><td>每组记录一个索引项</td><td>先定位组，再组内顺序</td><td>记录多、希望减少索引项</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>“索引文件为每条记录建索引”</strong>：对；索引顺序文件才是一组一个索引项。</li>
+<li><strong>“索引顺序文件不能顺序访问”</strong>：组内仍按顺序排列，可以顺序访问；索引只是帮助定位组。</li>
+<li><strong>“逻辑结构就是物理结构”</strong>：逻辑结构是记录组织，物理结构是盘块分配；同一逻辑结构可以有不同物理实现。</li>
+</ul>
+<p>把这一节收成一句话：<strong>顺序文件按顺序找，索引文件按记录索引找，索引顺序文件先按组索引、再组内顺序找。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>

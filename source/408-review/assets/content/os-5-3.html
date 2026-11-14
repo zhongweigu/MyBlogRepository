@@ -1,0 +1,100 @@
+<div class="article-content">
+<p>物理结构回答的是“文件占用哪些磁盘块、这些块怎样找到”。三种基本方式是连续、链接、索引；它们的差别集中在四件事：<strong>能否随机访问、有没有外碎片、能否动态增长、要不要额外索引空间</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>6 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#phy-cont">一、连续分配</a></li>
+<li><a href="#phy-link">二、链接分配：隐式与显式 FAT</a></li>
+<li><a href="#phy-index">三、索引分配：单级与多级</a></li>
+<li><a href="#phy-mixed">四、混合索引与最大文件</a></li>
+<li><a href="#phy-compare">五、四种结构对比</a></li>
+<li><a href="#phy-pitfalls">六、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="phy-cont">一、连续分配</h2>
+<p>为文件分配一组相邻的磁盘块，目录项/inode 记录起始块号和长度。逻辑块号 i 对应的物理块号 = 起始块号 + i。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="连续分配：目录记录文件名、起始块号、长度；文件记录放在连续盘块中" data-src="/408-review/assets/textbook/os-file-contiguous.webp" href="/408-review/assets/textbook/os-file-contiguous.webp">
+<img alt="连续分配示意图：目录中 count、tr、mail、list、f 文件分别记录起始块和长度，占用连续盘块" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-contiguous.webp"/>
+</a>
+<figcaption>连续分配支持随机访问，磁盘读写连续；但要求连续空间，容易产生外部碎片。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>优点</th><th>缺点</th></tr></thead>
+<tbody>
+<tr><td>支持随机访问，逻辑块号直接算物理块号</td><td>必须找到连续空闲块，容易产生外部碎片</td></tr>
+<tr><td>磁盘读写速度最快，寻道少</td><td>必须事先知道文件大小，动态增长困难</td></tr>
+<tr><td>实现简单</td><td>插入/删除记录可能要大范围移动</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="phy-link">二、链接分配：隐式与显式 FAT</h2>
+<p><strong>隐式链接</strong>：每个盘块末尾存指向下一盘的指针，目录项记录首块和末块。逻辑上像一条链，只能从首块顺序遍历。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="隐式链接：目录记录起始块 9，盘块 9→10→25，最后一块指针为 -1" data-src="/408-review/assets/textbook/os-file-implicit-link.webp" href="/408-review/assets/textbook/os-file-implicit-link.webp">
+<img alt="隐式链接示意图：目录记录文件 jeep 的起始块 9，盘块链 9→10→25，-1 表示最后一块" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-implicit-link.webp"/>
+</a>
+<figcaption>隐式链接无外碎片、易增长，但只能顺序访问；指针损坏会断链。</figcaption>
+</figure>
+<p><strong>显式链接</strong>：把链接指针集中放在内存的<strong>文件分配表 FAT</strong> 中。FAT 表项下标是盘块号，表项内容是下一块号；整个磁盘一张 FAT，开机调入内存。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="显式链接：目录记录起始块 6，FAT 中 6→4→2→5→1→-1 形成文件链" data-src="/408-review/assets/textbook/os-file-explicit-link.webp" href="/408-review/assets/textbook/os-file-explicit-link.webp">
+<img alt="显式链接 FAT 示意图：目录记录起始块号 6，FAT 表按盘块号记录下一块号，链在 -1 结束" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-explicit-link.webp"/>
+</a>
+<figcaption>FAT 在内存中，查第 i 块不必访问前 i-1 块，因此支持随机访问；代价是 FAT 占内存。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>方式</th><th>随机访问</th><th>外碎片</th><th>额外开销</th></tr></thead>
+<tbody>
+<tr><td>隐式链接</td><td>不支持，只能顺序遍历</td><td>无</td><td>每块一个指针</td></tr>
+<tr><td>显式链接 FAT</td><td>支持（查内存 FAT）</td><td>无</td><td>整张 FAT 占内存</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="phy-index">三、索引分配：单级与多级</h2>
+<p><strong>单级索引</strong>：为每个文件分配一个索引块，索引块中集中存放该文件所有盘块号。目录项/inode 记录索引块号；逻辑块 i 的物理块号就是索引块第 i 项。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="单级索引分配：目录记录索引块 9，块 9 中依次存放 16、1、10、25 等数据块号" data-src="/408-review/assets/textbook/os-file-single-index.webp" href="/408-review/assets/textbook/os-file-single-index.webp">
+<img alt="单级索引分配示意图：目录指向索引块 9，索引块中存放数据块号" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-single-index.webp"/>
+</a>
+<figcaption>索引分配支持随机访问、无外碎片；每个文件至少一个索引块，小文件会浪费索引空间。</figcaption>
+</figure>
+<p><strong>多级索引</strong>：文件太大、一个索引块装不下时，为索引块再建索引，形成主索引→二级索引→数据块。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="多级索引分配：主索引指向多个二级索引块，二级索引再指向数据块" data-src="/408-review/assets/textbook/os-file-multi-index.webp" href="/408-review/assets/textbook/os-file-multi-index.webp">
+<img alt="多级索引分配示意图：主索引 9 指向二级索引，二级索引再指向数据块" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-multi-index.webp"/>
+</a>
+<figcaption>级数越多，可表示的文件越大，但访问一个数据块要读更多索引块。</figcaption>
+</figure>
+
+<h2 id="phy-mixed">四、混合索引与最大文件</h2>
+<p>实际 inode 常采用<strong>混合索引</strong>：若干直接块 + 一级间址 + 二级间址 + 三级间址。直接块指向数据；间址块整块存放盘块号，逐级扩大。</p>
+<pre><code class="language-text">最大文件 = 直接块数 × 盘块大小
+         + 一级间址块数 × 每块指针数 × 盘块大小
+         + 二级间址块数 × 每块指针数² × 盘块大小
+         + 三级间址块数 × 每块指针数³ × 盘块大小</code></pre>
+<p>例：盘块 4KB、盘块号 4B → 一个间址块可存 4KB/4B = 1024 个盘块号。若 inode 有 10 个直接块、1 个一级间址、1 个二级间址、1 个三级间址，则最大文件 = 10×4KB + 1024×4KB + 1024²×4KB + 1024³×4KB。</p>
+
+<h2 id="phy-compare">五、四种结构对比</h2>
+<div class="article-table"><table>
+<thead><tr><th>结构</th><th>随机访问</th><th>外碎片</th><th>动态增长</th><th>额外空间</th></tr></thead>
+<tbody>
+<tr><td>连续分配</td><td>支持</td><td>有</td><td>困难</td><td>无</td></tr>
+<tr><td>隐式链接</td><td>不支持</td><td>无</td><td>容易</td><td>每块指针</td></tr>
+<tr><td>显式链接 FAT</td><td>支持</td><td>无</td><td>容易</td><td>FAT 占内存</td></tr>
+<tr><td>索引分配</td><td>支持</td><td>无</td><td>容易</td><td>索引块</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="phy-pitfalls">六、易错点与收束</h2>
+<ul>
+<li><strong>“链接分配都支持随机访问”</strong>：隐式链接只能从头遍历；显式链接 FAT 在内存中查表才支持随机访问。</li>
+<li><strong>“索引分配没有额外开销”</strong>：每个文件至少一个索引块，小文件索引块利用率低。</li>
+<li><strong>“多级索引级数越多越好”</strong>：级数增加可扩大文件上限，但访问数据块要读更多索引块。</li>
+<li><strong>“连续分配适合动态增长”</strong>：文件后面不一定有连续空闲块，增长通常要移动整个文件。</li>
+</ul>
+<p>把这一节收成一句话：<strong>连续分配用“相邻”换速度，链接分配用“指针”换灵活，索引分配用“索引块”换随机访问；最大文件长度按直接块和各级间址逐项算。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>

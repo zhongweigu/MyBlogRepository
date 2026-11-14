@@ -1,0 +1,84 @@
+<div class="article-content">
+<p>文件被“打开”之后，进程拿到的不是磁盘地址，而是一个文件描述符 fd。fd 背后是一条链：<strong>进程打开文件表 → 系统打开文件表 → 内存 inode → 数据块</strong>。理解这条链，open/read/write/close 和硬链接/软链接就不会混。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#open-flow">一、open 的完整流程</a></li>
+<li><a href="#read-write">二、read/write/close 在做什么</a></li>
+<li><a href="#open-table">三、两张打开文件表</a></li>
+<li><a href="#link">四、硬链接与软链接</a></li>
+<li><a href="#open-pitfalls">五、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="open-flow">一、open 的完整流程</h2>
+<p>以 <code>fd = open("/home/bok/a.txt", O_RDONLY)</code> 为例：</p>
+<ol>
+<li>用户进程执行 open，CPU 由用户态陷入内核态。</li>
+<li>按路径名逐级查目录：根目录 → home → bok，每个目录项给出下一级 inode 号。</li>
+<li>拿到目标文件 a.txt 的 inode 号，按 inode 区布局定位磁盘 inode。</li>
+<li>检查该 inode 是否已在内存：不在则调入并建立内存 inode；已在则增加访问计数。</li>
+<li>按打开方式检查权限、文件类型等；不满足则返回错误。</li>
+<li>建立系统打开文件表项：记录偏移量、打开方式、inode 指针、引用计数。</li>
+<li>在进程打开文件表中建立表项，指向系统表项，并分配 fd。</li>
+<li>open 返回 fd，CPU 回到用户态。open 只建立访问路径，不读文件正文。</li>
+</ol>
+
+<h2 id="read-write">二、read/write/close 在做什么</h2>
+<p><strong>read(fd, buf, n)</strong> 的主线：</p>
+<ol>
+<li>fd → 进程打开文件表项 → 系统打开文件表项 → 内存 inode。</li>
+<li>用当前文件偏移量算出要读的逻辑块号和块内偏移。</li>
+<li>用 inode 的数据块指针把逻辑块映射为磁盘块。</li>
+<li>若页缓存没有该块，发起磁盘 I/O 读入；再把需要的字节复制到用户 buf。</li>
+<li>按实际读取字节数更新文件偏移量，read 返回。</li>
+</ol>
+<p><strong>write</strong> 与 read 类似，但要把用户数据写入页缓存；若写入位置超过文件末尾，还要分配新盘块、更新 inode 的文件长度和数据块指针。普通 write 不保证立即落盘，脏页之后由内核写回；需要立即持久化时用 fsync。</p>
+<p><strong>close(fd)</strong> 删除进程打开文件表项，系统打开文件表引用计数减 1；减到 0 才释放系统表项，再减少内存 inode 引用计数。close 本身不保证文件数据已经写盘。</p>
+
+<h2 id="open-table">三、两张打开文件表</h2>
+<div class="article-table"><table>
+<thead><tr><th>表</th><th>范围</th><th>典型内容</th></tr></thead>
+<tbody>
+<tr><td>进程打开文件表</td><td>每个进程一张</td><td>fd、指向系统表项的指针、进程读写偏移（有的系统偏移在系统表）</td></tr>
+<tr><td>系统打开文件表</td><td>全系统一张</td><td>打开方式、当前偏移、inode 指针、引用计数</td></tr>
+</tbody>
+</table></div>
+<p>多个进程可以共享同一个系统打开文件表项（如 fork 后继承 fd），从而共享文件偏移；各自 open 同一文件通常会建立不同的系统表项，偏移独立。</p>
+
+<h2 id="link">四、硬链接与软链接</h2>
+<p><strong>硬链接</strong>：多个目录项指向同一个 inode，inode 的链接计数加 1。删除一个名字只把计数减 1；计数为 0 且没有进程打开时才回收数据块。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="硬链接：两个目录项指向同一个 inode，inode 链接计数为 2" data-src="/408-review/assets/textbook/os-file-hardlink.webp" href="/408-review/assets/textbook/os-file-hardlink.webp">
+<img alt="硬链接示意图：两个目录中的文件名指向同一个 inode，inode 链接计数 count=2" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-hardlink.webp"/>
+</a>
+<figcaption>硬链接共享 inode 和数据块，不复制文件内容；链接计数记录名字数量。</figcaption>
+</figure>
+<p><strong>软链接</strong>：新建一个独立文件，有自己的 inode，文件内容是目标路径字符串。访问软链接时，系统解析目标路径再访问目标文件。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="软链接：A、C 是软链接文件，内容是目标路径，访问时再解析到 F" data-src="/408-review/assets/textbook/os-file-softlink.webp" href="/408-review/assets/textbook/os-file-softlink.webp">
+<img alt="软链接示意图：A、C 两个软链接文件通过路径指向同一个目标文件 F" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-softlink.webp"/>
+</a>
+<figcaption>软链接是独立文件，目标删除后会悬空；硬链接不会因删除一个名字而丢数据。</figcaption>
+</figure>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>硬链接</th><th>软链接</th></tr></thead>
+<tbody>
+<tr><td>inode</td><td>共享同一个 inode</td><td>自己有独立 inode</td></tr>
+<tr><td>链接计数</td><td>加 1，删除减 1</td><td>目标文件的计数不变；软链接自身计数通常为 1</td></tr>
+<tr><td>跨文件系统</td><td>通常不可以</td><td>可以</td></tr>
+<tr><td>目标删除后</td><td>只要还有其他硬链接，数据仍在</td><td>悬空链接，访问失败</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="open-pitfalls">五、易错点与收束</h2>
+<ul>
+<li><strong>“open 会把文件内容读进内存”</strong>：open 只查目录、权限、建打开文件表项；正文由 read 按需读。</li>
+<li><strong>“fd 就是磁盘地址”</strong>：fd 是进程打开文件表的索引，物理地址要经过系统表→inode→数据块指针。</li>
+<li><strong>“close 后数据一定落盘”</strong>：close 主要释放打开实例；脏页可能还在页缓存，需要 fsync。</li>
+<li><strong>“删除文件名就立即回收数据”</strong>：还有硬链接或进程打开时，inode/数据块要等链接计数和引用计数都归零。</li>
+</ul>
+<p>把这一节收成一句话：<strong>open 把“路径名”变成 fd，read/write 沿 fd→系统表→inode→数据块访问，close 释放打开实例；硬链接共享 inode，软链接是独立文件。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>

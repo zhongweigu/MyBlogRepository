@@ -1,0 +1,82 @@
+<div class="article-content">
+<p>文件系统要随时知道“哪些磁盘块还能分配”。空闲表、空闲链表、位示图、成组链接是四种典型方法；它们不是互斥的“谁替代谁”，而是针对不同规模和分配方式的组织手段。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#free-table">一、空闲表法</a></li>
+<li><a href="#free-list">二、空闲链表法</a></li>
+<li><a href="#free-bitmap">三、位示图法</a></li>
+<li><a href="#free-group">四、成组链接法</a></li>
+<li><a href="#free-compare">五、对比与易错点</a></li>
+</ul></div>
+</details>
+
+<h2 id="free-table">一、空闲表法</h2>
+<p>为所有空闲区建立一张表，每个表项记录<strong>起始盘块号 + 空闲盘块数</strong>，类似内存动态分区的空闲表。分配时找足够长的空闲区，回收时与相邻空闲区合并。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="空闲表法：记录第一空闲盘块号和空闲盘块数" data-src="/408-review/assets/textbook/os-file-free-table.webp" href="/408-review/assets/textbook/os-file-free-table.webp">
+<img alt="空闲表法示意图：表项包含序号、第一空闲盘块号、空闲盘块数" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-free-table.webp"/>
+</a>
+<figcaption>空闲表适合连续分配；分配/回收要考虑相邻空闲区的合并。</figcaption>
+</figure>
+
+<h2 id="free-list">二、空闲链表法</h2>
+<p>把所有空闲盘块/盘区拉成链表：</p>
+<ul>
+<li><strong>空闲盘块链</strong>：一个盘块一个结点，分配/回收以块为单位；</li>
+<li><strong>空闲盘区链</strong>：一个连续空闲区一个结点，结点记录起始块号和块数。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="空闲链表法：空闲盘块链按块串，空闲盘区链按连续区串" data-src="/408-review/assets/textbook/os-file-free-list.webp" href="/408-review/assets/textbook/os-file-free-list.webp">
+<img alt="空闲链表法示意图：空闲盘块链 2→6→5→11→8，空闲盘区链 2-4、16-17、26-28" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-free-list.webp"/>
+</a>
+<figcaption>盘块链简单但链长；盘区链结点少，但每个结点要记录长度。</figcaption>
+</figure>
+
+<h2 id="free-bitmap">三、位示图法</h2>
+<p>用一位表示一个盘块是否空闲（0/1 的约定要看清题目）。所有位组成位示图，字号和位号由盘块号换算：</p>
+<pre><code class="language-text">字号 = 盘块号 / 字长
+位号 = 盘块号 % 字长</code></pre>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="位示图法：盘块情况与对应位示图，0/1 表示空闲/占用" data-src="/408-review/assets/textbook/os-file-bitmap.webp" href="/408-review/assets/textbook/os-file-bitmap.webp">
+<img alt="位示图法示意图：盘块号与位示图比特位的对应关系" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-bitmap.webp"/>
+</a>
+<figcaption>位示图适合找连续空闲块；分配时扫描 0 位，回收时置 0。</figcaption>
+</figure>
+<p>位示图占用空间小，容易判断连续空闲块；但分配连续区时需要扫描位图，盘块数很大时扫描开销不可忽略。</p>
+
+<h2 id="free-group">四、成组链接法</h2>
+<p>成组链接把空闲盘块分组，每组用一个“栈”管理：</p>
+<ul>
+<li>栈顶记录本组可分配的空闲盘块号；</li>
+<li>栈底记录<strong>下一组</strong>所在的盘块号；</li>
+<li>栈底为 0 表示没有下一组；</li>
+<li>栈是临界资源，分配/回收要互斥。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="成组链接法：空闲盘块号栈，栈底指向下一组，栈中其余位置是空闲块号" data-src="/408-review/assets/textbook/os-file-group-link.webp" href="/408-review/assets/textbook/os-file-group-link.webp">
+<img alt="成组链接法示意图：内存中的空闲盘块号栈通过栈底指向外存中的下一组空闲块" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/os-file-group-link.webp"/>
+</a>
+<figcaption>UNIX 常用；它把大量空闲块号分组，避免把整张位图/链表都放在内存。</figcaption>
+</figure>
+<p><strong>分配</strong>：从栈顶取空闲块号；如果取到栈底，先把栈底指向的下一组调入内存，再分配原栈底块。<strong>回收</strong>：把块号压栈；若栈满，把当前栈内容写入回收块，并把该块作为新栈底。</p>
+
+<h2 id="free-compare">五、对比与易错点</h2>
+<div class="article-table"><table>
+<thead><tr><th>方法</th><th>组织单位</th><th>优点</th><th>缺点</th></tr></thead>
+<tbody>
+<tr><td>空闲表</td><td>连续空闲区</td><td>适合连续分配，合并直观</td><td>空闲区多时表大</td></tr>
+<tr><td>空闲链表</td><td>盘块/盘区</td><td>分配回收简单</td><td>链长时检索慢</td></tr>
+<tr><td>位示图</td><td>一位/盘块</td><td>省空间，易找连续块</td><td>大磁盘扫描慢</td></tr>
+<tr><td>成组链接</td><td>分组 + 栈</td><td>适合大容量，内存占用可控</td><td>栈操作要互斥，逻辑复杂</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>“位示图一位对应一个字节”</strong>：一位对应一个盘块；要按字长换算字号/位号。</li>
+<li><strong>“成组链接的栈底也是普通空闲块”</strong>：栈底存下一组位置，分配时要特殊处理。</li>
+<li><strong>“空闲表法适合离散分配”</strong>：空闲表按连续区记录，天然适合连续分配。</li>
+</ul>
+<p>把这一节收成一句话：<strong>空闲表管连续区，空闲链表管块/区，位示图用一位管一块，成组链接用“分组栈”把大磁盘的空闲块号压进有限内存。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>
