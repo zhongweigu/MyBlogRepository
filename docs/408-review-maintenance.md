@@ -10,7 +10,7 @@
 ## 1. 先记住这几件事
 
 1. **不要编辑 `source/_posts/*.md`。** 帖子是历史归档；新内容只进复习台。
-2. **今日页只有一个模块**：每日知识点复习，默认 10 个考点。不要加回计划、每日一题、热力图、复习指引等模块。
+2. **今日页只有一个模块**：固定 20 个术语 + 5 个流程，按日期确定性随机，折叠答案。不要加回计划、每日一题、热力图、复习指引、进度/打卡等模块。
 3. **考点页是长文，不是几条摘要；但顶部要先给背诵和答法。** 结构是：背诵清单 / 考场答法 → 理解长文 → 图解 → 关联真题。长文要接近一篇小教材：定义、推导、示例片段、表格、图、易错点都要有；**完整例题不放在正文**。
 4. **图要放到对应位置。** 用户发的图、原帖里的图、自己画的图，都要落到 `assets/textbook/` 或 `assets/img/`，并在正文相应段落插入，不能只堆在文末；代表一类题型的图再收进 `data/diagrams.js`。
 5. **术语和图解是独立入口**：`#/glossary`、`#/diagrams`。不要加评论、路线 / 纲领、P0–P3 优先级、英文版——用户明确不要。
@@ -24,11 +24,13 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v37/
+│   ├── js-v38/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
 │   │   ├── data/
+│   │   │   ├── review-terms.js  # 每日术语池
+│   │   │   ├── review-flows.js  # 每日流程池
 │   │   │   ├── meta.js            # 科目、章节、跨章脉络
 │   │   │   ├── ds.js / coa.js / os.js  # 原有考点（OS 从 2026-11-09 开始）
 │   │   │   ├── ds-extra.js        # 新增 DS 考点
@@ -42,7 +44,7 @@ source/408-review/
 │   │   │   ├── code.js            # 数据结构代码（脚本抽取）
 │   │   │   └── index.js           # 合并、排序、索引
 │   │   ├── study.js               # 先回忆 / 背诵清单的公共文案
-│   │   ├── views/today.js         # 今日页（单模块，随机队列）
+│   │   ├── views/today.js         # 今日页（20 术语 + 5 流程，日期随机）
 │   │   ├── views/topic.js         # 考点页壳 + 背诵/答法/图解 + 长文 fetch
 │   │   ├── views/glossary.js      # 术语库
 │   │   ├── views/diagrams.js      # 图解库
@@ -242,12 +244,13 @@ python scripts/build-review-content.py
 
 ## 4. 今日页规则
 
-- 只保留 **每日知识点复习** 一个模块。
-- `store.dailyQueue(10)`：先从到期考点 + 新考点里选候选，再**随机打乱**后取 10 个；到期优先入选，但顺序不再按章节。全部学完且无到期时，从薄弱考点抽查。
-- 想固定顺序时不要改回 `[...due, ...fresh]`；用户明确要随机。
-- 不要加回：今日三件事、每日一题、每日一点 tab、复习指引、科目进度、连续天数、热力图、7 天预测。
-- 改数量：`today.js` 的 `DAILY_LIMIT`、`app.js` 的 `store.dailyQueue(10)` 两处一起改。
-- 每项「复习」按钮走 `start-topic-runner`，整页「开始今日复习」走 `start-queue`。
+- 今日页固定 **20 个术语 + 5 个流程**，不再按考点/复习进度出题。
+- 随机是**日期确定性随机**：用上海日期 `YYYY-MM-DD` 做种子，从 `data/review-terms.js` / `data/review-flows.js` 洗牌；同一天多次打开内容相同，次日自动换一批。不要改成 `Math.random()`，否则每次刷新都变。
+- 术语池 180+ 条、流程池 60+ 条；术语必须是一个明确概念（“最佳适应算法”“Belady 异常”），不能写“地址结构”“方法 3”这类歧义词。流程要能按步骤复述，答案放 `<details>`。
+- 不使用 `store.dailyQueue`、SRS、连续天数、已掌握标记；今日页不显示“开始复习/复习按钮”。
+- 不要加回：今日三件事、每日一题、每日一点 tab、复习指引、科目进度、热力图、7 天预测。
+- 改数量：`today.js` 的 `TERM_COUNT` / `FLOW_COUNT`。
+- 新增/修改知识库后，同步补 `review-terms.js` 与 `review-flows.js`；今日页每次构建都会读最新池子。
 
 ---
 
@@ -408,6 +411,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 已录入 39 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题 + 16 道内存管理题），题库存量为 204；内存题在 `data/questions-memory.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-5` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
 

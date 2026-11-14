@@ -8,8 +8,9 @@
 
 - 维护手册：`docs/408-review-maintenance.md`，**改复习台前先读**。
 - 入口 `/408-review/`，由 `_config.yml` 的 `skip_render: 408-review/**` 原样复制；不要改 Butterfly 主题去渲染它。
-- 今日页只保留「每日知识点复习」一个模块，默认 10 个考点；队列从到期 + 新考点里随机打乱，不要改回按章节顺序。不要加回计划 / 每日一题 / 热力图等模块。
-- 先回忆用 `study.js` 的 `recallPrompts()`：包括哪些 / 步骤 / 公式 / 易错四类问题；背诵清单列全部 points + 前三条 pitfalls；章节页有「本章背诵清单」。
+- 今日页固定 **20 个术语 + 5 个流程**，按上海日期做确定性随机：同一天多次打开内容相同，次日自动换一批；不依赖“是否学过”，不做进度/打卡/已掌握标记。术语与流程都用折叠答案，先让用户复述再展开核对。
+- 术语池在 `data/review-terms.js`，流程池在 `data/review-flows.js`；每天从当前数据抽取，知识库更新后改这两个池即可同步。术语名必须带限定语、明确指向一个概念（如“最佳适应算法”“Belady 异常”），不要用“地址结构”“方法 3”这类有歧义的大词。
+- 先回忆用 `study.js` 的 `recallPrompts()`：包括哪些 / 步骤 / 公式 / 易错四类问题；背诵清单列全部 points + 前三条 pitfalls；章节页有「本章背诵清单」。这套 SRS 只用于考点页/章节页，不要接回今日页。
 - 考点页正文在 `assets/content/<topic-id>.html`，按需 fetch；`topic.points` 只是速记层。
 - 考点页结构：背诵清单 / 考场答法（由 points 派生）→ 理解长文 → 图解（正文图 + 自绘 SVG）→ 关联真题。
 - 新增 `views/glossary.js` + `data/glossary.js`（术语库）、`views/diagrams.js` + `data/diagrams.js`（代表题型/流程图解）、`views/code.js` + `data/code.js`（数据结构与 OS 知识点代码库）；导航已接入。
