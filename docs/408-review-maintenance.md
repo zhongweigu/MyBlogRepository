@@ -1,4 +1,4 @@
-﻿# 408 复习台 · 维护手册
+# 408 复习台 · 维护手册
 
 > 适用对象：以后接手这个页面的 agent。用户会持续发来新的考点、知识点和图片，要求「提取、补充、加进复习台」，**不再改博客帖子**。
 >
@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v38/
+│   ├── js-v39/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -40,13 +40,13 @@ source/408-review/
 │   │   │   ├── questions-extra.js # 自动抽取题（脚本生成，勿手改）
 │   │   │   ├── questions-manual-extra.js # 裸题手工补充
 │   │   │   ├── diagrams.js        # 图解库（代表题型 + 流程）
-│   │   │   ├── glossary.js        # 术语（核心手写 + 自动抽取）
+│   │   │   ├── glossary.js        # 旧术语数据（页面已不用）
 │   │   │   ├── code.js            # 数据结构代码（脚本抽取）
 │   │   │   └── index.js           # 合并、排序、索引
 │   │   ├── study.js               # 先回忆 / 背诵清单的公共文案
 │   │   ├── views/today.js         # 今日页（20 术语 + 5 流程，日期随机）
 │   │   ├── views/topic.js         # 考点页壳 + 背诵/答法/图解 + 长文 fetch
-│   │   ├── views/glossary.js      # 术语库
+│   │   ├── views/glossary.js      # 完整复习库（术语 + 流程）
 │   │   ├── views/diagrams.js      # 图解库
 │   │   ├── views/code.js          # 代码库
 │   │   └── ...
@@ -218,9 +218,12 @@ python scripts/build-review-content.py
 4. **本章背诵清单**：章节页有一个折叠区，把所有考点的 `takeaway` + 全部 `points` 汇总；每章都能直接过一遍。
 5. **图解**：文章加载后自动抽取前 4 张 `.article-figure`，加上 `figures` 里的自绘 SVG。要新增“代表一类题型”的图，优先放进 `data/diagrams.js` 和图解库。
 
-### 3.7 术语库与图解库
+### 3.7 复习库（术语 + 流程）与图解库
 
-- `data/glossary.js`：`CORE_TERMS` 手写核心术语；其余从 75 个考点的 `points` 自动抽取（术语 = 知识点标题，释义 = `lead`）。术语页支持科目筛选和搜索。
+- `data/review-terms.js`：185 个术语，每项 `{ t, d, topic }`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
+- `data/review-flows.js`：64 个流程，每项 `{ t, topic, steps }`；步骤要能按顺序复述。
+- `#/glossary` 现在是**完整复习库**：上面是术语库、下面是流程库，支持科目筛选和搜索；顶部导航标签为「复习库」。
+- 旧的 `data/glossary.js`（`CORE_TERMS` / 自动抽取）不再被页面使用，不要继续往里加；新词加到 `review-terms.js`。
 - `data/diagrams.js`：`DIAGRAMS` 每项字段：
   ```js
   { id, subject: 'ds'|'coa'|'os', group, topic, title, src, caption, why }
@@ -319,7 +322,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 4. **融进已有体系**：先找它属于哪科、哪章、哪个考点；优先补现有 `points` / `content/<id>.html` / `supplements-*`，不要新建孤立页面。确实没有合适考点时才建新 topic，并补 `chapter/order/title/kicker/takeaway/points`。
 5. **写成学习卡**：背诵清单（能直接背的短句）→ 理解（推导、例子、表格、图）→ 考场答法（怎么开头、怎么收口、易错）。正文里**不放完整例题**。
 6. **题目入库**：能自动识别的走 `scripts/extract-questions.py`；裸题补到 `questions-manual-extra.js`。每题写 `topics`、答案和解析；解析最后一句尽量点出“这题在考哪个考点”。同时从正文里删掉这道题。
-7. **顺手更新术语/图解**：新术语加到 `CORE_TERMS` 或依赖自动抽取；新代表图加到 `DIAGRAMS`。
+7. **顺手更新复习库/图解**：新术语加到 `review-terms.js`，新流程加到 `review-flows.js`；新代表图加到 `DIAGRAMS`。
 8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 75 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
 9. **提交**：源帖不改；只提交复习台、脚本和手册相关文件。
 
@@ -347,7 +350,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 
 - 长文由帖子生成时，`points` 仍是速记层；两者不要求一一对应。
 - 背诵清单 / 考场答法由 `points` 自动派生，所以 `points` 的标题和一句线索要写清楚；特殊题型之后再手写覆盖。
-- 术语库的大部分释义来自 `points.lead`，核心术语才手写；发现释义太薄时，先补 `points.lead` 或把词加进 `CORE_TERMS`。
+- 复习库的术语是独立手写池，不依赖 `points.lead`；新词直接加到 `review-terms.js`，流程加到 `review-flows.js`。
 - MathJax / Mermaid 走 jsDelivr CDN，**按需加载**（只有文章里出现公式 / mermaid 才注入脚本）；加载失败时公式/图退化为原始文本，正文仍可读。
 - `coa-4-3`（流水线）在 `content/coa-4-3.html` 手写维护；流水线分类、五段式 IF/ID/EX/MEM/WB、多发技术都直接改这个文件，生成器跳过。
 - `coa-4-4`（数据通路与控制信号）在 `content/coa-4-4.html` 手写维护；生成器的 `MANUAL_TOPICS` 已跳过它。新增组合/状态元件、时钟、单总线、2015-43/44、2022-43 的内容直接改这个文件。
@@ -411,6 +414,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 已录入 39 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题 + 16 道内存管理题），题库存量为 204；内存题在 `data/questions-memory.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-5` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
 

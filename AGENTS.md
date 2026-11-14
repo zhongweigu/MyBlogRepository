@@ -13,7 +13,7 @@
 - 先回忆用 `study.js` 的 `recallPrompts()`：包括哪些 / 步骤 / 公式 / 易错四类问题；背诵清单列全部 points + 前三条 pitfalls；章节页有「本章背诵清单」。这套 SRS 只用于考点页/章节页，不要接回今日页。
 - 考点页正文在 `assets/content/<topic-id>.html`，按需 fetch；`topic.points` 只是速记层。
 - 考点页结构：背诵清单 / 考场答法（由 points 派生）→ 理解长文 → 图解（正文图 + 自绘 SVG）→ 关联真题。
-- 新增 `views/glossary.js` + `data/glossary.js`（术语库）、`views/diagrams.js` + `data/diagrams.js`（代表题型/流程图解）、`views/code.js` + `data/code.js`（数据结构与 OS 知识点代码库）；导航已接入。
+- `views/glossary.js` + `data/review-terms.js` / `review-flows.js` 组成「复习库」页面（术语 + 流程，顶部导航标签也是「复习库」）；旧的 `data/glossary.js` 不再使用。`views/diagrams.js` + `data/diagrams.js`（代表题型/流程图解）、`views/code.js` + `data/code.js`（数据结构与 OS 知识点代码库）导航已接入。
 - 操作系统是第三个科目（`os`），目前 `os-1` 概述（发展、CPU 模式、系统调用、引导、虚拟机）、`os-2` 进程与线程（进程控制、线程、调度指标、调度算法、同步互斥、死锁）、`os-3` 信号量与 PV（三类模型、生产者-消费者、读者-写者、哲学家、做题策略）和 `os-4` 内存管理（装入/连续分配、分页/多级页表、分段/段页式、虚拟存储/置换）共 20 个考点；数据在 `data/os.js`，长文在 `content/os-*.html` 手写维护。科目主题色用 `--violet`，视图统一走 `subjectClass()`，不要再写 `coa ? is-coa : is-ds` 的三元。
 - **代码库**由 `python scripts/extract-code.py` 从 `content/ds-*.html`、`content/os-2-5.html`、`content/os-3-1.html` 到 `os-3-4.html` 抽取；改完数据结构/OS 同步/PV 长文要重跑。
 - **流程类图解**放 `data/diagrams.js` 的 `process` 分类；缺图自己画 SVG，或明确让用户上传。
