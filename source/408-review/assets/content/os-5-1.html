@@ -2,13 +2,14 @@
 <p>文件管理的第一问不是“磁盘怎么分块”，而是“用户怎样用一个名字找到一份数据”。这条链是：<strong>文件名 → 目录项 → inode → 数据块</strong>。目录负责“按名查找”，inode 负责“记住文件在哪里、有多大、谁能用”。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>5 节</span></summary>
+<summary>本页目录 <span>6 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#file-basic">一、文件是什么</a></li>
 <li><a href="#file-fcb">二、FCB：文件控制块</a></li>
 <li><a href="#file-inode">三、索引结点 inode</a></li>
 <li><a href="#file-dir">四、目录：文件名到 inode 的映射</a></li>
-<li><a href="#file-pitfalls">五、易错点与收束</a></li>
+<li><a href="#file-compare">五、FCB、inode、目录、目录项辨析</a></li>
+<li><a href="#file-pitfalls">六、易错点与收束</a></li>
 </ul></div>
 </details>
 
@@ -66,10 +67,52 @@
 <tr><td>无环图目录</td><td>允许共享子目录/文件，用链接计数管理；实现复杂</td></tr>
 </tbody>
 </table></div>
-<p>目录项只存文件名和 inode 号，意味着<strong>文件名与文件数据解耦</strong>：同一个 inode 可以有多个名字（硬链接），同一个文件也可以被不同路径访问。</p>
+<p>在 UNIX 类文件系统中，目录项只存文件名和 inode 号，意味着<strong>文件名与文件数据解耦</strong>：同一个 inode 可以有多个名字（硬链接），同一个文件也可以被不同路径访问。</p>
 <p><strong>虚拟文件系统 VFS</strong> 是内核中的抽象层：它定义统一的文件/目录/inode 操作接口，让 ext4、FAT、NFS 等不同文件系统都能被同一套系统调用访问。VFS 不等于“运行在虚拟内存里的文件系统”，也不必然加快访问速度；它的价值是<strong>统一接口、屏蔽具体文件系统差异</strong>。</p>
 
-<h2 id="file-pitfalls">五、易错点与收束</h2>
+<h2 id="file-compare">五、FCB、inode、目录、目录项辨析</h2>
+<p>先把结论放在前面：<strong>FCB 是“文件元数据集合”这个概念，inode 是它在 UNIX 类文件系统中的实现；目录是存放目录项的特殊文件，目录项是目录里的一条“名字 → 文件”记录。</strong>四者是不同层次，不是四个互相排斥的东西。</p>
+<div class="article-table"><table>
+<thead><tr><th>概念</th><th>内容</th><th>存在哪里</th><th>怎么被读到</th></tr></thead>
+<tbody>
+<tr><td>FCB（广义）</td><td>文件名、属性、物理位置、大小、时间、权限等文件元数据</td><td>不同系统不同：FAT 放在目录项里；UNIX 类放在 inode 里；打开后内存中还有副本</td><td>查目录时随目录项读入，或由目录项给出的 inode 号读 inode；open 后进系统打开文件表/内存 inode</td></tr>
+<tr><td>inode（索引结点）</td><td>文件类型、权限、文件主、大小、链接计数、时间、数据块指针（直接/间接）</td><td>磁盘 inode 区；打开后调入内存 inode 表/缓存</td><td>目录项只给 inode 号；按 inode 号在 inode 区定位，读入内存；不按文件名直接找 inode</td></tr>
+<tr><td>目录</td><td>一张“文件名 → inode 号/FCB”的映射表；目录本身也是文件</td><td>目录文件的数据块在磁盘；目录自己的 inode/FCB 描述它</td><td>从根目录/当前目录开始，读目录文件的数据块，逐项比较文件名</td></tr>
+<tr><td>目录项</td><td>UNIX：文件名 + inode 号（+ 记录长度/文件类型）；FAT：文件名 + 属性 + 起始簇 + 大小等，本身就是 FCB</td><td>目录文件的数据块中；随目录块读入内存</td><td>读目录块后按名字匹配；命中后拿 inode 号/起始簇继续访问</td></tr>
+</tbody>
+</table></div>
+
+<h3>是相容还是互斥？</h3>
+<p><strong>不是互斥，是“抽象与实现、整体与部分”的关系。</strong></p>
+<ul>
+<li><strong>FCB 与 inode</strong>：inode 是 FCB 在 UNIX 类文件系统中的具体实现。可以说“inode 是一种 FCB”，但不能反过来说“所有 FCB 都是 inode”——FAT 的目录项也是 FCB，却没有 inode。</li>
+<li><strong>目录项与 inode</strong>：目录项负责“名字”，inode 负责“元数据 + 数据块”。UNIX 下二者配合才相当于一个完整 FCB；目录项本身不是 inode。</li>
+<li><strong>目录与目录项</strong>：目录是容器/特殊文件，目录项是其中的记录；目录由许多目录项组成，不是并列概念。</li>
+<li><strong>目录与 inode</strong>：目录有它自己的 inode；目录的数据块里放的是子项的目录项。二者一个是“特殊文件”，一个是“该文件的元数据”。</li>
+</ul>
+<p>所以考试里如果问“FCB 和 inode 是否等价”，要加前提：<strong>在 UNIX 类文件系统中，inode 是 FCB 的主体；在 FAT 中，目录项就是 FCB，没有独立 inode。</strong>离开文件系统实现谈“互斥”没有意义。</p>
+
+<h3>不同文件系统下的存在形式</h3>
+<div class="article-table"><table>
+<thead><tr><th>文件系统</th><th>目录项内容</th><th>FCB 在哪里</th><th>是否有独立 inode</th></tr></thead>
+<tbody>
+<tr><td>FAT（DOS/Windows）</td><td>文件名、属性、起始簇号、文件大小、时间等；长文件名另有 LFN 目录项</td><td>目录项本身就是 FCB；FAT 表负责簇链</td><td>没有 UNIX 式 inode</td></tr>
+<tr><td>UNIX/ext2/3/4</td><td>文件名 + inode 号（+ 记录长度/文件类型）</td><td>inode 表保存元数据；目录项只保存名字和编号</td><td>有，inode 是核心</td></tr>
+<tr><td>NTFS</td><td>目录是名字 → MFT 记录号的索引（B+ 树）</td><td>MFT 记录是 FCB 类结构，保存属性和数据运行</td><td>没有叫 inode，但有等价的 MFT 记录</td></tr>
+<tr><td>CP/M 等早期系统</td><td>目录项记录文件名、扩展名、块分配等</td><td>FCB 可由程序在内存建立，目录项保存文件入口</td><td>没有</td></tr>
+</tbody>
+</table></div>
+
+<h3>按路径读取时到底读了什么</h3>
+<p>以 UNIX 类文件系统的 <code>/home/bok/a.txt</code> 为例：</p>
+<pre><code class="language-text">根目录 inode（已知/常驻）
+  → 根目录数据块：找 home → 得 home 的 inode 号
+  → home inode → home 数据块：找 bok → 得 bok 的 inode 号
+  → bok inode → bok 数据块：找 a.txt → 得 a.txt 的 inode 号
+  → a.txt inode → 数据块指针 → 读文件内容</code></pre>
+<p>每一步都是“读目录文件的数据块，按名字匹配目录项，拿到 inode 号；再读 inode，进入下一层”。文件名只在目录项里出现；inode 里通常不存文件名。FAT 系统则把“inode 号”换成“目录项里的起始簇号 + FAT 簇链”，路径查找的框架相同，只是元数据存放位置不同。</p>
+
+<h2 id="file-pitfalls">六、易错点与收束</h2>
 <ul>
 <li><strong>“目录项就是 inode”</strong>：目录项是“名字 + inode 号”，inode 是属性/数据块指针，二者不是一回事。</li>
 <li><strong>“一个文件名对应一个 inode”</strong>：硬链接让多个文件名共享同一个 inode；软链接是另一个文件，有自己的 inode。</li>
