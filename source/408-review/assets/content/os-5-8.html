@@ -1,0 +1,75 @@
+<div class="article-content">
+<p>文件系统只有挂到目录树上，用户才能通过路径访问。挂载不是复制文件，而是把“某个设备上的文件系统”接到“某个已存在目录”下面，让这个目录成为该文件系统的根。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#mount-idea">一、挂载到底做了什么</a></li>
+<li><a href="#mount-root">二、根文件系统与其他文件系统</a></li>
+<li><a href="#mount-point">三、挂载点的规则</a></li>
+<li><a href="#mount-path">四、跨挂载点的路径解析</a></li>
+<li><a href="#mount-pitfalls">五、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="mount-idea">一、挂载到底做了什么</h2>
+<p>挂载（mount）把一个存储设备上的文件系统接到当前目录树的某个目录上。这个目录叫<strong>挂载点</strong>。挂载后，访问挂载点就进入被挂载文件系统的根目录，而不是原目录里的内容。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="文件系统挂载：根文件系统的 /mnt/data 挂载点接到另一个文件系统的根，路径查找跨过挂载点" data-src="/408-review/assets/img/os-mount.svg" href="/408-review/assets/img/os-mount.svg">
+<img alt="文件系统挂载示意图：根目录树的 /mnt/data 挂载点指向另一个文件系统的根目录" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-mount.svg"/>
+</a>
+<figcaption>挂载点是“入口”，不是复制出来的目录；原目录内容会被遮住，卸载后恢复。</figcaption>
+</figure>
+<p>内核在挂载时主要做三件事：</p>
+<ol>
+<li>读入该设备的超级块，建立 VFS 超级块对象；</li>
+<li>把设备、文件系统类型、挂载点、挂载标志记录到挂载表；</li>
+<li>让挂载点目录的 vnode 指向被挂载文件系统的根 vnode（或建立挂载关系）。</li>
+</ol>
+
+<h2 id="mount-root">二、根文件系统与其他文件系统</h2>
+<p>系统启动时，内核先挂载<strong>根文件系统</strong>，它包含内核映像、基本设备文件和启动所需的关键目录，形成以 <code>/</code> 为根的目录树。其他文件系统（如 <code>/home</code> 单独分区、U 盘、NFS）必须挂到根树的某个目录下才能被访问。</p>
+<ul>
+<li>UNIX/Linux：只有一棵以 <code>/</code> 为根的树；所有设备都挂到某个挂载点。</li>
+<li>Windows：常用盘符（C:、D:）标识卷，也支持把卷挂到 NTFS 目录（装入点）。</li>
+<li>根文件系统之外的文件系统可以在启动时自动挂载，也可以由用户手动挂载。</li>
+</ul>
+
+<h2 id="mount-point">三、挂载点的规则</h2>
+<div class="article-table"><table>
+<thead><tr><th>规则</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>挂载点必须是已存在目录</td><td>通常要求空目录，但非空目录也能挂；挂载后原内容被遮住</td></tr>
+<tr><td>同一挂载点同一时刻只能挂一个文件系统</td><td>后挂的会覆盖先挂的视图</td></tr>
+<tr><td>同一设备可以挂到多个挂载点</td><td>多个路径看到同一份文件系统</td></tr>
+<tr><td>卸载前不能有进程正在使用</td><td>“忙”时卸载失败，需关闭文件或延迟/强制卸载</td></tr>
+<tr><td>卸载后原挂载点内容恢复</td><td>被遮住的原目录重新可见</td></tr>
+</tbody>
+</table></div>
+<p>挂载信息通常记录在挂载表（mount table）中：设备名、挂载点、文件系统类型、挂载选项（只读/读写、noexec 等）、对应的 VFS 超级块。`/proc/mounts` 或 `mount` 命令看到的就是这些信息。</p>
+
+<h2 id="mount-path">四、跨挂载点的路径解析</h2>
+<p>以 <code>/mnt/data/a.txt</code> 为例：</p>
+<ol>
+<li>从根目录开始，找到 <code>mnt</code> 目录项；</li>
+<li>进入 <code>mnt</code> 后找到 <code>data</code>；发现 <code>data</code> 是一个挂载点；</li>
+<li>VFS 把当前 vnode 切换到被挂载文件系统的根 vnode；</li>
+<li>在被挂载文件系统内继续找 <code>a.txt</code>，读它的 inode 和数据块。</li>
+</ol>
+<pre><code class="language-text">/（根文件系统）
+└── mnt/
+    └── data/        ← 挂载点，切换到 /dev/sdb1 的根
+        └── a.txt    ← 实际在 /dev/sdb1 上</code></pre>
+<p>从被挂载文件系统的根目录执行 <code>..</code>，会回到挂载点的父目录（即根文件系统中的 <code>/mnt</code>），而不是被挂载文件系统内部的某个目录。这是“挂载点作为边界”的体现。</p>
+
+<h2 id="mount-pitfalls">五、易错点与收束</h2>
+<ul>
+<li><strong>“挂载会复制文件”</strong>：挂载只是把文件系统接到目录树，不复制数据。</li>
+<li><strong>“同一挂载点可同时挂多个文件系统”</strong>：同一时刻只能挂一个；后挂覆盖先挂的视图。</li>
+<li><strong>“挂载点必须是空目录”</strong>：不要求空；非空目录挂载后原内容被遮住，卸载后恢复。</li>
+<li><strong>“根文件系统也要手动挂载”</strong>：根文件系统由内核在启动时直接挂载；其他文件系统才需要挂载。</li>
+<li><strong>“挂载就是打开文件”</strong>：挂载是文件系统级操作，open 是文件级操作；挂载之后才能通过路径打开其中的文件。</li>
+</ul>
+<p>把这一节收成一句话：<strong>挂载把设备上的文件系统接到目录树的挂载点，VFS 在路径跨过挂载点时切换到新文件系统的根；挂载点原内容被遮住，卸载后恢复。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>

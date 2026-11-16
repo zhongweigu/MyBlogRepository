@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" role="img" aria-labelledby="t d">
+<title id="t">文件系统挂载</title>
+<desc id="d">根文件系统的目录树中有一个挂载点 /mnt/data；把另一个文件系统挂到该目录后，访问 /mnt/data 会进入被挂载文件系统的根，而不是原目录中的内容。</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#35618f"/></marker></defs>
+<style>.b{fill:#f7fafc;stroke:#35618f;stroke-width:1.6;rx:7}.m{fill:#fff7ed;stroke:#b45309;stroke-width:1.8;rx:7}.t{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:14px;fill:#1f2937;text-anchor:middle}.s{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:11px;fill:#5b6573;text-anchor:middle}.l{stroke:#35618f;stroke-width:1.8;fill:none;marker-end:url(#a)}</style>
+<rect width="960" height="470" fill="#fff"/>
+<text class="t" x="250" y="28">根文件系统目录树</text>
+<rect class="b" x="170" y="45" width="160" height="42"/><text class="t" x="250" y="72">/（根目录）</text>
+<path class="l" d="M210 87 V135"/><path class="l" d="M290 87 V135"/>
+<rect class="b" x="95" y="138" width="130" height="42"/><text class="t" x="160" y="164">/home</text>
+<rect class="m" x="275" y="138" width="170" height="42"/><text class="t" x="360" y="164">/mnt/data（挂载点）</text>
+<path class="l" d="M360 180 V218"/>
+<rect x="285" y="194" width="150" height="18" fill="#fff"/>
+<text class="s" x="360" y="207">挂载另一个文件系统</text>
+<rect class="m" x="260" y="222" width="200" height="58"/><text class="t" x="360" y="246">被挂载文件系统的根 /</text><text class="s" x="360" y="266">设备：/dev/sdb1</text>
+<path class="l" d="M360 280 V315"/>
+<rect class="b" x="285" y="318" width="150" height="42"/><text class="t" x="360" y="344">a.txt</text>
+<rect class="b" x="560" y="55" width="340" height="120"/><text class="t" x="730" y="82">路径解析</text><text class="s" x="730" y="108">/mnt/data/a.txt</text><text class="s" x="730" y="130">→ 根目录找 mnt</text><text class="s" x="730" y="150">→ 到挂载点后切换到新文件系统根</text>
+<path class="l" d="M520 245 H690 V180"/>
+<text class="s" x="600" y="235">跨过挂载点</text>
+<text class="s" x="480" y="400">挂载点原目录内容会被遮住；同一挂载点同一时刻只能挂一个文件系统；同一设备可挂到多个挂载点。</text>
+<text class="s" x="480" y="425">挂载信息由 VFS 的超级块/挂载表管理，路径查找时自动切换文件系统。</text>
+</svg>

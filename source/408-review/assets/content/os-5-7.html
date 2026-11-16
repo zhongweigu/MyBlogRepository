@@ -1,0 +1,76 @@
+<div class="article-content">
+<p>不同文件系统在磁盘上的布局完全不同：ext4 用 inode 表，NTFS 用 MFT，FAT 用目录项 + FAT 表。如果每个应用都直接面对这些差异，系统调用就没法统一。VFS 的作用就是<strong>在系统调用和具体文件系统之间加一层统一接口</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#vfs-role">一、VFS 解决什么问题</a></li>
+<li><a href="#vfs-objects">二、VFS 的四个对象</a></li>
+<li><a href="#vfs-vnode">三、vnode 与磁盘 inode 的区别</a></li>
+<li><a href="#vfs-write">四、write 怎样经 VFS 分发</a></li>
+<li><a href="#vfs-pitfalls">五、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="vfs-role">一、VFS 解决什么问题</h2>
+<p>VFS（Virtual File System）位于用户进程的系统调用和具体文件系统之间：</p>
+<ul>
+<li>向上：提供统一的 <code>open/read/write/close</code> 等接口，用户不用关心底层是 ext4、NTFS 还是 FAT；</li>
+<li>向下：把统一请求转发给具体文件系统的实现函数；</li>
+<li>它本身<strong>不是一种真正的磁盘文件系统</strong>，只存在于内存，不占磁盘空间，随系统启动建立、关机释放。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="VFS 分层：用户进程经 POSIX 系统调用进入 VFS，VFS 再调用 ext4、NTFS、FAT 等具体文件系统" data-src="/408-review/assets/img/os-vfs.svg" href="/408-review/assets/img/os-vfs.svg">
+<img alt="虚拟文件系统 VFS 分层图：用户进程、POSIX 系统调用、VFS 抽象层、ext4/NTFS/FAT 和磁盘" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-vfs.svg"/>
+</a>
+<figcaption>VFS 统一接口，具体文件系统负责实际的磁盘布局、权限和元数据格式。</figcaption>
+</figure>
+<p>VFS 不“消除”文件系统差异，只是把差异藏在操作函数指针后面。挂载、路径查找、缓存、权限检查等通用逻辑由 VFS 做；具体读写、分配盘块由下层文件系统做。</p>
+
+<h2 id="vfs-objects">二、VFS 的四个对象</h2>
+<div class="article-table"><table>
+<thead><tr><th>对象</th><th>表示什么</th><th>典型内容</th><th>生命周期</th></tr></thead>
+<tbody>
+<tr><td>超级块对象 superblock</td><td>一个已挂载的文件系统</td><td>块大小、总块数、空闲块、文件系统类型、操作函数</td><td>挂载时建立/读入，卸载时释放</td></tr>
+<tr><td>inode 对象 / vnode</td><td>一个具体的文件或目录</td><td>类型、权限、大小、时间、指向底层 inode 的指针、操作函数</td><td>首次访问时创建/复用，引用计数为 0 后可回收</td></tr>
+<tr><td>目录项对象 dentry</td><td>路径中的一个组成部分</td><td>名字、父目录、子目录项、指向 vnode 的指针</td><td>路径解析时建立，进入 dentry 缓存</td></tr>
+<tr><td>文件对象 file</td><td>一个进程的打开实例</td><td>当前偏移、打开方式、引用计数、指向 dentry/vnode 的指针</td><td>open 创建，close 且引用计数为 0 时销毁</td></tr>
+</tbody>
+</table></div>
+<p>四者关系可以记成：<strong>超级块管“哪个文件系统”，vnode 管“哪个文件”，dentry 管“路径中的这个名字”，file 管“这次打开”</strong>。同一条路径的 dentry 可以缓存；同一个文件可以被多个 file 对象打开，各自偏移不同。</p>
+
+<h2 id="vfs-vnode">三、vnode 与磁盘 inode 的区别</h2>
+<p>这是最容易被含糊过去的一点：</p>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>vnode（VFS inode 对象）</th><th>磁盘 inode</th></tr></thead>
+<tbody>
+<tr><td>层次</td><td>VFS 的内存抽象</td><td>具体文件系统的磁盘元数据</td></tr>
+<tr><td>位置</td><td>内存 inode 表/缓存</td><td>外存 inode 区</td></tr>
+<tr><td>内容</td><td>统一属性 + 操作函数指针 + 指向底层 inode 的指针</td><td>文件类型、权限、大小、链接计数、数据块指针</td></tr>
+<tr><td>作用</td><td>让上层用统一方式操作不同文件系统</td><td>记录该文件在具体文件系统中的实际位置</td></tr>
+<tr><td>数量/生命周期</td><td>按访问动态创建/缓存，可回收</td><td>格式化时确定，长期存在</td></tr>
+</tbody>
+</table></div>
+<p>所以：<strong>vnode 不是磁盘 inode，也不是 FCB 的简单别名。</strong> vnode 是“统一接口对象”，它通过指针关联具体文件系统的 inode；在 ext4 中最终落到 ext4 inode，在 NTFS 中落到 MFT 记录。考试如果问“VFS 的 inode 对象是否就是磁盘 inode”，答案是否定的。</p>
+
+<h2 id="vfs-write">四、write 怎样经 VFS 分发</h2>
+<ol>
+<li>用户调用 <code>write(fd, buf, n)</code>，CPU 陷入内核，进入 VFS 的 <code>sys_write</code>。</li>
+<li>用 fd 找到进程打开文件表中的文件对象。</li>
+<li>文件对象指向 dentry/vnode；VFS 检查打开方式、权限。</li>
+<li>VFS 调用 vnode 上挂的具体文件系统 <code>write</code> 函数指针。</li>
+<li>具体文件系统完成逻辑块到磁盘块的映射、页缓存/缓冲区写入，必要时分配新块。</li>
+<li>数据最终由设备驱动写入磁盘；VFS 返回实际写入字节数。</li>
+</ol>
+<p>VFS 只负责“统一入口 + 分发 + 通用缓存/权限”，不负责 ext4 的 inode 布局或 NTFS 的 MFT 细节。这正是它“屏蔽差异”的含义。</p>
+
+<h2 id="vfs-pitfalls">五、易错点与收束</h2>
+<ul>
+<li><strong>“VFS 是一种磁盘文件系统”</strong>：VFS 是内存抽象层，不占磁盘；ext4/NTFS/FAT 才是具体文件系统。</li>
+<li><strong>“vnode 就是 inode”</strong>：vnode 是 VFS 的统一对象，inode 是具体文件系统的磁盘元数据，两者通过指针关联。</li>
+<li><strong>“VFS 会加快所有文件访问”</strong>：VFS 主要统一接口，不必然加速；性能取决于缓存、具体 FS 和设备。</li>
+<li><strong>“dentry 就是目录项”</strong>：dentry 是 VFS 在内存中缓存“路径名 → vnode”的对象，不等于磁盘上的目录项记录。</li>
+</ul>
+<p>把这一节收成一句话：<strong>VFS 用超级块、vnode、dentry、file 四个内存对象，把不同文件系统统一到同一套系统调用接口；vnode 是抽象，磁盘 inode 是实现。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>

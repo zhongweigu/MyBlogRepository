@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" role="img" aria-labelledby="t d">
+<title id="t">虚拟文件系统 VFS 的分层</title>
+<desc id="d">用户进程通过 POSIX 系统调用进入 VFS；VFS 用超级块对象、vnode、目录项对象、文件对象统一表示不同文件系统，再调用 ext4、NTFS、FAT 的具体实现访问磁盘。</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#35618f"/></marker></defs>
+<style>.b{fill:#f7fafc;stroke:#35618f;stroke-width:1.6;rx:8}.v{fill:#eef7ee;stroke:#4d7c4d;stroke-width:1.8;rx:8}.t{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:14px;fill:#1f2937;text-anchor:middle}.s{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:11px;fill:#5b6573;text-anchor:middle}.l{stroke:#35618f;stroke-width:1.8;fill:none;marker-end:url(#a)}</style>
+<rect width="960" height="500" fill="#fff"/>
+<rect class="b" x="330" y="18" width="300" height="52"/><text class="t" x="480" y="40">用户进程</text><text class="s" x="480" y="58">open/read/write/close</text>
+<path class="l" d="M480 70 V105"/>
+<rect class="b" x="300" y="108" width="360" height="42"/><text class="t" x="480" y="134">POSIX 系统调用接口</text>
+<path class="l" d="M480 150 V180"/>
+<rect class="v" x="250" y="183" width="460" height="88"/><text class="t" x="480" y="207">VFS 抽象层（只在内存，不占磁盘）</text>
+<text class="s" x="480" y="229">超级块对象 · vnode/inode 对象 · 目录项对象 · 文件对象</text>
+<text class="s" x="480" y="248">每个对象带操作函数指针，统一向上提供接口</text>
+<path class="l" d="M360 271 V305"/><path class="l" d="M480 271 V305"/><path class="l" d="M600 271 V305"/>
+<rect class="b" x="250" y="308" width="110" height="52"/><text class="t" x="305" y="331">ext4</text><text class="s" x="305" y="348">Linux</text>
+<rect class="b" x="425" y="308" width="110" height="52"/><text class="t" x="480" y="331">NTFS</text><text class="s" x="480" y="348">Windows</text>
+<rect class="b" x="600" y="308" width="110" height="52"/><text class="t" x="655" y="331">FAT</text><text class="s" x="655" y="348">U 盘/旧系统</text>
+<path class="l" d="M305 360 V392"/><path class="l" d="M480 360 V392"/><path class="l" d="M655 360 V392"/>
+<rect class="b" x="200" y="395" width="210" height="42"/><text class="t" x="305" y="421">硬盘 1（分区）</text>
+<rect class="b" x="440" y="395" width="210" height="42"/><text class="t" x="545" y="421">硬盘 2（分区）</text>
+<rect class="b" x="680" y="395" width="210" height="42"/><text class="t" x="785" y="421">U 盘</text>
+<text class="s" x="480" y="470">VFS 统一接口；具体文件系统负责实际的磁盘布局、权限、inode/MFT 等实现。</text>
+</svg>

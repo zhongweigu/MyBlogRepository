@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" role="img" aria-labelledby="t d">
+<title id="t">文件系统在磁盘中的布局</title>
+<desc id="d">磁盘 0 号扇区是 MBR 和分区表，每个分区以引导块开始；分区内部依次是超级块、空闲空间管理、inode 表、根目录和数据块。</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#35618f"/></marker></defs>
+<style>.b{fill:#f7fafc;stroke:#35618f;stroke-width:1.6;rx:6}.k{fill:#eaf3fb;stroke:#35618f;stroke-width:1.6;rx:6}.t{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:14px;fill:#1f2937;text-anchor:middle}.s{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:11px;fill:#5b6573;text-anchor:middle}.l{stroke:#35618f;stroke-width:1.8;fill:none;marker-end:url(#a)}</style>
+<rect width="960" height="440" fill="#fff"/>
+<text class="t" x="480" y="28">整个磁盘</text>
+<rect class="b" x="40" y="45" width="110" height="56"/><text class="t" x="95" y="70">MBR</text><text class="s" x="95" y="90">引导代码+分区表</text>
+<rect class="k" x="160" y="45" width="210" height="56"/><text class="t" x="265" y="70">分区 1（活动）</text><text class="s" x="265" y="90">独立文件系统</text>
+<rect class="b" x="380" y="45" width="210" height="56"/><text class="t" x="485" y="70">分区 2</text><text class="s" x="485" y="90">独立文件系统</text>
+<rect class="b" x="600" y="45" width="210" height="56"/><text class="t" x="705" y="70">分区 3</text><text class="s" x="705" y="90">…</text>
+<path class="l" d="M265 101 V150"/>
+<rect x="212" y="128" width="106" height="18" fill="#fff"/>
+<text class="s" x="265" y="143">展开一个分区</text>
+<rect class="b" x="30" y="165" width="110" height="70"/><text class="t" x="85" y="193">引导块</text><text class="s" x="85" y="213">分区引导扇区</text>
+<rect class="k" x="150" y="165" width="120" height="70"/><text class="t" x="210" y="193">超级块</text><text class="s" x="210" y="213">全局元数据</text>
+<rect class="b" x="280" y="165" width="130" height="70"/><text class="t" x="345" y="193">空闲空间管理</text><text class="s" x="345" y="213">位图/链/成组链接</text>
+<rect class="k" x="420" y="165" width="105" height="70"/><text class="t" x="472" y="193">inode 表</text><text class="s" x="472" y="213">每个文件一项</text>
+<rect class="b" x="535" y="165" width="105" height="70"/><text class="t" x="587" y="193">根目录</text><text class="s" x="587" y="213">目录树起点</text>
+<rect class="b" x="650" y="165" width="270" height="70"/><text class="t" x="785" y="193">文件和目录的数据块</text><text class="s" x="785" y="213">其余磁盘空间</text>
+<text class="s" x="480" y="270">超级块在挂载/启动时读入内存；inode 号是 inode 表的下标；根目录的 inode 是路径查找的起点。</text>
+<text class="t" x="480" y="330">MBR → 活动分区引导块 → 分区内文件系统 → 根目录 → 文件</text>
+<text class="s" x="480" y="355">MBR 在磁盘 0 号扇区；每个分区都有自己的引导块，即使未安装 OS 也保留。</text>
+</svg>

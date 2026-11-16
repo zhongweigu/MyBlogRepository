@@ -1,0 +1,69 @@
+<div class="article-content">
+<p>文件系统不是“磁盘上随便放文件”。一个分区里要先有引导块、超级块、空闲空间管理、inode 表、根目录，最后才是文件数据。理解这张布局图，才能把“MBR 找分区”和“inode 找数据块”接起来。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#layout-disk">一、磁盘、分区与 MBR</a></li>
+<li><a href="#layout-boot">二、引导块与超级块</a></li>
+<li><a href="#layout-area">三、空闲空间、inode 表与根目录</a></li>
+<li><a href="#layout-read">四、启动与访问时分别读什么</a></li>
+<li><a href="#layout-pitfalls">五、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="layout-disk">一、磁盘、分区与 MBR</h2>
+<p>磁盘可以被划分成多个<strong>分区</strong>，每个分区里可以有一个独立的文件系统。磁盘的 0 号扇区是 <strong>MBR（主引导记录）</strong>，共 512B，包含引导代码、分区表和结束标志 <code>0x55AA</code>。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="文件系统布局：磁盘 MBR/分区表，每个分区以引导块开始，分区内有超级块、空闲空间管理、inode 表、根目录和数据块" data-src="/408-review/assets/img/os-fs-layout.svg" href="/408-review/assets/img/os-fs-layout.svg">
+<img alt="文件系统在磁盘中的布局图：MBR、分区、引导块、超级块、空闲空间管理、inode 表、根目录、数据块" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-fs-layout.svg"/>
+</a>
+<figcaption>MBR 在磁盘级；分区内的引导块、超级块、inode 表属于该分区的文件系统。</figcaption>
+</figure>
+<p>开机时 BIOS/UEFI 读 MBR，MBR 的引导代码根据分区表找到<strong>活动分区</strong>，再把该分区的第一个扇区（分区引导块）读入内存并跳转。注意：MBR 是“磁盘级”的，超级块是“文件系统级”的，二者不在一个层次。</p>
+
+<h2 id="layout-boot">二、引导块与超级块</h2>
+<p><strong>引导块（boot block / PBR）</strong>：每个分区的第一个扇区，负责加载该分区中的操作系统。即使当前分区没有安装可启动系统，这个区域通常也保留，便于以后部署。</p>
+<p><strong>超级块（super block）</strong>：文件系统的“全局档案”，典型内容包括：</p>
+<ul>
+<li>文件系统类型、块大小、总块数；</li>
+<li>空闲块数量、空闲块管理结构的指针；</li>
+<li>inode 总数、空闲 inode 数、inode 表位置；</li>
+<li>根目录的 inode 号；</li>
+<li>挂载状态、一致性标志等。</li>
+</ul>
+<p>系统启动或首次挂载文件系统时，超级块被读入内存；之后对空闲块/inode 的分配会修改内存中的超级块，并定期或同步时写回磁盘。超级块损坏通常会导致整个文件系统无法识别。</p>
+
+<h2 id="layout-area">三、空闲空间、inode 表与根目录</h2>
+<div class="article-table"><table>
+<thead><tr><th>区域</th><th>作用</th><th>常见实现</th></tr></thead>
+<tbody>
+<tr><td>空闲空间管理区</td><td>记录哪些盘块未分配</td><td>位示图、空闲链表、成组链接、FAT</td></tr>
+<tr><td>inode 表</td><td>每个文件一个 inode，存属性与数据块指针</td><td>连续 inode 数组，inode 号即下标</td></tr>
+<tr><td>根目录</td><td>目录树的起点</td><td>一个目录文件，其 inode 号由超级块给出</td></tr>
+<tr><td>数据区</td><td>存放普通文件、目录文件的数据块</td><td>由 inode 的直接/间接指针定位</td></tr>
+</tbody>
+</table></div>
+<p>UNIX 类文件系统常见的分区内顺序是：<strong>引导块 → 超级块 → 空闲空间管理 → inode 表 → 根目录 → 文件和目录数据块</strong>。这不是所有文件系统都完全一样，但“元数据区在前、数据区在后”的思路很常见。</p>
+<p>NTFS 则是：分区引导扇区 → MFT（主文件表）→ 其他元数据文件 → 数据区。MFT 记录承担类似 inode 的角色，目录用 B+ 树索引“文件名 → MFT 记录号”。</p>
+
+<h2 id="layout-read">四、启动与访问时分别读什么</h2>
+<pre><code class="language-text">开机：
+BIOS/UEFI → MBR（分区表）→ 活动分区引导块 → OS loader → 内核
+挂载文件系统：
+读分区引导块/超级块 → 建立 VFS 超级块 → 读根目录 inode
+访问 /home/a.txt：
+根目录 inode → 根目录数据块 → home 目录项 → home inode
+→ home 数据块 → a.txt 目录项 → a.txt inode → 数据块</code></pre>
+<p>启动链解决“谁来加载 OS”，文件系统布局解决“OS 起来后怎样找到文件”。两者在 MBR/分区引导块处衔接，但不要混为一谈。</p>
+
+<h2 id="layout-pitfalls">五、易错点与收束</h2>
+<ul>
+<li><strong>“一个磁盘只有一个文件系统”</strong>：磁盘可分多个分区，每个分区可有独立文件系统。</li>
+<li><strong>“超级块就是引导块”</strong>：引导块负责启动，超级块记录文件系统全局元数据。</li>
+<li><strong>“inode 表在根目录里”</strong>：inode 表是独立区域；根目录是目录树起点，其 inode 号由超级块记录。</li>
+<li><strong>“MBR 里存着文件数据”</strong>：MBR 只有引导代码和分区表，文件数据在分区内的数据块。</li>
+</ul>
+<p>把这一节收成一句话：<strong>MBR 找分区，分区引导块启动 OS，超级块描述文件系统，inode 表描述文件，根目录是目录树的入口。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>
