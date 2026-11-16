@@ -54,6 +54,28 @@
 </table></div>
 <p><strong>inode 数量决定文件个数上限</strong>：磁盘再大，inode 用完也不能再创建新文件。inode 号是文件的内部编号；目录项保存它，文件名只是用户看到的别名。</p>
 
+<h3>磁盘 inode 与内存 inode 的区别</h3>
+<p>inode 不是“只有一份”。磁盘上有一份<strong>磁盘 inode</strong>，文件被打开时调入内存形成<strong>内存 inode</strong>；内存 inode 是磁盘 inode 的副本加上运行时字段。</p>
+<div class="article-table"><table>
+<thead><tr><th>方面</th><th>磁盘 inode</th><th>内存 inode</th></tr></thead>
+<tbody>
+<tr><td>所在位置</td><td>外存 inode 区（inode 表）</td><td>内存 inode 表/缓存</td></tr>
+<tr><td>核心内容</td><td>文件类型、权限、文件主、长度、链接计数、时间、数据块指针</td><td>磁盘 inode 的副本 + 运行时状态</td></tr>
+<tr><td>编号</td><td>由它在 inode 区的位置/下标决定</td><td>内存 inode 编号（便于哈希查找）</td></tr>
+<tr><td>状态</td><td>通常不需要“打开状态”</td><td>状态（空闲/已分配/锁定/脏）、是否被引用</td></tr>
+<tr><td>访问计数</td><td>没有</td><td>当前有多少打开实例/内核引用在使用它</td></tr>
+<tr><td>逻辑设备号</td><td>没有（属于某个文件系统）</td><td>记录它所属的文件系统/逻辑设备，便于跨设备管理</td></tr>
+<tr><td>链接指针</td><td>没有</td><td>哈希链/空闲链指针，用于把内存 inode 串起来</td></tr>
+<tr><td>生命周期</td><td>长期存在，直到文件系统回收 inode</td><td>打开时建立/复用；访问计数为 0 后可回收或留在缓存</td></tr>
+</tbody>
+</table></div>
+<p>最容易混的是两个计数：</p>
+<ul>
+<li><strong>链接计数 link count（磁盘 inode）</strong>：有多少个目录项/硬链接指向这个 inode。unlink 一个名字减 1，减到 0 表示没有名字再指向它。</li>
+<li><strong>访问计数 access count（内存 inode）</strong>：当前有多少个“打开实例”/内核引用正在使用这个内存 inode。close 一个 fd 减 1，减到 0 表示内存 inode 可以释放/回收缓存。</li>
+</ul>
+<p>两者独立：一个文件可以链接计数为 1、访问计数为 3（三个进程同时打开）；也可以链接计数为 0、访问计数为 1（文件名已删除，但还有进程打开着，数据要等最后一个 close 才回收）。</p>
+
 <h2 id="file-dir">四、目录：文件名到 inode 的映射</h2>
 <p>目录本身也是文件，目录项是目录文件的记录。引入 inode 后，一个目录项至少包含：</p>
 <pre><code class="language-text">文件名 | inode 号</code></pre>

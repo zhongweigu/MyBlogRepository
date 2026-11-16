@@ -48,6 +48,15 @@
 <p>多个进程可以共享同一个系统打开文件表项（如 fork 后继承 fd），从而共享文件偏移；各自 open 同一文件通常会建立不同的系统表项，偏移独立。</p>
 
 <h2 id="link">四、硬链接与软链接</h2>
+<p>“文件共享”不是单层概念。先分清共享发生在<strong>目录项、inode、打开实例</strong>哪一层，再看链接是硬还是软。</p>
+<div class="article-table"><table>
+<thead><tr><th>共享层次</th><th>发生位置</th><th>形式</th><th>共享什么</th><th>不共享什么</th></tr></thead>
+<tbody>
+<tr><td>目录项层</td><td>父目录的数据块</td><td>硬链接：新增一个“名字 → 同一 inode 号”的目录项</td><td>同一个 inode、同一份数据块</td><td>不新建 inode，不复制数据</td></tr>
+<tr><td>inode/文件内容层</td><td>父目录 + 一个新的 symlink inode</td><td>软链接：目录项指向新 inode，新 inode 的数据块存目标路径</td><td>目标路径字符串（通过它再解析目标）</td><td>目标 inode 的链接计数不变；软链接自己有独立 inode</td></tr>
+<tr><td>打开实例层</td><td>内存的进程/系统打开文件表</td><td>同一打开实例被多个 fd/进程引用（fork、dup）</td><td>系统打开文件表项、文件偏移量</td><td>各自 open 同一文件时偏移独立</td></tr>
+</tbody>
+</table></div>
 <p><strong>硬链接</strong>：多个目录项指向同一个 inode，inode 的链接计数加 1。删除一个名字只把计数减 1；计数为 0 且没有进程打开时才回收数据块。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="硬链接：两个目录项指向同一个 inode，inode 链接计数为 2" data-src="/408-review/assets/textbook/os-file-hardlink.webp" href="/408-review/assets/textbook/os-file-hardlink.webp">
@@ -71,6 +80,8 @@
 <tr><td>目标删除后</td><td>只要还有其他硬链接，数据仍在</td><td>悬空链接，访问失败</td></tr>
 </tbody>
 </table></div>
+<p><strong>链接到底写在哪：</strong>硬链接只在父目录的数据块里新增一条目录项，写入“新名字 + 原 inode 号”，再把原 inode 的链接计数加 1；不新建 inode，也不复制数据块。软链接要先新建一个 symlink inode（类型为符号链接），在它的数据块里写入目标路径，再在父目录里新增“链接名 → 这个新 inode”的目录项；目标 inode 完全不知道软链接的存在，链接计数也不变。</p>
+<p>FAT 没有独立 inode，目录项本身就是 FCB，硬链接是否支持取决于具体文件系统；NTFS 用 MFT 记录承担类似 inode 的角色，硬链接是多个目录项指向同一个 MFT 记录，软链接则用重解析点保存目标路径。UNIX 的“目录项 + inode”是最典型的考法。</p>
 
 <h2 id="open-pitfalls">五、易错点与收束</h2>
 <ul>
