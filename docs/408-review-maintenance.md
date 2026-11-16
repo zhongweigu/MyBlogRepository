@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v42/
+│   ├── js-v43/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -421,9 +421,10 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `os-4` 是教材**第三章内存管理**，站点编号排在 PV 专题之后；图片在 `assets/textbook/`：`os-mem-paging.webp`、`os-mem-segmentation.webp`、`os-mem-segments.webp`（段页式的段内分页图）、`os-mem-segpage.webp`、`os-mem-partition-table.webp`、`os-mem-free-list.webp`，按段落插入。
 - `os-5` 文件管理图片在 `assets/textbook/`：`os-file-index.webp`、`os-file-index-seq.webp`、`os-file-contiguous.webp`、`os-file-implicit-link.webp`、`os-file-explicit-link.webp`、`os-file-single-index.webp`、`os-file-multi-index.webp`、`os-file-free-table.webp`、`os-file-free-list.webp`、`os-file-bitmap.webp`、`os-file-group-link.webp`、`os-file-hardlink.webp`、`os-file-softlink.webp`、`os-file-inode.webp`；布局/VFS/挂载图是 `assets/img/os-fs-layout.svg`、`os-vfs.svg`、`os-mount.svg`。
 - 科目主题色为紫（`--violet`）。`views/map.js` / `chapter.js` / `topic.js` / `runner.js` / `questions.js` 都通过 `ui.js` 的 `subjectClass()` 取 `is-os`，新增科目时不要再写 `coa ? is-coa : is-ds` 的三元。
-- 已录入 62 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题 + 16 道内存管理题 + 23 道文件管理题），题库存量为 227；文件题在 `data/questions-file.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4` / `os-5`，`topics` 指向对应考点。
+- 已录入 71 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题 + 16 道内存管理题 + 32 道文件管理题），题库存量为 236；文件题在 `data/questions-file.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4` / `os-5`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-6` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
 
