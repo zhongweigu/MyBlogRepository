@@ -1,0 +1,85 @@
+<div class="article-content">
+<p>文件保护要回答一个比“能不能读”更细的问题：<strong>哪个用户，能以什么方式，访问哪个文件或目录</strong>。读、写、执行、追加、删除、列目录都是不同的访问类型，权限也要分开控制。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#protect-types">一、访问类型与保护目标</a></li>
+<li><a href="#protect-acl">二、访问控制列表 ACL</a></li>
+<li><a href="#protect-unix">三、精简 ACL 与 UNIX 权限位</a></li>
+<li><a href="#protect-dir">四、目录保护与删除/改名</a></li>
+<li><a href="#protect-other">五、口令、加密与易错点</a></li>
+</ul></div>
+</details>
+
+<h2 id="protect-types">一、访问类型与保护目标</h2>
+<p>文件保护的目标是防止未授权用户读取、修改、删除或执行文件。常见受控操作：</p>
+<div class="article-table"><table>
+<thead><tr><th>访问类型</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td>读 read</td><td>从文件中读取数据</td></tr>
+<tr><td>写 write</td><td>向文件中写入或修改数据</td></tr>
+<tr><td>执行 execute</td><td>把文件装入内存并运行</td></tr>
+<tr><td>添加 append</td><td>在文件末尾追加数据，不覆盖原有内容</td></tr>
+<tr><td>删除 delete</td><td>删除文件/目录项并释放空间</td></tr>
+<tr><td>列目录 list</td><td>列出目录中文件的名字和属性</td></tr>
+</tbody>
+</table></div>
+<p>复制文件本质上是“读 + 写”：有读权限就可能把内容复制走；打印也是读出内容再交给打印机。所以保护不能只看“能不能打开”，还要看具体操作类型。</p>
+
+<h2 id="protect-acl">二、访问控制列表 ACL</h2>
+<p><strong>访问控制列表（Access-Control List，ACL）</strong>为每个文件/目录附加一张表，明确列出“哪个用户/组，允许哪些访问类型”。优点是支持灵活、复杂的访问策略；缺点是表长度不可预知，可能带来空间和管理开销。现代系统常用<strong>精简 ACL</strong>降低开销。</p>
+<p>ACL 通常存放在文件的 FCB/inode 或安全描述符中；访问文件时，系统按用户身份查 ACL，决定是否允许本次操作。</p>
+
+<h2 id="protect-unix">三、精简 ACL 与 UNIX 权限位</h2>
+<p>精简 ACL 把用户分成三类：</p>
+<ul>
+<li><strong>拥有者 owner</strong>：创建文件的用户；</li>
+<li><strong>组 group</strong>：需要共享该文件、具有相似访问需求的用户组；</li>
+<li><strong>其他 other</strong>：除拥有者和同组用户外的所有用户。</li>
+</ul>
+<p>每类用户用一组二进制位表示读、写、执行、删除等权限。教材中的 3×4 矩阵可以写成：</p>
+<div class="article-table"><table>
+<thead><tr><th>用户类型</th><th>读</th><th>写</th><th>删除</th><th>执行</th></tr></thead>
+<tbody>
+<tr><td>拥有者</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>组</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>其他</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+</tbody>
+</table></div>
+<p>匹配顺序是<strong>拥有者 → 同组 → 其他</strong>：命中一类就使用该类的权限，不再继续向下匹配。精简 ACL 不叠加权限；POSIX ACL 的命名用户、mask 等规则更复杂，做题时要看清题目给的是哪一种。</p>
+<p>UNIX 把权限压缩成 9 位：owner/group/other 各 3 位 <code>rwx</code>。例如 <code>0644</code> 表示拥有者读写、组和其他只读；<code>0755</code> 表示拥有者读写执行、组和其他读执行。</p>
+
+<h2 id="protect-dir">四、目录保护与删除/改名</h2>
+<p>目录也是文件，但目录的 <code>r/w/x</code> 含义与普通文件不同：</p>
+<div class="article-table"><table>
+<thead><tr><th>目录权限</th><th>允许做什么</th></tr></thead>
+<tbody>
+<tr><td>r（读）</td><td>列出目录中的文件名/目录项</td></tr>
+<tr><td>w（写）</td><td>在目录中创建、删除、重命名目录项</td></tr>
+<tr><td>x（执行）</td><td>进入/穿越该目录，访问目录中的文件</td></tr>
+</tbody>
+</table></div>
+<p>因此有一个反直觉结论：<strong>删除文件通常要求父目录的写 + 执行权限，而不是文件本身的写权限。</strong>删除操作本质是删除父目录中的目录项；文件数据是否回收还要看链接计数和打开引用。重命名文件则要求源目录和目标目录都有写权限。</p>
+<p>多级目录还要防止用户通过父目录绕过权限：路径查找的每一级目录都要有执行权限；目录的 ACL 需要覆盖其子目录和文件，不能只保护单个文件。</p>
+
+<h2 id="protect-other">五、口令、加密与易错点</h2>
+<p><strong>口令保护</strong>：创建文件时设置一个口令，系统把它存入 FCB；访问时要求用户提供正确口令。它开销小，但口令若以明文/弱保护形式存储，安全性低；而且通常一个文件一个口令，不区分读/写/执行，也难以审计。</p>
+<p><strong>加密保护</strong>：对文件内容加密，访问时用密钥解密。即使磁盘被窃取，没有密钥也难以读出内容；但加解密有计算开销，而且它保护的是“内容机密性”，不区分具体操作类型，不能替代 ACL。</p>
+<div class="article-table"><table>
+<thead><tr><th>机制</th><th>主要防什么</th><th>局限</th></tr></thead>
+<tbody>
+<tr><td>ACL/权限位</td><td>未授权用户执行读/写/执行/删除等操作</td><td>配置复杂；超级用户/特权可能绕过</td></tr>
+<tr><td>口令</td><td>不知道口令的人打开文件</td><td>口令泄露/弱存储；不区分操作</td></tr>
+<tr><td>加密</td><td>磁盘/文件被窃取后内容泄露</td><td>密钥管理；计算开销；不区分操作</td></tr>
+</tbody>
+</table></div>
+<p>所以三者是互补关系：<strong>ACL 管“谁能做什么”，口令/加密管“内容怎样不被看到”</strong>。考试里说“口令和加密可以替代访问控制”是错的。</p>
+<ul>
+<li>“有文件读权限就能删除文件”：错，删除看父目录写+执行权限。</li>
+<li>“ACL 存在 FAT 表里”：错，ACL 是文件属性，在 FCB/inode/安全描述符中。</li>
+<li>“owner 和 group 权限可以叠加”：精简 ACL 按优先级匹配，命中即止；不要套用 POSIX ACL 的复杂规则。</li>
+</ul>
+<p>把这一节收成一句话：<strong>文件保护按“用户身份 × 访问类型”授权；ACL/权限位是主机制，口令和加密是补充；目录的删除/改名/穿越要单独看目录权限。</strong></p>
+</div>
+<p class="article-source">内容整理自《文件管理》导图、文件专题 PPT 与操作系统教材通用框架。</p>

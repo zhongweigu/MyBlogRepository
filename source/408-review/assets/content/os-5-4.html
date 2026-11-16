@@ -13,7 +13,15 @@
 </details>
 
 <h2 id="open-flow">一、open 的完整流程</h2>
-<p>以 <code>fd = open("/home/bok/a.txt", O_RDONLY)</code> 为例：</p>
+<p>open 的完整原型是：</p>
+<pre><code class="language-c">int open(const char *pathname, int flags, mode_t mode);</code></pre>
+<p><strong>mode 不是每次都必须写</strong>：它只在创建新文件时生效（<code>O_CREAT</code> 或 <code>O_TMPFILE</code>），用来指定新文件的访问权限；打开一个已经存在的文件时，mode 可以省略/被忽略。最终权限还会受到进程 umask 的影响。</p>
+<ul>
+<li><code>flags</code> 的低位是访问方式：<code>O_RDONLY</code>、<code>O_WRONLY</code>、<code>O_RDWR</code>；</li>
+<li>还可以按位或上 <code>O_CREAT</code>（不存在则创建）、<code>O_EXCL</code>（与 O_CREAT 合用，已存在则失败）、<code>O_TRUNC</code>（截断）、<code>O_APPEND</code>（追加）等；</li>
+<li><code>mode</code> 常用八进制权限，如 <code>0644</code>：拥有者读写、组和其他只读。</li>
+</ul>
+<p>下面以打开一个已存在的文件 <code>fd = open("/home/bok/a.txt", O_RDONLY)</code> 为例（没有创建新文件，所以省略 mode）：</p>
 <ol>
 <li>用户进程执行 open，CPU 由用户态陷入内核态。</li>
 <li>按路径名逐级查目录：根目录 → home → bok，每个目录项给出下一级 inode 号。</li>
