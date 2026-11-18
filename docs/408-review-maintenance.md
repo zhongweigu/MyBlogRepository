@@ -24,13 +24,14 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v44/
+│   ├── js-v45/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
 │   │   ├── data/
-│   │   │   ├── review-terms.js  # 每日术语池
-│   │   │   ├── review-flows.js  # 每日流程池
+│   │   │   ├── review-cards.js  # 统一复习卡片（ID/问题/答案/来源）
+│   │   │   ├── review-terms.js  # 旧术语数据（历史）
+│   │   │   ├── review-flows.js  # 旧流程数据（历史）
 │   │   │   ├── meta.js            # 科目、章节、跨章脉络
 │   │   │   ├── ds.js / coa.js / os.js  # 原有考点（OS 从 2026-11-09 开始）
 │   │   │   ├── ds-extra.js        # 新增 DS 考点
@@ -44,7 +45,7 @@ source/408-review/
 │   │   │   ├── code.js            # 数据结构代码（脚本抽取）
 │   │   │   └── index.js           # 合并、排序、索引
 │   │   ├── study.js               # 先回忆 / 背诵清单的公共文案
-│   │   ├── views/today.js         # 今日页（20 术语 + 5 流程，日期随机）
+│   │   ├── views/today.js         # 今日页（25 张混合卡片，日期随机）
 │   │   ├── views/topic.js         # 考点页壳 + 背诵/答法/图解 + 长文 fetch
 │   │   ├── views/glossary.js      # 完整复习库（术语 + 流程）
 │   │   ├── views/diagrams.js      # 图解库
@@ -220,8 +221,8 @@ python scripts/build-review-content.py
 
 ### 3.7 复习库（术语 + 流程）与图解库
 
-- `data/review-terms.js`：245 个术语，每项 `{ t, d, topic }`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
-- `data/review-flows.js`：87 个流程，每项 `{ t, topic, steps }`；步骤要能按顺序复述。
+- `data/review-cards.js`：当前 266 张术语卡 + 90 张流程卡，每张有 `id/question/answer/goal/checkpoints/source/aliases`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
+- `data/review-terms.js` / `review-flows.js` 是迁移前历史数据，页面不再直接读取；不要在这两个文件里新增卡片。
 - `#/glossary` 现在是**完整复习库**：上面是术语库、下面是流程库，支持科目筛选和搜索；顶部导航标签为「复习库」。
 - 旧的 `data/glossary.js`（`CORE_TERMS` / 自动抽取）不再被页面使用，不要继续往里加；新词加到 `review-terms.js`。
 - `data/diagrams.js`：`DIAGRAMS` 每项字段：
@@ -248,12 +249,12 @@ python scripts/build-review-content.py
 ## 4. 今日页规则
 
 - 今日页固定 **20 个术语 + 5 个流程**，不再按考点/复习进度出题。
-- 随机是**日期确定性随机**：用上海日期 `YYYY-MM-DD` 做种子，从 `data/review-terms.js` / `data/review-flows.js` 洗牌；同一天多次打开内容相同，次日自动换一批。不要改成 `Math.random()`，否则每次刷新都变。
-- 术语池 230+ 条、流程池 80+ 条；术语必须是一个明确概念（“最佳适应算法”“Belady 异常”），不能写“地址结构”“方法 3”这类歧义词。流程要能按步骤复述，答案放 `<details>`。
+- 随机是**日期确定性随机**：用上海日期 `YYYY-MM-DD` 做种子，从 `data/review-cards.js` 洗牌；同一天多次打开内容相同，次日自动换一批。不要改成 `Math.random()`，否则每次刷新都变。
+- 卡片库 266 张术语卡 + 90 张流程卡；术语必须是一个明确概念（“最佳适应算法”“Belady 异常”），不能写“地址结构”“方法 3”这类歧义词。每张卡以问题开头，答案默认折叠。
 - 不使用 `store.dailyQueue`、SRS、连续天数、已掌握标记；今日页不显示“开始复习/复习按钮”。
 - 不要加回：今日三件事、每日一题、每日一点 tab、复习指引、科目进度、热力图、7 天预测。
 - 改数量：`today.js` 的 `TERM_COUNT` / `FLOW_COUNT`。
-- 新增/修改知识库后，同步补 `review-terms.js` 与 `review-flows.js`；今日页每次构建都会读最新池子。
+- 新增/修改知识库后，按卡片规则增量同步 `review-cards.js`；今日页每次构建都会读最新卡片库，不要全量重生成。
 
 ---
 
@@ -322,7 +323,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 4. **融进已有体系**：先找它属于哪科、哪章、哪个考点；优先补现有 `points` / `content/<id>.html` / `supplements-*`，不要新建孤立页面。确实没有合适考点时才建新 topic，并补 `chapter/order/title/kicker/takeaway/points`。
 5. **写成学习卡**：背诵清单（能直接背的短句）→ 理解（推导、例子、表格、图）→ 考场答法（怎么开头、怎么收口、易错）。正文里**不放完整例题**。
 6. **题目入库**：能自动识别的走 `scripts/extract-questions.py`；裸题补到 `questions-manual-extra.js`。每题写 `topics`、答案和解析；解析最后一句尽量点出“这题在考哪个考点”。同时从正文里删掉这道题。
-7. **顺手更新复习库/图解**：新术语加到 `review-terms.js`，新流程加到 `review-flows.js`；新代表图加到 `DIAGRAMS`。
+7. **顺手更新复习库/图解**：新卡片加到 `review-cards.js`；新代表图加到 `DIAGRAMS`。
 8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 85 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
 9. **提交**：源帖不改；只提交复习台、脚本和手册相关文件。
 
@@ -350,7 +351,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 
 - 长文由帖子生成时，`points` 仍是速记层；两者不要求一一对应。
 - 背诵清单 / 考场答法由 `points` 自动派生，所以 `points` 的标题和一句线索要写清楚；特殊题型之后再手写覆盖。
-- 复习库的术语是独立手写池，不依赖 `points.lead`；新词直接加到 `review-terms.js`，流程加到 `review-flows.js`。
+- 复习库使用统一 `review-cards.js`，不再从 `points.lead` 自动生成；新卡直接加到 `review-cards.js`。
 - MathJax / Mermaid 走 jsDelivr CDN，**按需加载**（只有文章里出现公式 / mermaid 才注入脚本）；加载失败时公式/图退化为原始文本，正文仍可读。
 - `coa-4-3`（流水线）在 `content/coa-4-3.html` 手写维护；流水线分类、五段式 IF/ID/EX/MEM/WB、多发技术都直接改这个文件，生成器跳过。
 - `coa-4-4`（数据通路与控制信号）在 `content/coa-4-4.html` 手写维护；生成器的 `MANUAL_TOPICS` 已跳过它。新增组合/状态元件、时钟、单总线、2015-43/44、2022-43 的内容直接改这个文件。
@@ -424,6 +425,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 已录入 71 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题 + 16 道内存管理题 + 32 道文件管理题），题库存量为 236；文件题在 `data/questions-file.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4` / `os-5`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-6` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
 

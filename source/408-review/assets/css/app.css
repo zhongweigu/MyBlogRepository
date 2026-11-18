@@ -2339,6 +2339,10 @@ pre.code code { padding: 0; background: none; color: inherit; font-size: inherit
 .dr-answer p { margin: 0 0 10px; color: var(--ink-2); font-size: 13px; line-height: 1.8; }
 .dr-answer ol { margin: 0 0 10px; padding-left: 18px; color: var(--ink-2); font-size: 13px; line-height: 1.8; }
 .dr-answer li { margin-bottom: 5px; }
+.dr-goal { margin: 10px 0 0; padding-top: 8px; border-top: 1px dashed var(--line); color: var(--ink-2); font-size: 12px; line-height: 1.7; }
+.dr-check { margin-top: 10px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 6px; background: var(--card-2); }
+.dr-check strong { display: block; margin-bottom: 4px; color: var(--ink); font-size: 12px; }
+.dr-check ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 12px; line-height: 1.7; }
 .dr-link { display: inline-flex; align-items: center; gap: 4px; color: var(--teal); font-size: 11px; }
 .dr-link:hover { text-decoration: underline; }
 
@@ -3047,6 +3051,8 @@ h1, h2, h3, h4,
 .flow-item li { margin-bottom: 4px; }
 .gi-foot { display: flex; justify-content: space-between; gap: 10px; color: var(--ink-3); font-size: 9px; }
 .gi-foot a { color: var(--teal); }
+.card-goal { margin: 8px 0 0; color: var(--ink-2); font-size: 12px; line-height: 1.7; }
+.card-checks { margin: 8px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 12px; line-height: 1.7; }
 .glossary-empty { padding: 24px; color: var(--ink-3); text-align: center; font-size: 12px; }
 
 /* 代码库 */
