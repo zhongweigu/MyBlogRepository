@@ -1,0 +1,99 @@
+<div class="article-content">
+<p>三种 I/O 控制方式——<strong>程序查询、中断、DMA</strong>——解决的是同一个矛盾：CPU 很快，设备很慢，CPU 不应该把时间浪费在“等设备”上。三者的区别不在用户接口，而在<strong>谁发起传送、谁搬数据、CPU 何时介入</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#io-three">一、三种方式的总对比</a></li>
+<li><a href="#io-poll">二、程序查询方式</a></li>
+<li><a href="#io-irq">三、中断控制方式</a></li>
+<li><a href="#io-dma">四、DMA 控制方式</a></li>
+<li><a href="#io-choose">五、怎样选择和比较</a></li>
+</ul></div>
+</details>
+
+<h2 id="io-three">一、三种方式的总对比</h2>
+<div class="article-table"><table>
+<thead><tr><th>方式</th><th>CPU 做什么</th><th>数据由谁搬</th><th>CPU 与设备关系</th><th>典型设备</th></tr></thead>
+<tbody>
+<tr><td>程序查询</td><td>循环读状态，就绪后传送一个字</td><td>CPU</td><td>串行，CPU 忙等</td><td>极低速、简单设备</td></tr>
+<tr><td>中断</td><td>启动设备后去干别的；每完成一个单位来一次中断</td><td>CPU（在 ISR 中）</td><td>可并行，但每字节/字都打断</td><td>键盘、串口等字符设备</td></tr>
+<tr><td>DMA</td><td>只做初始化和最后处理；整块数据由 DMA 控制器搬</td><td>DMA 控制器</td><td>块级并行，CPU 介入少</td><td>磁盘、网卡等块设备</td></tr>
+</tbody>
+</table></div>
+<p>从程序查询到中断，是把“等”从 CPU 手里拿走；从中断到 DMA，是把“搬”也从 CPU 手里拿走。理解这条演化线，比背三个定义重要。</p>
+
+<h2 id="io-poll">二、程序查询方式</h2>
+<p>程序查询（程序直接控制）的核心是：CPU <strong>不断读取控制器的状态寄存器</strong>，检查设备是否就绪；只有就绪时才传送一个单位的数据，然后修改地址/计数器，继续下一次。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="程序查询方式流程：预置参数、启动外设、循环取状态、就绪后传送、修改参数、判断结束" data-src="/408-review/assets/img/os-io-polling.png" href="/408-review/assets/img/os-io-polling.png">
+<img alt="程序查询方式流程图：预置传送参数、启动外设、取外设状态、判断就绪、传送数据、修改参数、判断传送完" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-polling.png"/>
+</a>
+<figcaption>虚线框是“忙等”循环；设备未就绪时，CPU 一直在这里打转。</figcaption>
+</figure>
+<ol>
+<li>CPU 预置数据缓冲区地址、传送长度、方向等参数。</li>
+<li>向控制器发“启动”命令，设备开始工作。</li>
+<li>CPU 读状态寄存器，检查“忙/就绪/错误”。</li>
+<li>未就绪则回到第 3 步；就绪则从数据寄存器读/写一个单位。</li>
+<li>修改内存地址和计数器，判断是否传完；未完回到第 3 步。</li>
+</ol>
+<p>这种方式实现简单，不需要中断机构，但 CPU 和设备完全串行：设备慢，CPU 就陪着空转。所谓“定时查询”只是把“一直查”改成“隔一段时间查一次”，并没有让 CPU 在等待期间去做别的进程，本质仍是查询。</p>
+<p>考试常问“程序查询方式下 CPU 与设备是否并行”。答案是：<strong>传送期间 CPU 被占用，不能并行执行其他程序</strong>；设备准备数据时 CPU 也在查询，不能算有效并行。</p>
+
+<h2 id="io-irq">三、中断控制方式</h2>
+<p>中断方式把“等待”从 CPU 的循环里拿出来：CPU 启动设备后可以继续执行当前进程；设备完成一个单位后向 CPU 发中断请求，CPU 响应后进入中断服务程序，在 ISR 中完成数据传送或缓冲区处理。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="中断控制方式：CPU 启动设备后继续执行，设备完成后发中断，CPU 响应并进入 ISR" data-src="/408-review/assets/img/os-io-interrupt-mode.png" href="/408-review/assets/img/os-io-interrupt-mode.png">
+<img alt="中断控制方式示意图：CPU 与设备并行工作，设备完成后发出中断请求" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-interrupt-mode.png"/>
+</a>
+<figcaption>中断方式的关键不是“中断”两个字，而是 CPU 在设备工作期间可以去执行别的指令。</figcaption>
+</figure>
+<ol>
+<li>CPU 预置参数并启动设备，然后继续执行其他程序。</li>
+<li>设备完成一个单位（一个字符/字）后，控制器置位状态并向 CPU 发中断请求。</li>
+<li>CPU 在一条指令结束后检查中断，满足条件则响应：关中断、保存断点和 PSW、转入内核态、按中断向量找到 ISR。</li>
+<li>ISR 读取数据寄存器，把数据送入内核缓冲区；必要时唤醒等待进程。</li>
+<li>恢复现场，返回被中断的程序；若传送未完成，设备继续工作、再次中断。</li>
+</ol>
+<p>中断方式让 CPU 和设备在<strong>设备工作期间</strong>并行，但每传送一个单位都要打断一次 CPU。对键盘这种低速字符设备很合适；对磁盘这种高速块设备，如果每字节都中断，CPU 会被中断淹没，所以要用 DMA。</p>
+<p>还要区分两个“并行”：CPU 执行与设备工作可以并行；但 CPU 进入 ISR 后，传送数据的动作仍由 CPU 完成，ISR 执行期间不能同时执行用户程序。中断不等于进程切换，也不等于“CPU 把数据搬完了”。</p>
+
+<h2 id="io-dma">四、DMA 控制方式</h2>
+<p>DMA（Direct Memory Access）把“搬数据”的工作交给 DMA 控制器。CPU 只做三件事：<strong>初始化、启动、处理完成中断</strong>；数据块在设备与主存之间直接传送，不需要 CPU 逐字搬运。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="DMA 控制方式：CPU 初始化 DMA 控制器，数据在设备与主存之间直接传送，完成后中断 CPU" data-src="/408-review/assets/img/os-io-dma-mode.png" href="/408-review/assets/img/os-io-dma-mode.png">
+<img alt="DMA 控制方式示意图：CPU 设置 DMA 控制器，设备与主存之间直接进行数据块传送" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-dma-mode.png"/>
+</a>
+<figcaption>DMA 适合块设备：一次传送一整块，完成时才中断 CPU。</figcaption>
+</figure>
+<p>DMA 控制器通常包含：</p>
+<ul>
+<li><strong>内存地址寄存器 MAR</strong>：数据在主存中的起始地址，传送过程中递增。</li>
+<li><strong>数据计数器 DC</strong>：还要传送多少个字/字节，减到 0 表示完成。</li>
+<li><strong>命令/状态寄存器 CR</strong>：方向（读/写）、是否启动、是否完成/出错。</li>
+<li><strong>数据缓冲寄存器</strong>：暂存总线上的一个字。</li>
+</ul>
+<p>典型流程：</p>
+<ol>
+<li>CPU 把主存起始地址、传送长度、方向写入 DMA 控制器，启动设备。</li>
+<li>DMA 控制器向 CPU 申请总线使用权；获得后直接在设备与主存之间传送数据。</li>
+<li>每传送一个字，MAR 加一、DC 减一；DC 为 0 时置完成标志。</li>
+<li>DMA 控制器向 CPU 发中断，CPU 进入 ISR 做校验、唤醒进程等收尾工作。</li>
+</ol>
+<p>DMA 与中断的区别可以压成一句话：<strong>中断是“每传一个单位打断一次”，DMA 是“传完一整块才打断一次”</strong>。DMA 传送期间 CPU 仍可执行程序，但 DMA 与 CPU 会竞争总线/内存周期，常见“周期挪用/总线窃取”就是把 CPU 不用的总线周期让给 DMA。</p>
+
+<h2 id="io-choose">五、怎样选择和比较</h2>
+<div class="article-table"><table>
+<thead><tr><th>比较项</th><th>程序查询</th><th>中断</th><th>DMA</th></tr></thead>
+<tbody>
+<tr><td>CPU 等待</td><td>忙等，浪费大</td><td>设备工作时可执行其他程序</td><td>块传送期间 CPU 基本不参与</td></tr>
+<tr><td>CPU 介入频率</td><td>每个单位都查询</td><td>每个单位一次中断</td><td>每块一次初始化/完成中断</td></tr>
+<tr><td>数据搬运者</td><td>CPU</td><td>CPU（ISR）</td><td>DMA 控制器</td></tr>
+<tr><td>硬件成本</td><td>最低</td><td>需要中断机构</td><td>需要 DMA 控制器，成本最高</td></tr>
+<tr><td>适用场景</td><td>极低速、简单控制</td><td>字符设备、低速随机事件</td><td>磁盘、网卡等高速块设备</td></tr>
+</tbody>
+</table></div>
+<p>选择不是“越高级越好”，而是看<strong>传送单位、数据率、CPU 介入成本</strong>。一个设备用哪种方式，通常由设备类型和控制器能力决定；操作系统中的驱动程序负责按设备能力选择并配置。硬件层面的详细时序、DMA 总线周期和中断隐指令，见计算机组成原理的 <a href="#/topic/coa-6-2">三种 I/O 方式与 DMA</a> 与 <a href="#/topic/coa-6-3">中断完整流程</a>；本页只保留 OS 侧必须掌握的判断。</p>
+<p>最后用一条线收束：<strong>查询让 CPU 等，中断让 CPU 在设备工作时干别的，DMA 让 CPU 连搬数据都不管</strong>。下一节把“中断发生之后 OS 到底做了什么”展开。</p>
+</div>

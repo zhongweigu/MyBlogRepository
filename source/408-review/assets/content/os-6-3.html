@@ -1,0 +1,96 @@
+<div class="article-content">
+<p>中断是 I/O 管理的中枢：设备用中断告诉 CPU“我完成了/出错了”，CPU 用中断处理程序把控制流从当前进程切到内核。这里最容易混的不是中断步骤，而是<strong>中断响应、中断处理、进程调度三者不是一回事</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>6 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#irq-source">一、中断请求与响应条件</a></li>
+<li><a href="#irq-hw">二、硬件做什么：中断隐指令</a></li>
+<li><a href="#irq-sw">三、软件做什么：ISR</a></li>
+<li><a href="#irq-multi">四、中断优先级、屏蔽与多重中断</a></li>
+<li><a href="#irq-driver">五、设备驱动程序</a></li>
+<li><a href="#irq-pitfalls">六、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="irq-source">一、中断请求与响应条件</h2>
+<p>设备控制器在完成一个单位的数据传送、发生错误或需要 CPU 处理时，会置位状态寄存器中的中断请求位，并通过中断控制器向 CPU 发出<strong>中断请求（IRQ）</strong>。</p>
+<p>CPU 不是任何时候都会立刻响应。通常要同时满足：</p>
+<ul>
+<li>当前指令执行完（中断在指令边界被检查）；</li>
+<li>CPU 处于开中断状态（中断允许标志 IF=1，且该中断未被屏蔽）；</li>
+<li>没有更高优先级的中断正在处理（或当前中断允许嵌套）；</li>
+<li>中断请求信号确实到达且未被撤销。</li>
+</ul>
+<p>“中断请求”是设备/控制器发出的信号；“中断响应”是 CPU 决定处理它；“中断处理”是软件执行 ISR。三者是先后关系，不能混写成一个动作。</p>
+
+<h2 id="irq-hw">二、硬件做什么：中断隐指令</h2>
+<p>CPU 响应中断时，会执行一组由硬件直接完成、对机器指令不可见的操作，常称为<strong>中断隐指令</strong>。核心是四件事：</p>
+<ol>
+<li><strong>关中断</strong>：防止响应过程中又被同级/低优先级中断打断（是否立即开中断由系统决定）。</li>
+<li><strong>保存断点</strong>：把当前 PC（下一条指令地址）和 PSW 压入内核栈/保存到指定位置。</li>
+<li><strong>切换内核态</strong>：把 CPU 模式位置为内核态，启用内核栈。</li>
+<li><strong>形成 ISR 入口</strong>：根据中断类型/中断向量，把中断服务程序的入口地址送入 PC。</li>
+</ol>
+<p>注意：<strong>保存通用寄存器</strong>通常不是硬件隐指令做的，而是 ISR 的软件开头部分做的；硬件主要保存 PC/PSW（断点与程序状态）。这是“中断响应”和“中断处理”的经典分界。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="中断响应与中断处理：硬件保存断点、切换内核态、查中断向量；软件保存现场并执行 ISR" data-src="/408-review/assets/img/os-io-interrupt-handling.png" href="/408-review/assets/img/os-io-interrupt-handling.png">
+<img alt="中断响应和中断处理流程图：中断请求、关中断、保存断点、转入内核态、查中断向量、执行中断服务程序" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-interrupt-handling.png"/>
+</a>
+<figcaption>“中断隐指令”是硬件自动完成的响应动作；ISR 是软件，负责保存通用寄存器、处理设备、恢复现场。</figcaption>
+</figure>
+
+<h2 id="irq-sw">三、软件做什么：ISR</h2>
+<p>中断服务程序（ISR）的典型结构：</p>
+<ol>
+<li>保存通用寄存器和被中断程序的现场（硬件已保存 PC/PSW，软件还要保存通用寄存器）。</li>
+<li>根据中断类型读取控制器状态，判断是正常完成还是错误。</li>
+<li>完成数据传送/缓冲区处理；若是字符设备，可能把数据放入内核缓冲区。</li>
+<li>唤醒等待该 I/O 的进程（阻塞态 → 就绪态），但唤醒不等于立刻切换。</li>
+<li>恢复现场，执行中断返回指令；返回被中断的进程或调度后的进程。</li>
+</ol>
+<p>中断返回后，CPU 可能回到原进程，也可能因为中断处理唤醒了更高优先级进程而发生调度。是否调度由调度器决定，不是“中断”本身决定的。</p>
+<p>这里要区分三种状态：</p>
+<ul>
+<li><strong>中断响应</strong>：CPU 从用户态/内核态转入内核态执行 ISR，当前进程可能仍处于运行态。</li>
+<li><strong>进程阻塞</strong>：进程主动等待 I/O（如 read 无数据）而进入阻塞态。</li>
+<li><strong>进程调度</strong>：调度器从就绪队列选一个进程上 CPU；中断可能触发调度，但不是每次中断都调度。</li>
+</ul>
+
+<h2 id="irq-multi">四、中断优先级、屏蔽与多重中断</h2>
+<p>多个中断源同时请求时，需要决定先响应谁；一个中断服务程序执行时，能否被另一个中断打断，也需要规则。</p>
+<ul>
+<li><strong>中断优先级</strong>：由中断控制器/硬件排队器决定响应顺序；优先级高的先响应。</li>
+<li><strong>中断屏蔽字</strong>：每个中断源对应一个屏蔽位；某位为 1 表示屏蔽（不允许响应），为 0 表示允许。屏蔽字通常由当前 ISR 设置，用来控制嵌套。</li>
+<li><strong>中断嵌套</strong>：高优先级中断可以打断低优先级 ISR；同级/低级通常不能。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="多重中断：中断响应、保存断点、中断处理、开中断后允许更高优先级中断嵌套" data-src="/408-review/assets/img/os-io-multiple-interrupt.png" href="/408-review/assets/img/os-io-multiple-interrupt.png">
+<img alt="多重中断与中断屏蔽示意图：高优先级中断可以打断低优先级中断服务程序" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-multiple-interrupt.png"/>
+</a>
+<figcaption>单级中断不允许嵌套；多重中断在 ISR 中开中断，并配合屏蔽字控制谁能打断谁。</figcaption>
+</figure>
+
+<p>判断执行轨迹时，先按<strong>硬件优先级</strong>处理同时到达的请求；进入某个 ISR 后，再看<strong>屏蔽字</strong>决定是否允许新中断；被打断的 ISR 在高级中断返回后继续。不要只按“处理优先级”排序，也不要忽略“当前指令执行完”这个条件。</p>
+
+<h2 id="irq-driver">五、设备驱动程序</h2>
+<p>设备驱动程序是 I/O 系统里“最懂这类设备”的软件层，位于设备独立性软件和控制器之间。它的典型职责：</p>
+<ul>
+<li>接收上层传来的抽象命令和参数，检查合法性；</li>
+<li>把逻辑地址/操作翻译成设备相关的命令、端口值和参数（如逻辑块号 → 柱面/磁头/扇区）；</li>
+<li>启动设备，设置控制器寄存器；设备忙时把请求挂到队列；</li>
+<li>处理设备完成/错误中断，向上返回结果；</li>
+<li>与设备控制器和硬件特性紧密相关，不同设备通常需要不同驱动。</li>
+</ul>
+<p>驱动程序和中断处理程序的边界不是绝对的：驱动通常注册/关联对应的 ISR；ISR 负责中断现场的底层处理，驱动负责设备语义和请求收尾。考试问“谁把逻辑块号转换为柱面号/磁头号/扇区号”，答案是<strong>设备驱动程序</strong>。</p>
+
+<h2 id="irq-pitfalls">六、易错点与收束</h2>
+<ul>
+<li><strong>“中断响应一定保存通用寄存器”</strong>：硬件隐指令保存 PC/PSW；通用寄存器通常由 ISR 软件保存。</li>
+<li><strong>“中断就是进程切换”</strong>：中断只改变 CPU 执行流；是否切换进程由调度决定。</li>
+<li><strong>“中断处理一定从用户态开始”</strong>：CPU 可能在内核态被中断；关键是保存现场并进入内核中断处理。</li>
+<li><strong>“中断优先级高就一定先执行完”</strong>：多重中断下，高优先级可以嵌套打断低优先级；同级不能嵌套。</li>
+<li><strong>“驱动程序就是中断处理程序”</strong>：驱动负责设备命令/参数/启动，ISR 负责中断响应后的处理；二者协作但层次不同。</li>
+</ul>
+<p>收束：<strong>硬件负责“保存断点、切内核、找入口”，软件负责“保现场、处理设备、恢复返回”；中断可能引发调度，但中断本身不是调度</strong>。下一节看 I/O 中另一个“解耦速度”的装置——缓冲区。</p>
+</div>

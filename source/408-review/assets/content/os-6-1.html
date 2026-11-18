@@ -1,0 +1,114 @@
+<div class="article-content">
+<p>I/O 管理要回答三个层次的问题：<strong>设备怎样被 CPU 看见</strong>（控制器、端口、寄存器），<strong>操作系统怎样把请求送给设备</strong>（I/O 软件层次、驱动程序），以及<strong>多个进程怎样共享有限的设备</strong>（分配、缓冲、SPOOLing、调度）。这一页先把“设备—控制器—端口—OS 层次”这条硬件与软件的接缝讲清楚，后面的控制方式、中断和磁盘调度才有落点。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>6 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#io-goal">一、I/O 管理的目标</a></li>
+<li><a href="#io-layers">二、I/O 系统的五个层次</a></li>
+<li><a href="#io-device">三、设备、控制器与设备寄存器</a></li>
+<li><a href="#io-port">四、I/O 端口与两种编址</a></li>
+<li><a href="#io-request">五、一次 I/O 请求经过哪些层</a></li>
+<li><a href="#io-pitfalls">六、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="io-goal">一、I/O 管理的目标</h2>
+<p>操作系统管理 I/O，不是为了“替用户按一下键盘”，而是要在<strong>速度差异极大、类型极多、共享冲突</strong>的设备之间建立一层可控的抽象。</p>
+<ul>
+<li><strong>设备独立性</strong>：用户用逻辑设备名和统一接口（open/read/write）访问设备，不必知道具体控制器、端口和寄存器。</li>
+<li><strong>提高利用率</strong>：让 CPU 与外设尽量并行，减少 CPU 空等；用缓冲、DMA、中断等手段解耦速度。</li>
+<li><strong>共享与保护</strong>：多个进程竞争设备时，决定谁先使用、能否共享、如何避免死锁和越权。</li>
+<li><strong>统一错误处理</strong>：设备出错、超时、断线时，由 OS 统一重试、报告或隔离，而不是让每个程序自己处理硬件细节。</li>
+</ul>
+<p>这里要区分两个视角：<strong>用户视角</strong>只看到逻辑设备名和系统调用；<strong>内核视角</strong>要把它翻译成设备号、控制器命令、端口读写和中断处理。I/O 管理的全部复杂性，就来自这两层视角之间的翻译。</p>
+
+<h2 id="io-layers">二、I/O 系统的五个层次</h2>
+<p>408 常用的 I/O 软件层次从外到内是：<strong>用户层软件 → 设备独立性软件 → 设备驱动程序 → 中断处理程序 → 硬件</strong>。请求向下逐层具体化，完成/错误向上逐层返回。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="I/O 系统层次：用户层软件、设备独立性软件、设备驱动程序、中断处理程序、硬件" data-src="/408-review/assets/img/os-io-levels.svg" href="/408-review/assets/img/os-io-levels.svg">
+<img alt="I/O 系统五层结构：用户层软件、设备独立性软件、设备驱动程序、中断处理程序、硬件" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-levels.svg"/>
+</a>
+<figcaption>越往上越接近用户语义，越往下越接近硬件时序；驱动程序和中断处理程序是分界线附近的两层。</figcaption>
+</figure>
+
+<div class="article-table"><table>
+<thead><tr><th>层次</th><th>主要职责</th><th>典型内容</th></tr></thead>
+<tbody>
+<tr><td>用户层软件</td><td>发出 I/O 请求，使用库函数/系统调用</td><td>printf、scanf、read、write、图形库</td></tr>
+<tr><td>设备独立性软件</td><td>统一接口、设备分配、缓冲、保护、错误处理</td><td>逻辑设备名、LUT、缓冲区管理、SPOOLing</td></tr>
+<tr><td>设备驱动程序</td><td>把抽象请求翻译成设备命令，启动设备，处理完成</td><td>读写控制器寄存器、设置参数、等待/中断</td></tr>
+<tr><td>中断处理程序</td><td>响应设备中断，保存现场，完成中断服务</td><td>ISR、中断向量、中断屏蔽、唤醒进程</td></tr>
+<tr><td>硬件</td><td>执行实际的数据传送</td><td>设备、控制器、端口、总线、DMA</td></tr>
+</tbody>
+</table></div>
+
+<p>这张层次图最重要的考点不是背五层名字，而是<strong>判断一件事该由哪一层做</strong>：</p>
+<ul>
+<li>“把逻辑设备名翻译成物理设备名”属于设备独立性软件（LUT）。</li>
+<li>“把逻辑块号翻译成柱面号/磁头号/扇区号”属于设备驱动程序。</li>
+<li>“保存断点、切换内核态、查中断向量”属于中断响应/中断处理，不是用户层。</li>
+<li>“把设备控制器收到的字节搬进内核缓冲区”通常由中断服务程序或 DMA 完成，具体看控制方式。</li>
+</ul>
+
+<h2 id="io-device">三、设备、控制器与设备寄存器</h2>
+<p>外设本身（键盘、磁盘、打印机）通常不能直接挂到系统总线上，它要通过<strong>设备控制器（I/O 接口）</strong>与 CPU 交互。控制器是 CPU 和设备之间的“翻译 + 缓冲 + 状态”部件。</p>
+<ul>
+<li><strong>数据寄存器</strong>：暂存待传送的数据；CPU 读/写它，控制器再与设备交换。</li>
+<li><strong>状态寄存器</strong>：至少包含“忙/闲”“就绪”“错误”等状态，CPU 查询或中断时读它。</li>
+<li><strong>控制寄存器</strong>：CPU 写入命令（读/写、启动、复位）和参数（地址、长度、方向）。</li>
+</ul>
+<p>因此，“CPU 访问设备”在硬件上通常不是直接访问设备内部，而是<strong>读写控制器上的寄存器</strong>。控制器再根据命令去驱动设备，设备完成后把状态写回控制器，必要时发中断。</p>
+
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="设备控制器与 CPU、设备之间的数据/状态/控制关系" data-src="/408-review/assets/img/os-io-device-tables.png" href="/408-review/assets/img/os-io-device-tables.png">
+<img alt="设备控制器、设备控制表 DCT、控制器控制表 COCT 的结构示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-device-tables.png"/>
+</a>
+<figcaption>设备管理中的 SDT/DCT/COCT 是“软件侧的数据结构”；本页先建立控制器/寄存器的硬件直觉，分配数据结构放到设备分配一节。</figcaption>
+</figure>
+
+<p>设备可以按不同维度分类，考法中常见的三组是：</p>
+<div class="article-table"><table>
+<thead><tr><th>分类维度</th><th>类型</th><th>特点/例子</th></tr></thead>
+<tbody>
+<tr><td>传输单位</td><td>块设备 / 字符设备</td><td>块设备以数据块为单位、可寻址（磁盘）；字符设备以字节/字符流为单位（键盘、串口）</td></tr>
+<tr><td>共享属性</td><td>独占设备 / 共享设备 / 虚拟设备</td><td>打印机通常独占；磁盘可共享；SPOOLing 把独占设备虚拟成共享设备</td></tr>
+<tr><td>所属层次</td><td>输入 / 输出 / 存储 / 网络设备</td><td>键盘、显示器、磁盘、网卡；网络设备常通过套接字接口访问</td></tr>
+</tbody>
+</table></div>
+
+<p><strong>设备 ≠ 控制器 ≠ 设备寄存器</strong>：设备是机械/物理部件，控制器是接口电路，寄存器是 CPU 能读写的窗口。考试说“设备状态”时，通常指控制器状态寄存器中的状态位，而不是设备内部机械位置。</p>
+
+<h2 id="io-port">四、I/O 端口与两种编址</h2>
+<p><strong>I/O 端口</strong>是 CPU 访问设备控制器寄存器的地址。每个控制器可能有一组端口，分别对应数据、状态、控制寄存器。常见两种编址：</p>
+<div class="article-table"><table>
+<thead><tr><th>方式</th><th>做法</th><th>优点</th><th>缺点</th></tr></thead>
+<tbody>
+<tr><td>独立编址（I/O 空间）</td><td>I/O 端口有独立地址空间，用专门的 IN/OUT 指令访问</td><td>不占主存地址空间，指令能区分访存和 I/O</td><td>需要专门 I/O 指令，编程稍复杂</td></tr>
+<tr><td>统一编址（内存映射 I/O）</td><td>把控制器寄存器映射到主存地址空间，用普通访存指令访问</td><td>可用普通 load/store，寻址方式丰富</td><td>占用主存地址空间，需划出保留区</td></tr>
+</tbody>
+</table></div>
+<p>无论哪种方式，CPU 看到的都是“某个地址上的寄存器”，区别只在指令和地址空间。不要把“端口”理解成网络端口（port），也不要把“统一编址”理解成“设备和内存共用同一块物理存储”。</p>
+
+<h2 id="io-request">五、一次 I/O 请求经过哪些层</h2>
+<p>以用户程序调用 <code>read(fd, buf, n)</code> 为例，请求的大致路径是：</p>
+<ol>
+<li>用户层库函数把参数整理好，执行系统调用陷入内核。</li>
+<li>设备独立性软件根据 fd 找到打开文件/设备，检查权限和参数，决定使用缓冲还是直接传送。</li>
+<li>设备驱动程序把“读第几块/第几个字节”翻译成设备命令，写控制器寄存器，启动设备。</li>
+<li>设备控制器与设备完成数据传送；完成后通过状态寄存器/中断/DMA 报告。</li>
+<li>中断处理程序（或 DMA 完成处理）确认完成，唤醒等待进程；数据可能先进入内核缓冲区。</li>
+<li>系统调用返回，用户层从缓冲区复制数据，继续执行。</li>
+</ol>
+<p>这条路径在后面的“键盘输入”“磁盘读块”两个完整流程中会逐段展开。这里先记住：<strong>用户只提交逻辑请求，驱动程序才接触硬件，中断处理程序负责完成通知</strong>。</p>
+
+<h2 id="io-pitfalls">六、易错点与收束</h2>
+<ul>
+<li><strong>“用户程序直接读写设备寄存器”</strong>：用户程序通过系统调用/库函数间接访问；直接访问硬件通常需要内核态或映射权限。</li>
+<li><strong>“设备独立性就是设备无关”</strong>：不是没有设备差异，而是把差异屏蔽在驱动/独立性软件之下，向上提供统一接口。</li>
+<li><strong>“控制器就是设备”</strong>：控制器是接口，设备是执行部件；一个控制器可能连接多个同类设备。</li>
+<li><strong>“I/O 端口就是网络端口”</strong>：这里是 CPU 访问控制器寄存器的地址，不是 TCP/UDP 端口。</li>
+<li><strong>“层次越高越靠近硬件”</strong>：恰好相反：用户层最高，硬件最低；请求向下翻译，完成向上返回。</li>
+</ul>
+<p>收束成一句话：<strong>I/O 管理是在“用户逻辑请求”和“控制器寄存器时序”之间做翻译、缓冲、分配和保护</strong>。下一节把这层翻译具体到程序查询、中断和 DMA 三种控制方式。</p>
+</div>

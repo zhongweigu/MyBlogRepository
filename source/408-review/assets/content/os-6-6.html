@@ -1,0 +1,110 @@
+<div class="article-content">
+<p>磁盘既是共享设备，也是块设备。它有两个常被混在一起的问题：<strong>数据放在哪里</strong>（柱面/磁头/扇区、逻辑块号）和<strong>先服务哪个请求</strong>（磁盘调度）。前者决定一次访问要移动多少，后者决定多个请求的平均等待。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>6 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#disk-geom">一、盘面、磁道、柱面与扇区</a></li>
+<li><a href="#disk-addr">二、从逻辑块号到物理地址</a></li>
+<li><a href="#disk-time">三、存取时间的三段</a></li>
+<li><a href="#disk-algo">四、四种磁盘调度算法</a></li>
+<li><a href="#disk-calc">五、同一个请求序列的完整计算</a></li>
+<li><a href="#disk-pitfalls">六、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="disk-geom">一、盘面、磁道、柱面与扇区</h2>
+<p>机械磁盘由若干<strong>盘片</strong>组成，每个盘片有上下两个<strong>盘面</strong>，每个盘面有一个<strong>磁头</strong>。盘面上划分成一圈圈<strong>磁道</strong>，每条磁道再分成若干<strong>扇区</strong>；不同盘面上半径相同的磁道组成一个<strong>柱面</strong>。</p>
+<ul>
+<li><strong>磁头号</strong>：选哪个盘面（哪个磁头）。</li>
+<li><strong>柱面号/磁道号</strong>：磁头径向移动到哪一圈。</li>
+<li><strong>扇区号</strong>：目标扇区在该磁道上的位置。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="磁盘几何：盘面、磁道、扇区、柱面与磁头运动方向" data-src="/408-review/assets/img/os-io-disk-geometry.png" href="/408-review/assets/img/os-io-disk-geometry.png">
+<img alt="磁盘几何结构：0号磁道、100号磁道、随机分布的扇区和磁头运动方向" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-disk-geometry.png"/>
+</a>
+<figcaption>磁头径向移动选柱面，盘片旋转选扇区；“柱面”是不同盘面上同一半径磁道的集合。</figcaption>
+</figure>
+<p>容量可以按“盘面数 × 每面磁道数 × 每道扇区数 × 每扇区字节数”估算。注意“盘片数”和“盘面数”不是一回事：双面盘片通常有 2 个盘面、2 个磁头。</p>
+
+<h2 id="disk-addr">二、从逻辑块号到物理地址</h2>
+<p>文件系统看到的是<strong>逻辑块号</strong>（LBA），磁盘控制器需要的是<strong>柱面号 C、磁头号 H、扇区号 S</strong>（CHS）。这个转换通常由设备驱动程序/磁盘控制器完成。</p>
+<pre><code class="language-text">逻辑块号 → 柱面号 C + 磁头号 H + 扇区号 S
+容量 = 柱面数 × 磁头数 × 每道扇区数 × 扇区大小</code></pre>
+<p>转换的关键是“先按柱面、再按磁头、最后按扇区”的编号约定；题目若给出 LBA 与每柱面/每磁头扇区数，要先用整除和取余拆出 C/H/S，不能直接拿逻辑块号当物理地址。</p>
+
+<h2 id="disk-time">三、存取时间的三段</h2>
+<p>一次磁盘访问的时间由三段组成：</p>
+<pre><code class="language-text">存取时间 = 寻道时间 + 旋转延迟时间 + 传输时间</code></pre>
+<div class="article-table"><table>
+<thead><tr><th>组成</th><th>含义</th><th>估算</th></tr></thead>
+<tbody>
+<tr><td>寻道时间</td><td>磁头径向移动到目标柱面</td><td>平均寻道时间 ≈ 最内到最外寻道时间的一半（题目常直接给）</td></tr>
+<tr><td>旋转延迟</td><td>目标扇区转到磁头下方</td><td>平均延迟 ≈ 旋转一圈时间的一半 = 1/(2r)</td></tr>
+<tr><td>传输时间</td><td>读写目标扇区的时间</td><td>与扇区数、转速、每道容量有关</td></tr>
+</tbody>
+</table></div>
+<p>若转速为 r 转/秒，旋转一圈时间为 1/r；平均旋转延迟为 1/(2r)。传输一个扇区的时间近似为“旋转一圈时间 ÷ 每道扇区数”；传输多个连续扇区时还要考虑跨磁道/跨柱面。</p>
+
+<h2 id="disk-algo">四、四种磁盘调度算法</h2>
+<p>多个进程同时发磁盘请求时，操作系统/磁盘控制器要决定先服务谁。目标通常是<strong>减少总寻道距离/平均寻道时间</strong>，但也要兼顾公平和饥饿。</p>
+<div class="article-table"><table>
+<thead><tr><th>算法</th><th>规则</th><th>优点</th><th>缺点</th></tr></thead>
+<tbody>
+<tr><td>FCFS</td><td>按请求到达顺序服务</td><td>公平、简单、无饥饿</td><td>磁头来回大幅移动，效率低</td></tr>
+<tr><td>SSTF</td><td>每次选离当前磁头最近的请求</td><td>局部寻道最短，平均等待通常较小</td><td>远端请求可能长期得不到服务（饥饿）；磁臂黏着</td></tr>
+<tr><td>SCAN</td><td>沿一个方向服务，到端点后反向</td><td>效率与公平折中，通常无饥饿</td><td>到端点可能空走；边缘请求等待不均</td></tr>
+<tr><td>C-SCAN</td><td>只沿一个方向服务，到端点后快速返回另一端，返回途中不服务</td><td>等待时间更均匀</td><td>返回空走增加总移动；实现稍复杂</td></tr>
+</tbody>
+</table></div>
+<p>SCAN 有一个常考变体 <strong>LOOK</strong>：不走到磁盘端点，而是到该方向上最远的请求就反向。很多教材/题目把“SCAN/C-SCAN”默认按 LOOK 实现；做题时必须看题目是否明确说“到端点”还是“到最远请求”。</p>
+
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="FCFS：按请求顺序 55,58,39,18,90,160,150,38,184 服务，磁头总移动 498 个磁道" data-src="/408-review/assets/img/os-io-fcfs.png" href="/408-review/assets/img/os-io-fcfs.png">
+<img alt="FCFS 磁盘调度示例：磁头从 100 开始，按请求顺序移动，总移动 498 个磁道" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-fcfs.png"/>
+</a>
+<figcaption>FCFS 不重排请求，磁头轨迹最“乱”，但不会饥饿。</figcaption>
+</figure>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="SSTF：每次选最近请求，示例总移动 248 个磁道，但远端请求可能饥饿" data-src="/408-review/assets/img/os-io-sstf.png" href="/408-review/assets/img/os-io-sstf.png">
+<img alt="SSTF 磁盘调度示例：每次选择离当前磁头最近的请求，可能产生饥饿" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-sstf.png"/>
+</a>
+<figcaption>SSTF 的“最近优先”是局部最优，不等于全局最优；持续到达的近端请求会饿死远端请求。</figcaption>
+</figure>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="SCAN：沿增加方向到端点后反向，示例总移动 282 个磁道" data-src="/408-review/assets/img/os-io-scan.png" href="/408-review/assets/img/os-io-scan.png">
+<img alt="SCAN 磁盘调度示例：磁头沿一个方向到端点后反向服务，总移动 282 个磁道" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-scan.png"/>
+</a>
+<figcaption>SCAN 的“电梯”模型；图中也标出了 LOOK 的改进：到最远请求即可反向。</figcaption>
+</figure>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="C-SCAN：单向服务，到端点后快速返回另一端，示例总移动 390 个磁道" data-src="/408-review/assets/img/os-io-cscan.png" href="/408-review/assets/img/os-io-cscan.png">
+<img alt="C-SCAN 磁盘调度示例：单向服务，返回途中不服务，总移动 390 个磁道" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-cscan.png"/>
+</a>
+<figcaption>C-SCAN 的返回空走要计入总移动；它换来更均匀的等待时间。</figcaption>
+</figure>
+
+<h2 id="disk-calc">五、同一个请求序列的完整计算</h2>
+<p>设磁头初始在 100 号磁道，请求队列为：<code>55, 58, 39, 18, 90, 160, 150, 38, 184</code>，磁盘范围 0～200。</p>
+<div class="article-table"><table>
+<thead><tr><th>算法</th><th>服务顺序</th><th>总移动量</th><th>平均寻道长度</th></tr></thead>
+<tbody>
+<tr><td>FCFS</td><td>55, 58, 39, 18, 90, 160, 150, 38, 184</td><td>45+3+19+21+72+70+10+112+146 = <strong>498</strong></td><td>498/9 ≈ <strong>55.3</strong></td></tr>
+<tr><td>SSTF</td><td>90, 58, 55, 39, 38, 18, 150, 160, 184</td><td>10+32+3+16+1+20+132+10+24 = <strong>248</strong></td><td>248/9 ≈ <strong>27.6</strong></td></tr>
+<tr><td>SCAN（向增加方向，到 200 反向）</td><td>150, 160, 184, 200, 90, 58, 55, 39, 38, 18</td><td>50+10+24+16+110+32+3+16+1+20 = <strong>282</strong></td><td>282/9 ≈ <strong>31.3</strong></td></tr>
+<tr><td>C-SCAN（向增加方向，返回 0 不服务）</td><td>150, 160, 184, 200, 0, 18, 38, 39, 55, 58, 90</td><td>50+10+24+16+200+18+20+1+16+3+32 = <strong>390</strong></td><td>390/9 ≈ <strong>43.3</strong></td></tr>
+</tbody>
+</table></div>
+<p>计算时抓住三点：<strong>起点是当前磁头位置</strong>、<strong>每次移动取绝对差</strong>、<strong>总移动量除以请求数得平均</strong>。SCAN/C-SCAN 的“到端点”与“到最远请求”会产生不同结果，题目必须按给定规则算。</p>
+
+<h2 id="disk-pitfalls">六、易错点与收束</h2>
+<ul>
+<li><strong>“平均寻道时间 = 总移动量 / 磁道数”</strong>：应除以请求数（或按题目定义），不是磁盘总磁道数。</li>
+<li><strong>“SSTF 一定最优”</strong>：它只对当前一步局部最优；可能造成远端饥饿，也可能总移动量不如 SCAN。</li>
+<li><strong>“SCAN 到端点一定更好”</strong>：到端点会空走；LOOK 到最远请求就反向，可能更短。</li>
+<li><strong>“C-SCAN 返回也服务”</strong>：C-SCAN 返回途中不服务，只快速回到另一端。</li>
+<li><strong>“逻辑块号就是柱面号”</strong>：逻辑块号要经驱动/控制器转换为 C/H/S；转换规则由磁盘几何决定。</li>
+</ul>
+<p>收束：<strong>磁盘访问时间 = 寻道 + 旋转延迟 + 传输；调度算法改变的是寻道顺序，不改变磁盘几何和单次传输</strong>。下一节看磁盘从“裸盘”到“能启动 OS”要经过哪些格式化与安装步骤。</p>
+</div>

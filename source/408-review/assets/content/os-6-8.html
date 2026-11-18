@@ -1,0 +1,116 @@
+<div class="article-content">
+<p>前面几页分别讲了控制方式、中断、缓冲、设备分配和磁盘调度；这一页把它们串成“从用户动作到数据到达”的完整路径。考试中的 I/O 大题，往往不是考单个名词，而是问“这一步谁做的、下一步是什么、进程状态怎么变”。下面用七个流程把这条链走通。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>8 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#flow-index">一、七个流程的总索引</a></li>
+<li><a href="#flow-keyboard">二、键盘输入：进程怎样拿到字符 A</a></li>
+<li><a href="#flow-read">三、读磁盘块：数据怎样进入用户空间</a></li>
+<li><a href="#flow-disk">四、多个磁盘请求：选择、定位、读取</a></li>
+<li><a href="#flow-buffer">五、连续输入：缓冲区怎样解耦</a></li>
+<li><a href="#flow-spool">六、打印机：SPOOLing 怎样排队</a></li>
+<li><a href="#flow-boot">七、新磁盘：怎样变成可启动系统</a></li>
+<li><a href="#flow-summary">八、收束：三条最容易混的边界</a></li>
+</ul></div>
+</details>
+
+<h2 id="flow-index">一、七个流程的总索引</h2>
+<div class="article-table"><table>
+<thead><tr><th>流程</th><th>起点</th><th>关键机制</th><th>终点</th></tr></thead>
+<tbody>
+<tr><td>键盘输入</td><td>用户按键</td><td>中断、内核缓冲区、阻塞/唤醒</td><td>read 返回用户缓冲区</td></tr>
+<tr><td>读磁盘块</td><td>read 系统调用</td><td>文件系统、驱动、DMA/中断、内核缓冲</td><td>数据复制到用户空间</td></tr>
+<tr><td>多磁盘请求</td><td>多个进程发请求</td><td>磁盘调度、CHS 定位、驱动、DMA</td><td>各请求完成/唤醒</td></tr>
+<tr><td>连续输入</td><td>设备持续产数据</td><td>单/双缓冲、T/M/C</td><td>CPU 处理与设备输入重叠</td></tr>
+<tr><td>打印机输出</td><td>进程提交打印</td><td>SPOOLing、输出井、输出进程</td><td>打印机串行输出</td></tr>
+<tr><td>新磁盘启动</td><td>裸盘</td><td>格式化、分区、安装、引导、内核初始化</td><td>可登录/可运行系统</td></tr>
+<tr><td>文件写入</td><td>write 扩展文件</td><td>空闲块分配、inode 更新、延迟写</td><td>数据落盘/可读</td></tr>
+</tbody>
+</table></div>
+<p>这七个流程共享一条主线：<strong>用户提出逻辑请求 → 内核找到对象 → 驱动操作控制器 → 硬件传送 → 中断/DMA 报告 → 内核唤醒/复制 → 用户继续</strong>。差别只在“对象”和“是否缓冲/排队”。</p>
+
+<h2 id="flow-keyboard">二、键盘输入：进程怎样拿到字符 A</h2>
+<p>场景：进程 P 正在 CPU 上运行，进程 Q 之前调用 <code>read()</code> 等待键盘输入而阻塞；用户在键盘上按下字符 A。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="键盘中断流程：键盘控制器、CPU、内核缓冲区、阻塞队列/就绪队列与用户缓冲区" data-src="/408-review/assets/img/os-io-keyboard-flow.png" href="/408-review/assets/img/os-io-keyboard-flow.png">
+<img alt="键盘输入完整流程：按键、键盘控制器中断、CPU 响应、ISR 读入内核缓冲区、唤醒进程、read 复制到用户缓冲区" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-keyboard-flow.png"/>
+</a>
+<figcaption>键盘是低速字符设备，通常采用中断 I/O；数据先进入内核缓冲区，再由 read 复制到用户缓冲区。</figcaption>
+</figure>
+<ol>
+<li><strong>按键产生数据</strong>：用户按下 A，键盘控制器（I/O 接口）接收到扫描码/字符，暂存在控制器的数据寄存器中，并置“数据就绪”。</li>
+<li><strong>控制器发中断请求</strong>：键盘控制器向 CPU 发中断请求；此时 CPU 可能正在执行进程 P，当前指令尚未执行完。</li>
+<li><strong>CPU 响应中断</strong>：当前指令结束后，若开中断且该中断未被屏蔽，CPU 关中断、保存 PC/PSW（断点）、切换内核态，按中断向量找到键盘 ISR。此时只是执行流进入内核，<strong>进程 P 不一定被切换</strong>，也可能仍处于运行态。</li>
+<li><strong>ISR 读入内核缓冲区</strong>：ISR 从键盘控制器的数据寄存器读出 A，放入内核缓冲区。为什么不直接放用户缓冲区？因为中断到达时，目标进程可能已退出、被换出、地址空间变化，或还没准备好接收缓冲区；内核缓冲区始终由 OS 控制。</li>
+<li><strong>唤醒等待进程</strong>：OS 检查是否有进程在等待键盘输入。若有进程 Q，Q 期待的事件发生，从阻塞态变为就绪态，插入就绪队列；<strong>唤醒不等于立刻获得 CPU</strong>。</li>
+<li><strong>ISR 返回/可能调度</strong>：ISR 结束后，CPU 可能返回进程 P 继续执行，也可能由调度程序从就绪队列选择 Q 上 CPU。中断可能引发调度，但中断本身不等于进程调度。</li>
+<li><strong>Q 完成 read</strong>：若 Q 被调度，CPU 仍在内核态，恢复 Q 的内核栈/寄存器，继续被挂起的 <code>read()</code>：把内核缓冲区中的 A 复制到 Q 的 <code>buf</code>，read 返回；此时 CPU 才切回用户态，Q 拿到字符 A。</li>
+</ol>
+<p>把这个流程压成一句：<strong>设备中断把数据送进内核，内核唤醒等待者，等待者被调度后在内核里完成 read 的最后一段复制</strong>。最容易错的是把“中断响应”当成“进程切换”，或把“唤醒”当成“立即运行”。</p>
+
+<h2 id="flow-read">三、读磁盘块：数据怎样进入用户空间</h2>
+<p>场景：进程调用 <code>read(fd, buf, n)</code> 读取文件的一个数据块。它与键盘流程共享“内核缓冲区 + 唤醒”的思想，但中间多了文件系统、磁盘驱动和 DMA。</p>
+<ol>
+<li><strong>用户层</strong>：read 库函数把参数放进寄存器/栈，执行陷入指令，进入内核。</li>
+<li><strong>文件系统层</strong>：根据 fd 找到进程打开文件表项 → 系统打开文件表项 → 内存 inode；把用户要读的文件逻辑块号翻译成磁盘逻辑块号。若页缓存/缓冲区已有所需数据，直接复制到用户缓冲区，流程提前结束。</li>
+<li><strong>块设备层/驱动</strong>：把磁盘逻辑块号转成柱面/磁头/扇区，构造读命令，写入控制器寄存器，启动磁盘；若磁盘忙，请求挂入队列。</li>
+<li><strong>硬件传送</strong>：磁盘控制器执行寻道、旋转、读取；若采用 DMA，数据直接写入内核缓冲区，不需要 CPU 逐字搬。</li>
+<li><strong>完成中断</strong>：磁盘/DMA 控制器发出中断；ISR 检查状态、清中断、标记缓冲区有效，唤醒等待该块的进程。</li>
+<li><strong>复制到用户空间</strong>：进程被调度后，内核把数据从内核缓冲区复制到用户 <code>buf</code>，更新文件偏移，read 返回。</li>
+</ol>
+<p>这个流程的完整 open/read/close 细节在 <a href="#/topic/os-5-4">目录、文件共享与打开文件</a>，文件物理结构和盘块定位在 <a href="#/topic/os-5-3">文件的物理结构</a>。I/O 章节只需抓住：<strong>文件系统负责“读哪个块”，驱动负责“怎样读”，DMA/中断负责“读完通知”</strong>。</p>
+
+<h2 id="flow-disk">四、多个磁盘请求：选择、定位、读取</h2>
+<p>场景：P1 要读 55 号磁道，P2 要读 58 号，P3 要读 39 号……多个请求同时到达。</p>
+<ol>
+<li><strong>请求排队</strong>：每个请求生成一个 I/O 请求块，挂到磁盘设备队列；磁盘是共享设备，可以交替服务多个进程，但同一时刻只有一个请求真正占用磁头。</li>
+<li><strong>调度选择</strong>：按 FCFS/SSTF/SCAN/C-SCAN 等算法从队列选下一个请求；算法只改变服务顺序，不改变磁盘几何。</li>
+<li><strong>逻辑地址定位</strong>：把逻辑块号转换为柱面号/磁头号/扇区号；文件系统/驱动完成这一层转换。</li>
+<li><strong>驱动启动</strong>：驱动程序设置控制器命令、内存地址、传送长度，启动磁盘；若使用 DMA，设置 DMA 控制器。</li>
+<li><strong>寻道/旋转/传输</strong>：磁头径向移动到目标柱面（寻道），盘片旋转到目标扇区（旋转延迟），读写数据（传输）。</li>
+<li><strong>完成与唤醒</strong>：DMA/中断报告完成；ISR 标记请求完成，唤醒对应进程，调度器再决定谁继续。</li>
+</ol>
+<p>如果题目问“磁盘 I/O 请求的处理流程”，不要把“调度算法”放在“地址转换”之后：通常先由文件系统/驱动得到逻辑块号，磁盘调度决定先服务哪个请求，驱动再把选中请求的逻辑块号转成 CHS 并启动。不同教材的描述顺序可能略有差异，但“请求排队 → 调度 → 地址转换 → 启动 → 传送 → 完成”这条主干不变。</p>
+
+<h2 id="flow-buffer">五、连续输入：缓冲区怎样解耦</h2>
+<p>设备连续产生数据，CPU 一边处理，设备一边输入。没有缓冲区时，两边必须严格同步；有缓冲区后，设备先写入，CPU 稍后取。</p>
+<ul>
+<li><strong>单缓冲</strong>：每块处理时间 = max(C,T)+M；T&gt;C 时设备是瓶颈，T&lt;C 时 CPU 是瓶颈。</li>
+<li><strong>双缓冲</strong>：每块处理时间 = max(C+M,T)；C+M&lt;T 时设备可连续输入，C+M&gt;T 时 CPU 不必等设备。</li>
+</ul>
+<p>在键盘流程中，缓冲区是“内核缓冲区”；在文件读中，缓冲区可能是页缓存/内核缓冲区；在块设备输入中，DMA 直接把数据送入内核缓冲区。缓冲区的层次和数量改变的是“等待发生在哪”，不改变“数据最终要复制到用户区”这一终点。</p>
+
+<h2 id="flow-spool">六、打印机：SPOOLing 怎样排队</h2>
+<p>打印机是独占设备。SPOOLing 让多个进程“同时”提交打印任务，但物理打印仍是一份一份串行输出。</p>
+<ol>
+<li>进程提出打印请求，把数据写入内存输出缓冲区。</li>
+<li>输出进程把数据送入磁盘输出井，形成井文件，按队列排队。</li>
+<li>打印机空闲时，输出进程从输出井取出一份数据，经输出缓冲区送到打印机。</li>
+<li>打印完成后释放打印机，输出进程继续取下一份。</li>
+</ol>
+<p>关键点：<strong>井在磁盘、缓冲区在内存、输出进程负责搬运、井管理程序负责控制</strong>；SPOOLing 把“等待打印机”变成“等待输出进程/磁盘空间”，提高的是并发提交能力，不是打印机的物理并行度。</p>
+
+<h2 id="flow-boot">七、新磁盘：怎样变成可启动系统</h2>
+<p>从裸盘到可启动系统，是一条“格式化 → 分区 → 建文件系统 → 安装 → 引导 → 内核初始化”的链：</p>
+<ol>
+<li><strong>物理格式化</strong>：划分磁道/扇区，写入扇区头和校验信息。</li>
+<li><strong>分区</strong>：建立分区表，把磁盘划成多个区域；MBR/GPT 记录分区位置。</li>
+<li><strong>逻辑格式化</strong>：在目标分区建立引导块、超级块、空闲空间管理、inode 表、根目录。</li>
+<li><strong>安装 OS</strong>：写入内核、驱动、系统文件和引导配置。</li>
+<li><strong>引导</strong>：固件 → MBR/GPT → 活动分区 PBR → OS loader → 内核；细节见 <a href="#/topic/os-1-4">OS 引导</a>。</li>
+<li><strong>内核初始化</strong>：内存管理 → 中断/异常 → 设备/驱动 → 进程/调度 → 文件系统/根挂载 → 第一个用户进程。</li>
+</ol>
+<p>这条链和“读磁盘块”共享驱动/中断/DMA，但目标不同：读块是“取一个已有文件的数据”，启动是“把内核和根文件系统装配起来”。不要把 MBR、PBR、引导块、超级块混成一个层次。</p>
+
+<h2 id="flow-summary">八、收束：三条最容易混的边界</h2>
+<div class="article-table"><table>
+<thead><tr><th>容易混</th><th>正确边界</th></tr></thead>
+<tbody>
+<tr><td>中断 vs 进程调度</td><td>中断只把执行流转入内核 ISR；是否切换进程由调度器决定</td></tr>
+<tr><td>唤醒 vs 运行</td><td>阻塞态 → 就绪态只是“可以运行”，还要被调度才 → 运行态</td></tr>
+<tr><td>内核缓冲 vs 用户缓冲</td><td>设备数据先进内核缓冲；read 返回前再复制到用户 buf</td></tr>
+</tbody>
+</table></div>
+<p>把七个流程记成一条链：<strong>用户请求 → 内核对象 → 驱动/控制器 → 硬件传送 → 中断/DMA → 内核缓冲/唤醒 → 用户复制</strong>。链条上的每一段，都能对应回前面某一页的机制。</p>
+</div>
