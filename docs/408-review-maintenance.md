@@ -2,6 +2,8 @@
 
 > 适用对象：以后接手这个页面的 agent。用户会持续发来新的考点、知识点和图片，要求「提取、补充、加进复习台」，**不再改博客帖子**。
 >
+> **用户提供图片/文字/文件/教材/课件/笔记/真题要求更新知识库时，先读 `docs/rules/408-knowledge-update.md`，再读 `docs/rules/408-knowledge-base.md`；改完按 `docs/rules/408-review-cards.md` 同步卡片。**
+>
 > 页面入口：`https://milvelas.cn/408-review/`（博客友链「复习工具」）。
 > 源码：`source/408-review/`，由 Hexo 的 `skip_render: 408-review/**` 原样复制到 `public/408-review/`。
 
