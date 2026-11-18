@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 400" role="img" aria-labelledby="t d">
+<title id="t">中序线索二叉树</title>
+<desc id="d">二叉树 A 的左孩子 B、右孩子 C，B 的左孩子 D、右孩子 E。中序序列为 D B E A C，空右指针依次指向后继，空左指针指向有前驱的结点。</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b45309"/></marker></defs>
+<style>.n{fill:#f7fafc;stroke:#35618f;stroke-width:1.6;rx:6}.t{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:15px;fill:#1f2937;text-anchor:middle}.s{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:11px;fill:#5b6573;text-anchor:middle}.e{stroke:#35618f;stroke-width:1.8;fill:none}.th{stroke:#b45309;stroke-width:1.8;fill:none;stroke-dasharray:6 5;marker-end:url(#a)}</style>
+<rect width="820" height="400" fill="#fff"/>
+<text class="t" x="410" y="28">中序线索树：D → B → E → A → C</text>
+<rect class="n" x="380" y="60" width="60" height="42"/><text class="t" x="410" y="87">A</text>
+<rect class="n" x="240" y="145" width="60" height="42"/><text class="t" x="270" y="172">B</text>
+<rect class="n" x="520" y="145" width="60" height="42"/><text class="t" x="550" y="172">C</text>
+<rect class="n" x="120" y="235" width="60" height="42"/><text class="t" x="150" y="262">D</text>
+<rect class="n" x="300" y="235" width="60" height="42"/><text class="t" x="330" y="262">E</text>
+<path class="e" d="M390 102 L290 145"/><path class="e" d="M430 102 L530 145"/>
+<path class="e" d="M260 187 L165 235"/><path class="e" d="M280 187 L320 235"/>
+<path class="th" d="M150 277 C120 330 230 320 252 193"/><text class="s" x="145" y="320">D 的后继 → B</text>
+<path class="th" d="M330 277 C300 335 470 335 500 190"/><text class="s" x="400" y="345">E 的后继 → A</text>
+<path class="th" d="M550 277 C560 330 650 300 640 220"/><text class="s" x="625" y="335">C 的后继 → NULL</text>
+<path class="th" d="M300 235 C220 220 210 215 240 190"/><text class="s" x="245" y="220">E 的前驱 → B</text>
+<text class="s" x="410" y="380">实线：孩子指针（tag=0）；虚线：线索指针（tag=1）</text>
+</svg>

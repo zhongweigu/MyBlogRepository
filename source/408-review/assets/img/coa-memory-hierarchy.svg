@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 420" role="img" aria-labelledby="t d">
+<title id="t">存储器层次结构</title>
+<desc id="d">从 CPU 向外依次是寄存器、Cache、主存、辅存；越靠近 CPU 越快、越小、每位成本越高，越向外越慢、越大、越便宜。</desc>
+<style>.b{fill:#f7fafc;stroke:#35618f;stroke-width:1.5;rx:6}.t{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:15px;fill:#1f2937;text-anchor:middle}.s{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:11px;fill:#5b6573;text-anchor:middle}.a{stroke:#35618f;stroke-width:1.6;fill:none}</style>
+<rect width="860" height="420" fill="#fff"/>
+<text class="t" x="430" y="30">存储器层次：越靠上越快、越小、越贵</text>
+<rect class="b" x="300" y="55" width="260" height="48"/><text class="t" x="430" y="78">寄存器</text><text class="s" x="430" y="96">CPU 内，ns 级</text>
+<rect class="b" x="250" y="125" width="360" height="48"/><text class="t" x="430" y="148">Cache（SRAM）</text><text class="s" x="430" y="166">CPU 内/附近，ns 级</text>
+<rect class="b" x="190" y="195" width="480" height="48"/><text class="t" x="430" y="218">主存（DRAM）</text><text class="s" x="430" y="236">几十~百 ns，按地址随机访问</text>
+<rect class="b" x="120" y="265" width="620" height="48"/><text class="t" x="430" y="288">辅存（SSD/磁盘）</text><text class="s" x="430" y="306">μs~ms，容量最大、非易失</text>
+<path class="a" d="M430 103 V125"/><path class="a" d="M430 173 V195"/><path class="a" d="M430 243 V265"/>
+<text class="s" x="430" y="355">相邻层之间通常由硬件/OS 按块交换：Cache↔主存按块，主存↔辅存按页/段。</text>
+<text class="s" x="430" y="380">上层是下层的“缓存”：寄存器缓存主存数据，Cache 缓存主存块，主存缓存磁盘页。</text>
+</svg>

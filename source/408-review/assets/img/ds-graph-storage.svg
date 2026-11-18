@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" role="img" aria-labelledby="t d">
+<title id="t">图的邻接矩阵与邻接表</title>
+<desc id="d">无向图 A、B、C、D 及边 A-B、A-C、B-D、C-D；邻接矩阵为四行四列，邻接表为每个顶点挂一条链表。</desc>
+<style>.n{fill:#f7fafc;stroke:#35618f;stroke-width:1.5;rx:5}.h{fill:#eaf3fb;stroke:#35618f;stroke-width:1.5}.t{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:14px;fill:#1f2937;text-anchor:middle}.s{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:11px;fill:#5b6573;text-anchor:middle}.e{stroke:#35618f;stroke-width:1.6;fill:none}</style>
+<rect width="900" height="380" fill="#fff"/>
+<text class="t" x="150" y="28">无向图</text>
+<rect class="n" x="125" y="55" width="50" height="38"/><text class="t" x="150" y="80">A</text>
+<rect class="n" x="55" y="150" width="50" height="38"/><text class="t" x="80" y="175">B</text>
+<rect class="n" x="195" y="150" width="50" height="38"/><text class="t" x="220" y="175">C</text>
+<rect class="n" x="125" y="245" width="50" height="38"/><text class="t" x="150" y="270">D</text>
+<path class="e" d="M130 90 L95 150"/><path class="e" d="M170 90 L205 150"/><path class="e" d="M80 188 L130 245"/><path class="e" d="M220 188 L170 245"/>
+<text class="t" x="470" y="28">邻接矩阵</text>
+<g>
+<rect class="h" x="390" y="55" width="40" height="32"/><text class="t" x="410" y="77"> </text>
+<rect class="h" x="430" y="55" width="40" height="32"/><text class="t" x="450" y="77">A</text>
+<rect class="h" x="470" y="55" width="40" height="32"/><text class="t" x="490" y="77">B</text>
+<rect class="h" x="510" y="55" width="40" height="32"/><text class="t" x="530" y="77">C</text>
+<rect class="h" x="550" y="55" width="40" height="32"/><text class="t" x="570" y="77">D</text>
+<rect class="h" x="390" y="87" width="40" height="32"/><text class="t" x="410" y="109">A</text>
+<rect class="n" x="430" y="87" width="40" height="32"/><text class="t" x="450" y="109">0</text><rect class="n" x="470" y="87" width="40" height="32"/><text class="t" x="490" y="109">1</text><rect class="n" x="510" y="87" width="40" height="32"/><text class="t" x="530" y="109">1</text><rect class="n" x="550" y="87" width="40" height="32"/><text class="t" x="570" y="109">0</text>
+<rect class="h" x="390" y="119" width="40" height="32"/><text class="t" x="410" y="141">B</text>
+<rect class="n" x="430" y="119" width="40" height="32"/><text class="t" x="450" y="141">1</text><rect class="n" x="470" y="119" width="40" height="32"/><text class="t" x="490" y="141">0</text><rect class="n" x="510" y="119" width="40" height="32"/><text class="t" x="530" y="141">0</text><rect class="n" x="550" y="119" width="40" height="32"/><text class="t" x="570" y="141">1</text>
+<rect class="h" x="390" y="151" width="40" height="32"/><text class="t" x="410" y="173">C</text>
+<rect class="n" x="430" y="151" width="40" height="32"/><text class="t" x="450" y="173">1</text><rect class="n" x="470" y="151" width="40" height="32"/><text class="t" x="490" y="173">0</text><rect class="n" x="510" y="151" width="40" height="32"/><text class="t" x="530" y="173">0</text><rect class="n" x="550" y="151" width="40" height="32"/><text class="t" x="570" y="173">1</text>
+<rect class="h" x="390" y="183" width="40" height="32"/><text class="t" x="410" y="205">D</text>
+<rect class="n" x="430" y="183" width="40" height="32"/><text class="t" x="450" y="205">0</text><rect class="n" x="470" y="183" width="40" height="32"/><text class="t" x="490" y="205">1</text><rect class="n" x="510" y="183" width="40" height="32"/><text class="t" x="530" y="205">1</text><rect class="n" x="550" y="183" width="40" height="32"/><text class="t" x="570" y="205">0</text>
+</g>
+<text class="s" x="490" y="240">对称矩阵；无向图一条边存两次</text>
+<text class="t" x="760" y="28">邻接表</text>
+<g>
+<rect class="h" x="650" y="55" width="50" height="30"/><text class="t" x="675" y="76">A</text><path class="e" d="M700 70 L730 70"/><rect class="n" x="730" y="55" width="50" height="30"/><text class="t" x="755" y="76">B</text><path class="e" d="M780 70 L810 70"/><rect class="n" x="810" y="55" width="50" height="30"/><text class="t" x="835" y="76">C</text>
+<rect class="h" x="650" y="110" width="50" height="30"/><text class="t" x="675" y="131">B</text><path class="e" d="M700 125 L730 125"/><rect class="n" x="730" y="110" width="50" height="30"/><text class="t" x="755" y="131">A</text><path class="e" d="M780 125 L810 125"/><rect class="n" x="810" y="110" width="50" height="30"/><text class="t" x="835" y="131">D</text>
+<rect class="h" x="650" y="165" width="50" height="30"/><text class="t" x="675" y="186">C</text><path class="e" d="M700 180 L730 180"/><rect class="n" x="730" y="165" width="50" height="30"/><text class="t" x="755" y="186">A</text><path class="e" d="M780 180 L810 180"/><rect class="n" x="810" y="165" width="50" height="30"/><text class="t" x="835" y="186">D</text>
+<rect class="h" x="650" y="220" width="50" height="30"/><text class="t" x="675" y="241">D</text><path class="e" d="M700 235 L730 235"/><rect class="n" x="730" y="220" width="50" height="30"/><text class="t" x="755" y="241">B</text><path class="e" d="M780 235 L810 235"/><rect class="n" x="810" y="220" width="50" height="30"/><text class="t" x="835" y="241">C</text>
+</g>
+<text class="s" x="760" y="280">每个顶点挂一条边表；无向图每条边存两次</text>
+</svg>

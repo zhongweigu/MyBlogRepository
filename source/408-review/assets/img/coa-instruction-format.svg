@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" role="img" aria-labelledby="t d">
+<title id="t">指令格式与寻址方式</title>
+<desc id="d">R 型指令分成 op、rs、rt、rd、shamt、funct 字段；I 型指令分成 op、rs、rt、立即数/偏移量字段。下方给出立即数、直接、间接、寄存器间接、相对寻址的有效地址公式。</desc>
+<style>.b{fill:#f7fafc;stroke:#35618f;stroke-width:1.5}.h{fill:#eaf3fb;stroke:#35618f;stroke-width:1.5}.t{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:14px;fill:#1f2937;text-anchor:middle}.s{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:11px;fill:#5b6573;text-anchor:middle}.l{stroke:#35618f;stroke-width:1.5;fill:none}</style>
+<rect width="900" height="380" fill="#fff"/>
+<text class="t" x="450" y="28">R 型：操作码 + 寄存器 + 功能码</text>
+<g>
+<rect class="h" x="60" y="50" width="100" height="45"/><text class="t" x="110" y="78">op</text>
+<rect class="b" x="160" y="50" width="90" height="45"/><text class="t" x="205" y="78">rs</text>
+<rect class="b" x="250" y="50" width="90" height="45"/><text class="t" x="295" y="78">rt</text>
+<rect class="b" x="340" y="50" width="90" height="45"/><text class="t" x="385" y="78">rd</text>
+<rect class="b" x="430" y="50" width="90" height="45"/><text class="t" x="475" y="78">shamt</text>
+<rect class="b" x="520" y="50" width="120" height="45"/><text class="t" x="580" y="78">funct</text>
+</g>
+<text class="t" x="450" y="130">I 型：操作码 + 寄存器 + 立即数/偏移量</text>
+<g>
+<rect class="h" x="60" y="152" width="100" height="45"/><text class="t" x="110" y="180">op</text>
+<rect class="b" x="160" y="152" width="90" height="45"/><text class="t" x="205" y="180">rs</text>
+<rect class="b" x="250" y="152" width="90" height="45"/><text class="t" x="295" y="180">rt</text>
+<rect class="b" x="340" y="152" width="300" height="45"/><text class="t" x="490" y="180">立即数 / 偏移量（常为补码）</text>
+</g>
+<text class="t" x="450" y="245">有效地址 EA 的常见计算</text>
+<g>
+<rect class="b" x="50" y="265" width="180" height="34"/><text class="s" x="140" y="286">立即数：操作数 = A</text>
+<rect class="b" x="245" y="265" width="180" height="34"/><text class="s" x="335" y="286">直接：EA = A</text>
+<rect class="b" x="440" y="265" width="180" height="34"/><text class="s" x="530" y="286">间接：EA = (A)</text>
+<rect class="b" x="635" y="265" width="215" height="34"/><text class="s" x="742" y="286">寄存器间接：EA = (Rn)</text>
+<rect class="b" x="120" y="315" width="300" height="34"/><text class="s" x="270" y="336">相对：EA = 下条指令地址 + 偏移量</text>
+<rect class="b" x="440" y="315" width="340" height="34"/><text class="s" x="610" y="336">基址/变址：EA = 基址 + 变址×比例 + 位移</text>
+</g>
+</svg>

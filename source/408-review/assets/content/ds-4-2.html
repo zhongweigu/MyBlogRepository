@@ -13,6 +13,12 @@
 
 </details><div class="article-content">
 <h2 id="11-dfsbfs">考点11-DFS和BFS</h2>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="同一张图从 A 出发的 DFS 与 BFS：DFS 沿一条路走到底再回溯，BFS 按距离一层层扩展；邻接点按字母序访问" data-src="/408-review/assets/img/ds-graph-traversal.svg" href="/408-review/assets/img/ds-graph-traversal.svg">
+<img alt="同一张无向图的 DFS 与 BFS 遍历顺序对比图" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-graph-traversal.svg"/>
+</a>
+<figcaption>DFS 用栈/递归保存“回去的路”，BFS 用队列保存“下一层要访问的点”；两者都要 visited 标记防重复。</figcaption>
+</figure>
 <h3 id="dfs">DFS思想在不同存储结构上的实现</h3>
 <p>DFS 的思想就三步：</p>
 <ol>

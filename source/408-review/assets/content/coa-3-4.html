@@ -9,6 +9,7 @@
 </div>
 
 </details><div class="article-content">
+<p>Cache 性能题的主线只有三条：<strong>访问模式决定命中率</strong>、<strong>命中率/缺失代价决定 AMAT</strong>、<strong>缺失停顿决定程序总时间</strong>。先把这三条串起来，再看具体题型。</p>
 <h2 id="2-cache">题型2-Cache 命中率与数组访问优化</h2>
 <p>题型2 按四步走：</p>
 <ol>
@@ -43,7 +44,11 @@
 <p>$$T_{\text{CPU}}=\text{指令数}\times\mathrm{CPI}\times T_{\text{clk}}+\text{缺失次数}\times\text{缺失代价}$$</p>
 <hr/>
 <hr/>
-<p>回到题型5 的 2025 年第 43 题，数组跨 129 个块、共 2048 次访问，缺失率 6.30%，命中时间 2 个周期，缺失损失 200 个周期：</p>
-<p>$$T_a=2+0.0630\times200\approx14.60\text{ 个时钟周期}$$</p>
+<p><strong>完整例子：</strong>某程序共 2048 次访存，Cache 命中率 93.7%（缺失率 6.3%），命中时间 2 个时钟周期，缺失损失 200 个时钟周期。则平均访问时间为</p>
+<p>$$T_a=2+0.063\times200=14.6\text{ 个时钟周期}$$</p>
+<p>若程序有 1000 条指令、CPI=1（不含 Cache 停顿）、时钟周期 1ns，则总执行时间还要加上缺失造成的停顿：</p>
+<pre><code class="language-text">执行时间 = 1000×1×1ns + 2048×0.063×200×1ns
+         = 1000ns + 25804.8ns ≈ 26.8μs</code></pre>
+<p>这里“缺失次数 × 缺失损失”是额外停顿；若题目给的 CPI 已经包含 Cache 缺失，就不能再加一遍，先看清口径。</p>
 </div>
 <p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

@@ -97,5 +97,14 @@
 <li>多分支时不能只看深度，还要乘上每层的结点数：斐波那契每减一层就多一个分叉，结点数指数膨胀；归并排序虽然也是两个分支，但规模同时减半，从根往下每层结点数翻倍、层数只有 $\log n$，累计仍是 $O(n)$。</li>
 </ul>
 <p>更一般地，凡是能写成 $T(n) = aT(n/b) + f(n)$ 的递归（把“每次调用的基本语句次数”也并进 $f(n)$），都可以直接用<strong>主定理</strong>定出数量级——这也是大题里推导分治算法复杂度的标准工具。</p>
+<div class="article-table"><table>
+<thead><tr><th>情形</th><th>条件（以 $n^{\\log_b a}$ 为基准）</th><th>结果</th><th>典型例子</th></tr></thead>
+<tbody>
+<tr><td>①</td><td>$f(n)=O(n^{\\log_b a-\\varepsilon})$</td><td>$T(n)=\\Theta(n^{\\log_b a})$</td><td>$T(n)=2T(n/2)+1$ → $\\Theta(n)$</td></tr>
+<tr><td>②</td><td>$f(n)=\\Theta(n^{\\log_b a}\\log^k n)$</td><td>$T(n)=\\Theta(n^{\\log_b a}\\log^{k+1} n)$</td><td>$T(n)=2T(n/2)+n$ → $\\Theta(n\\log n)$</td></tr>
+<tr><td>③</td><td>$f(n)=\\Omega(n^{\\log_b a+\\varepsilon})$ 且满足正则条件</td><td>$T(n)=\\Theta(f(n))$</td><td>$T(n)=2T(n/2)+n^2$ → $\\Theta(n^2)$</td></tr>
+</tbody>
+</table></div>
+<p>记法：先算“分叉数 $a$ 和规模缩小倍数 $b$”给出的基准 $n^{\\log_b a}$，再看额外工作 $f(n)$ 比它小、同阶还是大。408 题通常只用到②（归并/快排平均）和③（某些分治），不必背完整证明。</p>
 </div>
 <p class="article-source">内容整理自站内 408 笔记；这一节的例题保留在正文中，用于“边做边讲”，题库里另有同一道题的归档。</p>

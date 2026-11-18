@@ -1333,5 +1333,27 @@ void RadixSort(int A[], int n, int d, int r) {
 <li>稳定：分配时同一队列保持原次序，收集时按队列顺序串起来；如果收集时把队列顺序反过来，稳定性就被破坏。</li>
 <li>适合 $n$ 较大、$d$ 较小、$r$ 较小的场景；如果 $d$ 很大（关键字很长）或 $r$ 很大（每一位取值很多），$d(n+r)$ 不一定比 $O(n\log n)$ 的排序快。</li>
 </ul>
+<h3 id="heap-app">堆的 ADT 与典型应用</h3>
+<p>堆不只是“堆排序的中间结构”，它本身就是一个<strong>优先队列</strong>：插入元素、取最小/最大元素、删除堆顶，都能在 $O(\log n)$ 内完成。</p>
+<pre><code class="language-text">ADT PriorityQueue {
+    Insert(Q, x)      // 插入，O(log n)
+    DeleteMin(Q)      // 删除并返回最小元，O(log n)
+    GetMin(Q)         // 查看最小元，O(1)
+    BuildHeap(Q)      // 建堆，O(n)
+} ADT PriorityQueue</code></pre>
+<div class="article-table"><table>
+<thead><tr><th>操作</th><th>做法（小根堆）</th><th>复杂度</th></tr></thead>
+<tbody>
+<tr><td>插入</td><td>放到数组末尾，向上与父结点比较/交换，直到满足堆序</td><td>O(log n)</td></tr>
+<tr><td>删除堆顶</td><td>用末尾元素替代堆顶，向下与较小孩子交换，直到满足堆序</td><td>O(log n)</td></tr>
+<tr><td>建堆</td><td>从最后一个分支结点向前逐个向下调整</td><td>O(n)</td></tr>
+<tr><td>取堆顶</td><td>直接返回 `heap[1]`</td><td>O(1)</td></tr>
+</tbody>
+</table></div>
+<p><strong>应用一：优先队列/任务调度。</strong>每次取优先级最高（或最低）的任务，插入新任务；用堆比每次排序 O(n log n) 更合适。</p>
+<p><strong>应用二：Top-k 问题。</strong>求 n 个数中最大的 k 个：维护一个大小为 k 的<strong>小根堆</strong>，堆顶是当前 k 个里最小的；新元素比堆顶大就替换并向下调整。时间 O(n log k)，空间 O(k)。</p>
+<p><strong>应用三：堆排序。</strong>建大根堆后反复“堆顶与末尾交换、堆大小减 1、向下调整”，得到升序序列；时间 O(n log n)，空间 O(1)，不稳定。</p>
+<p><strong>应用四：多路归并/外部排序的败者树。</strong>堆/败者树用于从 k 个有序段中快速选出当前最小元素，把每选一个元素的比较代价从 O(k) 降到 O(log k)。</p>
+<p>注意：<strong>大根堆适合升序堆排序和“取最大”；小根堆适合“取最小”和 Top-k 最大元素</strong>，不要因为“求最大”就直觉用大根堆。</p>
 </div>
 <p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>

@@ -1,0 +1,82 @@
+<div class="article-content">
+<p>后面每一章都会反复用到几个词：数据、数据元素、逻辑结构、存储结构、ADT、算法特性。它们不是名词解释题，而是判断“这个结构该怎么实现、这个算法算不算算法”的共同语言。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>4 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#basic-data">一、数据、数据元素、数据项、数据对象</a></li>
+<li><a href="#basic-structure">二、数据结构的三个要素</a></li>
+<li><a href="#basic-adt">三、抽象数据类型 ADT</a></li>
+<li><a href="#basic-algorithm">四、算法与复杂度</a></li>
+</ul></div>
+</details>
+
+<h2 id="basic-data">一、数据、数据元素、数据项、数据对象</h2>
+<div class="article-table"><table>
+<thead><tr><th>术语</th><th>含义</th><th>例子</th></tr></thead>
+<tbody>
+<tr><td>数据</td><td>信息的载体，是描述客观事物的符号集合</td><td>一张学生表、一段程序、一张图片</td></tr>
+<tr><td>数据元素</td><td>数据的基本单位，通常作为一个整体处理</td><td>学生表中的一行（一个学生记录）</td></tr>
+<tr><td>数据项</td><td>组成数据元素的不可分割最小单位</td><td>学号、姓名、成绩</td></tr>
+<tr><td>数据对象</td><td>具有相同性质的数据元素的集合</td><td>所有学生的记录</td></tr>
+</tbody>
+</table></div>
+<p>关系可以记成：<strong>数据对象由数据元素组成，数据元素由数据项组成</strong>。数据项不可再分；数据元素是“整体处理”的单位；数据对象是“同类元素”的集合。</p>
+
+<h2 id="basic-structure">二、数据结构的三个要素</h2>
+<p><strong>数据结构</strong>不是“数据 + 结构”这么模糊，它包含三件事：</p>
+<ol>
+<li><strong>逻辑结构</strong>：数据元素之间的逻辑关系；</li>
+<li><strong>存储结构</strong>：逻辑结构在计算机中的表示；</li>
+<li><strong>数据的运算</strong>：定义在该结构上的一组操作。</li>
+</ol>
+<div class="article-table"><table>
+<thead><tr><th>要素</th><th>回答的问题</th><th>常见类型</th></tr></thead>
+<tbody>
+<tr><td>逻辑结构</td><td>元素之间是什么关系？</td><td>集合、线性、树形、图形</td></tr>
+<tr><td>存储结构</td><td>这种关系在内存里怎么放？</td><td>顺序、链式、索引、散列</td></tr>
+<tr><td>数据的运算</td><td>能对它做什么？</td><td>插入、删除、查找、遍历</td></tr>
+</tbody>
+</table></div>
+<p>逻辑结构与存储结构要分开看：</p>
+<ul>
+<li>线性表是逻辑结构；顺序表和链表是它的两种存储结构。</li>
+<li>树是逻辑结构；孩子兄弟表示法、双亲表示法是它的存储结构。</li>
+<li>图是逻辑结构；邻接矩阵、邻接表是它的存储结构。</li>
+</ul>
+<p>同一逻辑结构换一种存储结构，运算的实现和复杂度都会变。例如“按位查找”在顺序表是 O(1)，在链表是 O(n)；但它们的逻辑结构都还是线性表。</p>
+
+<h2 id="basic-adt">三、抽象数据类型 ADT</h2>
+<p><strong>抽象数据类型（Abstract Data Type，ADT）</strong>是一个数学模型以及定义在该模型上的一组操作。它只规定“数据对象是什么、元素之间什么关系、能做哪些操作”，不规定“用什么存储、怎么实现”。</p>
+<pre><code class="language-text">ADT List {
+    数据对象：D = {a_i | a_i ∈ ElemSet, i = 1..n}
+    数据关系：除第一个/最后一个外，每个元素有唯一前驱和后继
+    基本操作：InitList, DestroyList, Insert, Delete, Locate, GetElem ...
+} ADT List</code></pre>
+<p>ADT 的价值是<strong>把“做什么”与“怎么做”分离</strong>：先定义接口语义，再用顺序表或链表实现。408 里常把“顺序表”“链表”当作 ADT 的两种实现来比较。</p>
+
+<h2 id="basic-algorithm">四、算法与复杂度</h2>
+<p><strong>算法</strong>是对特定问题求解步骤的描述，必须满足五个特性：</p>
+<div class="article-table"><table>
+<thead><tr><th>特性</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td>有穷性</td><td>有限步后结束，每一步都在有限时间内完成</td></tr>
+<tr><td>确定性</td><td>每条指令含义明确，无二义性；相同输入得到相同结果</td></tr>
+<tr><td>可行性</td><td>每一步都能通过有限次基本运算实现</td></tr>
+<tr><td>输入</td><td>有零个或多个输入</td></tr>
+<tr><td>输出</td><td>有一个或多个输出</td></tr>
+</tbody>
+</table></div>
+<p>“程序”不一定满足有穷性（操作系统就是无限循环），所以<strong>程序 ≠ 算法</strong>。好算法还要追求正确性、可读性、健壮性、高效率和低存储需求。</p>
+<p><strong>时间复杂度</strong>看基本操作执行次数随问题规模 n 的增长数量级；<strong>空间复杂度</strong>看除输入外额外辅助空间随 n 的增长数量级。递归算法的空间复杂度要算递归调用栈的深度。</p>
+<div class="article-table"><table>
+<thead><tr><th>记号</th><th>含义</th><th>例子</th></tr></thead>
+<tbody>
+<tr><td>O</td><td>渐进上界</td><td>3n²+2n+1 = O(n²)</td></tr>
+<tr><td>Ω</td><td>渐进下界</td><td>n² = Ω(n²)</td></tr>
+<tr><td>Θ</td><td>渐进紧确界</td><td>3n²+2n = Θ(n²)</td></tr>
+</tbody>
+</table></div>
+<p>常见数量级从小到大：<strong>O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n²) &lt; O(2ⁿ) &lt; O(n!)</strong>。408 选择题常要求“看循环/递归直接判阶”，具体计数方法见下一考点。</p>
+</div>
+<p class="article-source">内容整理自 408 数据结构基本概念与算法基础；例题归入真题板块。</p>

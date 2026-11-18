@@ -1,6 +1,13 @@
 <div class="article-content">
 <h2 id="41">4.1 指令系统</h2>
 <p>一条指令通常由操作码和地址码组成；地址码可以只有一个，也可以有多个。按指令字长和字段划分，可以先把基本结构理清。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="R 型与 I 型指令的字段划分，以及立即数、直接、间接、寄存器间接、相对、基址/变址寻址的 EA 计算" data-src="/408-review/assets/img/coa-instruction-format.svg" href="/408-review/assets/img/coa-instruction-format.svg">
+<img alt="指令格式与寻址方式示意图：R 型字段、I 型字段和常见有效地址公式" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-instruction-format.svg"/>
+</a>
+<figcaption>先数“操作码/寄存器/地址/立即数”各占多少位，再套对应寻址方式的 EA 公式；字段位数决定指令条数和寄存器个数上限。</figcaption>
+</figure>
+<p><strong>例：</strong>某机指令 16 位，操作码 4 位、寄存器编号各 3 位、剩余为立即数。则最多 $2^4=16$ 条指令、$2^3=8$ 个寄存器，立即数字段 $16-4-3-3=6$ 位；若立即数用补码，可表示 $-32\sim31$。</p>
 <p><strong>基本字段。</strong></p>
 <ul>
 <li><strong>操作码 OP</strong>：决定执行何种操作；操作码占 $n$ 位时，最多可表示 $2^n$ 条指令。</li>

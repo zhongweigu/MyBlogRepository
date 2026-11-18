@@ -71,6 +71,13 @@
 </table></div>
 <p><strong>只有"父红叔红"会向上传递</strong>：父、叔变黑、祖父变红后，祖父可能和它的父亲（曾祖父）形成新的红-红，所以要把祖父当作新的当前结点继续看一层。若祖父是根，直接染黑结束。</p>
 <p><strong>"父红叔黑"不会向上传递</strong>：旋转后子树根变成黑色，它的两个孩子（原父亲、原祖父）是红色；子树内部已经恢复红黑性质，且子树根为黑，不会和上层冲突。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="红黑树示意：根为黑，红结点的孩子必须为黑，从根到每个 NIL 叶子的黑结点数相同；插入后通过变色和旋转恢复性质" data-src="/408-review/assets/img/ds-red-black.svg" href="/408-review/assets/img/ds-red-black.svg">
+<img alt="红黑树示意图：黑色根、红色子结点与 NIL 黑叶子，展示颜色约束" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-red-black.svg"/>
+</a>
+<figcaption>红黑树首先是一棵 BST；颜色约束把最长路径限制在最短路径的 2 倍以内。</figcaption>
+</figure>
+<p><strong>插入例：</strong>依次插入 10、20、30。10 染黑作根；20 染红作右孩子；30 染红接在 20 右边，出现“父红、叔黑、右-右”冲突。以 10 为轴左旋，20 成为根，10 和 30 成为它的左右孩子；最后把 20 染黑、10/30 保持红色。旋转 1 次，红黑性质恢复。</p>
 <p>红黑树插入的<strong>旋转最多两次</strong>，但"父红叔红"的变色可能沿路径向上传播 $O(\log n)$ 层。最后别忘了把根染黑。</p>
 <h3 id="vs-avl">红黑树 vs AVL</h3>
 <p><strong>设计目的</strong>：红黑树是为了解决 AVL 维护起来比较麻烦的问题——用稍松的平衡换取更少的旋转，尤其适合插入、删除频繁的场景。</p>

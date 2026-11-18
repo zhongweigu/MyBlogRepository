@@ -1,26 +1,76 @@
+<div class="article-content">
+<p>特殊矩阵压缩存储的核心不是“背一张图”，而是回答两个问题：<strong>原来矩阵里哪些位置有值</strong>、<strong>这些值按什么顺序塞进一维数组</strong>。只要能把二维下标 $(i,j)$ 映射成一维下标 $k$，就完成了压缩。</p>
+
 <details class="article-toc">
 <summary>本页目录 <span>5 节</span></summary>
-<div class="toc">
-<ul>
-<li><a href="#7-">考点7-稀疏矩阵</a><ul>
-<li><a href="#_1">稀疏矩阵的存储</a></li>
-<li><a href="#_2">特殊矩阵的存储</a></li>
-<li><a href="#_3">对称矩阵</a></li>
-<li><a href="#_4">三角矩阵 / 对角（带状）矩阵</a></li>
-</ul>
-</li>
-</ul>
-</div>
+<div class="toc"><ul>
+<li><a href="#matrix-2d">一、二维数组的地址计算</a></li>
+<li><a href="#matrix-sparse">二、稀疏矩阵：三元组表与十字链表</a></li>
+<li><a href="#matrix-sym">三、对称矩阵</a></li>
+<li><a href="#matrix-tri">四、三角矩阵与三对角矩阵</a></li>
+<li><a href="#matrix-pitfalls">五、易错点与收束</a></li>
+</ul></div>
+</details>
 
-</details><div class="article-content">
-<h2 id="7-">考点7-稀疏矩阵</h2>
-<h3 id="_1">稀疏矩阵的存储</h3>
-<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="稀疏矩阵的两种存储方式：三元组表、十字链表" data-src="/408-review/assets/textbook/ds-sparse-matrix-storage.webp" href="/408-review/assets/textbook/ds-sparse-matrix-storage.webp"><img alt="稀疏矩阵的两种存储方式：三元组表、十字链表" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-sparse-matrix-storage.webp"/></a><figcaption>稀疏矩阵的两种存储方式：三元组表、十字链表</figcaption></figure>
-<h3 id="_2">特殊矩阵的存储</h3>
-<h3 id="_3">对称矩阵</h3>
-<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="对称矩阵：按行/列优先，只存上三角或下三角（含对角线）" data-src="/408-review/assets/textbook/ds-symmetric-matrix.webp" href="/408-review/assets/textbook/ds-symmetric-matrix.webp"><img alt="对称矩阵：按行/列优先，只存上三角或下三角（含对角线）" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-symmetric-matrix.webp"/></a><figcaption>对称矩阵：按行/列优先，只存上三角或下三角（含对角线）</figcaption></figure>
-<h3 id="_4">三角矩阵 / 对角（带状）矩阵</h3>
-<p>存储思路和对称矩阵一样，也是按行优先或列优先压缩进一维数组。</p>
-<figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption='A[i][j] 在一维数组中的下标：下标从 0 开始看"前面有几个元素"，从 1 开始看"它是第几个元素"' data-src="/408-review/assets/textbook/ds-compressed-array-index.webp" href="/408-review/assets/textbook/ds-compressed-array-index.webp"><img alt='A[i][j] 在一维数组中的下标：下标从 0 开始看"前面有几个元素"，从 1 开始看"它是第几个元素"' class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-compressed-array-index.webp"/></a><figcaption>A[i][j] 在一维数组中的下标：下标从 0 开始看"前面有几个元素"，从 1 开始看"它是第几个元素"</figcaption></figure>
+<h2 id="matrix-2d">一、二维数组的地址计算</h2>
+<p>设二维数组 $A$ 有 $m$ 行、$n$ 列，元素大小为 $L$，首元素 $A[0][0]$ 的地址为 $LOC(0,0)$，下标从 0 开始。</p>
+<div class="article-table"><table>
+<thead><tr><th>存储方式</th><th>地址公式</th><th>理解</th></tr></thead>
+<tbody>
+<tr><td>行优先</td><td>$LOC(i,j)=LOC(0,0)+(i\times n+j)\times L$</td><td>先存完前 $i$ 行（每行 $n$ 个），再存本行前 $j$ 个</td></tr>
+<tr><td>列优先</td><td>$LOC(i,j)=LOC(0,0)+(j\times m+i)\times L$</td><td>先存完前 $j$ 列（每列 $m$ 个），再存本列前 $i$ 个</td></tr>
+</tbody>
+</table></div>
+<p>例：$m=3,n=4,L=4$，行优先时 $A[1][2]$ 的偏移是 $(1\times4+2)\times4=24$ 字节；列优先时是 $(2\times3+1)\times4=28$ 字节。C 语言二维数组按行优先存储，Fortran 默认按列优先。</p>
+
+<h2 id="matrix-sparse">二、稀疏矩阵：三元组表与十字链表</h2>
+<p>稀疏矩阵中非零元素很少，若仍存整个 $m\times n$ 矩阵会浪费大量空间。常见做法是只存非零元素：</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="稀疏矩阵的两种存储方式：三元组表按（行号，列号，值）顺序存非零元；十字链表把同一行、同一列的非零元串成链表" data-src="/408-review/assets/textbook/ds-sparse-matrix-storage.webp" href="/408-review/assets/textbook/ds-sparse-matrix-storage.webp">
+<img alt="稀疏矩阵的两种存储方式：三元组表与十字链表" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-sparse-matrix-storage.webp"/>
+</a>
+<figcaption>三元组表适合按行/列顺序扫描；十字链表适合频繁插入、删除非零元。</figcaption>
+</figure>
+<ul>
+<li><strong>三元组表</strong>：每个非零元存 `(i, j, value)`，通常再存总行数、总列数、非零元个数；可按行优先排列，也可按列优先排列。</li>
+<li><strong>十字链表</strong>：每个非零元结点含行、列、值、行指针、列指针；每行/每列各有一个头结点，形成十字交叉的链表。</li>
+</ul>
+<p>三元组表顺序存储、结构简单；十字链表用指针换灵活，适合非零元动态变化。若题目只问“怎样压缩”，先答三元组表；若问“插入/删除方便”，答十字链表。</p>
+
+<h2 id="matrix-sym">三、对称矩阵</h2>
+<p>对称矩阵满足 $A[i][j]=A[j][i]$，因此只需存下三角（含对角线）或上三角。以 $n\times n$ 矩阵、行优先存<strong>下三角</strong>、下标从 0 开始为例：</p>
+<pre><code class="language-text">若 i ≥ j：k = i(i+1)/2 + j
+若 i &lt; j：交换 i、j 后代入上式（利用对称性）</code></pre>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="对称矩阵：按行优先只存下三角（含对角线），第 i 行前面有 i 行，共 1+2+…+i 个元素" data-src="/408-review/assets/textbook/ds-symmetric-matrix.webp" href="/408-review/assets/textbook/ds-symmetric-matrix.webp">
+<img alt="对称矩阵压缩存储示意图：只存下三角，按行优先映射到一维数组" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-symmetric-matrix.webp"/>
+</a>
+<figcaption>下三角第 $i$ 行有 $i+1$ 个元素；它前面的 $0\sim i-1$ 行共有 $1+2+\cdots+i=i(i+1)/2$ 个元素。</figcaption>
+</figure>
+<p>例子：$n=4$，$A[2][1]$ 的下标 $k=2\times3/2+1=4$；$A[1][2]$ 利用对称性等价于 $A[2][1]$，也存到 $k=4$。一维数组只需 $n(n+1)/2$ 个元素，而不是 $n^2$ 个。</p>
+
+<h2 id="matrix-tri">四、三角矩阵与三对角矩阵</h2>
+<p><strong>下三角矩阵</strong>（上三角全为常数 $c$）：下三角部分与对称矩阵的下三角公式相同，$k=i(i+1)/2+j$；最后再单独存一个常数 $c$，数组长度 $n(n+1)/2+1$。</p>
+<p><strong>上三角矩阵</strong>（下三角全为常数 $c$）：按行优先存上三角，第 $i$ 行从 $j=i$ 到 $n-1$，前面共有</p>
+<pre><code class="language-text">k = i*n - i(i-1)/2 + (j-i)     // i ≤ j
+数组长度 = n(n+1)/2 + 1</code></pre>
+<p><strong>三对角（带状）矩阵</strong>：只有主对角线及上下各一条对角线非零，即 $|i-j|\le1$。按行优先存这三条带，第 $i$ 行最多 3 个元素：</p>
+<pre><code class="language-text">k = 2i + j        // j = i-1, i, i+1（边界行除外）
+数组长度 = 3n - 2</code></pre>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="压缩数组下标：从 0 开始看“前面有几个元素”，从 1 开始看“它是第几个元素”；下标换算要先把两种口径分清" data-src="/408-review/assets/textbook/ds-compressed-array-index.webp" href="/408-review/assets/textbook/ds-compressed-array-index.webp">
+<img alt="压缩数组下标换算示意图：二维下标映射到一维数组，0 基与 1 基的差别" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-compressed-array-index.webp"/>
+</a>
+<figcaption>所有公式都依赖“下标从 0 还是从 1 开始”；先看题目口径，再套公式。</figcaption>
+</figure>
+
+<h2 id="matrix-pitfalls">五、易错点与收束</h2>
+<ul>
+<li><strong>“对称矩阵存整个矩阵”</strong>：只需存一半，长度约 $n(n+1)/2$，不是 $n^2$。</li>
+<li><strong>“上三角和下三角公式一样”</strong>：下三角按行优先是 $i(i+1)/2+j$；上三角要按它前面的完整行/列重新推，不能直接套。</li>
+<li><strong>“三对角矩阵有 3n 个元素”</strong>：边界两行只有 2 个，长度是 $3n-2$。</li>
+<li><strong>“稀疏矩阵压缩后一定省空间”</strong>：三元组每个元素还要存行、列，非零元很多时不一定省；稀疏才适合压缩。</li>
+</ul>
+<p>把这一节收成一句话：<strong>二维数组先定行/列优先；对称/三角利用重复元素只存一半；三对角只存三条带；稀疏矩阵用三元组或十字链表存非零元。</strong></p>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>
+<p class="article-source">内容整理自 408 数据结构线性表与数组部分；例题归入真题板块。</p>

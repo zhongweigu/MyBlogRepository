@@ -29,6 +29,13 @@
 <li>森林里的结点<strong>没有右兄弟</strong>、或者根结点<strong>没有下一个根</strong>，对应到二叉树上就是：这个结点<strong>没有右孩子</strong>。</li>
 <li>二叉树上<strong>没有右孩子</strong>的结点，正好是每个<strong>非终端结点的最后一个孩子</strong>，再加上<strong>根链最末尾的那个结点</strong>（它没有下一个根）。</li>
 </ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="树转二叉树：根 A 的孩子 B、C、D 依次变成左孩子、右兄弟；B 的孩子 E、F 也按“左孩子、右兄弟”挂到 B 下面" data-src="/408-review/assets/img/ds-tree-forest.svg" href="/408-review/assets/img/ds-tree-forest.svg">
+<img alt="树转二叉树示意图：根 A 的孩子 B、C、D 依次变成左孩子与右兄弟，B 的孩子 E、F 按同样规则转换" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-tree-forest.svg"/>
+</a>
+<figcaption>转换口诀：<strong>左孩子、右兄弟</strong>。原树的第一个孩子变左孩子，其余孩子依次串成右兄弟。</figcaption>
+</figure>
+<p>例：树根 A 的孩子为 B、C、D，B 的孩子为 E、F。转换后 A 的左孩子是 B，B 的左孩子是 E、右孩子是 C，E 的右孩子是 F，C 的右孩子是 D。原来“A 的三个孩子”变成了“B 的右兄弟链 B→C→D”。</p>
 <p>遍历的对应关系也是同一套转换带来的：</p>
 <div class="article-table"><table>
 <thead>

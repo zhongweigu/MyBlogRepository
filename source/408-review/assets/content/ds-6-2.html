@@ -92,7 +92,7 @@
 <p>各算法的最好 / 最坏 / 平均时间复杂度和空间复杂度，直接看课件这张表：</p>
 <figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="内部排序时空复杂度总表：直接插入、冒泡最好 O(n)、最坏/平均 O(n²)、空间 O(1)；简单选择全 O(n²)、空间 O(1)；快速最好/平均 O(n log n)、最坏 O(n²)、空间 O(log n)~O(n)；堆全 O(n log n)、空间 O(1)；归并全 O(n log n)、空间 O(n)；基数 O(d(n+r))、空间 O(r)；表底注明时间复杂度与初始状态无关的是简单选择、堆、归并、基数" data-src="/408-review/assets/textbook/ds-sorting-complexity-summary.webp" href="/408-review/assets/textbook/ds-sorting-complexity-summary.webp"><img alt="内部排序时空复杂度总表：直接插入、冒泡最好 O(n)、最坏/平均 O(n²)、空间 O(1)；简单选择全 O(n²)、空间 O(1)；快速最好/平均 O(n log n)、最坏 O(n²)、空间 O(log n)~O(n)；堆全 O(n log n)、空间 O(1)；归并全 O(n log n)、空间 O(n)；基数 O(d(n+r))、空间 O(r)；表底注明时间复杂度与初始状态无关的是简单选择、堆、归并、基数" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-sorting-complexity-summary.webp"/></a><figcaption>内部排序时空复杂度总表：直接插入、冒泡最好 O(n)、最坏/平均 O(n²)、空间 O(1)；简单选择全 O(n²)、空间 O(1)；快速最好/平均 O(n log n)、最坏 O(n²)、空间 O(log n)~O(n)；堆全 O(n log n)、空间 O(1)；归并全 O(n log n)、空间 O(n)；基数 O(d(n+r))、空间 O(r)；表底注明时间复杂度与初始状态无关的是简单选择、堆、归并、基数</figcaption></figure>
 <blockquote>
-<p>注：课件这张表只列了 7 个代表算法，没列折半插入和希尔排序——折半插入最好 O(n log n)、最坏 / 平均 O(n²)、空间 O(1)；希尔依赖增量序列，最坏 O(n²)、平均约 O(n^1.3)、空间 O(1)，且不稳定。</p>
+<p>注：课件这张表只列了 7 个代表算法，没列折半插入和希尔排序。折半插入的<strong>比较次数</strong>是 O(n log n)，但插入仍要移动元素，<strong>总时间最好/平均/最坏都是 O(n²)</strong>，空间 O(1)；希尔依赖增量序列，最坏 O(n²)、平均约 O(n^1.3)、空间 O(1)，且不稳定。不要把“比较次数”误当成“总时间”。</p>
 </blockquote>
 <h3 id="_3">一趟排序能确定一个元素最终位置的算法</h3>
 <div class="article-table"><table>

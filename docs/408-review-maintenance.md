@@ -24,7 +24,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v43/
+│   ├── js-v44/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -70,7 +70,7 @@ source/408-review/
 
 先看 `data/meta.js` 里的 `CHAPTERS`：
 
-- 数据结构 6 章：`ds-1` 复杂度、`ds-2` 线性、`ds-3` 树、`ds-4` 图、`ds-5` 查找、`ds-6` 排序
+- 数据结构 6 章：`ds-1` 基本概念与复杂度、`ds-2` 线性、`ds-3` 树、`ds-4` 图、`ds-5` 查找、`ds-6` 排序
 - 组成原理 6 章：`coa-1` 概述、`coa-2` 数据表示、`coa-3` 存储、`coa-4` 指令与 CPU、`coa-5` 总线、`coa-6` 输入/输出
 - 操作系统：`os-1` 概述（发展分类、CPU 模式、系统调用、OS 引导、虚拟机）；`os-2` 进程与线程（进程控制、线程、调度指标、调度算法、同步互斥、死锁）
 
@@ -108,7 +108,7 @@ source/408-review/
 
 **A. 从站内帖子生成（推荐，适用于已有帖子）**
 
-`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线概念）、`coa-5-2`（总线结构/事务/定时）、`coa-6-1`（I/O 接口与端口）、`coa-6-2`（I/O 方式与 DMA）、`coa-6-3`（中断完整流程）和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6`、`os-3-1` 到 `os-3-5`、`os-4-1` 到 `os-4-4`、`os-5-1` 到 `os-5-9` 是手写文件，脚本会跳过、不要覆盖：
+`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线概念）、`coa-5-2`（总线结构/事务/定时）、`coa-6-1`（I/O 接口与端口）、`coa-6-2`（I/O 方式与 DMA）、`coa-6-3`（中断完整流程）和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6`、`os-3-1` 到 `os-3-5`、`os-4-1` 到 `os-4-4`、`os-5-1` 到 `os-5-9`、`ds-1-3` 是手写文件，脚本会跳过、不要覆盖：
 
 ```powershell
 python scripts/build-review-content.py
@@ -220,8 +220,8 @@ python scripts/build-review-content.py
 
 ### 3.7 复习库（术语 + 流程）与图解库
 
-- `data/review-terms.js`：237 个术语，每项 `{ t, d, topic }`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
-- `data/review-flows.js`：85 个流程，每项 `{ t, topic, steps }`；步骤要能按顺序复述。
+- `data/review-terms.js`：245 个术语，每项 `{ t, d, topic }`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
+- `data/review-flows.js`：87 个流程，每项 `{ t, topic, steps }`；步骤要能按顺序复述。
 - `#/glossary` 现在是**完整复习库**：上面是术语库、下面是流程库，支持科目筛选和搜索；顶部导航标签为「复习库」。
 - 旧的 `data/glossary.js`（`CORE_TERMS` / 自动抽取）不再被页面使用，不要继续往里加；新词加到 `review-terms.js`。
 - `data/diagrams.js`：`DIAGRAMS` 每项字段：
@@ -323,7 +323,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 5. **写成学习卡**：背诵清单（能直接背的短句）→ 理解（推导、例子、表格、图）→ 考场答法（怎么开头、怎么收口、易错）。正文里**不放完整例题**。
 6. **题目入库**：能自动识别的走 `scripts/extract-questions.py`；裸题补到 `questions-manual-extra.js`。每题写 `topics`、答案和解析；解析最后一句尽量点出“这题在考哪个考点”。同时从正文里删掉这道题。
 7. **顺手更新复习库/图解**：新术语加到 `review-terms.js`，新流程加到 `review-flows.js`；新代表图加到 `DIAGRAMS`。
-8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 84 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
+8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 85 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
 9. **提交**：源帖不改；只提交复习台、脚本和手册相关文件。
 
 ---
@@ -419,11 +419,12 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `os-3` 是从第二章同步互斥拆出的 **PV 专题**，不是教材第三章内存管理；`os-3-1` 讲三类模型与五步法，`os-3-2` / `os-3-3` / `os-3-4` 分别对应生产者-消费者、读者-写者、哲学家，`os-3-5` 收束做题策略。
 - `os-3` 的代码块用 `class="language-c"`，由 `extract-code.py` 收进代码库的「操作系统」章节；改 PV 代码后要重跑脚本。
 - `os-4` 是教材**第三章内存管理**，站点编号排在 PV 专题之后；图片在 `assets/textbook/`：`os-mem-paging.webp`、`os-mem-segmentation.webp`、`os-mem-segments.webp`（段页式的段内分页图）、`os-mem-segpage.webp`、`os-mem-partition-table.webp`、`os-mem-free-list.webp`，按段落插入。
-- `os-5` 文件管理图片在 `assets/textbook/`：`os-file-index.webp`、`os-file-index-seq.webp`、`os-file-contiguous.webp`、`os-file-implicit-link.webp`、`os-file-explicit-link.webp`、`os-file-single-index.webp`、`os-file-multi-index.webp`、`os-file-free-table.webp`、`os-file-free-list.webp`、`os-file-bitmap.webp`、`os-file-group-link.webp`、`os-file-hardlink.webp`、`os-file-softlink.webp`、`os-file-inode.webp`；布局/VFS/挂载图是 `assets/img/os-fs-layout.svg`、`os-vfs.svg`、`os-mount.svg`。
+- `os-5` 文件管理图片在 `assets/textbook/`：`os-file-index.webp`、`os-file-index-seq.webp`、`os-file-contiguous.webp`、`os-file-implicit-link.webp`、`os-file-explicit-link.webp`、`os-file-single-index.webp`、`os-file-multi-index.webp`、`os-file-free-table.webp`、`os-file-free-list.webp`、`os-file-bitmap.webp`、`os-file-group-link.webp`、`os-file-hardlink.webp`、`os-file-softlink.webp`、`os-file-inode.webp`；布局/VFS/挂载图是 `assets/img/os-fs-layout.svg`、`os-vfs.svg`、`os-mount.svg`；本轮新增的图有 `ds-threaded-tree.svg`、`ds-graph-storage.svg`、`coa-hamming.svg`、`coa-memory-hierarchy.svg`、`coa-instruction-format.svg`。
 - 科目主题色为紫（`--violet`）。`views/map.js` / `chapter.js` / `topic.js` / `runner.js` / `questions.js` 都通过 `ui.js` 的 `subjectClass()` 取 `is-os`，新增科目时不要再写 `coa ? is-coa : is-ds` 的三元。
 - 已录入 71 道 OS 真题（14 道概述/进程题 + 9 道 PV 综合题 + 16 道内存管理题 + 32 道文件管理题），题库存量为 236；文件题在 `data/questions-file.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` / `os-2` / `os-3` / `os-4` / `os-5`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加 `os-6` 等章节、在 `os.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
 

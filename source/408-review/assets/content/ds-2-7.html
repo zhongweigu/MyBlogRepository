@@ -1,12 +1,75 @@
 <div class="article-content">
-<h2 id="6-">考点6-队列的应用</h2>
-<p>这部分一般出选择题，记住下面几组场景就够了。</p>
-<p><strong>用队列辅助实现的算法</strong>：二叉树的层次遍历、BFS、BFS 求单源最短路径。</p>
-<p><strong>队列的常用场景</strong>：</p>
-<ol>
-<li>要求<strong>公平调度</strong>：就绪队列、阻塞队列、各种请求队列等；</li>
-<li>需要<strong>排队处理数据的缓冲区</strong>；</li>
-<li><strong>多级反馈队列</strong>调度算法。</li>
-</ol>
+<p>队列是“先进先出”的线性表：只允许在一端插入（队尾 rear），在另一端删除（队头 front）。它本身不难，408 主要考三件事：<strong>顺序/循环/链式队列的判空判满</strong>、<strong>队列在算法中的角色</strong>、<strong>BFS 为什么需要队列</strong>。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>4 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#queue-adt">一、队列的 ADT 与三种实现</a></li>
+<li><a href="#queue-app">二、队列的典型应用</a></li>
+<li><a href="#queue-bfs">三、BFS 与“无权图最短路”</a></li>
+<li><a href="#queue-pitfalls">四、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="queue-adt">一、队列的 ADT 与三种实现</h2>
+<pre><code class="language-text">ADT Queue {
+    InitQueue(&amp;Q)
+    QueueEmpty(Q)
+    EnQueue(&amp;Q, x)   // 入队，队尾
+    DeQueue(&amp;Q, &amp;x) // 出队，队头
+    GetHead(Q, &amp;x)
+} ADT Queue</code></pre>
+<div class="article-table"><table>
+<thead><tr><th>实现</th><th>结构</th><th>判空/判满</th><th>特点</th></tr></thead>
+<tbody>
+<tr><td>顺序队列</td><td>数组 + front/rear</td><td>front==rear 空；rear==MAXSIZE 溢出</td><td>简单，但会出现“假溢出”</td></tr>
+<tr><td>循环队列</td><td>数组首尾相接</td><td>牺牲一个单元/设 tag/设 size</td><td>解决假溢出，408 最常考</td></tr>
+<tr><td>链队列</td><td>带头尾指针的链表</td><td>front==NULL 或 front==rear</td><td>动态增长，入队 O(1)</td></tr>
+</tbody>
+</table></div>
+<p>顺序队列的“假溢出”不是真满：出队让 front 后移，前面空出位置，但 rear 已到数组末尾，不能绕回。循环队列把 `rear = (rear+1) % MAXSIZE`，空出的位置就能继续用。</p>
+<p>循环队列的判空/判满有三种常用方案：</p>
+<ul>
+<li><strong>牺牲一个单元</strong>：最多存 MAXSIZE−1 个元素；队空 `front==rear`，队满 `(rear+1)%M==front`（rear 指向队尾下一个位置时）。</li>
+<li><strong>设 tag</strong>：`front==rear` 时，tag=0 为空、tag=1 为满；入队置 1，出队置 0。</li>
+<li><strong>设 size</strong>：直接记录元素个数，size==0 空、size==M 满。</li>
+</ul>
+<p>链队列通常带<strong>头结点</strong>：front 指向头结点，rear 指向队尾结点；入队在 rear 后插，出队删 front 的后继。注意只有一个元素时出队后要把 rear 重新指回头结点，否则 rear 会悬空。</p>
+
+<h2 id="queue-app">二、队列的典型应用</h2>
+<div class="article-table"><table>
+<thead><tr><th>场景</th><th>为什么用队列</th></tr></thead>
+<tbody>
+<tr><td>二叉树的层次遍历</td><td>按“一层一层”的顺序处理，先访问的结点先展开孩子</td></tr>
+<tr><td>图的 BFS</td><td>先发现的顶点先扩展，保证按距离层次访问</td></tr>
+<tr><td>操作系统的就绪/阻塞/设备请求队列</td><td>按到达顺序排队，保证公平</td></tr>
+<tr><td>缓冲区/打印队列</td><td>生产者放入、消费者按 FIFO 取出</td></tr>
+<tr><td>多级反馈队列调度</td><td>多个就绪队列按优先级和轮转规则排队</td></tr>
+</tbody>
+</table></div>
+<p>队列在算法题里通常不是“目的”，而是<strong>维护“待处理顺序”的容器</strong>：谁先进队列，谁就先被扩展。BFS、层序遍历、拓扑排序（入度为 0 的顶点队列）都是这个思想。</p>
+
+<h2 id="queue-bfs">三、BFS 与“无权图最短路”</h2>
+<p>BFS 从起点开始，先访问所有距离为 1 的顶点，再访问距离为 2 的顶点……它用队列保证“先发现的先扩展”。在<strong>无权图</strong>（或所有边权相同）中，BFS 第一次到达某顶点时经过的边数就是最短路径长度。</p>
+<pre><code class="language-text">BFS(G, s):
+    visited[s] = true; Q.push(s)
+    while Q 非空:
+        u = Q.pop()
+        for v in Adj(u):
+            if not visited[v]:
+                visited[v] = true
+                dist[v] = dist[u] + 1
+                Q.push(v)</code></pre>
+<p><strong>关键限定</strong>：普通 BFS 只适用于<strong>无权图/边权相等</strong>的最短路；带权图（边权不全相同）要用 Dijkstra/Floyd，不能直接套 BFS。若题目说“BFS 求单源最短路径”，默认图是无权的。</p>
+<p>例：无权图 $s\to a,s\to b,a\to c,b\to c$。BFS 顺序是 $s,a,b,c$，$dist[c]=2$（$s\to a\to c$ 或 $s\to b\to c$），不会因为 $c$ 先被 $b$ 发现就得到更长路径。</p>
+
+<h2 id="queue-pitfalls">四、易错点与收束</h2>
+<ul>
+<li><strong>“队列就是先进先出，所以任何最短路都能用 BFS”</strong>：错；BFS 只保证无权图/等权图的最短路。</li>
+<li><strong>“循环队列 front==rear 一定是空”</strong>：不一定，也可能是满；要结合牺牲单元/tag/size 的约定。</li>
+<li><strong>“链队列出队只改 front”</strong>：删除最后一个结点时还要把 rear 指回头结点。</li>
+<li><strong>“队列只能用于 BFS”</strong>：队列还用于层序遍历、拓扑排序、缓冲区、调度等。</li>
+</ul>
+<p>把这一节收成一句话：<strong>队列维护“先来先处理”的顺序；循环队列解决假溢出；BFS 用队列做层次扩展，但只有无权图才能直接当最短路。</strong></p>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>
+<p class="article-source">内容整理自 408 数据结构栈、队列和数组部分；BFS 例题为教学示例。</p>

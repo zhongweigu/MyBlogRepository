@@ -1,49 +1,110 @@
+<div class="article-content">
+<p>校验码要解决的是“数据在存储/传输中变了，能不能发现、能不能纠正”。奇偶校验只查错，海明码能纠一位错，CRC 适合长数据块检错；三者不是互相替代，而是代价和能力不同。</p>
+
 <details class="article-toc">
 <summary>本页目录 <span>5 节</span></summary>
-<div class="toc">
-<ul>
-<li><a href="#_1">九、数据校验码</a><ul>
-<li><a href="#_2">差错</a></li>
-<li><a href="#_3">奇偶校验码</a></li>
-<li><a href="#_4">海明码</a></li>
-<li><a href="#_7">循环冗余校验</a></li>
-</ul>
-</li>
-</ul>
-</div>
+<div class="toc"><ul>
+<li><a href="#check-basic">一、差错、检错与纠错</a></li>
+<li><a href="#check-parity">二、奇偶校验</a></li>
+<li><a href="#check-hamming">三、海明码</a></li>
+<li><a href="#check-crc">四、循环冗余校验 CRC</a></li>
+<li><a href="#check-pitfalls">五、对比与易错点</a></li>
+</ul></div>
+</details>
 
-</details><div class="article-content">
-<h2 id="_1">九、数据校验码</h2>
-<h3 id="_2">差错</h3>
-<p><strong>差错</strong>：数据在计算机内部进行计算、存取和传送过程中，由于元器件故障或噪音干扰等原因，会出现差错</p>
-<p>​   硬故障：<strong>永久性的物理故障</strong>，由恶劣的环境、制造缺陷和旧损引起</p>
-<p>​   软故障：<strong>随机非破坏性事件</strong>，由电源问题或α粒子引起</p>
-<p><strong>纠错</strong>：使用函数f对<strong>操作前后的数据</strong>D和D‘生成校验码C和C‘’，将C‘’与C‘比较，相同则输出D’；不同则校正；若无法校正就报告</p>
-<h3 id="_3">奇偶校验码</h3>
-<p>增加1位校验码来表示数据中<strong>1的数量</strong>是奇数还是偶数</p>
-<blockquote>
-<p>优点：代价低，只需要 1 位额外数据，计算简单</p>
-<p>缺点：不能发现出错位数为偶数的情形；不能纠错</p>
-<p>适用：对较短长度（1B）的数据进行检错</p>
-</blockquote>
-<h3 id="_4">海明码</h3>
-<p>将数据分成几组，对每一组都使用奇偶校验码进行检错</p>
-<h4 id="_5">校验码位数的确定：</h4>
-<p>假设校验码K位，可以表示$2^K$种状态。 数据有M位，每次出错一位的话，一共M种情况；校验码K位，每次出错一位的话，一共K种情况； 还有可能不出错，1种情况。
-$$
-2^K \geq M + K + 1
-$$
-根据M求最小的K</p>
-<h4 id="_6">校验码位置：</h4>
-<p>Ci是对应的<strong>故障字</strong>第i位为1的数据位的异或值</p>
-<p>将C’‘和C’异或后的结果是<strong>故障字</strong>，与上表对照得知哪一位出错</p>
-<p><strong>码距：同一编码中，任意两个合法编码之间不同二进制数位数的最小值</strong></p>
-<p>纠错理论：𝑳 − 𝟏 = 𝑫 + 𝑪, 𝑫 ≥ 𝑪（𝐿是码距， 𝐷是检错位数， 𝐶是纠错位数）</p>
-<blockquote>
-<p>优点：1位错误时可以纠错</p>
-<p>缺点：额外成本很大；要求把数据分为字节</p>
-</blockquote>
-<h3 id="_7">循环冗余校验</h3>
-<p>适用于以流格式存储和传输大量数据</p>
+<h2 id="check-basic">一、差错、检错与纠错</h2>
+<ul>
+<li><strong>硬故障</strong>：永久性物理故障，如器件损坏、断线；</li>
+<li><strong>软故障</strong>：随机、非破坏性事件，如电源波动、α 粒子、噪声；</li>
+<li><strong>检错</strong>：判断数据是否出错，但不一定知道哪一位错；</li>
+<li><strong>纠错</strong>：不仅能发现错误，还能定位并改正（通常只能纠少量位）。</li>
+</ul>
+<p>校验的基本做法是：发送端用数据 $D$ 按约定函数生成校验位 $C$，组成码字 $D\parallel C$；接收端用同样规则重新计算 $C'$，比较 $C$ 与 $C'$。若不同，说明检测到错误；海明码还能用“故障字”指出出错位。</p>
+<p><strong>码距</strong>：同一编码中任意两个合法码字之间不同二进制位的最小值。码距 $L$ 与检错位数 $D$、纠错位数 $C$ 的关系是</p>
+<p>$$L-1\ge D+C,\qquad D\ge C$$</p>
+<p>直观理解：码距越大，合法码字之间隔得越远，越容易发现/纠正偏离。</p>
+
+<h2 id="check-parity">二、奇偶校验</h2>
+<p>增加 1 位校验位，使整个码字中 1 的个数为奇数（奇校验）或偶数（偶校验）。</p>
+<div class="article-table"><table>
+<thead><tr><th>类型</th><th>规则</th><th>例子（数据 1011）</th></tr></thead>
+<tbody>
+<tr><td>偶校验</td><td>数据+校验位中 1 的个数为偶数</td><td>1011 已有 3 个 1，校验位取 1 → 10111</td></tr>
+<tr><td>奇校验</td><td>数据+校验位中 1 的个数为奇数</td><td>1011 已有 3 个 1，校验位取 0 → 10110</td></tr>
+</tbody>
+</table></div>
+<p>奇偶校验只能发现<strong>奇数位</strong>出错；偶数位同时出错会互相抵消，而且不能定位、不能纠错。它代价低，适合短数据或作为其他校验的辅助。</p>
+
+<h2 id="check-hamming">三、海明码</h2>
+<p>海明码把数据位分成若干组，每组配一个校验位，用多组奇偶校验的“症状”定位错误。设数据位 $m$ 位、校验位 $k$ 位，要能指出“哪一位错”或“没错”，需要：</p>
+<p>$$2^k\ge m+k+1$$</p>
+<p>校验位放在 $2^0,2^1,2^2,\dots$ 的位置（1、2、4、8…），其余位置放数据位。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="海明码（7,4）位置：1、2、4 为校验位，3、5、6、7 为数据位；P1 校验 1/3/5/7，P2 校验 2/3/6/7，P4 校验 4/5/6/7" data-src="/408-review/assets/img/coa-hamming.svg" href="/408-review/assets/img/coa-hamming.svg">
+<img alt="海明码 7 位码字的位置分配：1、2、4 是校验位，3、5、6、7 是数据位；三组校验覆盖关系" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-hamming.svg"/>
+</a>
+<figcaption>每个数据位被多个校验位覆盖；出错时各组的校验结果组成故障字，其值就是出错位号。</figcaption>
+</figure>
+<p><strong>例：数据 1011 的海明码（偶校验）。</strong>把数据放在 3、5、6、7 位：</p>
+<pre><code class="language-text">位号:   1   2   3   4   5   6   7
+类型:  P1  P2  D3  P4  D5  D6  D7
+数据:   ?   ?   1   ?   0   1   1</code></pre>
+<p>各组偶校验：</p>
+<ul>
+<li>P1 覆盖 1、3、5、7：$P1\oplus1\oplus0\oplus1=0$ → P1=0；</li>
+<li>P2 覆盖 2、3、6、7：$P2\oplus1\oplus1\oplus1=0$ → P2=1；</li>
+<li>P4 覆盖 4、5、6、7：$P4\oplus0\oplus1\oplus1=0$ → P4=0。</li>
+</ul>
+<p>码字为 <code>0 1 1 0 0 1 1</code>。若第 6 位在传输中翻转，接收端重新计算三组校验：</p>
+<pre><code class="language-text">G1 = 1⊕3⊕5⊕7 = 0
+G2 = 2⊕3⊕6⊕7 = 1
+G4 = 4⊕5⊕6⊕7 = 1
+故障字 = G4 G2 G1 = 110₂ = 6  → 第 6 位出错，取反纠正</code></pre>
+<p>注意：故障字为 0 表示无错；非 0 的十进制值就是出错位号。海明码能纠一位错、检测两位错（具体能力取决于是否加总校验位），不是“任意多位都能纠”。</p>
+
+<h2 id="check-crc">四、循环冗余校验 CRC</h2>
+<p>CRC 把数据看成一个二进制多项式，用生成多项式 $G(x)$ 做<strong>模 2 除法</strong>，余数就是校验位。模 2 运算没有进位/借位，加法和减法都等价于异或。</p>
+<p>步骤：</p>
+<ol>
+<li>设 $G(x)$ 的最高次为 $r$，在数据后补 $r$ 个 0；</li>
+<li>用补 0 后的数据除以 $G(x)$，做模 2 除法；</li>
+<li>余数（$r$ 位）作为 CRC 校验位，替换掉补的 0；</li>
+<li>接收端用同样 $G(x)$ 除整个码字，余数为 0 则认为无错，否则检错。</li>
+</ol>
+<p><strong>例：</strong>数据 $1101$，生成多项式 $G(x)=x^3+x+1$，即 <code>1011</code>，$r=3$。数据后补 3 个 0 得 <code>1101000</code>，做模 2 除法：</p>
+<pre><code class="language-text">          1 1 0 1
+       _______________
+1011 ) 1 1 0 1 0 0 0
+       1 0 1 1
+       ---------
+         1 1 0 0
+         1 0 1 1
+         ---------
+           1 1 1 0
+           1 0 1 1
+           ---------
+             1 0 1 0
+             1 0 1 1
+             ---------
+               0 0 1   ← 余数 001</code></pre>
+<p>所以 CRC 校验位是 <code>001</code>，发送码字为 <code>1101001</code>。接收端用 <code>1011</code> 除 <code>1101001</code>，余数为 0；若某位翻转，余数一般非 0。</p>
+<p>CRC 的检错能力强、实现可用移位寄存器/异或门，适合磁盘块、网络帧等长数据；它主要用于<strong>检错</strong>，通常不用于纠错。</p>
+
+<h2 id="check-pitfalls">五、对比与易错点</h2>
+<div class="article-table"><table>
+<thead><tr><th>方法</th><th>额外位</th><th>能力</th><th>典型场景</th></tr></thead>
+<tbody>
+<tr><td>奇偶校验</td><td>1 位</td><td>发现奇数位错，不能定位/纠错</td><td>短数据、辅助校验</td></tr>
+<tr><td>海明码</td><td>$k$ 位，满足 $2^k\ge m+k+1$</td><td>纠 1 位错，可检测部分 2 位错</td><td>存储器、短码字</td></tr>
+<tr><td>CRC</td><td>$r$ 位（生成多项式次数）</td><td>强检错，通常不纠错</td><td>磁盘、网络帧</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>“海明码必须按字节分组”</strong>：错；海明码按位分组，不要求数据是整字节。</li>
+<li><strong>“奇偶校验能纠错”</strong>：错；只能发现奇数位错，不能定位。</li>
+<li><strong>“CRC 的余数就是校验位，直接拼在数据后面”</strong>：要先把数据左移 $r$ 位再除，余数替换补的 0；不要忘记补 0。</li>
+<li><strong>“码距 L 与纠错位数无关”</strong>：关系是 $L-1\ge D+C$，$D\ge C$；码距越大，检错/纠错能力越强。</li>
+</ul>
+<p>把这一节收成一句话：<strong>奇偶校验只查奇数位错；海明码用分组校验定位一位错；CRC 用模 2 除法生成余数，擅长长数据检错。</strong></p>
 </div>
-<p class="article-source">内容整理自站内 408 笔记；例题、真题与解析已归入「真题」板块，正文只保留概念、推导、表格和图解。</p>
+<p class="article-source">内容整理自 408 计算机组成原理数据表示与校验部分；例题为教学示例。</p>

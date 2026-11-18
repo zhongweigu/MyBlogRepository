@@ -1,5 +1,11 @@
 <div class="article-content">
 <h2 id="8-">考点8-图的概念和性质</h2>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="同一张无向图的两种存储：邻接矩阵用 n×n 矩阵存边，无向图对称；邻接表为每个顶点挂一条边表，无向图每条边存两次" data-src="/408-review/assets/img/ds-graph-storage.svg" href="/408-review/assets/img/ds-graph-storage.svg">
+<img alt="无向图及其邻接矩阵、邻接表示意图：A 连 B、C，B 连 D，C 连 D" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-graph-storage.svg"/>
+</a>
+<figcaption>邻接矩阵适合稠密图、判边 O(1)；邻接表适合稀疏图、遍历邻接点快，但判边要扫链表。</figcaption>
+</figure>
 <p><strong>① 子图</strong>：设有两个图 $G = (V, E)$ 和 $G' = (V', E')$，若 $V' \subseteq V$ 且 $E' \subseteq E$，则称 $G'$ 是 $G$ 的子图。定义之外还得盯住一句：<strong>$V'$ 和 $E'$ 要能扯上关系</strong>——$E'$ 里每条边的两个端点都必须落在 $V'$ 里，不能「边留着、端点却不在」。</p>
 <p><strong>② 完全图</strong>：无向完全图有 $\frac{n(n-1)}{2}$ 条边，有向完全图有 $n(n-1)$ 条弧。完全图一定是连通的（有向则强连通），而且顶点数给定的时候，完全图的边数就是最多的。</p>
 <p><strong>③ 连通分量 / 强连通分量</strong>：连通分量 = 无向图中的<strong>极大连通子图</strong>；强连通分量 = 有向图中的<strong>极大强连通子图</strong>（有向图里任意两个顶点互相都能到达）。</p>
