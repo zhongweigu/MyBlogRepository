@@ -2,14 +2,15 @@
 <p>I/O 管理要回答三个层次的问题：<strong>设备怎样被 CPU 看见</strong>（控制器、端口、寄存器），<strong>操作系统怎样把请求送给设备</strong>（I/O 软件层次、驱动程序），以及<strong>多个进程怎样共享有限的设备</strong>（分配、缓冲、SPOOLing、调度）。这一页先把“设备—控制器—端口—OS 层次”这条硬件与软件的接缝讲清楚，后面的控制方式、中断和磁盘调度才有落点。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>6 节</span></summary>
+<summary>本页目录 <span>7 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#io-goal">一、I/O 管理的目标</a></li>
 <li><a href="#io-layers">二、I/O 系统的五个层次</a></li>
 <li><a href="#io-device">三、设备、控制器与设备寄存器</a></li>
 <li><a href="#io-port">四、I/O 端口与两种编址</a></li>
 <li><a href="#io-request">五、一次 I/O 请求经过哪些层</a></li>
-<li><a href="#io-pitfalls">六、易错点与收束</a></li>
+<li><a href="#io-owner">六、设备独立性软件 vs 设备驱动程序</a></li>
+<li><a href="#io-pitfalls">七、易错点与收束</a></li>
 </ul></div>
 </details>
 
@@ -102,7 +103,49 @@
 </ol>
 <p>这条路径在后面的“键盘输入”“磁盘读块”两个完整流程中会逐段展开。这里先记住：<strong>用户只提交逻辑请求，驱动程序才接触硬件，中断处理程序负责完成通知</strong>。</p>
 
-<h2 id="io-pitfalls">六、易错点与收束</h2>
+<h2 id="io-owner">六、设备独立性软件 vs 设备驱动程序</h2>
+<p>这两个层次最容易混：它们都在内核里、都处理 I/O，但一个负责<strong>“对上层统一、对设备分类管理”</strong>，另一个负责<strong>“对具体硬件下命令”</strong>。可以用一句话区分：</p>
+<blockquote>
+<p><strong>设备独立性软件管“策略和抽象”，设备驱动程序管“具体设备的机制和寄存器”。</strong></p>
+</blockquote>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>设备独立性软件</th><th>设备驱动程序</th></tr></thead>
+<tbody>
+<tr><td>服务对象</td><td>面向所有同类设备，向上提供统一接口</td><td>面向某一种/某一型号设备，向下对接控制器</td></tr>
+<tr><td>是否碰硬件</td><td>通常不直接读写控制器寄存器</td><td>直接读写数据/状态/控制寄存器，发启动命令</td></tr>
+<tr><td>核心任务</td><td>逻辑设备名、LUT、分配、缓冲、SPOOLing、保护、错误码转换</td><td>逻辑块号→CHS、命令字/参数、时序、状态检查、重试/初始化</td></tr>
+<tr><td>典型问题</td><td>“这个逻辑设备对应哪台物理设备？要不要缓冲/排队？”</td><td>“这台设备的数据寄存器/命令寄存器怎么填？现在忙不忙？”</td></tr>
+<tr><td>可替换性</td><td>换同类设备通常不用改这一层</td><td>换设备/控制器通常要换驱动</td></tr>
+<tr><td>层次位置</td><td>在驱动之上，靠近系统调用/文件系统</td><td>在驱动之下，靠近中断处理/硬件</td></tr>
+</tbody>
+</table></div>
+<p>再给一个“功能归属”表。考试里看到一件事，先问：<strong>它是在决定“用哪个设备/怎么排队”，还是在决定“这个设备的寄存器怎么写”</strong>？</p>
+<div class="article-table"><table>
+<thead><tr><th>功能/事件</th><th>主要归属层</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>open/read/write 等系统调用接口</td><td>用户层软件 + 系统调用入口</td><td>用户只给逻辑请求；具体设备翻译往下走</td></tr>
+<tr><td>逻辑设备名 → 物理设备名/驱动入口</td><td>设备独立性软件（LUT）</td><td>解决“用户说的是哪个设备”</td></tr>
+<tr><td>设备分配、DCT/COCT/CHCT 队列</td><td>设备独立性软件</td><td>解决“这台设备/控制器/通道现在给谁用”</td></tr>
+<tr><td>缓冲区分配、SPOOLing 井/队列</td><td>设备独立性软件</td><td>解决速度解耦和共享策略</td></tr>
+<tr><td>逻辑块号 → 柱面/磁头/扇区</td><td>设备驱动程序</td><td>设备相关的地址转换</td></tr>
+<tr><td>填写控制器命令/参数、启动设备</td><td>设备驱动程序</td><td>直接操作控制器寄存器</td></tr>
+<tr><td>设备初始化、重试、设备相关错误处理</td><td>设备驱动程序</td><td>知道该设备的重置/重试方式</td></tr>
+<tr><td>设备完成/出错 → 发中断请求</td><td>硬件/控制器</td><td>控制器置状态位并发 IRQ</td></tr>
+<tr><td>保存 PC/PSW、切内核态、查中断向量</td><td>中断响应硬件</td><td>中断隐指令，不是驱动/用户层</td></tr>
+<tr><td>保存通用寄存器、读控制器数据、唤醒进程</td><td>中断处理程序（ISR）</td><td>ISR 做中断现场和完成通知；具体设备语义可回调驱动</td></tr>
+<tr><td>中断返回后选择下一个进程</td><td>进程调度器</td><td>中断可能触发调度，但调度不是 I/O 层次本身</td></tr>
+<tr><td>实际数据在设备与主存间传送</td><td>硬件（DMA/控制器）</td><td>CPU 只初始化/收尾；ISR 处理完成</td></tr>
+</tbody>
+</table></div>
+<p>三个容易混淆的边界：</p>
+<ul>
+<li><strong>设备独立性软件不“碰”寄存器</strong>：它可以把请求交给驱动，但不负责写数据/命令寄存器；写寄存器是驱动的设备相关动作。</li>
+<li><strong>驱动程序不“决定全局分配”</strong>：它通常接受已经分配好的设备/请求，负责启动和完成；谁先拿到设备、是否 SPOOLing，是独立性软件/系统策略。</li>
+<li><strong>ISR 不等于驱动</strong>：ISR 是中断现场的通用处理，驱动是设备语义和命令的专家；驱动可以注册/调用 ISR，但“保存通用寄存器、唤醒进程”不等于“驱动写控制器”。</li>
+</ul>
+<p>用一条链记住：<strong>用户逻辑请求 → 独立性软件做命名/分配/缓冲 → 驱动做地址转换/命令/启动 → 硬件传送 → 中断响应/ISR 完成通知 → 调度器决定谁继续</strong>。这条链也是后面键盘、磁盘流程的骨架。</p>
+
+<h2 id="io-pitfalls">七、易错点与收束</h2>
 <ul>
 <li><strong>“用户程序直接读写设备寄存器”</strong>：用户程序通过系统调用/库函数间接访问；直接访问硬件通常需要内核态或映射权限。</li>
 <li><strong>“设备独立性就是设备无关”</strong>：不是没有设备差异，而是把差异屏蔽在驱动/独立性软件之下，向上提供统一接口。</li>

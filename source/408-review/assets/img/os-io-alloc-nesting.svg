@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-label="设备分配套娃：LUT SDT DCT COCT CHCT">
+  <defs>
+    <marker id="aa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="960" height="520" fill="#fffdf8"/>
+  <text x="480" y="30" text-anchor="middle" font-family="serif" font-size="22" font-weight="700" fill="#24313a">设备分配是套娃：从逻辑名到通道逐层拿</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="50" y="70" width="160" height="70" rx="5" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="130" y="98" text-anchor="middle" font-weight="700">LUT</text>
+    <text x="130" y="118" text-anchor="middle" font-size="12">逻辑名→物理设备</text>
+
+    <rect x="250" y="70" width="180" height="70" rx="5" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="340" y="98" text-anchor="middle" font-weight="700">SDT</text>
+    <text x="340" y="118" text-anchor="middle" font-size="12">系统设备表</text>
+
+    <rect x="480" y="70" width="190" height="70" rx="5" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="575" y="98" text-anchor="middle" font-weight="700">DCT</text>
+    <text x="575" y="118" text-anchor="middle" font-size="12">设备控制表 + 设备队列</text>
+
+    <rect x="480" y="210" width="190" height="70" rx="5" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="575" y="238" text-anchor="middle" font-weight="700">COCT</text>
+    <text x="575" y="258" text-anchor="middle" font-size="12">控制器控制表 + 队列</text>
+
+    <rect x="480" y="350" width="190" height="70" rx="5" fill="#eadff2" stroke="#7f5b9a"/>
+    <text x="575" y="378" text-anchor="middle" font-weight="700">CHCT</text>
+    <text x="575" y="398" text-anchor="middle" font-size="12">通道控制表 + 队列</text>
+
+    <rect x="730" y="210" width="180" height="70" rx="5" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="820" y="238" text-anchor="middle" font-weight="700">控制器</text>
+    <text x="820" y="258" text-anchor="middle" font-size="12">状态寄存器/命令</text>
+
+    <rect x="730" y="350" width="180" height="70" rx="5" fill="#eadff2" stroke="#7f5b9a"/>
+    <text x="820" y="378" text-anchor="middle" font-weight="700">通道 / 设备</text>
+    <text x="820" y="398" text-anchor="middle" font-size="12">实际传送</text>
+
+    <path d="M210 105 L250 105" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aa)"/>
+    <path d="M430 105 L480 105" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aa)"/>
+    <path d="M575 140 L575 210" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aa)"/>
+    <path d="M575 280 L575 350" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aa)"/>
+    <path d="M670 245 L730 245" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aa)"/>
+    <path d="M670 385 L730 385" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aa)"/>
+  </g>
+  <g font-family="sans-serif" font-size="12" fill="#52605a">
+    <text x="50" y="180">用户说“我要打印机”</text>
+    <text x="250" y="180">按设备类型/号找到 DCT</text>
+    <text x="480" y="150">设备忙 → 挂 DCT 队列</text>
+    <text x="480" y="290">控制器忙 → 挂 COCT 队列</text>
+    <text x="480" y="430">通道忙 → 挂 CHCT 队列</text>
+    <text x="50" y="470">分配顺序：LUT → DCT → COCT → CHCT；释放顺序相反。没有通道的系统到 COCT 为止。</text>
+    <text x="50" y="492">任何一层忙，都不要跳过它直接使用下层；否则会出现“设备拿到了、控制器还没拿到”的假分配。</text>
+  </g>
+</svg>
