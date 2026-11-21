@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f4f1e9">
+  <title>英语复习台 · 考研英语一作文</title>
+  <meta name="description" content="考研英语一作文复习台：背诵库（模板、语料、表达）、写作台（审题与套写流程）、2020–2026 真题套写与策略库。">
+  <meta property="og:title" content="英语复习台 · 考研英语一作文">
+  <meta property="og:description" content="把作文拆成审题、立意、结构、语料与检查五步，考场直接调用。">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="/english-review/assets/favicon.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('reviewmy.theme');
+        if (!t) t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#121716' : '#f4f1e9');
+      } catch (e) { /* noop */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="/408-review/assets/css/app.css?v=20261105-9">
+  <link rel="stylesheet" href="/english-review/assets/css/english.css?v=20261121-2">
+</head>
+<body>
+  <a class="skip-link" href="#app" data-action="skip-to-main">跳到正文</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#/today" aria-label="英语复习台首页">
+        <span class="brand-seal">英</span>
+        <span class="brand-text">
+          <strong>复习台</strong>
+          <small>ENGLISH DESK</small>
+        </span>
+      </a>
+
+      <nav class="primary-nav" aria-label="主导航">
+        <a href="#/today" data-nav="today">今日</a>
+        <a href="#/desk" data-nav="desk">写作台</a>
+        <a href="#/recite" data-nav="recite">背诵</a>
+        <a href="#/corpus" data-nav="corpus">语料</a>
+        <a href="#/exams" data-nav="exams">真题</a>
+        <a href="#/strategy" data-nav="strategy">策略</a>
+        <a href="#/sources" data-nav="sources">资料</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <a class="topbar-blog" href="/" title="返回博客" aria-label="返回博客">
+          博客
+          <svg class="i" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+        </a>
+        <button type="button" class="icon-btn" id="theme-toggle" data-action="theme-toggle" aria-label="切换深浅色模式" title="切换深浅色">
+          <svg class="i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1">
+    <div class="boot" style="min-height:60vh;display:grid;place-items:center;color:var(--ink-3);font-size:12px;letter-spacing:.08em">
+      正在铺开复习台…
+    </div>
+  </main>
+
+  <nav class="bottom-nav" aria-label="移动端导航">
+    <a href="#/today" data-nav="today">
+      <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
+      <span>今日</span>
+    </a>
+    <a href="#/desk" data-nav="desk">
+      <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V8l6-4 6 4v12"/><path d="M10 20v-6h4v6"/></svg>
+      <span>写作台</span>
+    </a>
+    <a href="#/recite" data-nav="recite">
+      <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5v-13Z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/></svg>
+      <span>背诵</span>
+    </a>
+    <a href="#/corpus" data-nav="corpus">
+      <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M5 8l7-5 7 5v8l-7 5-7-5V8Z"/></svg>
+      <span>语料</span>
+    </a>
+    <a href="#/strategy" data-nav="strategy">
+      <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4Z"/><path d="M9 4v13M15 6.5v13"/></svg>
+      <span>策略</span>
+    </a>
+  </nav>
+
+  <div id="overlay-root"></div>
+  <div id="toast-root" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div style="max-width:640px;margin:12vh auto;padding:24px;border:1px solid #ded7c8;border-radius:16px;background:#fffdf8;font-family:system-ui,sans-serif;line-height:1.8;color:#1b2425">
+      <strong>需要启用 JavaScript</strong><br>
+      这个复习台是静态单页应用，内容在本地渲染。请在浏览器设置里允许 JavaScript 后刷新。
+    </div>
+  </noscript>
+
+  <script type="module" src="/english-review/assets/js-v1/app.js"></script>
+  <!-- 改 JS/CSS 时递增 js-vN 与 english.css?v，否则 CDN 缓存会让用户看不到更新。 -->
+</body>
+</html>

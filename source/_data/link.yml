@@ -8,6 +8,10 @@
       link: /politics-review/
       avatar: /politics-review/assets/favicon.svg
       descr: 考研政治马原：每日知识点复习、知识地图与术语库
+    - name: 英语复习台
+      link: /english-review/
+      avatar: /english-review/assets/favicon.svg
+      descr: 考研英语一作文：模板、语料与真题套写
 
 - class_name: 友情链接
   link_list:
