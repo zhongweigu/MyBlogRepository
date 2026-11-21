@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 620" role="img" aria-label="生产者消费者：环形缓冲区与 empty/full/mutex">
+  <defs>
+    <marker id="pca" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="620" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">生产者-消费者：empty/full 管“位置”，mutex 管“互斥”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="55" y="85" width="170" height="64" rx="5" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="140" y="108" text-anchor="middle" font-weight="700">生产者</text>
+    <text x="140" y="130" text-anchor="middle" font-size="12">生产数据并放入空槽</text>
+    <rect x="265" y="260" width="530" height="80" rx="8" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="530" y="288" text-anchor="middle" font-weight="700">环形缓冲区（最多 N 个元素）</text>
+    <g>
+      <rect x="290" y="300" width="55" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="317" y="319" text-anchor="middle" font-size="12">满</text>
+      <rect x="345" y="300" width="55" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="372" y="319" text-anchor="middle" font-size="12">满</text>
+      <rect x="400" y="300" width="55" height="28" fill="#f7f5ee" stroke="#c9c0ae"/><text x="427" y="319" text-anchor="middle" font-size="12">空</text>
+      <rect x="455" y="300" width="55" height="28" fill="#f7f5ee" stroke="#c9c0ae"/><text x="482" y="319" text-anchor="middle" font-size="12">空</text>
+      <rect x="510" y="300" width="55" height="28" fill="#f7f5ee" stroke="#c9c0ae"/><text x="537" y="319" text-anchor="middle" font-size="12">空</text>
+      <rect x="565" y="300" width="55" height="28" fill="#f7f5ee" stroke="#c9c0ae"/><text x="592" y="319" text-anchor="middle" font-size="12">空</text>
+      <rect x="620" y="300" width="55" height="28" fill="#f7f5ee" stroke="#c9c0ae"/><text x="647" y="319" text-anchor="middle" font-size="12">空</text>
+      <rect x="675" y="300" width="55" height="28" fill="#f7f5ee" stroke="#c9c0ae"/><text x="702" y="319" text-anchor="middle" font-size="12">空</text>
+    </g>
+    <rect x="55" y="260" width="170" height="64" rx="5" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="140" y="283" text-anchor="middle" font-weight="700">消费者</text>
+    <text x="140" y="305" text-anchor="middle" font-size="12">取走满槽，释放空槽</text>
+    <rect x="840" y="260" width="170" height="64" rx="5" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="925" y="283" text-anchor="middle" font-weight="700">empty / full</text>
+    <text x="925" y="305" text-anchor="middle" font-size="12">empty 记空槽数，full 记满槽数</text>
+
+    <path d="M225 117 C225 180, 400 210, 400 300" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pca)"/>
+    <path d="M660 300 C660 190, 225 190, 225 260" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pca)"/>
+    <text x="250" y="195" font-size="12">P(empty) → P(mutex) → 放入 → V(mutex) → V(full)</text>
+    <text x="300" y="230" font-size="12" fill="#b54b45">先 P 同步，再 P 互斥；反过来可能死锁</text>
+
+    <rect x="55" y="390" width="950" height="80" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="415" font-weight="700">生产者</text>
+    <text x="75" y="439">P(empty)→P(mutex)→放入→V(mutex)→V(full)</text>
+    <text x="75" y="463" font-size="12">先 P 同步，再 P 互斥；反了可能死锁</text>
+    <text x="590" y="415" font-weight="700">消费者</text>
+    <text x="590" y="439">P(full)→P(mutex)→取出→V(mutex)→V(empty)</text>
+    <text x="590" y="463" font-size="12">V 顺序与 P 对称；V(mutex) 在临界区边界</text>
+
+    <text x="55" y="520" font-weight="700">容量与顺序</text>
+    <text x="55" y="544">empty 初值 = N，full 初值 = 0，mutex 初值 = 1；三者的和/状态共同决定“能不能放/取”。</text>
+    <text x="55" y="568" font-size="12" fill="#6b777f">环形缓冲区用 in/out 指针推进；empty/full 计数解决“满/空”判断，mutex 只保护临界区。</text>
+  </g>
+</svg>

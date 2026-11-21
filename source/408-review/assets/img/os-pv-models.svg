@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 620" role="img" aria-label="PV 操作的互斥、同步与资源计数三类模型">
+  <defs>
+    <marker id="pa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="620" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">P/V 的三类基本模型</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="45" y="70" width="300" height="190" rx="5" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="195" y="98" text-anchor="middle" font-weight="700">① 互斥：S 初值 1</text>
+    <text x="65" y="128">P(S)：申请进入临界区</text>
+    <text x="65" y="152">S=1 → 0，允许进入</text>
+    <text x="65" y="176">S=0 时再 P → 阻塞，进等待队列</text>
+    <text x="65" y="200">V(S)：离开，S++ 并唤醒一个等待者</text>
+    <text x="65" y="232" fill="#52605a">保证同一时刻只有一个进程在临界区</text>
+
+    <rect x="380" y="70" width="300" height="190" rx="5" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="530" y="98" text-anchor="middle" font-weight="700">② 同步：S 初值 0</text>
+    <text x="400" y="128">P(S)：等待“事件发生”</text>
+    <text x="400" y="152">S=0 → 阻塞，进等待队列</text>
+    <text x="400" y="176">V(S)：事件发生，S++ 并唤醒</text>
+    <text x="400" y="200">被唤醒后从 P(S) 之后继续</text>
+    <text x="400" y="232" fill="#52605a">保证“先做 A，再做 B”的先后关系</text>
+
+    <rect x="715" y="70" width="300" height="190" rx="5" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="865" y="98" text-anchor="middle" font-weight="700">③ 资源计数：S 初值 k</text>
+    <text x="735" y="128">S 表示可用资源数</text>
+    <text x="735" y="152">P(S)：申请一个资源，S−−</text>
+    <text x="735" y="176">S&lt;0 时请求者阻塞</text>
+    <text x="735" y="200">V(S)：释放一个资源，S++</text>
+    <text x="735" y="232" fill="#52605a">S 的绝对值 = 等待者数量（常见约定）</text>
+
+    <text x="45" y="305" font-weight="700">P/V 对信号量内部状态的影响（同一套规则）</text>
+    <rect x="45" y="325" width="970" height="100" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="351">P(S)：S = S − 1；若 S &lt; 0，则调用者阻塞，进入该信号量的等待队列。</text>
+    <text x="65" y="375">V(S)：S = S + 1；若 S ≤ 0，说明队列里有人等，唤醒其中一个。</text>
+    <text x="65" y="399">互斥/同步/计数只是“初值和语义”不同；P/V 本身不区分三类模型。</text>
+
+    <text x="45" y="470" font-weight="700">判断模型的口诀</text>
+    <text x="45" y="496">临界区互斥 → mutex 初值 1；等某个事件 → sync 初值 0；数可用资源 → count 初值 k。</text>
+    <text x="45" y="520">同一道题可以同时有 mutex、empty/full、资源计数，不要把“信号量”只理解成锁。</text>
+    <text x="45" y="552" font-size="12" fill="#6b777f">本图只表达 P/V 的阻塞/唤醒语义；具体调度顺序由 OS 调度器决定，不保证被唤醒者立刻运行。</text>
+  </g>
+</svg>

@@ -51,6 +51,12 @@ void V(semaphore S) {   // signal / 释放
 <p>P 的“减一”不是简单的计数：它先占用一个资源，若占用后变负，说明资源已经不够，当前进程要睡眠。V 的“加一”也不是简单归还：若加完仍 ≤0，说明有人在等，要唤醒一个。</p>
 <p>同一个 P/V 在不同场景下语义不同：互斥/资源场景是“拿/还”，同步场景是“等/通知”。不要把“P 就是加锁”背死。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="PV 的互斥、同步、资源计数三类模型" data-src="/408-review/assets/img/os-pv-models.svg" href="/408-review/assets/img/os-pv-models.svg">
+<img alt="互斥初值 1、同步初值 0、资源计数初值 k 的 PV 语义和等待队列" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-pv-models.svg"/>
+</a>
+<figcaption>三类模型的区别在初值和语义，P/V 的内部规则相同：P 减一，负则阻塞；V 加一，非正则唤醒。</figcaption>
+</figure>
 <h2 id="pv-mutex">三、互斥模型</h2>
 <p>临界资源一次只允许一个进程访问，初值 <code>mutex=1</code>：</p>
 <pre><code class="language-c">semaphore mutex = 1;

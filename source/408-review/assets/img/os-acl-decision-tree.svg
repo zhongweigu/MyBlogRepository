@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 650" role="img" aria-label="文件访问权限检查决策树">
+  <defs>
+    <marker id="aca" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="650" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">文件访问权限检查：先身份，再操作，再看目录</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="390" y="70" width="280" height="52" rx="5" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="530" y="102" text-anchor="middle">进程请求：用户 U、操作 op、路径 P</text>
+
+    <rect x="390" y="160" width="280" height="52" rx="5" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="530" y="181" text-anchor="middle">逐级查目录：对每级目录要 x 权限</text>
+    <text x="530" y="201" text-anchor="middle" font-size="12">要创建/删除/改名还要目录 w</text>
+
+    <rect x="390" y="250" width="280" height="52" rx="5" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="530" y="271" text-anchor="middle">取文件 inode 的 ACL / 权限位</text>
+    <text x="530" y="291" text-anchor="middle" font-size="12">U 是 owner / group / other？</text>
+
+    <rect x="80" y="365" width="250" height="70" rx="5" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="205" y="390" text-anchor="middle" font-weight="700">owner 类</text>
+    <text x="205" y="412" text-anchor="middle" font-size="12">检查 owner 的 r/w/x</text>
+    <rect x="400" y="365" width="250" height="70" rx="5" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="525" y="390" text-anchor="middle" font-weight="700">group 类</text>
+    <text x="525" y="412" text-anchor="middle" font-size="12">检查同组权限（命中即用）</text>
+    <rect x="720" y="365" width="250" height="70" rx="5" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="845" y="390" text-anchor="middle" font-weight="700">other 类</text>
+    <text x="845" y="412" text-anchor="middle" font-size="12">检查其他用户权限</text>
+
+    <rect x="390" y="500" width="280" height="60" rx="5" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="530" y="525" text-anchor="middle" font-weight="700">允许 / 拒绝</text>
+    <text x="530" y="546" text-anchor="middle" font-size="12">ACL 命中则按 ACL；否则按精简权限位</text>
+
+    <path d="M530 122 L530 160" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aca)"/>
+    <path d="M530 212 L530 250" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aca)"/>
+    <path d="M450 302 L205 365" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aca)"/>
+    <path d="M530 302 L525 365" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aca)"/>
+    <path d="M610 302 L845 365" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aca)"/>
+    <path d="M205 435 L530 500" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aca)"/>
+    <path d="M525 435 L530 500" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aca)"/>
+    <path d="M845 435 L530 500" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#aca)"/>
+
+    <text x="45" y="600" font-size="13" font-weight="700">三个关键边界</text>
+    <text x="45" y="624" font-size="13">① 删除/改名看父目录 w+x，不是看文件自身 w；② 目录 x 是“穿越”，r 是“列目录”；③ 口令/加密不替代 ACL 的按操作授权。</text>
+  </g>
+</svg>

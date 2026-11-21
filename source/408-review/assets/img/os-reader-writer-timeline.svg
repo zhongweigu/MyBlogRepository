@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-label="读者写者共享与写者等待的时间线">
+  <rect width="1080" height="620" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">读者-写者：读读可并行，读写/写写互斥</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="55" y="78" font-weight="700">读者优先的典型时间线</text>
+    <text x="90" y="110">R1</text>
+    <text x="90" y="150">R2</text>
+    <text x="90" y="190">W</text>
+    <text x="90" y="230">count</text>
+
+    <rect x="160" y="92" width="470" height="34" fill="#e9f2f6" stroke="#4d7f95"/><text x="395" y="114" text-anchor="middle">读</text>
+    <rect x="370" y="132" width="260" height="34" fill="#e9f2f6" stroke="#4d7f95"/><text x="500" y="154" text-anchor="middle">读（与 R1 并行）</text>
+    <rect x="370" y="172" width="260" height="34" fill="#f3e6e6" stroke="#a85a5a"/><text x="500" y="194" text-anchor="middle">W 等待（w 被占用）</text>
+    <rect x="630" y="172" width="250" height="34" fill="#eef3e4" stroke="#6f8f45"/><text x="755" y="194" text-anchor="middle">读到 count=0，W 进入</text>
+
+    <rect x="160" y="215" width="210" height="24" fill="#e9f2f6" stroke="#4d7f95"/><text x="265" y="232" text-anchor="middle" font-size="12">count=1</text>
+    <rect x="370" y="215" width="260" height="24" fill="#e9f2f6" stroke="#4d7f95"/><text x="500" y="232" text-anchor="middle" font-size="12">count=2，R2 仍可进入</text>
+    <rect x="630" y="215" width="250" height="24" fill="#f7f5ee" stroke="#c9c0ae"/><text x="755" y="232" text-anchor="middle" font-size="12">最后一个读者离开 → V(w)</text>
+
+    <text x="55" y="290" font-weight="700">两种常见优先级</text>
+    <text x="55" y="316">读者优先：新读者到来时，只要已有读者在，就允许继续读；写者可能一直等（写者饥饿）。</text>
+    <text x="55" y="340">写者优先：写者到达后阻止新读者进入（或让新读者排队），避免写者饥饿，但读者可能等。</text>
+    <text x="55" y="364">公平策略：按到达顺序排队，读者/写者都不被无限插队；实现更复杂。</text>
+
+    <rect x="55" y="400" width="970" height="110" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="425" font-weight="700">关键变量</text>
+    <text x="75" y="449">count：当前读者数；mutex：保护 count；w：写者锁（或读写共享锁）。</text>
+    <text x="75" y="473">第一个读者进入时 P(w)，最后一个读者离开时 V(w)；读者之间的 count 修改要 P/V(mutex)。</text>
+    <text x="75" y="497">写者进入前 P(w)，写完 V(w)；写者优先还要额外的等待/排队信号量。</text>
+
+    <text x="55" y="555" font-size="12" fill="#6b777f">本图是逻辑时序示意，不表示 CPU 调度顺序；读读可并行，读写/写写互斥是核心约束。</text>
+  </g>
+</svg>

@@ -94,6 +94,12 @@ while (TS(&lock));   // 旧值为 true 说明别人占着，继续试
 lock = false;</code></pre>
 <p><strong>Swap</strong>：原子地交换一个局部变量和 lock 的值；局部变量为 false 时，交换后若旧 lock 为 false，说明拿到锁。两者都保证互斥，但都是<strong>忙等</strong>；TS 不保证有限等待，可能有人一直抢不到。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="互斥锁、等待队列与唤醒的时序" data-src="/408-review/assets/img/os-sync-mutex-timeline.svg" href="/408-review/assets/img/os-sync-mutex-timeline.svg">
+<img alt="P1 获得 mutex 进入临界区，P2 阻塞等待，P1 释放后 P2 被唤醒的时序" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-sync-mutex-timeline.svg"/>
+</a>
+<figcaption>P 失败时进入等待队列，V 只负责唤醒；被唤醒是“就绪”，不保证立刻运行。</figcaption>
+</figure>
 <h2 id="sync-sem">六、信号量与 P/V</h2>
 <p>408 还会考信号量，导图只列了软件/硬件/管程，这里补上。信号量是一个整型变量加一个等待队列，P/V 必须原子执行：</p>
 <pre><code class="language-c">P(S):  S.value--;

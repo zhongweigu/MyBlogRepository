@@ -14,7 +14,7 @@
   - OS-6 的 I/O 层次、设备表、分配套娃、缓冲甘特图、循环缓冲、缓冲池、磁盘调度图；
   - COA 的存储器层次、Cache 地址、指令格式、中断/流水线图；
   - DS 的树、图、排序/查找示意图。
-- 本轮先做 **Batch 1（6 张）**，全部是“文字描述成本高、图形能直接建立正确直觉”的内容。
+- 本轮按 3 批完成 **18 张图**，全部是“文字描述成本高、图形能直接建立正确直觉”的内容；已有准确图示保留，不重复绘制。
 
 ## 二、可视化改进清单
 
@@ -47,9 +47,11 @@
 | 保留 | — | 数据结构 · 栈队列 | `ds-2-6` 卡特兰数 | 公式+例子 | 不新增 | 推导和枚举表已足够；避免为公式强行配图 |
 | 保留 | — | OS · 概述 | `os-1-5` 虚拟机 | 已有 HTML/CSS 分层图 | 保留现有 | 现有 `.vm-stack-grid` 已表达 Type-1/Type-2 层次 |
 
-## 三、Batch 1 实施内容
+## 三、Batch 1–3 实施内容
 
 已在正文对应位置插入并配图注：
+
+**Batch 1（6 张）**
 
 1. `coa-2-2`：`coa-ieee754-layout.svg`
 2. `coa-2-3`：`coa-float-add-flow.svg`
@@ -57,6 +59,24 @@
 4. `ds-2-1`：`ds-linked-list-insert.svg`
 5. `ds-2-2`：`ds-circular-queue.svg`
 6. `os-2-3`：`os-cpu-scheduling-gantt.svg`
+
+**Batch 2（7 张）**
+
+7. `coa-1-4`：`coa-addressing-units.svg`
+8. `coa-3-4`：`coa-cache-access-timeline.svg`
+9. `ds-1-2`：`ds-recursion-tree.svg`
+10. `ds-2-7`：`ds-bfs-queue.svg`
+11. `os-3-1`：`os-pv-models.svg`
+12. `os-3-2`：`os-producer-consumer.svg`
+13. `os-5-9`：`os-acl-decision-tree.svg`
+
+**Batch 3（5 张）**
+
+14. `coa-2-7`：`coa-mul-div-iteration.svg`
+15. `os-2-5`：`os-sync-mutex-timeline.svg`
+16. `os-3-3`：`os-reader-writer-timeline.svg`
+17. `os-3-4`：`os-philosopher-graph.svg`
+18. `os-3-5`：`os-pv-decision-flow.svg`
 
 图示形式选择理由：
 
@@ -76,8 +96,8 @@
 
 ## 五、执行顺序
 
-- **Batch 1（本轮完成）**：上述 6 张。
-- **Batch 2（待执行）**：`coa-1-4`、`coa-3-4`、`ds-1-2`、`ds-2-7`、`os-3-1`、`os-3-2`、`os-5-9`。
-- **Batch 3（待执行）**：`coa-2-7`、`os-2-5`、`os-3-3`、`os-3-4`、`os-3-5`。
+- **Batch 1（已完成）**：6 张。
+- **Batch 2（已完成）**：7 张。
+- **Batch 3（已完成）**：5 张。
 
-每批完成后重复本清单的准确性、可读性、图文一致性检查，再进入下一批。
+每批完成后都重复了本清单的准确性、可读性、图文一致性检查。

@@ -27,6 +27,12 @@
 </table></div>
 <p>复制文件本质上是“读 + 写”：有读权限就可能把内容复制走；打印也是读出内容再交给打印机。所以保护不能只看“能不能打开”，还要看具体操作类型。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="文件访问权限检查：身份、ACL、目录权限" data-src="/408-review/assets/img/os-acl-decision-tree.svg" href="/408-review/assets/img/os-acl-decision-tree.svg">
+<img alt="从用户请求到 owner/group/other 权限判断，以及目录 x/w 权限检查的决策树" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-acl-decision-tree.svg"/>
+</a>
+<figcaption>先逐级目录 x（创建/删除/改名还要 w），再按 owner→group→other 或 ACL 命中判断；删除文件看父目录权限。</figcaption>
+</figure>
 <h2 id="protect-acl">二、访问控制列表 ACL</h2>
 <p><strong>访问控制列表（Access-Control List，ACL）</strong>为每个文件/目录附加一张表，明确列出“哪个用户/组，允许哪些访问类型”。优点是支持灵活、复杂的访问策略；缺点是表长度不可预知，可能带来空间和管理开销。现代系统常用<strong>精简 ACL</strong>降低开销。</p>
 <p>ACL 通常存放在文件的 FCB/inode 或安全描述符中；访问文件时，系统按用户身份查 ACL，决定是否允许本次操作。</p>

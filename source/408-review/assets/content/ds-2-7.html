@@ -49,6 +49,12 @@
 </table></div>
 <p>队列在算法题里通常不是“目的”，而是<strong>维护“待处理顺序”的容器</strong>：谁先进队列，谁就先被扩展。BFS、层序遍历、拓扑排序（入度为 0 的顶点队列）都是这个思想。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="BFS 队列状态与访问顺序" data-src="/408-review/assets/img/ds-bfs-queue.svg" href="/408-review/assets/img/ds-bfs-queue.svg">
+<img alt="BFS 从 A 出发时队列的入队、出队变化和访问顺序" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-bfs-queue.svg"/>
+</a>
+<figcaption>队列保存“待扩展的下一层”，所以同一层结点会在下一层之前处理；第一次发现即无权图最短路。</figcaption>
+</figure>
 <h2 id="queue-bfs">三、BFS 与“无权图最短路”</h2>
 <p>BFS 从起点开始，先访问所有距离为 1 的顶点，再访问距离为 2 的顶点……它用队列保证“先发现的先扩展”。在<strong>无权图</strong>（或所有边权相同）中，BFS 第一次到达某顶点时经过的边数就是最短路径长度。</p>
 <pre><code class="language-text">BFS(G, s):

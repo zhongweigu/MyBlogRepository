@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 560" role="img" aria-label="Cache 命中与缺失的访问时间线">
+  <defs>
+    <marker id="ca" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="560" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">Cache 访问时间线：命中、缺失与 AMAT</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="50" y="75" font-weight="700">命中路径</text>
+    <rect x="60" y="92" width="150" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="135" y="118" text-anchor="middle">CPU 送地址</text>
+    <rect x="260" y="92" width="180" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="350" y="118" text-anchor="middle">查 Tag/有效位：命中</text>
+    <rect x="490" y="92" width="160" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="570" y="118" text-anchor="middle">访问 Cache 数据</text>
+    <rect x="700" y="92" width="160" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="780" y="118" text-anchor="middle">送 CPU</text>
+    <path d="M210 113 L260 113" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ca)"/>
+    <path d="M440 113 L490 113" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ca)"/>
+    <path d="M650 113 L700 113" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ca)"/>
+    <text x="610" y="78" font-size="12">命中时间 ≈ T_c</text>
+
+    <text x="50" y="195" font-weight="700">缺失路径（先查后取）</text>
+    <rect x="60" y="212" width="150" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="135" y="238" text-anchor="middle">CPU 送地址</text>
+    <rect x="260" y="212" width="180" height="42" fill="#f3e6e6" stroke="#a85a5a"/><text x="350" y="238" text-anchor="middle">查 Tag：缺失</text>
+    <rect x="490" y="212" width="190" height="42" fill="#f7ecd9" stroke="#a8782c"/><text x="585" y="238" text-anchor="middle">选行/替换，读主存块</text>
+    <rect x="730" y="212" width="170" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="815" y="238" text-anchor="middle">装入 Cache，重试</text>
+    <path d="M210 233 L260 233" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ca)"/>
+    <path d="M440 233 L490 233" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ca)"/>
+    <path d="M680 233 L730 233" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ca)"/>
+    <text x="710" y="205" font-size="12">缺失代价 T_m</text>
+
+    <rect x="60" y="310" width="900" height="92" rx="5" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="80" y="336" font-weight="700">AMAT 的两种常见口径</text>
+    <text x="80" y="360">先查 Cache：T_a = p·T_c + (1−p)(T_c + T_m) = T_c + (1−p)T_m</text>
+    <text x="80" y="384">同时访问 Cache/主存，命中取 Cache：T_a = p·T_c + (1−p)T_m</text>
+
+    <text x="50" y="445" font-weight="700">程序时间的组成</text>
+    <text x="50" y="470">T_CPU = 指令数 × CPI × T_clk + 缺失次数 × 缺失代价</text>
+    <text x="50" y="494">若 CPI 已包含 Cache 缺失停顿，就不能再加一遍；先确认题目口径。</text>
+    <text x="50" y="528" font-size="12" fill="#6b777f">示意图：写回/写分配只改变“缺失时做什么”，不改变命中/缺失两条主路径。</text>
+  </g>
+</svg>

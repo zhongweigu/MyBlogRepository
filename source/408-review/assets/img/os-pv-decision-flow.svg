@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 650" role="img" aria-label="PV 题解题决策流程">
+  <defs>
+    <marker id="pva" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="650" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">PV 题：从场景到信号量的判断流程</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="380" y="70" width="300" height="48" rx="5" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="530" y="100" text-anchor="middle">读题：找出进程、共享资源、先后关系</text>
+
+    <rect x="70" y="165" width="270" height="70" rx="5" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="205" y="190" text-anchor="middle" font-weight="700">有互斥资源？</text>
+    <text x="205" y="212" text-anchor="middle" font-size="12">缓冲区/打印机/变量</text>
+    <text x="205" y="228" text-anchor="middle" font-size="12">→ mutex 初值 1</text>
+
+    <rect x="395" y="165" width="270" height="70" rx="5" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="530" y="190" text-anchor="middle" font-weight="700">有“先 A 后 B”？</text>
+    <text x="530" y="212" text-anchor="middle" font-size="12">等待方 P，完成方 V</text>
+    <text x="530" y="228" text-anchor="middle" font-size="12">→ sync 初值 0</text>
+
+    <rect x="720" y="165" width="270" height="70" rx="5" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="855" y="190" text-anchor="middle" font-weight="700">有 k 个同类资源？</text>
+    <text x="855" y="212" text-anchor="middle" font-size="12">空槽/库存/座位</text>
+    <text x="855" y="228" text-anchor="middle" font-size="12">→ count 初值 k</text>
+
+    <rect x="70" y="300" width="920" height="75" rx="5" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="90" y="326" font-weight="700">写 P/V 的顺序</text>
+    <text x="90" y="350">先 P 同步/资源（等条件），再 P 互斥（进临界区）；离开时先 V 互斥，再 V 同步/资源。</text>
+    <text x="90" y="372" font-size="12" fill="#b54b45">如果先 P(mutex) 再 P(empty/full)，条件不满足时会抱着锁睡眠 → 死锁。</text>
+
+    <rect x="70" y="420" width="920" height="70" rx="5" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="90" y="446" font-weight="700">检查</text>
+    <text x="90" y="470">初值对吗？每个 P 有配对 V 吗？所有分支（异常/退出）都释放了吗？小规模模拟 N=1/2 会死锁吗？</text>
+
+    <path d="M530 118 L205 165" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pva)"/>
+    <path d="M530 118 L530 165" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pva)"/>
+    <path d="M530 118 L855 165" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pva)"/>
+    <path d="M205 235 L530 300" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pva)"/>
+    <path d="M530 235 L530 300" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pva)"/>
+    <path d="M855 235 L530 300" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pva)"/>
+    <path d="M530 375 L530 420" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#pva)"/>
+
+    <text x="70" y="540" font-weight="700">常见失分点</text>
+    <text x="70" y="566">把“同步”写成 mutex；忘记给 count 加 mutex；P/V 顺序颠倒；只写 P 不写 V；忽略异常路径释放。</text>
+    <text x="70" y="600" font-size="12" fill="#6b777f">本图是分析路径，不是固定代码模板；不同题目可能有多个资源/多组同步关系，按场景逐个建信号量。</text>
+  </g>
+</svg>

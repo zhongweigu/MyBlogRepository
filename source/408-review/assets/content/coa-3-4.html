@@ -35,7 +35,13 @@
 <hr/>
 <h2 id="6-cache-amat">题型6-Cache 性能分析（AMAT）</h2>
 <p>CPU 在 Cache-主存层次的平均访问时间：</p>
-<p>$$T_a=pT_c+(1-p)(T_c+T_m)=T_c+(1-p)T_m$$</p>
+<p>$$T_a=pT_c+(1-p)(T_c+T_m)=T_c+(1-p)T_m$$</p><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="Cache 命中与缺失的访问时间线、AMAT 公式" data-src="/408-review/assets/img/coa-cache-access-timeline.svg" href="/408-review/assets/img/coa-cache-access-timeline.svg">
+<img alt="Cache 命中路径与缺失路径的时间线，以及 AMAT 的两种计算口径" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-cache-access-timeline.svg"/>
+</a>
+<figcaption>命中只花 T_c；缺失要先查 Tag、再读主存块并重试。AMAT 的口径取决于“先查”还是“同时访问”。</figcaption>
+</figure>
+
 <p>若 Cache 与主存同时访问、命中时取 Cache 的结果：</p>
 <p>$$T_a=pT_c+(1-p)T_m$$</p>
 <p>其中 $p$ 为命中率，$T_c$ 为 Cache 命中时的访问时间，$T_m$ 为主存的访问时间。题目给的是缺失代价时：</p>

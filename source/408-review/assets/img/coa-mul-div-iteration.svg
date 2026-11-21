@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 650" role="img" aria-label="定点乘法与除法的寄存器迭代">
+  <defs>
+    <marker id="mda" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="650" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">定点乘除法：寄存器迭代与移位</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 原码一位乘法（n 位，重复 n 次）</text>
+    <rect x="55" y="95" width="150" height="54" fill="#f7ecd9" stroke="#a8782c"/><text x="130" y="118" text-anchor="middle">A：部分积</text><text x="130" y="138" text-anchor="middle" font-size="12">初值 0</text>
+    <rect x="225" y="95" width="150" height="54" fill="#e9f2f6" stroke="#4d7f95"/><text x="300" y="118" text-anchor="middle">Q：乘数</text><text x="300" y="138" text-anchor="middle" font-size="12">从最低位看</text>
+    <rect x="395" y="95" width="150" height="54" fill="#eef3e4" stroke="#6f8f45"/><text x="470" y="118" text-anchor="middle">M：被乘数</text><text x="470" y="138" text-anchor="middle" font-size="12">绝对值</text>
+    <rect x="565" y="95" width="150" height="54" fill="#f3e6e6" stroke="#a85a5a"/><text x="640" y="118" text-anchor="middle">C：计数器</text><text x="640" y="138" text-anchor="middle" font-size="12">n 次</text>
+
+    <rect x="55" y="190" width="930" height="105" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="216" font-weight="700">每一轮</text>
+    <text x="75" y="240">① 看 Q 的最低位：1 → A = A + M；0 → A 不变。</text>
+    <text x="75" y="264">② 把 A、Q 作为一个整体逻辑右移一位（A 的最高位补 0）。</text>
+    <text x="75" y="288">③ 计数器减 1，直到 0；最后 A 是高半部分，Q 是低半部分，拼接为积。</text>
+    <text x="470" y="216" font-size="12">符号位单独：积符 = x_s ⊕ y_s</text>
+    <text x="470" y="240" font-size="12">Booth 用 Q0Q−1 决定 +M/−M，再算术右移</text>
+
+    <text x="45" y="350" font-weight="700">B. 恢复余数除法（n 位，重复 n 次）</text>
+    <rect x="55" y="370" width="170" height="54" fill="#f7ecd9" stroke="#a8782c"/><text x="140" y="393" text-anchor="middle">R：余数</text><text x="140" y="413" text-anchor="middle" font-size="12">初值 0</text>
+    <rect x="245" y="370" width="170" height="54" fill="#e9f2f6" stroke="#4d7f95"/><text x="330" y="393" text-anchor="middle">Q：被除数/商</text><text x="330" y="413" text-anchor="middle" font-size="12">左移，低位补商位</text>
+    <rect x="435" y="370" width="170" height="54" fill="#eef3e4" stroke="#6f8f45"/><text x="520" y="393" text-anchor="middle">M：除数</text><text x="520" y="413" text-anchor="middle" font-size="12">绝对值</text>
+    <rect x="625" y="370" width="170" height="54" fill="#f3e6e6" stroke="#a85a5a"/><text x="710" y="393" text-anchor="middle">C：计数器</text><text x="710" y="413" text-anchor="middle" font-size="12">n 次</text>
+
+    <rect x="55" y="465" width="930" height="105" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="491" font-weight="700">每一轮</text>
+    <text x="75" y="515">① R、Q 左移一位，Q 最高位移入 R 的最低位。</text>
+    <text x="75" y="539">② R = R − M；若 R &lt; 0，商位 0，恢复 R = R + M；否则商位 1。</text>
+    <text x="75" y="563">③ 商位写入 Q 的最低位；计数器减 1，直到 0；最后 R 为余数，Q 为商。</text>
+    <text x="620" y="491" font-size="12">符号位单独处理</text>
+    <text x="620" y="515" font-size="12">加减交替法：R&lt;0 时下一轮改加 M</text>
+
+    <text x="45" y="615" font-size="12" fill="#6b777f">本图只画寄存器级迭代骨架；具体位宽、符号位和溢出判断以题目数据为准。</text>
+  </g>
+</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 600" role="img" aria-label="编址单位、MAR、MDR 与存储字长的关系">
+  <defs>
+    <marker id="ua" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="600" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">编址单位、MAR、MDR 与存储字长</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="45" y="75" width="180" height="70" rx="5" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="135" y="101" text-anchor="middle" font-weight="700">CPU</text>
+    <text x="135" y="123" text-anchor="middle" font-size="12">MAR 给出地址</text>
+    <text x="135" y="139" text-anchor="middle" font-size="12">MDR 收/发数据</text>
+    <rect x="305" y="75" width="220" height="70" rx="5" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="415" y="101" text-anchor="middle" font-weight="700">主存</text>
+    <text x="415" y="123" text-anchor="middle" font-size="12">地址空间 = 2^n 个编址单位</text>
+    <text x="415" y="139" text-anchor="middle" font-size="12">每个单位宽度 = 编址单位</text>
+    <path d="M225 105 L305 105" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ua)"/>
+    <path d="M305 135 L225 135" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ua)"/>
+    <text x="245" y="98" font-size="12">地址</text>
+    <text x="245" y="155" font-size="12">数据</text>
+
+    <text x="45" y="205" font-weight="700">A. 按字节编址（每个地址 = 1 字节）</text>
+    <g>
+      <rect x="70" y="225" width="160" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="150" y="251" text-anchor="middle">地址 0</text>
+      <rect x="230" y="225" width="160" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="310" y="251" text-anchor="middle">地址 1</text>
+      <rect x="390" y="225" width="160" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="470" y="251" text-anchor="middle">地址 2</text>
+      <text x="560" y="251" font-size="12">每个格子 1B</text>
+    </g>
+    <text x="70" y="295">32 位地址：地址数 = 2^32，容量 = 2^32B = 4GB</text>
+    <text x="70" y="318">408 模型中：存储字长 8 位 → MDR 8 位（不要拿机器字长 32 位替代）</text>
+
+    <text x="45" y="365" font-weight="700">B. 按 32 位字编址（每个地址 = 1 个存储字 = 4B）</text>
+    <g>
+      <rect x="70" y="385" width="160" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="150" y="411" text-anchor="middle">地址 0：4B</text>
+      <rect x="230" y="385" width="160" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="310" y="411" text-anchor="middle">地址 1：4B</text>
+      <rect x="390" y="385" width="160" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="470" y="411" text-anchor="middle">地址 2：4B</text>
+      <text x="560" y="411" font-size="12">每个格子 4B</text>
+    </g>
+    <text x="70" y="455">32 位地址：地址数 = 2^32，容量 = 2^32 × 4B = 16GB</text>
+    <text x="70" y="478">地址加 1 是“移动到下一个存储字”，不是“移动到下一个字节”。</text>
+
+    <rect x="45" y="510" width="950" height="66" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="535" font-size="13" font-weight="700">容量判断顺序</text>
+    <text x="65" y="558" font-size="13">一个地址对应多少位/字节 × 一共有多少个地址（2^n）；MDR=存储字长，机器字长另算。</text>
+  </g>
+</svg>

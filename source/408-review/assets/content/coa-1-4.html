@@ -30,6 +30,12 @@
 </tr>
 </tbody>
 </table></div>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="编址单位、MAR、MDR 与存储字长的关系" data-src="/408-review/assets/img/coa-addressing-units.svg" href="/408-review/assets/img/coa-addressing-units.svg">
+<img alt="按字节编址与按字编址、MAR 地址数、MDR 和存储字长的关系图" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-addressing-units.svg"/>
+</a>
+<figcaption>先看“一个地址代表多少数据”，再看地址数 2^n；MDR 对应存储字长，不等于机器字长。</figcaption>
+</figure>
 <p>因此，“按字节编址且存储字长为 32 位”时，一个存储字会占用连续的 4 个字节地址。若某存储字从地址 <code>A</code> 开始，它的四个字节分别位于 <code>A、A+1、A+2、A+3</code>；下一条存储字从 <code>A+4</code> 开始。</p>
 <hr/>
 <p>存储字长是一个存储单元中实际存放的二进制位数，常见为 8、16、32 或 64 位。它不一定等于：</p>

@@ -42,6 +42,12 @@
 </ul>
 <p>因此需要两个东西：<code>rw</code>（读者整体/写者的互斥）和 <code>count</code>（当前读者数）。<code>count</code> 是普通整数，不是信号量——它不需要排队，也不限制读者上限；但多个读者同时修改它，必须用 <code>mutex</code> 保护。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="读者-写者：读读并行、读写互斥与写者等待" data-src="/408-review/assets/img/os-reader-writer-timeline.svg" href="/408-review/assets/img/os-reader-writer-timeline.svg">
+<img alt="多个读者并行读、写者等待、最后一个读者离开后写者进入的时间线" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-reader-writer-timeline.svg"/>
+</a>
+<figcaption>count 记录读者数，mutex 保护 count，w 保护读写/写写互斥；第一个读者 P(w)、最后一个读者 V(w)。</figcaption>
+</figure>
 <h2 id="rw-code">三、读者优先代码</h2>
 <pre><code class="language-c">semaphore rw = 1;      // 写者与“读者整体”互斥
 semaphore mutex = 1;   // 保护 count

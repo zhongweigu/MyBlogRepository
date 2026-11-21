@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 560" role="img" aria-label="BFS 队列状态与访问顺序">
+  <defs>
+    <marker id="ba" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="560" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">BFS：队列里存“待访问的下一层”，而不是已访问</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="50" y="75">图：A 邻接 B、C；B 邻接 D、E；C 邻接 F。</text>
+    <g fill="#e9f2f6" stroke="#4d7f95">
+      <circle cx="180" cy="140" r="26"/><circle cx="330" cy="105" r="26"/><circle cx="330" cy="180" r="26"/>
+      <circle cx="500" cy="70" r="26"/><circle cx="500" cy="140" r="26"/><circle cx="500" cy="210" r="26"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="180" y="146">A</text><text x="330" y="111">B</text><text x="330" y="186">C</text>
+      <text x="500" y="76">D</text><text x="500" y="146">E</text><text x="500" y="216">F</text>
+    </g>
+    <g stroke="#9aa6ad" stroke-width="1.5" fill="none">
+      <path d="M205 133 L304 112"/><path d="M205 148 L304 173"/><path d="M356 105 L474 78"/><path d="M356 110 L474 133"/><path d="M356 180 L474 203"/>
+    </g>
+
+    <text x="600" y="80" font-weight="700">队列变化</text>
+    <text x="600" y="110">初始：[A]</text>
+    <text x="600" y="140">弹出 A：访问 A，入队 B、C → [B, C]</text>
+    <text x="600" y="170">弹出 B：访问 B，入队 D、E → [C, D, E]</text>
+    <text x="600" y="200">弹出 C：访问 C，入队 F → [D, E, F]</text>
+    <text x="600" y="230">继续：D、E、F 依次弹出 → 访问顺序 A,B,C,D,E,F</text>
+
+    <rect x="50" y="295" width="920" height="100" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="70" y="321" font-weight="700">为什么队列能保证“按层”</text>
+    <text x="70" y="345">队首永远是本层最早发现、尚未扩展的结点；新发现的下一层结点只能排到队尾。</text>
+    <text x="70" y="369">所以同一层的结点一定在本层已入队结点之后、下一层结点之前被处理。</text>
+
+    <text x="50" y="440" font-weight="700">无权图最短路</text>
+    <text x="50" y="465">dist[v] = dist[u] + 1（第一次发现 v 时写入）；队列按 dist 非降序扩展，第一次到达就是最短。</text>
+    <text x="50" y="489">带权图不能直接用 BFS，除非所有边权相等；否则用 Dijkstra/其他最短路算法。</text>
+    <text x="50" y="520" font-size="12" fill="#6b777f">本图只表示队列顺序，不表示邻接表的物理存储顺序；邻接表顺序会改变同层访问先后，但不改变层序。</text>
+  </g>
+</svg>

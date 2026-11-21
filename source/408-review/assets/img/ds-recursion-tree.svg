@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 600" role="img" aria-label="递归树与每层代价">
+  <defs>
+    <marker id="ra" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="600" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">递归树：T(n)=2T(n/2)+n 的代价分层</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="430" y="75" width="180" height="48" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="520" y="96" text-anchor="middle">T(n)</text>
+    <text x="520" y="114" text-anchor="middle" font-size="11">本层代价 n</text>
+    <rect x="270" y="175" width="180" height="48" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="360" y="196" text-anchor="middle">T(n/2)</text>
+    <text x="360" y="214" text-anchor="middle" font-size="11">n/2</text>
+    <rect x="590" y="175" width="180" height="48" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="680" y="196" text-anchor="middle">T(n/2)</text>
+    <text x="680" y="214" text-anchor="middle" font-size="11">n/2</text>
+    <path d="M485 123 L375 175" stroke="#4d5b66" stroke-width="1.8" fill="none" marker-end="url(#ra)"/>
+    <path d="M555 123 L665 175" stroke="#4d5b66" stroke-width="1.8" fill="none" marker-end="url(#ra)"/>
+
+    <text x="270" y="275">…继续二分，直到子问题规模为 1（叶子）…</text>
+    <rect x="70" y="300" width="870" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="505" y="326" text-anchor="middle">叶子层：共 n 个叶子，每个规模 1、代价 1</text>
+
+    <rect x="70" y="385" width="870" height="88" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="90" y="411" font-weight="700">每层总代价</text>
+    <text x="90" y="435">第 0 层：n；第 1 层：2×(n/2)=n；第 2 层：4×(n/4)=n；……</text>
+    <text x="90" y="459">共有 log₂n + 1 层（从 n 二分到 1），所以总代价 = n·(log₂n+1) = Θ(n log n)。</text>
+
+    <text x="70" y="515" font-weight="700">和主定理的联系</text>
+    <text x="70" y="540">比较 f(n)=n 与 n^(log_b a)=n^(log₂2)=n：同阶，乘 log 因子 → Θ(n log n)。</text>
+    <text x="70" y="564" font-size="12" fill="#6b777f">递归树画的是“每层代价 × 层数”；若叶子代价不同，要把叶子层单独算，不能只数层数。</text>
+  </g>
+</svg>

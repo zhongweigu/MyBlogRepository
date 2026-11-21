@@ -1,6 +1,12 @@
 <div class="article-content">
 <h2 id="3-">考点3-定点数的乘除法</h2>
 <p>定点数乘除法都是“加/减 + 移位”的循环。设数值部分有 $n$ 位，连同符号位共 $n+1$ 位；符号位按原码或补码的规则处理。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="定点乘法与除法的寄存器迭代骨架" data-src="/408-review/assets/img/coa-mul-div-iteration.svg" href="/408-review/assets/img/coa-mul-div-iteration.svg">
+<img alt="原码一位乘法与恢复余数除法的 A/Q/M/C 寄存器迭代、移位和商位变化" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-mul-div-iteration.svg"/>
+</a>
+<figcaption>乘除法都是“加/减 + 移位 + 计数”的循环；图中先给骨架，具体算例再按题目位宽展开。</figcaption>
+</figure>
 <p><strong>原码一位乘法。</strong></p>
 <ol>
 <li>符号位单独处理：积符 $=x_s\oplus y_s$；</li>

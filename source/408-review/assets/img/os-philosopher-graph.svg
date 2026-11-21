@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 640" role="img" aria-label="哲学家进餐的资源环与防死锁策略">
+  <defs>
+    <marker id="pha" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1020" height="640" fill="#fffdf8"/>
+  <text x="510" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">哲学家进餐：五个进程与五把叉子的循环等待</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <circle cx="300" cy="280" r="170" fill="none" stroke="#c9c0ae" stroke-width="2"/>
+    <g fill="#e9f2f6" stroke="#4d7f95">
+      <circle cx="300" cy="110" r="30"/><circle cx="462" cy="228" r="30"/><circle cx="400" cy="418" r="30"/><circle cx="200" cy="418" r="30"/><circle cx="138" cy="228" r="30"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="300" y="116">P0</text><text x="462" y="234">P1</text><text x="400" y="424">P2</text><text x="200" y="424">P3</text><text x="138" y="234">P4</text>
+    </g>
+    <g fill="#f3e6e6" stroke="#a85a5a">
+      <rect x="360" y="155" width="40" height="24" rx="3"/><text x="380" y="172" text-anchor="middle" font-size="11">F0</text>
+      <rect x="408" y="300" width="40" height="24" rx="3"/><text x="428" y="317" text-anchor="middle" font-size="11">F1</text>
+      <rect x="280" y="395" width="40" height="24" rx="3"/><text x="300" y="412" text-anchor="middle" font-size="11">F2</text>
+      <rect x="170" y="300" width="40" height="24" rx="3"/><text x="190" y="317" text-anchor="middle" font-size="11">F3</text>
+      <rect x="215" y="155" width="40" height="24" rx="3"/><text x="235" y="172" text-anchor="middle" font-size="11">F4</text>
+    </g>
+    <text x="55" y="470" font-size="12" fill="#52605a">F_i 是 P_i 与 P_(i+1) 之间的共享叉子；每位哲学家需要左右两把。</text>
+
+    <text x="560" y="95" font-weight="700">死锁的四个必要条件（这里全部满足）</text>
+    <text x="560" y="122">互斥：一把叉子一次只能一个人用。</text>
+    <text x="560" y="146">占有并等待：拿着左叉，等右叉。</text>
+    <text x="560" y="170">不可抢占：不能从哲学家手里抢叉子。</text>
+    <text x="560" y="194">循环等待：P0→P1→P2→P3→P4→P0。</text>
+
+    <text x="560" y="250" font-weight="700">三种防死锁方案</text>
+    <text x="560" y="278">① 最多 4 人同时进餐：至少一人能拿到两把叉。</text>
+    <text x="560" y="302">② 原子地拿两把叉：要么左右都拿到，要么都不拿。</text>
+    <text x="560" y="326">③ 奇偶顺序：奇数先左后右，偶数先右后左，破坏循环等待。</text>
+
+    <rect x="45" y="500" width="930" height="95" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="525" font-weight="700">判断方案对不对</text>
+    <text x="65" y="549">先问：是否破坏四个必要条件之一；再看是否引入饥饿；最后检查 P/V 顺序和初值。</text>
+    <text x="65" y="573">“最多 4 人”仍需互斥拿叉；原子拿两把要一次 P 两个信号量或用一个 mutex 包住取叉动作。</text>
+
+    <text x="45" y="620" font-size="12" fill="#6b777f">本图只表示资源环和经典策略；具体代码实现中的信号量名、初值以正文为准。</text>
+  </g>
+</svg>

@@ -23,6 +23,12 @@
 </ul>
 <p>把约束拆成两句话：<strong>“有没有空位/产品”是同步（状态），“能不能同时改缓冲区”是互斥</strong>。这两件事要用不同的信号量，不能用一个 mutex 全包。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="生产者-消费者环形缓冲区与 empty/full/mutex" data-src="/408-review/assets/img/os-producer-consumer.svg" href="/408-review/assets/img/os-producer-consumer.svg">
+<img alt="生产者消费者环形缓冲区，empty、full、mutex 三个信号量的作用和 P/V 顺序" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-producer-consumer.svg"/>
+</a>
+<figcaption>empty/full 管“有没有位置”，mutex 管“能不能同时改”；先 P 同步/资源，再 P 互斥，否则可能抱着锁睡眠。</figcaption>
+</figure>
 <h2 id="pc-sync">二、先解决“能不能做”</h2>
 <p>如果没有同步，生产者可能覆盖未取走的数据，消费者可能读取空缓冲区。设：</p>
 <pre><code class="language-c">semaphore empty = N;   // 空位数

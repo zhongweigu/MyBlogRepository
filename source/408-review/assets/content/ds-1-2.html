@@ -58,7 +58,13 @@
 <td>归并排序的调用数</td>
 </tr>
 </tbody>
-</table></div>
+</table></div><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="递归树：每层代价与总代价" data-src="/408-review/assets/img/ds-recursion-tree.svg" href="/408-review/assets/img/ds-recursion-tree.svg">
+<img alt="T(n)=2T(n/2)+n 的递归树，每层代价为 n，共 log n 层" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-recursion-tree.svg"/>
+</a>
+<figcaption>递归树把“每层有多少个子问题、每层总代价是多少”画出来；本例每层都是 n，共 log₂n+1 层。</figcaption>
+</figure>
+
 <hr/>
 <p><strong>① 单分支、规模每次减 1 —— 调用 $n$ 次。</strong></p>
 <pre><code class="language-text">Fact(n):

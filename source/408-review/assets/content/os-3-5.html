@@ -14,6 +14,12 @@
 </ul></div>
 </details>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="PV 题从场景到信号量的判断流程" data-src="/408-review/assets/img/os-pv-decision-flow.svg" href="/408-review/assets/img/os-pv-decision-flow.svg">
+<img alt="PV 解题决策流程：识别互斥/同步/资源计数，确定初值，按同步优先于互斥写 P/V，再检查" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-pv-decision-flow.svg"/>
+</a>
+<figcaption>先找关系再写代码；P 的顺序是“先同步/资源，后互斥”，V 的顺序与临界区边界对称。</figcaption>
+</figure>
 <h2 id="pv5-read">一、先读题：把场景翻成三类关系</h2>
 <p>拿到题，先在草稿上写三行：</p>
 <div class="article-table"><table>
