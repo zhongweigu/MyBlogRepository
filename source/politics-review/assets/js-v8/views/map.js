@@ -146,10 +146,10 @@ export function mapView(store, query = {}) {
     <div class="map-bottom-cta">
       <div>
         <p class="eyebrow">NEXT</p>
-        <h3>地图走完了，回到今日队列。</h3>
-        <p>按到期顺序滚动复习，每个专题先回忆，再读全文。</p>
+        <h3>地图走完了，回到一页纸。</h3>
+        <p>按手册顺序过 100 个知识点，再点进专题读展开讲解。</p>
       </div>
-      <a class="btn btn-primary" href="#/today">${icon('calendar', 16)} 打开今日复习</a>
+      <a class="btn btn-primary" href="#/yizhi">${icon('calendar', 16)} 打开一页纸</a>
     </div>
 
     ${footer()}

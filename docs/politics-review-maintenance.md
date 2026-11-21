@@ -10,13 +10,15 @@
 ## 1. 先记住这几件事
 
 1. **不编辑 `source/_posts/*.md`**。帖子是历史归档；新内容只进复习台。
-2. 三科并列，结构见 `assets/js-v7/data/meta.js`：
+2. 三科并列，结构见 `assets/js-v8/data/meta.js`：
    - **马原**：六板块 29 专题（`my-01`…`my-29`，长文在 `content/`）；
    - **史纲**：八板块 57 专题（`sx-038`…`sx-094`，来自《27 考研政治一页纸·知识点手册》）；
    - **新思想与法治**：两板块 6 专题（`xz-095`…`xz-100`，同一手册）。
-3. 三个模块：**今日**（每日 8 个专题，按科目轮转）、**知识地图**（`?subject=my|sx|xz`）、**术语库**（按科目筛）。用户明确不要真题、图解、评论、英文版。
+3. 三个模块：**一页纸**（`#/yizhi`，手册 100 个知识点的原卡片 + 彩色圈画，每卡链到知识库）、**知识地图**（`?subject=my|sx|xz`）、**术语库**（按科目筛）。原「今日」队列已撤销，不要再加回。用户明确不要真题、图解、评论、英文版。
 4. `topics-pending.js` 现在是空数组，留作以后扩展。
 5. 样式直接复用 `/408-review/assets/css/app.css`，本页只加载 `assets/css/politics.css` 做覆写（朱红/青/赭三色、待补标记）。
+
+**一页纸与知识库分工**：`yizhi.js` 是手册原文（颜色来自 PDF 文字层），**不许改写、增删、润色**；知识库专题负责背景、理解与记忆方法，正文高亮对齐手册圈画。
 
 ---
 
@@ -29,8 +31,8 @@ source/politics-review/
 │   ├── css/politics.css           # 覆写层（accent、pending、小节样式）
 │   ├── favicon.svg
 │   ├── content/my-XX.html         # 每篇长文，按需 fetch
-│   └── js-v7/
-│       ├── app.js                 # 路由：today / map / chapter / topic / glossary
+│   └── js-v8/
+│       ├── app.js                 # 路由：yizhi / map / chapter / topic / glossary
 │       ├── store.js               # localStorage 进度、复习间隔（1/3/7/15 天）
 │       ├── stats.js               # 板块与专题统计（只算非 pending）
 │       ├── runner.js              # 回忆模式遮罩
@@ -38,13 +40,17 @@ source/politics-review/
 │       ├── ui.js                  # 图标、footer、通用片段
 │       ├── data/
 │       │   ├── meta.js            # 科目、板块、横向脉络
+│       │   ├── yizhi.js           # 一页纸 100 个知识点（PDF 彩色文字层，勿改写）
 │       │   ├── topics-core.js     # 马原 1–29 的速记层
 │       │   ├── topics-sx.js       # 史纲 57 个知识点（handbook: true）
+│       │   ├── sx-articles.js     # 史纲详细正文（背诵句用 <mark>）
+│       │   ├── sx-memory.js       # 史纲记忆方法（why / how）
 │       │   ├── topics-xz.js       # 新思想与法治 6 个知识点（handbook: true）
+│       │   ├── xz-articles.js     # 新思想与法治详细正文
 │       │   ├── topics-pending.js  # 待补占位（当前为空）
 │       │   ├── glossary.js        # 术语库
-│       │   └── index.js           # 合并、索引（每日队列按科目轮转）
-│       └── views/                 # today / map / chapter / topic / glossary
+│       │   └── index.js           # 合并、索引
+│       └── views/                 # yizhi / map / chapter / topic / glossary
 ```
 
 ---
@@ -104,8 +110,9 @@ source/politics-review/
 
 这类专题不写 `content/*.html`，内容放在 `data/` 里的两个地方：
 
-- `topics-sx.js` / `topics-xz.js` 的 `points`：**速记层**，一句话一条，供背诵清单、今日队列、回忆模式使用；
-- `sx-articles.js`：**正文层**，按专题 id 写详细讲解（时间、地点、经过、意义），把手册里的背诵句用 `<mark>` 标出。
+- `topics-sx.js` / `topics-xz.js` 的 `points`：**速记层**，一句话一条，供背诵清单、回忆模式使用；
+- `sx-articles.js` / `xz-articles.js`：**正文层**，按专题 id 写详细讲解（时间、地点、经过、意义），把手册里的背诵句用 `<mark>` 标出；
+- `sx-memory.js`：**记忆方法**，每专题一句「为什么」+ 一句「怎么记」，在正文后渲染。
 
 ```js
 // topics-sx.js
@@ -116,21 +123,26 @@ H('sx-038', 'sx-c1', 1, '三元里抗英与太平天国', '知识点 038',
 
 // sx-articles.js
 'sx-038': '<p>1841 年 5 月，广州三元里……<mark>这是中国人民第一次大规模的反侵略武装斗争</mark>。</p>'
+
+// sx-memory.js
+'sx-038': { why: '农民是小生产者……', how: '三元里＝第一次反侵略；太平天国＝第一次反封建反侵略。' }
 ```
 
-- 有 `article` 的专题（史纲 57 篇）由 `articleFromData` 渲染；没有的（新思想与法治）退回 `handbookArticle`，按 `points[].body` 渲染。
-- 扩写只改 `sx-articles.js`，**不要动 `points`**——它是背诵层，越短越好。
+- 有 `article` 的专题（史纲 57 篇、新思想与法治 6 篇）由 `articleFromData` 渲染；`memory` 存在时追加「记忆方法」卡片。
+- 扩写只改 `sx-articles.js` / `xz-articles.js`，**不要动 `points`**——它是背诵层，越短越好。
 - 章节按手册目录分组；`order` 用章内顺序，`id` 保留手册知识点编号（sx-038…sx-094 / xz-095…xz-100）。
 - 手册里的口诀、辨析、易错项原样保留；发现原书笔误（如「二十三中」应为二十届三中全会）按正确表述写。
 - 新增科目：在 `meta.js` 的 `SUBJECTS` / `CHAPTERS` 增加科目与板块，再建 `topics-xx.js`，在 `data/index.js` 里加入 `TOPICS`；地图会自动出现科目 tab，术语库按科目筛选。
 
 ---
 
-## 5. 今日队列
+## 5. 一页纸板块
 
-- 默认 8 个专题：到期优先，不足时补没读过的；全部读过且无到期时，按掌握度从低到高抽查。
-- 数量改两处：`views/today.js` 的 `DAILY_LIMIT` 与 `app.js` 里 `store.dailyQueue(8)`。
-- 评分四档：忘记 / 模糊 / 记得 / 熟练，对应 1、1、3~7、7~15 天的间隔。
+- 数据在 `data/yizhi.js`，由 PDF 的彩色文字层直接提取：每个知识点一条，含 `n / subject / topic / title / body`。
+- `body` 里的 `<span class="yz-r|b|a|o|p">` 对应 PDF 的红、蓝、浅蓝、橙、紫；**不要改写文字、不要增删内容、不要调换顺序**。
+- `topic` 指向知识库专题页；新增或调整卡片时，确认链接能打开对应专题。
+- 排序按知识点编号；卡片按知识库章节分组，章节名取自 `meta.js`。
+- `views/yizhi.js` 负责渲染与搜索；导航项为 `#/yizhi`，不要再恢复 `#/today`。
 
 ---
 
@@ -139,10 +151,10 @@ H('sx-038', 'sx-c1', 1, '三元里抗英与太平天国', '知识点 038',
 ```powershell
 npx hexo generate
 python -m http.server 8124 --directory public
-# 浏览器打开 http://127.0.0.1:8124/politics-review/#/today
+# 浏览器打开 http://127.0.0.1:8124/politics-review/#/yizhi
 ```
 
-要看的页面：`#/today`、`#/map`、改动的 `#/topic/<id>`、`#/glossary`；再看一眼 390px 宽度。
+要看的页面：`#/yizhi`、`#/map`、改动的 `#/topic/<id>`、`#/glossary`；再看一眼 390px 宽度。
 
 - headless Chrome 的 `--window-size=500` 实际视口约 518px，截图右侧会少 18px，**不是布局溢出**；判断是否真溢出，注入脚本量 `document.documentElement.scrollWidth`。
 - 本地截图加 `--no-proxy-server`（这台机器的代理会接管 127.0.0.1）。
@@ -156,14 +168,14 @@ git commit -m "…"
 git push origin main
 ```
 
-> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v7` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
+> **缓存**：Netlify / Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 必须递增 `assets/js-v8` 目录或 `politics.css?v=...` 与 `index.html` 里的引用。
 
 ---
 
 ## 7. 不要做
 
 - 不要编辑 `source/_posts/*.md`。
-- 不要给今日页加计划、每日一题、热力图等模块。
+- 不要给一页纸加计划、每日一题、热力图等模块。
 - 不要加真题、图解、评论、路线 / 纲领、P0–P3 优先级、英文版。
 - 不要把 `pending` 专题放进队列或统计。
 - 不要改已有专题 id（进度、链接、脉络都依赖它）。

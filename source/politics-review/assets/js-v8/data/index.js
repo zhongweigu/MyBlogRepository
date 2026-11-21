@@ -2,15 +2,17 @@ import { META, SUBJECTS, CHAPTERS, CHAINS } from './meta.js';
 import { CORE_TOPICS } from './topics-core.js';
 import { SX_TOPICS } from './topics-sx.js';
 import { SX_ARTICLES } from './sx-articles.js';
+import { SX_MEMORY } from './sx-memory.js';
 import { XZ_TOPICS } from './topics-xz.js';
+import { XZ_ARTICLES } from './xz-articles.js';
 import { PENDING_TOPICS } from './topics-pending.js';
 
 export { META, SUBJECTS, CHAPTERS, CHAINS };
 
 export const TOPICS = [
   ...CORE_TOPICS,
-  ...SX_TOPICS.map((t) => ({ ...t, article: SX_ARTICLES[t.id] || '' })),
-  ...XZ_TOPICS,
+  ...SX_TOPICS.map((t) => ({ ...t, article: SX_ARTICLES[t.id] || '', memory: SX_MEMORY[t.id] || null })),
+  ...XZ_TOPICS.map((t) => ({ ...t, article: XZ_ARTICLES[t.id] || '' })),
   ...PENDING_TOPICS,
 ];
 

@@ -1,6 +1,6 @@
 import { Store, today } from './store.js';
 import { topicById, chapterById, topicsOfChapter, subjectOf, subjectById } from './data/index.js';
-import { todayView } from './views/today.js';
+import { yizhiView, filterYizhi } from './views/yizhi.js';
 import { mapView } from './views/map.js';
 import { chapterView } from './views/chapter.js';
 import { topicView, hydrateTopicArticle } from './views/topic.js';
@@ -71,16 +71,16 @@ function setDocTitle(title) {
 function render({ scroll = true } = {}) {
   const route = parseHash();
   const { parts } = route;
-  const name = parts[0] || 'today';
+  const name = parts[0] || 'yizhi';
   let html = null;
-  let nav = 'today';
+  let nav = 'yizhi';
   let title = '';
 
   try {
-    if (name === 'today' || parts.length === 0) {
-      html = todayView(store);
-      nav = 'today';
-      title = '今日';
+    if (name === 'yizhi' || name === 'today' || parts.length === 0) {
+      html = yizhiView(store, route.query);
+      nav = 'yizhi';
+      title = '一页纸';
     } else if (name === 'map') {
       html = mapView(store, route.query);
       nav = 'map';
@@ -262,8 +262,10 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('input', (e) => {
-  const input = e.target.closest('[data-glossary-search]');
-  if (input) filterGlossary(input.value);
+  const glossaryInput = e.target.closest('[data-glossary-search]');
+  if (glossaryInput) filterGlossary(glossaryInput.value);
+  const yizhiInput = e.target.closest('[data-yizhi-search]');
+  if (yizhiInput) filterYizhi(yizhiInput.value);
 });
 
 document.addEventListener('keydown', (e) => {
@@ -288,7 +290,7 @@ function errorView(err) {
     <h1>页面渲染失败</h1>
     <p>${escapeHtml(err?.message || String(err))}</p>
     <p class="muted">打开浏览器控制台可以看到完整堆栈。</p>
-    <a class="btn" href="#/today">${icon('home', 15)} 回到今日</a>
+    <a class="btn" href="#/yizhi">${icon('home', 15)} 回到一页纸</a>
   </div>${footer()}</section>`;
 }
 
@@ -298,7 +300,7 @@ function notFoundView() {
     <h1>这个页面不存在</h1>
     <p>链接可能拼错了，或者内容已经移动。</p>
     <div class="error-actions">
-      <a class="btn btn-primary" href="#/today">${icon('calendar', 15)} 今日复习</a>
+      <a class="btn btn-primary" href="#/yizhi">${icon('calendar', 15)} 一页纸</a>
       <a class="btn" href="#/map">${icon('map', 15)} 知识地图</a>
     </div>
   </div>${footer()}</section>`;
@@ -307,7 +309,7 @@ function notFoundView() {
 /* ---------------- 启动 ---------------- */
 
 if (!location.hash) {
-  history.replaceState(null, '', '#/today');
+  history.replaceState(null, '', '#/yizhi');
 }
 updateThemeUI();
 render();

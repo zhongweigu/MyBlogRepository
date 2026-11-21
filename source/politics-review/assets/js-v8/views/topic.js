@@ -266,8 +266,13 @@ function handbookArticle(topic) {
     <p class="article-source">手册原文整理自《27 考研政治一页纸·知识点手册》${escapeHtml(topic.kicker || '')}。</p>`;
 }
 
-/** 史纲的详细正文：讲清事件，背诵句用 <mark> 标出。 */
+/** 史纲 / 新思想与法治的详细正文：讲清事件，背诵句用 <mark> 标出。 */
 function articleFromData(topic) {
-  return `<div class="article-content">${topic.article}</div>
+  const memory = topic.memory ? `<div class="memo-card">
+    <h2>记忆方法</h2>
+    <p><b>为什么</b>${markTerms(topic.memory.why)}</p>
+    <p><b>怎么记</b>${markTerms(topic.memory.how)}</p>
+  </div>` : '';
+  return `<div class="article-content">${topic.article}${memory}</div>
     <p class="article-source">正文为扩展讲解；<mark>高亮部分</mark>是《27 考研政治一页纸·知识点手册》${escapeHtml(topic.kicker || '')} 的背诵句，其余为背景与经过。</p>`;
 }

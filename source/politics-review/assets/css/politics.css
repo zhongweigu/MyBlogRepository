@@ -169,3 +169,75 @@ mark.kw {
 @media (max-width: 760px) {
   .subject-switch { grid-template-columns: 1fr; }
 }
+
+/* ---------- 一页纸 ---------- */
+.view-yizhi .yz-hero { margin-bottom: 26px; }
+.yz-hero h1 { margin: 6px 0 10px; font-family: var(--serif); font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.01em; }
+.yz-lede { max-width: 720px; color: var(--ink-2); line-height: 1.9; }
+.yz-meta { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; font-size: 12px; color: var(--ink-3); }
+.yz-meta b { color: var(--ink); font-size: 14px; }
+.yz-meta em { font-style: normal; font-weight: 600; }
+.yz-meta em.yz-r { color: #d21f1f; }
+.yz-meta em.yz-b { color: #1f4fae; }
+.yz-meta em.yz-a { color: #2f7fbf; }
+.yz-meta em.yz-o { color: #c25a00; }
+.yz-meta em.yz-p { color: #6b3fa0; }
+
+.yz-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 26px; }
+
+.yz-group { margin-bottom: 34px; }
+.yz-group-head { display: flex; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+.yz-group-head h2 { margin: 0; font-family: var(--serif); font-size: 20px; }
+.yz-sub { font-size: 11px; letter-spacing: 0.1em; color: var(--ink-3); text-transform: uppercase; }
+.yz-group-count { margin-left: auto; font-size: 12px; color: var(--ink-3); }
+
+.yz-grid { columns: 3 340px; column-gap: 14px; }
+.yz-card { break-inside: avoid; margin: 0 0 14px; }
+@media (max-width: 900px) { .yz-grid { columns: 2 320px; } }
+@media (max-width: 640px) { .yz-grid { columns: 1; } }
+.view-yizhi { overflow-x: clip; }
+.yz-body p, .yz-lede, .yz-meta { overflow-wrap: anywhere; }
+
+.yz-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent, var(--red));
+  border-radius: var(--radius-sm);
+  background: var(--card);
+}
+.yz-card.is-sx { --accent: var(--teal); }
+.yz-card.is-xz { --accent: var(--amber); }
+.yz-card-head { display: flex; align-items: baseline; gap: 10px; }
+.yz-no { flex: none; font-size: 11px; letter-spacing: 0.06em; color: var(--ink-3); }
+.yz-card-head h3 { margin: 0; font-size: 15px; line-height: 1.5; }
+.yz-body { flex: 1; }
+.yz-body p { margin: 4px 0; font-size: 13.5px; line-height: 1.95; color: var(--ink-2); }
+.yz-body .yz-r { color: #d21f1f; font-weight: 700; }
+.yz-body .yz-b { color: #1f4fae; font-weight: 600; }
+.yz-body .yz-a { color: #2f7fbf; }
+.yz-body .yz-o { color: #c25a00; font-weight: 600; }
+.yz-body .yz-p { color: #6b3fa0; }
+.yz-link { margin-top: 2px; font-size: 12px; color: var(--accent, var(--red)); display: inline-flex; align-items: center; gap: 4px; }
+.yz-link:hover { text-decoration: underline; }
+.yz-empty { padding: 40px 0; text-align: center; color: var(--ink-3); }
+
+[data-theme="dark"] .yz-body .yz-r { color: #ff8a80; }
+[data-theme="dark"] .yz-body .yz-b { color: #8ab4f8; }
+[data-theme="dark"] .yz-body .yz-a { color: #7fc4f0; }
+[data-theme="dark"] .yz-body .yz-o { color: #ffb26b; }
+[data-theme="dark"] .yz-body .yz-p { color: #c3a6ff; }
+
+/* 知识库里的记忆方法 */
+.memo-card {
+  margin-top: 26px;
+  padding: 18px 20px;
+  border: 1px dashed color-mix(in srgb, var(--accent, var(--red)) 35%, var(--line));
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft-2, var(--card-2));
+}
+.memo-card h2 { margin: 0 0 8px; font-size: 17px; color: var(--accent-deep, var(--red)); }
+.memo-card p { margin: 6px 0; font-size: 14px; line-height: 1.9; color: var(--ink-2); }
+.memo-card b { display: inline-block; min-width: 3.4em; color: var(--accent, var(--red)); }
