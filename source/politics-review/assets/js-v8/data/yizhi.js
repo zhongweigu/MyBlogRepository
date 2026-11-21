@@ -614,7 +614,7 @@ export const YIZHI = [
   {
     n: '037',
     subject: 'sx',
-    topic: 'sx-037',
+    topic: 'sx-038',
     title: '史纲整体脉络',
     body: `
       <p>早期</p>`,
