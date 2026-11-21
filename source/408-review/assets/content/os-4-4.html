@@ -76,7 +76,13 @@
 <p>对换区足够时，缺页从对换区读；不够时，未修改的文件页可直接从文件区读，修改页才写回对换区。这影响缺页处理时间和磁盘 I/O 次数。</p>
 <p><strong>为什么对换区用连续分配？</strong>对换区的页面是“临时换入换出”的，访问模式相对连续，系统可以预留一段连续磁盘空间。连续分配让一次调入/调出的多个扇区在磁盘上相邻，减少寻道和旋转延迟，也便于批量传输；代价是空间利用率不如离散分配、扩展不灵活。文件区要长期保存大量文件，更看重空间利用和动态增长，所以用离散分配。这里的选择逻辑和内存里的“连续分配 vs 分页”类似：速度/简单 vs 灵活性。</p>
 
-<h2 id="vm-algo">五、OPT / FIFO / LRU / CLOCK</h2>
+<h2 id="vm-algo"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="FIFO 淘汰最早进入的页，LRU 淘汰最久未使用的页；命中时 LRU 要更新最近使用顺序。" data-src="/408-review/assets/img/os-page-replacement-trace.svg" href="/408-review/assets/img/os-page-replacement-trace.svg">
+<img alt="FIFO 与 LRU 在同一访问串上的置换轨迹" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-page-replacement-trace.svg"/>
+</a>
+<figcaption>FIFO 淘汰最早进入的页，LRU 淘汰最久未使用的页；命中时 LRU 要更新最近使用顺序。</figcaption>
+</figure>
+五、OPT / FIFO / LRU / CLOCK</h2>
 <div class="article-table"><table>
 <thead><tr><th>算法</th><th>淘汰谁</th><th>实现/特点</th></tr></thead>
 <tbody>

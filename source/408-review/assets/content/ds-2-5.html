@@ -11,7 +11,13 @@
 </div>
 
 </details><div class="article-content">
-<h2 id="8-kmpnextnextval">考点8-KMP中的next和nextval数组</h2>
+<h2 id="8-kmpnextnextval"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="next 刻画失配点之前的最长相等前后缀；nextval 跳过必然再次失配的字符。" data-src="/408-review/assets/img/ds-kmp-nextval.svg" href="/408-review/assets/img/ds-kmp-nextval.svg">
+<img alt="KMP 的 next/nextval 与失配跳转" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-kmp-nextval.svg"/>
+</a>
+<figcaption>next 刻画失配点之前的最长相等前后缀；nextval 跳过必然再次失配的字符。</figcaption>
+</figure>
+考点8-KMP中的next和nextval数组</h2>
 <p>朴素匹配失配后，主串指针要退回本趟起点、模式串指针回到开头，前面比过的全白比。KMP 的改进是<strong>主串指针永不回退</strong>，失配时只把模式串指针挪到某个合适位置继续比——挪到哪儿，查 next 数组即可。</p>
 <p>next 数组刻画的是模式串自身的结构：失配处<strong>前面那一段已经和主串匹配上了</strong>，而这段里前缀和后缀相等，所以能把前缀挪到后缀的位置接着比，不必从头来。</p>
 <p><strong>next 的算法</strong>（默认从 0 开始）：</p>

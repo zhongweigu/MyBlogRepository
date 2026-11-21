@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 620" role="img" aria-label="二叉树的先序、中序、后序和层序遍历">
+  <rect width="1040" height="620" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">同一棵二叉树，四种遍历的访问顺序</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <g stroke="#9aa6ad" stroke-width="2" fill="none">
+      <path d="M500 105 L355 190"/><path d="M500 105 L645 190"/>
+      <path d="M340 215 L265 305"/><path d="M340 215 L415 305"/>
+      <path d="M660 215 L585 305"/><path d="M660 215 L735 305"/>
+      <path d="M430 330 L430 415"/>
+    </g>
+    <g fill="#e9f2f6" stroke="#4d7f95" stroke-width="2">
+      <circle cx="500" cy="90" r="27"/><circle cx="340" cy="200" r="27"/><circle cx="660" cy="200" r="27"/>
+      <circle cx="250" cy="320" r="27"/><circle cx="430" cy="320" r="27"/><circle cx="570" cy="320" r="27"/><circle cx="740" cy="320" r="27"/>
+      <circle cx="430" cy="430" r="27"/>
+    </g>
+    <g text-anchor="middle" font-weight="700">
+      <text x="500" y="96">A</text><text x="340" y="206">B</text><text x="660" y="206">C</text>
+      <text x="250" y="326">D</text><text x="430" y="326">E</text><text x="570" y="326">F</text><text x="740" y="326">G</text>
+      <text x="430" y="436">H</text>
+    </g>
+    <text x="455" y="490" font-size="12" fill="#52605a">E 的左孩子是 H；F、G 为叶子。</text>
+
+    <rect x="40" y="500" width="960" height="100" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="60" y="525" font-weight="700">访问序列（根 / 左 / 右 的定义不同）</text>
+    <text x="60" y="550">先序：A B D E H C F G</text>
+    <text x="330" y="550">中序：D B H E A F C G</text>
+    <text x="600" y="550">后序：D H E B F G C A</text>
+    <text x="60" y="578">层序：A B C D E F G H</text>
+    <text x="330" y="578" font-size="12" fill="#b54b45">先/中/后序是“根在什么时候访问”；层序用队列按层推进。</text>
+  </g>
+</svg>

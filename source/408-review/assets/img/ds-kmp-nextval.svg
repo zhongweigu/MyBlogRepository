@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 600" role="img" aria-label="KMP next 与 nextval 的失配跳转">
+  <defs>
+    <marker id="kma" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="600" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">KMP：失配后模式串跳到 next[j]，不是回到开头</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="50" y="78" font-weight="700">模式串 P = ABABC</text>
+    <text x="50" y="105" font-size="12" fill="#52605a">主串指针 i 不回退；只移动模式串指针 j。</text>
+
+    <rect x="50" y="130" width="70" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="85" y="155" text-anchor="middle">j</text>
+    <rect x="120" y="130" width="70" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="155" y="155" text-anchor="middle">0</text>
+    <rect x="190" y="130" width="70" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="225" y="155" text-anchor="middle">1</text>
+    <rect x="260" y="130" width="70" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="295" y="155" text-anchor="middle">2</text>
+    <rect x="330" y="130" width="70" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="365" y="155" text-anchor="middle">3</text>
+    <rect x="400" y="130" width="70" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="435" y="155" text-anchor="middle">4</text>
+    <rect x="50" y="170" width="70" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="85" y="195" text-anchor="middle">P</text>
+    <rect x="120" y="170" width="70" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="155" y="195" text-anchor="middle">A</text>
+    <rect x="190" y="170" width="70" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="225" y="195" text-anchor="middle">B</text>
+    <rect x="260" y="170" width="70" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="295" y="195" text-anchor="middle">A</text>
+    <rect x="330" y="170" width="70" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="365" y="195" text-anchor="middle">B</text>
+    <rect x="400" y="170" width="70" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="435" y="195" text-anchor="middle">C</text>
+    <rect x="50" y="210" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="85" y="235" text-anchor="middle">next</text>
+    <rect x="120" y="210" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="155" y="235" text-anchor="middle">−1</text>
+    <rect x="190" y="210" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="225" y="235" text-anchor="middle">0</text>
+    <rect x="260" y="210" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="295" y="235" text-anchor="middle">0</text>
+    <rect x="330" y="210" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="365" y="235" text-anchor="middle">1</text>
+    <rect x="400" y="210" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="435" y="235" text-anchor="middle">2</text>
+    <rect x="50" y="250" width="70" height="40" fill="#eadff2" stroke="#7f5b9a"/><text x="85" y="275" text-anchor="middle">nextval</text>
+    <rect x="120" y="250" width="70" height="40" fill="#eadff2" stroke="#7f5b9a"/><text x="155" y="275" text-anchor="middle">−1</text>
+    <rect x="190" y="250" width="70" height="40" fill="#eadff2" stroke="#7f5b9a"/><text x="225" y="275" text-anchor="middle">0</text>
+    <rect x="260" y="250" width="70" height="40" fill="#eadff2" stroke="#7f5b9a"/><text x="295" y="275" text-anchor="middle">−1</text>
+    <rect x="330" y="250" width="70" height="40" fill="#eadff2" stroke="#7f5b9a"/><text x="365" y="275" text-anchor="middle">0</text>
+    <rect x="400" y="250" width="70" height="40" fill="#eadff2" stroke="#7f5b9a"/><text x="435" y="275" text-anchor="middle">2</text>
+
+    <text x="50" y="335" font-weight="700">失配示例：主串到 A，模式串在第 4 位 C 失配</text>
+    <text x="55" y="370" font-family="monospace">主串: A B A B A B C</text>
+    <text x="55" y="398" font-family="monospace">模式: A B A B C      （j=0 开始）</text>
+    <text x="55" y="426" font-family="monospace">              ↑ j=4，C 与 A 失配</text>
+    <text x="55" y="465" font-family="monospace">右移 2 位：        A B A B C</text>
+    <text x="55" y="493" font-family="monospace">                     ↑ j=2，P[2]=A 对齐主串 A</text>
+
+    <rect x="560" y="315" width="430" height="150" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="580" y="340" font-weight="700">nextval 在做什么</text>
+    <text x="580" y="363" font-size="13">若 next[j] 指向的字符等于 P[j]，</text>
+    <text x="580" y="385" font-size="13">跳过去仍会再次失配 → 继续继承。</text>
+    <text x="580" y="407" font-size="13">nextval[j] 记录“跳过冗余比较后”的位置。</text>
+    <text x="580" y="431" font-size="12" fill="#b54b45">本页只给一条失配链；换模式串要重算，不能套固定数组。</text>
+
+    <text x="50" y="550" font-size="12" fill="#6b777f">next 刻画“失配位置之前的最长相等前后缀”；nextval 是对 next 的进一步压缩。</text>
+  </g>
+</svg>

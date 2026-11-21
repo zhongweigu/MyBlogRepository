@@ -27,7 +27,13 @@
 </figure>
 <p>VFS 不“消除”文件系统差异，只是把差异藏在操作函数指针后面。挂载、路径查找、缓存、权限检查等通用逻辑由 VFS 做；具体读写、分配盘块由下层文件系统做。</p>
 
-<h2 id="vfs-objects">二、VFS 的四个对象</h2>
+<h2 id="vfs-objects"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="superblock 管文件系统，vnode 管文件，dentry 管路径名字，file 管本次打开；前三个可共享，file 的偏移独立。" data-src="/408-review/assets/img/os-vfs-objects.svg" href="/408-review/assets/img/os-vfs-objects.svg">
+<img alt="VFS 四对象：superblock、vnode、dentry、file 的关系与位置" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-vfs-objects.svg"/>
+</a>
+<figcaption>superblock 管文件系统，vnode 管文件，dentry 管路径名字，file 管本次打开；前三个可共享，file 的偏移独立。</figcaption>
+</figure>
+二、VFS 的四个对象</h2>
 <div class="article-table"><table>
 <thead><tr><th>对象</th><th>表示什么</th><th>典型内容</th><th>生命周期</th></tr></thead>
 <tbody>

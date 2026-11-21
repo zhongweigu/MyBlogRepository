@@ -125,6 +125,12 @@
 </tbody>
 </table></div>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="目录文件的数据块存“名字+inode号”，inode 存属性和数据块指针；文件名不在 inode 里。" data-src="/408-review/assets/img/os-file-path-chain.svg" href="/408-review/assets/img/os-file-path-chain.svg">
+<img alt="路径解析：目录文件、目录项、inode 表和数据块" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-file-path-chain.svg"/>
+</a>
+<figcaption>目录文件的数据块存“名字+inode号”，inode 存属性和数据块指针；文件名不在 inode 里。</figcaption>
+</figure>
 <h3>按路径读取时到底读了什么</h3>
 <p>以 UNIX 类文件系统的 <code>/home/bok/a.txt</code> 为例：</p>
 <pre><code class="language-text">根目录 inode（已知/常驻）

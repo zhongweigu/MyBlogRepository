@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 620" role="img" aria-label="B 树结点分裂与散列冲突处理">
+  <defs>
+    <marker id="bha" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="620" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">B 树分裂与散列冲突：两种“放不下怎么办”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. B 树（5 阶，最多 4 个关键字）插入 25</text>
+    <text x="45" y="100">原结点：10, 20, 30, 40；插入 25 后变成 5 个关键字，溢出。</text>
+
+    <rect x="60" y="125" width="440" height="52" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="80" y="156">10</text><text x="170" y="156">20</text><text x="260" y="156">25</text><text x="350" y="156">30</text><text x="440" y="156">40</text>
+    <text x="60" y="200" font-size="12" fill="#b54b45">中位 25 上提，左右各留两个关键字</text>
+    <path d="M280 177 L280 225" stroke="#4d5b66" stroke-width="2" marker-end="url(#bha)"/>
+
+    <rect x="210" y="235" width="140" height="50" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="280" y="266" text-anchor="middle">25（父结点）</text>
+    <rect x="50" y="310" width="240" height="50" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="170" y="341" text-anchor="middle">10, 20（左）</text>
+    <rect x="350" y="310" width="240" height="50" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="470" y="341" text-anchor="middle">30, 40（右）</text>
+    <path d="M260 285 L190 310" stroke="#4d5b66" stroke-width="2" marker-end="url(#bha)"/>
+    <path d="M300 285 L430 310" stroke="#4d5b66" stroke-width="2" marker-end="url(#bha)"/>
+    <text x="60" y="390" font-size="12" fill="#52605a">分裂后仍满足：所有叶子同层、非根结点至少 ⌈m/2⌉ 棵子树。</text>
+
+    <text x="45" y="455" font-weight="700">B. 散列表：表长 7，插入 10、17、24（都散列到 3）</text>
+    <text x="45" y="480" font-size="12" fill="#52605a">h(k)=k mod 7；10 mod 7 = 3，17 mod 7 = 3，24 mod 7 = 3。</text>
+
+    <rect x="55" y="505" width="180" height="70" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="145" y="530" text-anchor="middle" font-weight="700">拉链法</text>
+    <text x="145" y="552" text-anchor="middle" font-size="12">槽 3 → 10 → 17 → 24</text>
+    <text x="145" y="570" text-anchor="middle" font-size="11">同义词挂链，装填因子可 &gt;1</text>
+
+    <rect x="300" y="505" width="330" height="70" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="465" y="530" text-anchor="middle" font-weight="700">线性探测</text>
+    <text x="465" y="552" text-anchor="middle" font-size="12">10→槽3；17→槽4；24→槽5</text>
+    <text x="465" y="570" text-anchor="middle" font-size="11">冲突后顺序找下一个空槽，可能聚集</text>
+
+    <rect x="690" y="505" width="290" height="70" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="835" y="530" text-anchor="middle" font-weight="700">两种成本</text>
+    <text x="835" y="552" text-anchor="middle" font-size="12">拉链：链表指针 + 局部性差</text>
+    <text x="835" y="570" text-anchor="middle" font-size="12">开放地址：探测次数 + 聚集</text>
+
+    <text x="45" y="605" font-size="12" fill="#6b777f">B 树分裂改变树结构；散列冲突不改变“桶”的映射，只改变桶内/桶后的存放方式。</text>
+  </g>
+</svg>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 620" role="img" aria-label="RAID 0、RAID 1 与 RAID 5 的数据布局">
+  <rect width="1060" height="620" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">RAID 0 / 1 / 5：数据块怎样分布到磁盘</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="76" font-weight="700">RAID 0：条带化，无冗余</text>
+    <g>
+      <rect x="55" y="100" width="140" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="125" y="126" text-anchor="middle">磁盘 0</text>
+      <rect x="215" y="100" width="140" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="285" y="126" text-anchor="middle">磁盘 1</text>
+      <rect x="375" y="100" width="140" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="445" y="126" text-anchor="middle">磁盘 2</text>
+      <rect x="535" y="100" width="140" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="605" y="126" text-anchor="middle">磁盘 3</text>
+    </g>
+    <g>
+      <rect x="55" y="142" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="125" y="167" text-anchor="middle">A0</text>
+      <rect x="215" y="142" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="285" y="167" text-anchor="middle">A1</text>
+      <rect x="375" y="142" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="445" y="167" text-anchor="middle">A2</text>
+      <rect x="535" y="142" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="605" y="167" text-anchor="middle">A3</text>
+      <rect x="55" y="182" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="125" y="207" text-anchor="middle">A4</text>
+      <rect x="215" y="182" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="285" y="207" text-anchor="middle">A5</text>
+      <rect x="375" y="182" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="445" y="207" text-anchor="middle">A6</text>
+      <rect x="535" y="182" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="605" y="207" text-anchor="middle">A7</text>
+    </g>
+    <text x="700" y="167" font-size="12">并行读写，容量 100%</text>
+    <text x="700" y="189" font-size="12" fill="#b54b45">任一块盘坏，数据丢失</text>
+
+    <text x="45" y="270" font-weight="700">RAID 1：镜像，两块盘存同一份</text>
+    <g>
+      <rect x="55" y="295" width="140" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="125" y="320" text-anchor="middle">磁盘 0</text>
+      <rect x="215" y="295" width="140" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="285" y="320" text-anchor="middle">磁盘 1</text>
+      <rect x="55" y="335" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="125" y="360" text-anchor="middle">A0</text>
+      <rect x="215" y="335" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="285" y="360" text-anchor="middle">A0′</text>
+      <rect x="55" y="375" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="125" y="400" text-anchor="middle">A1</text>
+      <rect x="215" y="375" width="140" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="285" y="400" text-anchor="middle">A1′</text>
+    </g>
+    <text x="390" y="335" font-size="12">容量 50%；读可并行，写要两份</text>
+    <text x="390" y="357" font-size="12">坏一块盘可继续用另一份重建</text>
+
+    <text x="45" y="455" font-weight="700">RAID 5：条带 + 分布式奇偶校验（P 轮转）</text>
+    <g>
+      <rect x="55" y="480" width="140" height="34" fill="#e9f2f6" stroke="#4d7f95"/><text x="125" y="502" text-anchor="middle">磁盘 0</text>
+      <rect x="215" y="480" width="140" height="34" fill="#e9f2f6" stroke="#4d7f95"/><text x="285" y="502" text-anchor="middle">磁盘 1</text>
+      <rect x="375" y="480" width="140" height="34" fill="#e9f2f6" stroke="#4d7f95"/><text x="445" y="502" text-anchor="middle">磁盘 2</text>
+      <rect x="535" y="480" width="140" height="34" fill="#e9f2f6" stroke="#4d7f95"/><text x="605" y="502" text-anchor="middle">磁盘 3</text>
+      <rect x="55" y="514" width="140" height="34" fill="#eef3e4" stroke="#6f8f45"/><text x="125" y="536" text-anchor="middle">A0</text>
+      <rect x="215" y="514" width="140" height="34" fill="#eef3e4" stroke="#6f8f45"/><text x="285" y="536" text-anchor="middle">A1</text>
+      <rect x="375" y="514" width="140" height="34" fill="#eef3e4" stroke="#6f8f45"/><text x="445" y="536" text-anchor="middle">A2</text>
+      <rect x="535" y="514" width="140" height="34" fill="#f7ecd9" stroke="#a8782c"/><text x="605" y="536" text-anchor="middle">P0</text>
+      <rect x="55" y="548" width="140" height="34" fill="#eef3e4" stroke="#6f8f45"/><text x="125" y="570" text-anchor="middle">A3</text>
+      <rect x="215" y="548" width="140" height="34" fill="#eef3e4" stroke="#6f8f45"/><text x="285" y="570" text-anchor="middle">A4</text>
+      <rect x="375" y="548" width="140" height="34" fill="#f7ecd9" stroke="#a8782c"/><text x="445" y="570" text-anchor="middle">P1</text>
+      <rect x="535" y="548" width="140" height="34" fill="#eef3e4" stroke="#6f8f45"/><text x="605" y="570" text-anchor="middle">A5</text>
+    </g>
+    <text x="700" y="520" font-size="12">容量 (n−1)/n</text>
+    <text x="700" y="542" font-size="12">坏一块盘可用 P 重建</text>
+    <text x="700" y="564" font-size="12" fill="#b54b45">P 轮转，不能固定在同一块盘</text>
+
+    <text x="45" y="610" font-size="12" fill="#6b777f">RAID 0 性能/容量优先但无冗余；RAID 1 可靠但容量减半；RAID 5 在容量、可靠性和写开销之间折中。</text>
+  </g>
+</svg>

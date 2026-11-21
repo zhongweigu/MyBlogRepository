@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 580" role="img" aria-label="CRC 模 2 除法与移位寄存器">
+  <defs>
+    <marker id="crca" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="580" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">CRC：在数据后补 r 个 0，做模 2 除法，余数就是校验位</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="50" y="78" font-weight="700">A. 发送端</text>
+    <rect x="60" y="100" width="240" height="52" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="180" y="123" text-anchor="middle">原始数据 D（k 位）</text>
+    <text x="180" y="142" text-anchor="middle" font-size="12">后面补 r 个 0</text>
+    <rect x="340" y="100" width="240" height="52" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="460" y="123" text-anchor="middle">模 2 除法 ÷ G(x)</text>
+    <text x="460" y="142" text-anchor="middle" font-size="12">异或代替减法，不借位</text>
+    <rect x="620" y="100" width="300" height="52" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="770" y="123" text-anchor="middle">取 r 位余数 R</text>
+    <text x="770" y="142" text-anchor="middle" font-size="12">把 R 附在 D 后发送</text>
+    <path d="M300 126 L340 126" stroke="#4d5b66" stroke-width="2" marker-end="url(#crca)"/>
+    <path d="M580 126 L620 126" stroke="#4d5b66" stroke-width="2" marker-end="url(#crca)"/>
+
+    <text x="50" y="200" font-weight="700">B. 用移位寄存器实现（G(x) 决定抽头位置）</text>
+    <text x="50" y="225">数据从左侧逐位输入；每来一位，寄存器右移一次，抽头处做异或。</text>
+    <g>
+      <rect x="90" y="250" width="100" height="55" fill="#e9f2f6" stroke="#4d7f95"/><text x="140" y="323" text-anchor="middle">r3</text>
+      <rect x="230" y="250" width="100" height="55" fill="#e9f2f6" stroke="#4d7f95"/><text x="280" y="323" text-anchor="middle">r2</text>
+      <rect x="370" y="250" width="100" height="55" fill="#e9f2f6" stroke="#4d7f95"/><text x="420" y="323" text-anchor="middle">r1</text>
+      <rect x="510" y="250" width="100" height="55" fill="#e9f2f6" stroke="#4d7f95"/><text x="560" y="323" text-anchor="middle">r0</text>
+    </g>
+    <path d="M190 317 L230 317" stroke="#4d5b66" stroke-width="2" marker-end="url(#crca)"/>
+    <path d="M330 317 L370 317" stroke="#4d5b66" stroke-width="2" marker-end="url(#crca)"/>
+    <path d="M470 317 L510 317" stroke="#4d5b66" stroke-width="2" marker-end="url(#crca)"/>
+    <path d="M610 317 C760 317, 760 260, 650 260 L140 260 C80 260, 80 275, 90 290" stroke="#b54b45" stroke-width="2" fill="none" marker-end="url(#crca)"/>
+    <text x="650" y="250" fill="#b54b45" font-size="12">反馈 = 数据位 ⊕ 抽头位</text>
+    <circle cx="560" cy="260" r="4" fill="#b54b45"/><text x="575" y="278" font-size="11">抽头示例</text>
+
+    <text x="50" y="360" font-weight="700">C. 接收端校验</text>
+    <text x="50" y="386">收到“数据 + CRC”后，用同一个 G(x) 再做一次模 2 除法：</text>
+    <text x="50" y="410">余数为 0 → 未检出错误；余数非 0 → 认为传输/存储出错。</text>
+    <text x="50" y="434" font-size="12" fill="#52605a">CRC 能检错但不保证纠错；生成多项式、位数和初始值必须双方约定一致。</text>
+
+    <rect x="50" y="470" width="940" height="75" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="70" y="496" font-weight="700">别混</text>
+    <text x="70" y="520">海明码：分组奇偶校验，可定位并纠正一位错；CRC：模 2 除法/移位寄存器，适合长数据块检错。</text>
+    <text x="70" y="540" font-size="12" fill="#6b777f">图中寄存器编号只是示意；抽头位置由具体生成多项式决定，不能死记这一种连线。</text>
+  </g>
+</svg>

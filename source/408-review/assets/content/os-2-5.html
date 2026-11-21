@@ -122,7 +122,13 @@ V(S):  S.value++;
 </table></div>
 <p>信号量能实现让权等待（P 阻塞时释放 CPU），但<strong>P 的顺序可能死锁</strong>：两个进程分别持有 S1、S2，再互相申请对方，形成循环等待。V 的顺序一般不会造成死锁。</p>
 
-<h2 id="sync-monitor">七、管程与条件变量</h2>
+<h2 id="sync-monitor"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="管程把互斥封装在过程调用里；wait 释放锁并阻塞，signal 只唤醒一个等待者。" data-src="/408-review/assets/img/os-monitor-structure.svg" href="/408-review/assets/img/os-monitor-structure.svg">
+<img alt="管程的共享数据、隐式锁与条件变量等待队列" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-monitor-structure.svg"/>
+</a>
+<figcaption>管程把互斥封装在过程调用里；wait 释放锁并阻塞，signal 只唤醒一个等待者。</figcaption>
+</figure>
+七、管程与条件变量</h2>
 <p>管程把共享数据和对它的操作封装在一起，并保证<strong>同一时刻只有一个进程在管程内执行</strong>。它像“自动加锁的对象”：进程调用管程过程时自动获得互斥，退出时自动释放。</p>
 <p>管程里还有<strong>条件变量</strong>，用于等待某个条件：</p>
 <ul>

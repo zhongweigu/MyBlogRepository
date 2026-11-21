@@ -51,7 +51,13 @@
 <blockquote>
 <p>Flash 断电不丢失数据，但每个存储块的擦写次数有限，因此实际设备需要进行垃圾回收和磨损均衡。</p>
 </blockquote>
-<h2 id="6-">考点6-外部存储器与磁盘阵列</h2>
+<h2 id="6-"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="RAID 0 条带无冗余；RAID 1 镜像容量减半；RAID 5 条带加轮转奇偶校验，坏一块盘可重建。" data-src="/408-review/assets/img/coa-raid-layout.svg" href="/408-review/assets/img/coa-raid-layout.svg">
+<img alt="RAID 0、RAID 1 与 RAID 5 的数据布局" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-raid-layout.svg"/>
+</a>
+<figcaption>RAID 0 条带无冗余；RAID 1 镜像容量减半；RAID 5 条带加轮转奇偶校验，坏一块盘可重建。</figcaption>
+</figure>
+考点6-外部存储器与磁盘阵列</h2>
 <p>磁盘属于非易失性的直接存取存储器。它的容量大、每位成本低，但访问需要机械定位，速度远低于主存。</p>
 <div class="article-table"><table>
 <thead>

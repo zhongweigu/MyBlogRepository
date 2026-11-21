@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 620" role="img" aria-label="堆的数组与完全二叉树、快速排序划分">
+  <defs>
+    <marker id="hqa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="620" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">堆是“数组 + 完全二叉树”，快排是“划分 + 递归”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 大根堆：父结点 ≥ 子结点</text>
+    <rect x="55" y="95" width="70" height="42" fill="#f7ecd9" stroke="#a8782c"/><text x="90" y="121" text-anchor="middle">90</text>
+    <rect x="125" y="95" width="70" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="160" y="121" text-anchor="middle">70</text>
+    <rect x="195" y="95" width="70" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="230" y="121" text-anchor="middle">80</text>
+    <rect x="265" y="95" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="300" y="121" text-anchor="middle">30</text>
+    <rect x="335" y="95" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="370" y="121" text-anchor="middle">60</text>
+    <rect x="405" y="95" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="440" y="121" text-anchor="middle">20</text>
+    <rect x="475" y="95" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="510" y="121" text-anchor="middle">50</text>
+    <text x="55" y="160" font-size="12">下标：0 1 2 3 4 5 6；孩子 2i+1、2i+2</text>
+
+    <g stroke="#9aa6ad" stroke-width="2" fill="none">
+      <path d="M570 190 L500 270"/><path d="M570 190 L640 270"/>
+      <path d="M500 290 L460 370"/><path d="M500 290 L545 370"/><path d="M640 290 L620 370"/><path d="M640 290 L700 370"/>
+    </g>
+    <g fill="#e9f2f6" stroke="#4d7f95" stroke-width="2">
+      <circle cx="570" cy="180" r="24"/><circle cx="495" cy="280" r="24"/><circle cx="645" cy="280" r="24"/>
+      <circle cx="450" cy="380" r="24"/><circle cx="545" cy="380" r="24"/><circle cx="620" cy="380" r="24"/><circle cx="705" cy="380" r="24"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="570" y="186">90</text><text x="495" y="286">70</text><text x="645" y="286">80</text>
+      <text x="450" y="386">30</text><text x="545" y="386">60</text><text x="620" y="386">20</text><text x="705" y="386">50</text>
+    </g>
+    <text x="760" y="180" font-size="12">完全二叉树：</text>
+    <text x="760" y="202" font-size="12">除最后一层外全满，</text>
+    <text x="760" y="224" font-size="12">最后一层靠左连续。</text>
+    <text x="760" y="252" font-size="12" fill="#b54b45">下沉：与较大的孩子交换，</text>
+    <text x="760" y="274" font-size="12" fill="#b54b45">直到父 ≥ 孩子。</text>
+
+    <text x="45" y="465" font-weight="700">B. 快速排序：一次划分后，pivot 左边都 ≤，右边都 ≥</text>
+    <rect x="65" y="490" width="90" height="44" fill="#eef3e4" stroke="#6f8f45"/><text x="110" y="517" text-anchor="middle">30</text>
+    <rect x="155" y="490" width="90" height="44" fill="#eef3e4" stroke="#6f8f45"/><text x="200" y="517" text-anchor="middle">20</text>
+    <rect x="245" y="490" width="90" height="44" fill="#eef3e4" stroke="#6f8f45"/><text x="290" y="517" text-anchor="middle">10</text>
+    <rect x="335" y="490" width="90" height="44" fill="#f7ecd9" stroke="#a8782c"/><text x="380" y="517" text-anchor="middle">50</text>
+    <rect x="425" y="490" width="90" height="44" fill="#e9f2f6" stroke="#4d7f95"/><text x="470" y="517" text-anchor="middle">70</text>
+    <rect x="515" y="490" width="90" height="44" fill="#e9f2f6" stroke="#4d7f95"/><text x="560" y="517" text-anchor="middle">60</text>
+    <text x="65" y="558" font-size="12">≤ pivot 50</text>
+    <text x="335" y="558" font-size="12">pivot 就位</text>
+    <text x="425" y="558" font-size="12">≥ pivot 50</text>
+
+    <rect x="65" y="585" width="930" height="24" fill="none"/>
+    <text x="65" y="590" font-size="12" fill="#6b777f">堆排序：建堆 O(n)，每次取堆顶后下沉 O(log n)；快排：划分 O(n)，递归左右子区间。</text>
+  </g>
+</svg>

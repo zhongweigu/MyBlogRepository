@@ -90,6 +90,12 @@
 <li><strong>单源</strong>（一个起点到其余各点）：无权图用 <strong>BFS</strong>（一层层推进，见考点11）；带权图用 <strong>Dijkstra</strong>；</li>
 <li><strong>顶点对</strong>（各顶点之间的最短路径）：用 <strong>Floyd</strong>。</li>
 </ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="每次选当前最近的未确定点，松弛出边；红色是从 A 出发的最短路径树。" data-src="/408-review/assets/img/ds-dijkstra-shortest.svg" href="/408-review/assets/img/ds-dijkstra-shortest.svg">
+<img alt="Dijkstra 的距离更新与最短路径树" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-dijkstra-shortest.svg"/>
+</a>
+<figcaption>每次选当前最近的未确定点，松弛出边；红色是从 A 出发的最短路径树。</figcaption>
+</figure>
 <h3 id="dijkstra">Dijkstra</h3>
 <p>靠三个数组打天下：</p>
 <div class="article-table"><table>

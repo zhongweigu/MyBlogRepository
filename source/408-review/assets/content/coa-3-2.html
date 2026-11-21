@@ -149,7 +149,13 @@
 </table></div>
 <p>这些高两位不参与芯片内部的 16K 字寻址，只用来决定哪一组芯片被片选。</p>
 </details>
-<h2 id="4-">考点4-多模块存储器</h2>
+<h2 id="4-"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="连续地址按低 2 位落到不同模块；每个模块仍有 T 周期，但四个模块错开可提高吞吐。" data-src="/408-review/assets/img/coa-multimodule-interleave.svg" href="/408-review/assets/img/coa-multimodule-interleave.svg">
+<img alt="四模块低位交叉编址与流水存取" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-multimodule-interleave.svg"/>
+</a>
+<figcaption>连续地址按低 2 位落到不同模块；每个模块仍有 T 周期，但四个模块错开可提高吞吐。</figcaption>
+</figure>
+考点4-多模块存储器</h2>
 <p>主存可以由多个独立的存储模块（体）组成，每个体有自己的地址寄存器和数据寄存器。多模块存储器让多个体并行工作，提高主存的带宽；按地址怎样分到各体，分为高位交叉和低位交叉。</p>
 <p><strong>高位交叉（连续）编址。</strong> 地址的高位是体号，低位是体内地址：</p>
 <p>$$\text{体号}\mid\text{体内地址}$$</p>

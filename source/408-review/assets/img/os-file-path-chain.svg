@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 680" role="img" aria-label="路径解析：目录文件、目录项、inode 表和数据块">
+  <defs>
+    <marker id="fpa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1120" height="680" fill="#fffdf8"/>
+  <text x="560" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">路径解析：文件名 → 目录项 → inode 号 → inode → 数据块</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">以 /home/bok/a.txt 为例（UNIX 类文件系统）</text>
+    <text x="45" y="98" font-size="12" fill="#52605a">目录本身也是文件；目录文件的数据块里存“文件名 + inode 号”。</text>
+
+    <rect x="45" y="120" width="210" height="90" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="150" y="144" text-anchor="middle" font-weight="700">根目录 inode</text>
+    <text x="150" y="166" text-anchor="middle" font-size="12">根目录数据块：</text>
+    <text x="150" y="186" text-anchor="middle" font-size="12">"home" → inode 10</text>
+
+    <rect x="320" y="120" width="230" height="90" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="435" y="144" text-anchor="middle" font-weight="700">home 目录 inode 10</text>
+    <text x="435" y="166" text-anchor="middle" font-size="12">home 数据块：</text>
+    <text x="435" y="186" text-anchor="middle" font-size="12">"bok" → inode 20</text>
+
+    <rect x="620" y="120" width="230" height="90" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="735" y="144" text-anchor="middle" font-weight="700">bok 目录 inode 20</text>
+    <text x="735" y="166" text-anchor="middle" font-size="12">bok 数据块：</text>
+    <text x="735" y="186" text-anchor="middle" font-size="12">"a.txt" → inode 30</text>
+
+    <path d="M255 165 L320 165" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fpa)"/>
+    <path d="M550 165 L620 165" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fpa)"/>
+
+    <rect x="620" y="285" width="230" height="110" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="735" y="309" text-anchor="middle" font-weight="700">inode 30：a.txt</text>
+    <text x="735" y="331" text-anchor="middle" font-size="12">类型/权限/大小/时间</text>
+    <text x="735" y="351" text-anchor="middle" font-size="12">链接计数</text>
+    <text x="735" y="371" text-anchor="middle" font-size="12">直接块 + 一级/二级/三级间址</text>
+
+    <rect x="935" y="285" width="140" height="110" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="1005" y="309" text-anchor="middle" font-weight="700">数据块</text>
+    <text x="1005" y="334" text-anchor="middle" font-size="12">正文内容</text>
+    <text x="1005" y="356" text-anchor="middle" font-size="12">…</text>
+    <text x="1005" y="378" text-anchor="middle" font-size="12">按块号访问</text>
+
+    <path d="M850 210 C850 260, 800 285, 760 285" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fpa)"/>
+    <path d="M850 340 L935 340" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fpa)"/>
+
+    <rect x="45" y="285" width="510" height="115" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="310" font-weight="700">每一步到底读什么</text>
+    <text x="65" y="334" font-size="13">① 读目录文件的数据块，按名字匹配目录项；</text>
+    <text x="65" y="356" font-size="13">② 目录项给出下一级 inode 号；</text>
+    <text x="65" y="378" font-size="13">③ 按 inode 号读 inode 表，得到文件属性和数据块指针。</text>
+
+    <text x="45" y="470" font-weight="700">三个容易混淆的对象</text>
+    <rect x="45" y="490" width="320" height="130" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="65" y="514" font-weight="700">FCB（概念）</text>
+    <text x="65" y="538" font-size="13">文件的元数据集合；</text>
+    <text x="65" y="560" font-size="13">UNIX 中主要由 inode 实现，</text>
+    <text x="65" y="582" font-size="13">FAT 中目录项本身就是 FCB。</text>
+
+    <rect x="395" y="490" width="320" height="130" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="415" y="514" font-weight="700">目录项（directory entry）</text>
+    <text x="415" y="538" font-size="13">目录文件中的一条记录；</text>
+    <text x="415" y="560" font-size="13">UNIX：文件名 + inode 号；</text>
+    <text x="415" y="582" font-size="13">不存文件正文。</text>
+
+    <rect x="745" y="490" width="330" height="130" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="765" y="514" font-weight="700">inode（实现）</text>
+    <text x="765" y="538" font-size="13">属性 + 数据块指针；</text>
+    <text x="765" y="560" font-size="13">磁盘 inode 长期存在，</text>
+    <text x="765" y="582" font-size="13">打开后调入内存 inode。</text>
+
+    <text x="45" y="655" font-size="12" fill="#6b777f">文件名只在目录项里；inode 通常不存文件名。硬链接就是“多个目录项指向同一个 inode 号”。</text>
+  </g>
+</svg>

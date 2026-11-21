@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 580" role="img" aria-label="多模块存储器低位交叉编址与流水存取">
+  <defs>
+    <marker id="mma" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="580" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">多模块存储器：低位交叉编址让连续地址落在不同模块</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 地址划分（4 个模块）</text>
+    <rect x="55" y="95" width="520" height="46" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="315" y="124" text-anchor="middle">体内地址（高位）</text>
+    <rect x="575" y="95" width="120" height="46" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="635" y="124" text-anchor="middle">模块号（低 2 位）</text>
+    <text x="715" y="118" font-size="12">连续地址 A, A+1, A+2, A+3</text>
+    <text x="715" y="138" font-size="12">依次落到 M0, M1, M2, M3</text>
+
+    <text x="45" y="190" font-weight="700">B. 四个模块并行/流水工作</text>
+    <g>
+      <rect x="65" y="210" width="120" height="50" fill="#eef3e4" stroke="#6f8f45"/><text x="125" y="240" text-anchor="middle">M0</text>
+      <rect x="65" y="265" width="120" height="50" fill="#e9f2f6" stroke="#4d7f95"/><text x="125" y="295" text-anchor="middle">M1</text>
+      <rect x="65" y="320" width="120" height="50" fill="#f7ecd9" stroke="#a8782c"/><text x="125" y="350" text-anchor="middle">M2</text>
+      <rect x="65" y="375" width="120" height="50" fill="#f3e6e6" stroke="#a85a5a"/><text x="125" y="405" text-anchor="middle">M3</text>
+    </g>
+    <g fill="#eef3e4" stroke="#6f8f45">
+      <rect x="210" y="210" width="150" height="50"/><rect x="510" y="210" width="150" height="50"/>
+    </g>
+    <g fill="#e9f2f6" stroke="#4d7f95">
+      <rect x="285" y="265" width="150" height="50"/><rect x="585" y="265" width="150" height="50"/>
+    </g>
+    <g fill="#f7ecd9" stroke="#a8782c">
+      <rect x="360" y="320" width="150" height="50"/><rect x="660" y="320" width="150" height="50"/>
+    </g>
+    <g fill="#f3e6e6" stroke="#a85a5a">
+      <rect x="435" y="375" width="150" height="50"/><rect x="735" y="375" width="150" height="50"/>
+    </g>
+    <g text-anchor="middle" font-size="12">
+      <text x="285" y="241">A0</text><text x="585" y="241">A4</text>
+      <text x="360" y="296">A1</text><text x="660" y="296">A5</text>
+      <text x="435" y="351">A2</text><text x="735" y="351">A6</text>
+      <text x="510" y="406">A3</text><text x="810" y="406">A7</text>
+    </g>
+    <line x1="210" y1="445" x2="930" y2="445" stroke="#4d5b66" stroke-width="1"/>
+    <text x="210" y="465" font-size="12">t0</text><text x="510" y="465" font-size="12">t0+T</text><text x="810" y="465" font-size="12">t0+2T</text>
+
+    <text x="45" y="520" font-weight="700">C. 关键结论</text>
+    <text x="45" y="545">每个模块仍有 T 的存取周期，但四个模块错开工作，理想情况下每 T/4 就能启动一次新的字访问。</text>
+    <text x="45" y="568" font-size="12" fill="#6b777f">这是“低位交叉编址”的流水效果；高位交叉编址是连续地址落在同一模块，不能靠这种方式并行提速。</text>
+  </g>
+</svg>

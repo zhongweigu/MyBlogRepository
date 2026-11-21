@@ -62,7 +62,13 @@ G4 = 4⊕5⊕6⊕7 = 1
 故障字 = G4 G2 G1 = 110₂ = 6  → 第 6 位出错，取反纠正</code></pre>
 <p>注意：故障字为 0 表示无错；非 0 的十进制值就是出错位号。海明码能纠一位错、检测两位错（具体能力取决于是否加总校验位），不是“任意多位都能纠”。</p>
 
-<h2 id="check-crc">四、循环冗余校验 CRC</h2>
+<h2 id="check-crc"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="数据后补 r 个 0 做模 2 除法，余数附在数据后；接收端用同一 G(x) 再除，余数 0 表示未检出错误。" data-src="/408-review/assets/img/coa-crc-division.svg" href="/408-review/assets/img/coa-crc-division.svg">
+<img alt="CRC 的模 2 除法与移位寄存器" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-crc-division.svg"/>
+</a>
+<figcaption>数据后补 r 个 0 做模 2 除法，余数附在数据后；接收端用同一 G(x) 再除，余数 0 表示未检出错误。</figcaption>
+</figure>
+四、循环冗余校验 CRC</h2>
 <p>CRC 把数据看成一个二进制多项式，用生成多项式 $G(x)$ 做<strong>模 2 除法</strong>，余数就是校验位。模 2 运算没有进位/借位，加法和减法都等价于异或。</p>
 <p>步骤：</p>
 <ol>

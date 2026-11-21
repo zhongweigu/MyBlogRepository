@@ -19,7 +19,13 @@
 </div>
 
 </details><div class="article-content">
-<h2 id="4-bb">考点4-B树和B+树</h2>
+<h2 id="4-bb"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="B 树分裂把中位关键字上提；散列冲突用拉链或开放地址探测，二者不是同一种“放不下”的处理。" data-src="/408-review/assets/img/ds-btree-split-hash.svg" href="/408-review/assets/img/ds-btree-split-hash.svg">
+<img alt="B 树结点分裂与散列冲突处理" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-btree-split-hash.svg"/>
+</a>
+<figcaption>B 树分裂把中位关键字上提；散列冲突用拉链或开放地址探测，二者不是同一种“放不下”的处理。</figcaption>
+</figure>
+考点4-B树和B+树</h2>
 <p><strong>B 树（m 阶）</strong>：一种多路平衡查找树。每个结点最多有 $m$ 棵子树、$m-1$ 个关键字；除根结点外的非叶结点至少有 $\lceil m/2 \rceil$ 棵子树；所有叶结点在同一层。</p>
 <h3 id="_1">节点结构</h3>
 <p>B 树的结点通常存成：</p>

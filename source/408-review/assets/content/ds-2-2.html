@@ -21,6 +21,12 @@
 </details><div class="article-content">
 <h2 id="2-">考点2-栈和队列的基本操作</h2>
 <hr/>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="栈只在栈顶进出；双端队列按“哪端能入、哪端能出”分三种，不要套普通队列的 FIFO。" data-src="/408-review/assets/img/ds-stack-deque.svg" href="/408-review/assets/img/ds-stack-deque.svg">
+<img alt="栈的后进先出和双端队列的三种端口限制" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-stack-deque.svg"/>
+</a>
+<figcaption>栈只在栈顶进出；双端队列按“哪端能入、哪端能出”分三种，不要套普通队列的 FIFO。</figcaption>
+</figure>
 <h3 id="_1">方法论：给一个入栈序列，怎么判断 / 求它的出栈序列</h3>
 <p><strong>判断某个序列是否合法，用一条「禁模式」判据</strong>：把入栈序列编号成 1, 2, …, n，某个排列是合法出栈序列<strong>当且仅当</strong>它不含「大-小-中」模式——不存在 $i &lt; j &lt; k$ 使 $\sigma_i &gt; \sigma_k &gt; \sigma_j$。换成更好用的说法：</p>
 <blockquote>

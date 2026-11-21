@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 700" role="img" aria-label="fd、进程打开文件表、系统打开文件表和内存 inode 的关系">
+  <defs>
+    <marker id="fda" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+    <marker id="fdb" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1140" height="700" fill="#fffdf8"/>
+  <text x="570" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">fd 背后的两层表：进程私有表 → 系统共享表 → 内存 inode</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="40" y="76" font-weight="700">进程打开文件表（每进程一张，fd 是索引）</text>
+    <rect x="40" y="95" width="220" height="120" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="150" y="118" text-anchor="middle" font-weight="700">P1</text>
+    <text x="150" y="143" text-anchor="middle" font-size="12">fd 0/1/2：标准输入/输出/错误</text>
+    <text x="150" y="165" text-anchor="middle" font-size="12">fd 3 → S1（共享）</text>
+    <text x="150" y="187" text-anchor="middle" font-size="12">fd 9 → S2（独立 open）</text>
+
+    <rect x="40" y="250" width="220" height="100" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="150" y="273" text-anchor="middle" font-weight="700">P2（fork 后继承 fd3）</text>
+    <text x="150" y="297" text-anchor="middle" font-size="12">fd 3 → S1（同一个系统表项）</text>
+    <text x="150" y="319" text-anchor="middle" font-size="12">fd 4 → S3（自己的 open）</text>
+
+    <text x="335" y="76" font-weight="700">系统打开文件表（全系统一张）</text>
+    <rect x="335" y="95" width="300" height="100" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="485" y="118" text-anchor="middle" font-weight="700">S1：同一个打开实例</text>
+    <text x="485" y="140" text-anchor="middle" font-size="12">偏移 offset = 64（共享）</text>
+    <text x="485" y="160" text-anchor="middle" font-size="12">flags = O_RDWR，引用计数 2</text>
+    <text x="485" y="180" text-anchor="middle" font-size="12">inode 指针 → I30</text>
+
+    <rect x="335" y="215" width="300" height="88" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="485" y="238" text-anchor="middle" font-weight="700">S2：P1 自己 open</text>
+    <text x="485" y="260" text-anchor="middle" font-size="12">offset = 128，引用计数 1</text>
+    <text x="485" y="280" text-anchor="middle" font-size="12">inode 指针 → I30</text>
+
+    <rect x="335" y="320" width="300" height="88" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="485" y="343" text-anchor="middle" font-weight="700">S3：P2 自己 open</text>
+    <text x="485" y="365" text-anchor="middle" font-size="12">offset = 0，引用计数 1</text>
+    <text x="485" y="385" text-anchor="middle" font-size="12">inode 指针 → I30</text>
+
+    <text x="705" y="76" font-weight="700">内存 inode 表</text>
+    <rect x="705" y="95" width="230" height="190" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="820" y="118" text-anchor="middle" font-weight="700">I30：/home/bok/a.txt</text>
+    <text x="820" y="142" text-anchor="middle" font-size="12">磁盘 inode 的内存副本 + 运行时状态</text>
+    <text x="820" y="164" text-anchor="middle" font-size="12">链接计数 = 1</text>
+    <text x="820" y="186" text-anchor="middle" font-size="12">访问计数 = 3（S1/S2/S3）</text>
+    <text x="820" y="208" text-anchor="middle" font-size="12">数据块指针：直接/间接</text>
+    <text x="820" y="230" text-anchor="middle" font-size="12">文件长度、权限、时间</text>
+    <text x="820" y="252" text-anchor="middle" font-size="12">操作函数/所属文件系统</text>
+
+    <rect x="990" y="95" width="110" height="190" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="1045" y="120" text-anchor="middle" font-weight="700">数据块</text>
+    <text x="1045" y="147" text-anchor="middle" font-size="12">块 0</text>
+    <text x="1045" y="172" text-anchor="middle" font-size="12">块 1</text>
+    <text x="1045" y="197" text-anchor="middle" font-size="12">块 2</text>
+    <text x="1045" y="222" text-anchor="middle" font-size="12">…</text>
+
+    <path d="M260 165 L335 145" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fda)"/>
+    <path d="M260 187 L335 255" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fda)"/>
+    <path d="M260 300 L335 145" stroke="#b54b45" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#fdb)"/>
+    <path d="M260 318 L335 360" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fda)"/>
+    <path d="M635 145 L705 180" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fda)"/>
+    <path d="M635 255 L705 200" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fda)"/>
+    <path d="M635 360 L705 230" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fda)"/>
+    <path d="M935 205 L990 180" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#fda)"/>
+
+    <text x="335" y="440" font-size="12" fill="#b54b45">红色虚线：P2 继承 P1 的 fd3，两个 fd 指向同一个 S1，因此共享偏移。</text>
+    <text x="335" y="462" font-size="12" fill="#52605a">P1 的 fd9、P2 的 fd4 是各自 open，系统表项不同，偏移互不影响，但都指向同一个内存 inode。</text>
+
+    <rect x="40" y="500" width="1060" height="150" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="60" y="526" font-weight="700">四个层次不要混</text>
+    <text x="60" y="550">fd：进程打开文件表的索引，不是磁盘地址。</text>
+    <text x="60" y="572">系统打开文件表项：一次打开实例，保存偏移、flags、引用计数；fork/dup 可共享它。</text>
+    <text x="60" y="594">内存 inode：文件的元数据/数据块入口，可被多个系统表项共享；访问计数与链接计数不同。</text>
+    <text x="60" y="616">磁盘 inode：具体文件系统长期保存的元数据；内存 inode 是它的副本 + 运行时字段。</text>
+    <text x="60" y="640" font-size="12" fill="#6b777f">close 只减少引用；引用计数为 0 才释放系统表项，访问计数为 0 才可回收内存 inode。</text>
+  </g>
+</svg>

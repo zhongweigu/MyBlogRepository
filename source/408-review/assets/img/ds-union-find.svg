@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 600" role="img" aria-label="并查集 parent 数组、union 与路径压缩">
+  <defs>
+    <marker id="ufa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="600" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">并查集：parent 数组就是森林的“父指针”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 初始：每个元素自成一个集合</text>
+    <text x="45" y="105">parent = [-1, -1, -1, -1, -1]（-1 表示根）</text>
+    <g fill="#eef3e4" stroke="#6f8f45">
+      <circle cx="120" cy="155" r="24"/><circle cx="240" cy="155" r="24"/><circle cx="360" cy="155" r="24"/><circle cx="480" cy="155" r="24"/><circle cx="600" cy="155" r="24"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="120" y="161">0</text><text x="240" y="161">1</text><text x="360" y="161">2</text><text x="480" y="161">3</text><text x="600" y="161">4</text>
+    </g>
+
+    <text x="45" y="230" font-weight="700">B. union(0,1)、union(2,3)、union(1,2)</text>
+    <g fill="#e9f2f6" stroke="#4d7f95">
+      <circle cx="300" cy="285" r="25"/><circle cx="170" cy="360" r="25"/><circle cx="430" cy="360" r="25"/><circle cx="520" cy="435" r="25"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="300" y="291">0</text><text x="170" y="366">1</text><text x="430" y="366">2</text><text x="520" y="441">3</text>
+    </g>
+    <path d="M285 307 L190 339" stroke="#4d5b66" stroke-width="2" marker-end="url(#ufa)"/>
+    <path d="M415 382 L345 365" stroke="#4d5b66" stroke-width="2" marker-end="url(#ufa)"/>
+    <path d="M405 374 L322 303" stroke="#4d5b66" stroke-width="2" marker-end="url(#ufa)"/>
+    <path d="M510 415 L452 380" stroke="#4d5b66" stroke-width="2" marker-end="url(#ufa)"/>
+    <text x="620" y="285">parent[1]=0，parent[3]=2，parent[2]=0</text>
+    <text x="620" y="310">数组：[ -1, 0, 0, 2, -1 ]</text>
+    <text x="620" y="335" font-size="12">箭头指向父结点；根是 0，深度可能变长。</text>
+
+    <text x="45" y="490" font-weight="700">C. find(3)：沿 3→2→0 找到根，压缩路径</text>
+    <text x="45" y="515">路径上的 3、2 都直接挂到根 0；之后 find(3) 只走一步。</text>
+    <g fill="#f7ecd9" stroke="#a8782c">
+      <circle cx="300" cy="545" r="22"/><circle cx="430" cy="545" r="22"/><circle cx="560" cy="545" r="22"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="300" y="551">0</text><text x="430" y="551">2</text><text x="560" y="551">3</text>
+    </g>
+    <path d="M410 545 L325 545" stroke="#b54b45" stroke-width="2" marker-end="url(#ufa)"/>
+    <path d="M545 560 C480 590, 370 590, 315 562" stroke="#b54b45" stroke-width="2" fill="none" marker-end="url(#ufa)"/>
+    <text x="650" y="525">压缩后：parent[2]=0，parent[3]=0</text>
+    <text x="650" y="550">数组：[ -1, 0, 0, 0, -1 ]</text>
+    <text x="650" y="575" font-size="12" fill="#52605a">按秩/大小合并可控制树高；路径压缩只优化查找，不改变集合划分。</text>
+  </g>
+</svg>

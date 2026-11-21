@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 680" role="img" aria-label="操作系统 I/O 七个流程总览">
+  <defs>
+    <marker id="ifa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1120" height="680" fill="#fffdf8"/>
+  <text x="560" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">I/O 全流程：七个场景共用“请求→排队→传送→完成”骨架</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="380" y="58" width="360" height="46" rx="5" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="560" y="86" text-anchor="middle" font-weight="700">一次 I/O 请求的共同骨架</text>
+    <text x="560" y="124" text-anchor="middle" font-size="12" fill="#52605a">用户请求 → 内核排队/分配 → 控制器+设备传送 → 中断/唤醒 → 数据交付</text>
+
+    <g>
+      <rect x="30" y="155" width="250" height="125" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+      <text x="155" y="180" text-anchor="middle" font-weight="700">① 键盘输入</text>
+      <text x="50" y="204" font-size="12">按键 → 控制器中断 → ISR</text>
+      <text x="50" y="226" font-size="12">→ 内核缓冲区 → 唤醒进程</text>
+      <text x="50" y="248" font-size="12">→ read 复制到用户 buf</text>
+      <text x="50" y="270" font-size="12" fill="#b54b45">低速字符设备，常用中断</text>
+    </g>
+    <g>
+      <rect x="300" y="155" width="250" height="125" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+      <text x="425" y="180" text-anchor="middle" font-weight="700">② 读磁盘块</text>
+      <text x="320" y="204" font-size="12">文件系统找块 → 驱动转 CHS/LBA</text>
+      <text x="320" y="226" font-size="12">→ 磁盘/DMA 传送 → 中断</text>
+      <text x="320" y="248" font-size="12">→ 页缓存/缓冲区 → 用户</text>
+      <text x="320" y="270" font-size="12" fill="#b54b45">块设备，DMA 常用</text>
+    </g>
+    <g>
+      <rect x="570" y="155" width="250" height="125" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+      <text x="695" y="180" text-anchor="middle" font-weight="700">③ 多个磁盘请求</text>
+      <text x="590" y="204" font-size="12">请求排队 → 调度算法选下一个</text>
+      <text x="590" y="226" font-size="12">→ 定位（柱面/磁头/扇区）</text>
+      <text x="590" y="248" font-size="12">→ 传送 → 完成中断</text>
+      <text x="590" y="270" font-size="12" fill="#b54b45">先调度，后定位/启动</text>
+    </g>
+    <g>
+      <rect x="840" y="155" width="250" height="125" rx="4" fill="#eadff2" stroke="#7f5b9a"/>
+      <text x="965" y="180" text-anchor="middle" font-weight="700">④ 连续输入</text>
+      <text x="860" y="204" font-size="12">设备逐个字符写入缓冲区</text>
+      <text x="860" y="226" font-size="12">→ 用户按块读取</text>
+      <text x="860" y="248" font-size="12">→ 循环/缓冲池解耦速度</text>
+      <text x="860" y="270" font-size="12" fill="#b54b45">缓冲把“逐字符”变“成块”</text>
+    </g>
+
+    <g>
+      <rect x="30" y="320" width="250" height="125" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+      <text x="155" y="345" text-anchor="middle" font-weight="700">⑤ 打印机 / SPOOLing</text>
+      <text x="50" y="369" font-size="12">进程写输出井 → 返回</text>
+      <text x="50" y="391" font-size="12">→ 输出进程按队列逐份打印</text>
+      <text x="50" y="413" font-size="12">→ 物理设备串行</text>
+      <text x="50" y="435" font-size="12" fill="#b54b45">提交并发，物理服务仍串行</text>
+    </g>
+    <g>
+      <rect x="300" y="320" width="250" height="125" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+      <text x="425" y="345" text-anchor="middle" font-weight="700">⑥ 新磁盘 → 可启动</text>
+      <text x="320" y="369" font-size="12">物理格式化 → 分区 → 逻辑格式化</text>
+      <text x="320" y="391" font-size="12">→ 安装 OS → 引导块</text>
+      <text x="320" y="413" font-size="12">→ 固件→MBR→PBR→loader→内核</text>
+      <text x="320" y="435" font-size="12" fill="#b54b45">先有文件系统，才谈文件</text>
+    </g>
+    <g>
+      <rect x="570" y="320" width="520" height="125" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+      <text x="830" y="345" text-anchor="middle" font-weight="700">⑦ 三条最容易混的边界</text>
+      <text x="590" y="369" font-size="12">控制方式（查询/中断/DMA）≠ 调度算法（FCFS/SSTF/SCAN）</text>
+      <text x="590" y="391" font-size="12">缓冲（解耦速度）≠ 缓存（重复访问命中）</text>
+      <text x="590" y="413" font-size="12">SPOOLing（虚拟设备）≠ 真正的物理并行</text>
+      <text x="590" y="435" font-size="12" fill="#b54b45">答题先定位“现在在哪一层、谁在等待谁”</text>
+    </g>
+
+    <path d="M155 280 L155 320" stroke="#4d5b66" stroke-width="1.6" marker-end="url(#ifa)"/>
+    <path d="M425 280 L425 320" stroke="#4d5b66" stroke-width="1.6" marker-end="url(#ifa)"/>
+    <path d="M695 280 L695 320" stroke="#4d5b66" stroke-width="1.6" marker-end="url(#ifa)"/>
+    <path d="M965 280 L965 320" stroke="#4d5b66" stroke-width="1.6" marker-end="url(#ifa)"/>
+
+    <text x="30" y="505" font-weight="700">怎么用这张总览</text>
+    <text x="30" y="530">先判断设备类型（字符/块）、控制方式（查询/中断/DMA）、是否有缓冲/SPOOLing，再沿骨架填“谁做什么”。</text>
+    <text x="30" y="554">不要把所有流程都背成同一串；共同骨架相同，但“排队点、数据落点、唤醒点”不同。</text>
+    <text x="30" y="590" font-size="12" fill="#6b777f">本图是七条流程的索引，不替代各页的寄存器/中断/调度细节。</text>
+  </g>
+</svg>

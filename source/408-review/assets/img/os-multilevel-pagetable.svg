@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 720" role="img" aria-label="32 位两级页表与 TLB 地址转换">
+  <defs>
+    <marker id="mla" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+    <marker id="mlb" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1140" height="720" fill="#fffdf8"/>
+  <text x="570" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">两级页表：虚拟地址 → 页目录 → 页表 → 页框</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="76" font-weight="700">32 位虚拟地址（页大小 4 KB）</text>
+    <rect x="55" y="95" width="240" height="48" fill="#e9f2f6" stroke="#4d7f95"/><text x="175" y="116" text-anchor="middle">页目录索引 10 位</text><text x="175" y="135" text-anchor="middle" font-size="12">bit 31–22</text>
+    <rect x="295" y="95" width="240" height="48" fill="#eef3e4" stroke="#6f8f45"/><text x="415" y="116" text-anchor="middle">页表索引 10 位</text><text x="415" y="135" text-anchor="middle" font-size="12">bit 21–12</text>
+    <rect x="535" y="95" width="240" height="48" fill="#f7ecd9" stroke="#a8782c"/><text x="655" y="116" text-anchor="middle">页内偏移 12 位</text><text x="655" y="135" text-anchor="middle" font-size="12">bit 11–0</text>
+    <text x="800" y="116" font-size="12">4 KB = 2¹²，偏移 12 位</text>
+    <text x="800" y="136" font-size="12">每级页表 2¹⁰ 项，每项 4 B → 4 KB</text>
+
+    <text x="45" y="205" font-weight="700">TLB 先查（快表，存最近用过的 VPN→PFN）</text>
+    <rect x="55" y="225" width="300" height="62" rx="4" fill="#eadff2" stroke="#7f5b9a"/>
+    <text x="205" y="249" text-anchor="middle">TLB 命中</text>
+    <text x="205" y="271" text-anchor="middle" font-size="12">直接得到页框号，跳过页表 walk</text>
+
+    <text x="430" y="205" font-weight="700">TLB 未命中：访问页表</text>
+    <rect x="430" y="225" width="180" height="62" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="520" y="249" text-anchor="middle" font-weight="700">CR3 / PDBR</text>
+    <text x="520" y="271" text-anchor="middle" font-size="12">页目录基址</text>
+    <rect x="650" y="225" width="190" height="62" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="745" y="249" text-anchor="middle" font-weight="700">页目录</text>
+    <text x="745" y="271" text-anchor="middle" font-size="12">10 位索引选 PDE</text>
+    <rect x="880" y="225" width="210" height="62" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="985" y="249" text-anchor="middle" font-weight="700">页表</text>
+    <text x="985" y="271" text-anchor="middle" font-size="12">10 位索引选 PTE → 页框号</text>
+    <path d="M610 256 L650 256" stroke="#4d5b66" stroke-width="2" marker-end="url(#mla)"/>
+    <path d="M840 256 L880 256" stroke="#4d5b66" stroke-width="2" marker-end="url(#mla)"/>
+
+    <rect x="430" y="345" width="660" height="78" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="450" y="370" font-weight="700">每一级表项都要检查存在位/权限位；任一级缺失 → 缺页异常</text>
+    <text x="450" y="394">页目录项 PDE 指向一张页表；页表项 PTE 指向物理页框；最后拼接页内偏移。</text>
+    <text x="450" y="414" font-size="12" fill="#52605a">多级页表的好处：不需要为整个虚拟地址空间建一张连续大表，未使用的页表可以不建。</text>
+
+    <rect x="55" y="465" width="1015" height="75" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="75" y="490" font-weight="700">物理地址</text>
+    <rect x="200" y="474" width="240" height="42" fill="#f3e6e6" stroke="#a85a5a"/><text x="320" y="500" text-anchor="middle">页框号（来自 PTE）</text>
+    <rect x="440" y="474" width="240" height="42" fill="#f7ecd9" stroke="#a8782c"/><text x="560" y="500" text-anchor="middle">页内偏移（原样保留）</text>
+    <text x="710" y="500" font-size="12">页框号 + 偏移 = 物理地址</text>
+
+    <text x="55" y="585" font-weight="700">为什么多级页表能省空间</text>
+    <text x="55" y="610">单级页表：2²⁰ 个页表项 × 4 B = 4 MB，必须连续存放，且整张表都要建。</text>
+    <text x="55" y="634">两级页表：页目录 4 KB + 只为实际使用的虚拟页建二级页表；未用区域的二级页表可以不存在。</text>
+    <text x="55" y="666" font-size="12" fill="#6b777f">代价：一次 TLB 缺失可能要多次访存（页目录、页表、数据）；TLB 命中则只走一次地址转换。</text>
+  </g>
+</svg>

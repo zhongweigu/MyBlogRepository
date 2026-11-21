@@ -703,6 +703,12 @@ void BubbleSort(ElemType A[], int n) {
 <li>两者都稳定，最坏都是 $O(n^2)$，最好都能到 $O(n)$（冒泡靠 <code>flag</code>，直接插入靠正序时一次都不移）。</li>
 <li>冒泡的一次交换要三次赋值，直接插入的后移通常更省；实际运行中直接插入一般更快。</li>
 </ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="堆是一棵完全二叉树，用数组下标找孩子；快排一次划分后 pivot 左边≤、右边≥。" data-src="/408-review/assets/img/ds-heap-quicksort.svg" href="/408-review/assets/img/ds-heap-quicksort.svg">
+<img alt="大根堆的数组/完全二叉树与快速排序的划分" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-heap-quicksort.svg"/>
+</a>
+<figcaption>堆是一棵完全二叉树，用数组下标找孩子；快排一次划分后 pivot 左边≤、右边≥。</figcaption>
+</figure>
 <h3 id="_5">快速排序</h3>
 <p><strong>快速排序</strong>：选一个元素作为<strong>枢轴</strong>（pivot，通常取表中第一个元素），通过一趟<strong>划分</strong>把表分成左右两部分——左边都不大于枢轴、右边都不小于枢轴，枢轴落到它的最终位置；然后对左右两个子表递归地重复同样的过程。</p>
 <p><strong>划分（挖坑填数）</strong>：以 <code>A[low..high]</code> 为例，先令 <code>pivot = A[low]</code>。此时 <code>A[low]</code> 空出来，像一个"坑"：</p>

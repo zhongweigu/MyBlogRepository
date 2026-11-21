@@ -47,6 +47,12 @@
 <li><strong>同一组权值构造出的哈夫曼树可能不唯一</strong>。</li>
 </ul>
 <p><strong>m 叉哈夫曼树</strong>：只有度为 0 和 m 的结点。设初始有 $n_0$ 个结点，先算 $k = (n_0 - 1) \bmod (m - 1)$，若 $k \ne 0$ 就补充 $m - 1 - k$ 个权值为 0 的结点凑数；然后照二叉的老办法，每次合并 <strong>m 个权值最小</strong>的结点，重复到只剩一个。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="parent 数组就是森林的父指针；find 沿父链找到根，路径压缩让路径上的结点直接挂到根。" data-src="/408-review/assets/img/ds-union-find.svg" href="/408-review/assets/img/ds-union-find.svg">
+<img alt="并查集的 parent 数组、union 和 find 路径压缩" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-union-find.svg"/>
+</a>
+<figcaption>parent 数组就是森林的父指针；find 沿父链找到根，路径压缩让路径上的结点直接挂到根。</figcaption>
+</figure>
 <h2 id="7-">考点7-并查集的基本操作</h2>
 <p>并查集（Disjoint Set）管理的是<strong>若干互不相交的集合</strong>，每个集合用一棵树表示，<strong>树根就是集合的代表元</strong>。它对外只提供三种操作：</p>
 <div class="article-table"><table>

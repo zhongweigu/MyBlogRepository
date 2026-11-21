@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 640" role="img" aria-label="管程的共享数据、互斥锁与条件变量队列">
+  <defs>
+    <marker id="moa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+    <marker id="mob" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1080" height="640" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">管程：共享数据 + 隐式锁 + 条件变量队列</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="76" font-weight="700">进入管程</text>
+    <rect x="55" y="95" width="150" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="130" y="123" text-anchor="middle">进程请求</text>
+    <rect x="245" y="95" width="150" height="45" fill="#f7f5ee" stroke="#c9c0ae"/><text x="320" y="123" text-anchor="middle">入口队列</text>
+    <path d="M205 117 L245 117" stroke="#4d5b66" stroke-width="2" marker-end="url(#moa)"/>
+    <path d="M395 117 L455 117" stroke="#4d5b66" stroke-width="2" marker-end="url(#moa)"/>
+
+    <rect x="455" y="75" width="560" height="330" rx="6" fill="#f7fbfd" stroke="#35618f" stroke-width="2"/>
+    <text x="475" y="101" font-weight="700" fill="#35618f">管程（Monitor）</text>
+    <text x="475" y="124" font-size="12" fill="#52605a">同一时刻只允许一个进程在管程内活动（隐式 mutex）</text>
+
+    <rect x="480" y="145" width="250" height="95" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="605" y="170" text-anchor="middle" font-weight="700">共享数据</text>
+    <text x="605" y="192" text-anchor="middle" font-size="12">缓冲区、计数器、队列…</text>
+    <text x="605" y="214" text-anchor="middle" font-size="12">只能通过管程过程访问</text>
+
+    <rect x="760" y="145" width="225" height="95" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="872" y="170" text-anchor="middle" font-weight="700">条件变量 cv</text>
+    <text x="872" y="192" text-anchor="middle" font-size="12">wait(cv)：释放锁并阻塞</text>
+    <text x="872" y="214" text-anchor="middle" font-size="12">signal(cv)：唤醒一个等待者</text>
+
+    <rect x="480" y="270" width="250" height="70" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="605" y="295" text-anchor="middle" font-weight="700">管程过程</text>
+    <text x="605" y="317" text-anchor="middle" font-size="12">enter / leave 由编译器插入</text>
+
+    <rect x="760" y="270" width="225" height="70" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="872" y="295" text-anchor="middle" font-weight="700">cv 等待队列</text>
+    <text x="872" y="317" text-anchor="middle" font-size="12">调用 wait 的进程在这里睡眠</text>
+
+    <path d="M730 185 L760 185" stroke="#4d5b66" stroke-width="2" marker-end="url(#moa)"/>
+    <path d="M730 305 L760 305" stroke="#4d5b66" stroke-width="2" marker-end="url(#moa)"/>
+    <path d="M872 240 L872 270" stroke="#b54b45" stroke-width="2" marker-end="url(#mob)"/>
+    <path d="M872 270 C820 240, 820 220, 850 220" stroke="#b54b45" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#mob)"/>
+
+    <text x="45" y="455" font-weight="700">wait / signal 的关键语义</text>
+    <text x="45" y="480">wait(cv)：调用者必须已在管程内；它释放管程锁，进入 cv 等待队列，被唤醒后重新竞争管程锁。</text>
+    <text x="45" y="504">signal(cv)：只唤醒队列中的一个等待者；被唤醒者不保证立刻运行（Mesa 语义），醒来后要重新检查条件。</text>
+    <text x="45" y="528">Hoare 语义下，signal 可能立即把管程交给被唤醒者；考试若未说明，按教材/题目约定，核心是“wait 释放锁、signal 只唤醒”。</text>
+
+    <rect x="45" y="555" width="990" height="55" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="578" font-weight="700">与信号量对比</text>
+    <text x="65" y="600" font-size="13">管程把“互斥”封装在过程调用里；信号量要程序员自己 P/V。条件变量没有记忆，signal 时无人等待就丢失；信号量有计数。</text>
+  </g>
+</svg>

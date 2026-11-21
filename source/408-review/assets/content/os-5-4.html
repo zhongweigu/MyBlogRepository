@@ -45,7 +45,13 @@
 <p><strong>write</strong> 与 read 类似，但要把用户数据写入页缓存；若写入位置超过文件末尾，还要分配新盘块、更新 inode 的文件长度和数据块指针。普通 write 不保证立即落盘，脏页之后由内核写回；需要立即持久化时用 fsync。</p>
 <p><strong>close(fd)</strong> 删除进程打开文件表项，系统打开文件表引用计数减 1；减到 0 才释放系统表项，再减少内存 inode 引用计数。close 本身不保证文件数据已经写盘。</p>
 
-<h2 id="open-table">三、两张打开文件表</h2>
+<h2 id="open-table"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="fd 是进程表索引；系统表项代表一次打开实例；fork/dup 可共享系统表项，独立 open 的偏移互不影响。" data-src="/408-review/assets/img/os-fd-open-tables.svg" href="/408-review/assets/img/os-fd-open-tables.svg">
+<img alt="fd、进程打开文件表、系统打开文件表和内存 inode" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-fd-open-tables.svg"/>
+</a>
+<figcaption>fd 是进程表索引；系统表项代表一次打开实例；fork/dup 可共享系统表项，独立 open 的偏移互不影响。</figcaption>
+</figure>
+三、两张打开文件表</h2>
 <div class="article-table"><table>
 <thead><tr><th>表</th><th>范围</th><th>典型内容</th></tr></thead>
 <tbody>

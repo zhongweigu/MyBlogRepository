@@ -71,7 +71,13 @@
 </ul>
 <p>所以“TLB 全局只有一个”不等于“所有进程共享同一套页表映射”。全局的是硬件表项，区分靠刷新或 ASID；页表本身仍是每进程一份。</p>
 
-<h2 id="pg-multi">四、多级页表</h2>
+<h2 id="pg-multi"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="虚拟地址拆成页目录索引、页表索引和页内偏移；TLB 命中可跳过页表 walk。" data-src="/408-review/assets/img/os-multilevel-pagetable.svg" href="/408-review/assets/img/os-multilevel-pagetable.svg">
+<img alt="32 位两级页表、TLB 与地址转换" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-multilevel-pagetable.svg"/>
+</a>
+<figcaption>虚拟地址拆成页目录索引、页表索引和页内偏移；TLB 命中可跳过页表 walk。</figcaption>
+</figure>
+四、多级页表</h2>
 <p>单级页表在地址空间很大时会占太多连续内存：例如 32 位地址、4KB 页、4B PTE，页表有 2²⁰ 项，共 4MB，还要连续存放。多级页表把页表本身再分页，用一张<strong>页目录</strong>（顶级页表）记录各二级页表的位置。</p>
 <ul>
 <li>逻辑地址：页目录号 | 页号 | 页内偏移；</li>

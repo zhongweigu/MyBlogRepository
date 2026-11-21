@@ -82,7 +82,13 @@
 <figure class="article-figure"><a class="figure-link" data-action="zoom-image" data-caption="合体之后的最终 DAG：c+d 与 (c+d)*e 等公共子表达式各只保留一个结点，a~e 每个操作数也只出现一次" data-src="/408-review/assets/textbook/ds-dag-expression-final.webp" href="/408-review/assets/textbook/ds-dag-expression-final.webp"><img alt="合体之后的最终 DAG：c+d 与 (c+d)*e 等公共子表达式各只保留一个结点，a~e 每个操作数也只出现一次" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/textbook/ds-dag-expression-final.webp"/></a><figcaption>合体之后的最终 DAG：c+d 与 (c+d)*e 等公共子表达式各只保留一个结点，a~e 每个操作数也只出现一次</figcaption></figure>
 <p>原式里 <code>c+d</code> 出现了 3 次、<code>(c+d)*e</code> 出现了 2 次，合体后各只留一个结点，<code>a</code>~<code>e</code> 这些操作数也只画一次——这就是 DAG 比二叉树省结点的地方。</p>
 <p>合并时的两条判据：<strong>依据是"同一个子表达式"</strong>（运算符相同、两部分也相同），<strong>合完不能打乱原来的运算先后</strong>。</p>
-<h2 id="15-">考点15-关键路径</h2>
+<h2 id="15-"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="ve 正向取最大，vl 反向取最小；e=l 的活动是关键活动。" data-src="/408-review/assets/img/ds-aoe-critical-path.svg" href="/408-review/assets/img/ds-aoe-critical-path.svg">
+<img alt="AOE 网的事件最早/最迟时间与关键路径" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-aoe-critical-path.svg"/>
+</a>
+<figcaption>ve 正向取最大，vl 反向取最小；e=l 的活动是关键活动。</figcaption>
+</figure>
+考点15-关键路径</h2>
 <p>四个量，两个按事件算、两个按活动算：</p>
 <div class="article-table"><table>
 <thead>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 640" role="img" aria-label="AOE 网、事件最早最迟时间与关键路径">
+  <defs>
+    <marker id="aoa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+    <marker id="aob" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1080" height="640" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">AOE：事件的最早/最迟时间决定关键活动</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <circle cx="95" cy="300" r="30" fill="#eef3e4" stroke="#6f8f45" stroke-width="2"/><text x="95" y="306" text-anchor="middle" font-weight="700">v1</text>
+    <circle cx="335" cy="165" r="30" fill="#e9f2f6" stroke="#4d7f95" stroke-width="2"/><text x="335" y="171" text-anchor="middle" font-weight="700">v2</text>
+    <circle cx="335" cy="440" r="30" fill="#e9f2f6" stroke="#4d7f95" stroke-width="2"/><text x="335" y="446" text-anchor="middle" font-weight="700">v3</text>
+    <circle cx="610" cy="300" r="30" fill="#f7ecd9" stroke="#a8782c" stroke-width="2"/><text x="610" y="306" text-anchor="middle" font-weight="700">v4</text>
+    <circle cx="870" cy="300" r="30" fill="#f3e6e6" stroke="#a85a5a" stroke-width="2"/><text x="870" y="306" text-anchor="middle" font-weight="700">v5</text>
+
+    <g stroke="#9aa6ad" stroke-width="1.8" fill="none">
+      <path d="M125 292 L305 178" marker-end="url(#aoa)"/>
+      <path d="M125 308 L305 428" marker-end="url(#aoa)"/>
+      <path d="M365 182 L580 282" marker-end="url(#aoa)"/>
+      <path d="M365 428 L580 318" marker-end="url(#aoa)"/>
+      <path d="M640 300 L840 300" marker-end="url(#aoa)"/>
+      <path d="M360 415 C520 370, 700 320, 840 305" marker-end="url(#aoa)"/>
+    </g>
+    <g font-size="12" fill="#52605a">
+      <text x="190" y="220">A=3</text>
+      <text x="185" y="390">B=2</text>
+      <text x="450" y="220">C=2</text>
+      <text x="455" y="390">D=4</text>
+      <text x="725" y="285">E=3</text>
+      <text x="540" y="385">F=5</text>
+    </g>
+
+    <path d="M125 307 L305 430" stroke="#b54b45" stroke-width="3" fill="none" marker-end="url(#aob)"/>
+    <path d="M365 432 L580 315" stroke="#b54b45" stroke-width="3" fill="none" marker-end="url(#aob)"/>
+    <path d="M640 300 L840 300" stroke="#b54b45" stroke-width="3" fill="none" marker-end="url(#aob)"/>
+
+    <rect x="55" y="500" width="970" height="115" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="525" font-weight="700">事件时间与关键活动</text>
+    <text x="75" y="550">ve：v1=0，v2=3，v3=2，v4=max(3+2,2+4)=6，v5=max(6+3,2+5)=9</text>
+    <text x="75" y="574">vl：v5=9，v4=6，v3=min(6−4,9−5)=2，v2=6−2=4，v1=min(4−3,2−2)=0</text>
+    <text x="75" y="598" font-size="13" fill="#b54b45">关键活动：B(v1→v3)、D(v3→v4)、E(v4→v5)；关键路径 v1→v3→v4→v5，长度 2+4+3=9。</text>
+  </g>
+</svg>
