@@ -149,6 +149,12 @@
 <li>B+ 树所有查找都到叶子，查找长度更稳定；B 树可能提前成功；</li>
 <li>B+ 树的叶子链表支持范围查询，B 树做范围查询要中序遍历或回溯。</li>
 </ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="B+ 树所有键在叶层；分裂把右叶最小键的副本上提，删除从叶开始借位/合并。" data-src="/408-review/assets/img/ds-bplus-split-merge.svg" href="/408-review/assets/img/ds-bplus-split-merge.svg">
+<img alt="B+ 树叶分裂与删除后的合并" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-bplus-split-merge.svg"/>
+</a>
+<figcaption>B+ 树所有键在叶层；分裂把右叶最小键的副本上提，删除从叶开始借位/合并。</figcaption>
+</figure>
 <h3 id="bb_1">B/B+树的插入</h3>
 <p><strong>B 树的插入</strong>：</p>
 <ol>

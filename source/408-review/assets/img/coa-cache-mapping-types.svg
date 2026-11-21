@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 700" role="img" aria-label="Cache 直接映射、全相联和组相联的结构对比">
+  <defs>
+    <marker id="cma" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1140" height="700" fill="#fffdf8"/>
+  <text x="570" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">Cache 三种映射：地址怎样选中行、Tag 怎样比较</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 直接映射：一个主存块只能进唯一一行</text>
+    <rect x="55" y="95" width="230" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="170" y="121" text-anchor="middle">Tag</text>
+    <rect x="285" y="95" width="160" height="42" fill="#f7ecd9" stroke="#a8782c"/><text x="365" y="121" text-anchor="middle">行号 = 块号 mod 行数</text>
+    <rect x="445" y="95" width="160" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="525" y="121" text-anchor="middle">块内偏移</text>
+    <text x="630" y="112">行号直接选中一行，只比较这一行的 Tag</text>
+    <text x="630" y="134" font-size="12">冲突多：不同块映射到同一行会互相替换</text>
+
+    <g>
+      <rect x="70" y="170" width="180" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="160" y="195" text-anchor="middle">主存块 0</text>
+      <rect x="270" y="170" width="180" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="360" y="195" text-anchor="middle">块 1</text>
+      <rect x="470" y="170" width="180" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="560" y="195" text-anchor="middle">块 2</text>
+      <rect x="670" y="170" width="180" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="760" y="195" text-anchor="middle">块 3</text>
+      <rect x="70" y="220" width="180" height="40" fill="#f3e6e6" stroke="#a85a5a"/><text x="160" y="245" text-anchor="middle">块 4 → 行 0</text>
+      <rect x="270" y="220" width="180" height="40" fill="#f3e6e6" stroke="#a85a5a"/><text x="360" y="245" text-anchor="middle">块 5 → 行 1</text>
+      <rect x="470" y="220" width="180" height="40" fill="#f3e6e6" stroke="#a85a5a"/><text x="560" y="245" text-anchor="middle">块 6 → 行 2</text>
+      <rect x="670" y="220" width="180" height="40" fill="#f3e6e6" stroke="#a85a5a"/><text x="760" y="245" text-anchor="middle">块 7 → 行 3</text>
+    </g>
+    <text x="880" y="195" font-size="12">Cache 行 0–3</text>
+    <text x="880" y="220" font-size="12">每行只存一个块</text>
+
+    <text x="45" y="320" font-weight="700">B. 全相联：一个块可以进任意一行</text>
+    <rect x="55" y="340" width="260" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="185" y="366" text-anchor="middle">Tag（整个块号）</text>
+    <rect x="315" y="340" width="160" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="395" y="366" text-anchor="middle">块内偏移</text>
+    <text x="500" y="357">没有“行号”字段；所有行的 Tag 一起比较</text>
+    <text x="500" y="379" font-size="12">灵活、冲突少；但比较器和替换逻辑成本高</text>
+    <g>
+      <rect x="70" y="420" width="140" height="38" fill="#f7f5ee" stroke="#c9c0ae"/><text x="140" y="444" text-anchor="middle">行 0</text>
+      <rect x="230" y="420" width="140" height="38" fill="#f7f5ee" stroke="#c9c0ae"/><text x="300" y="444" text-anchor="middle">行 1</text>
+      <rect x="390" y="420" width="140" height="38" fill="#f7f5ee" stroke="#c9c0ae"/><text x="460" y="444" text-anchor="middle">行 2</text>
+      <rect x="550" y="420" width="140" height="38" fill="#f7f5ee" stroke="#c9c0ae"/><text x="620" y="444" text-anchor="middle">行 3</text>
+    </g>
+    <text x="710" y="444" font-size="12">任一空行都能放；满了按替换算法选 victim</text>
+
+    <text x="45" y="520" font-weight="700">C. 组相联（2 路）：先选组，再在组内比较 2 个 Tag</text>
+    <rect x="55" y="540" width="220" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="165" y="566" text-anchor="middle">Tag</text>
+    <rect x="275" y="540" width="150" height="42" fill="#f7ecd9" stroke="#a8782c"/><text x="350" y="566" text-anchor="middle">组号</text>
+    <rect x="425" y="540" width="150" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="500" y="566" text-anchor="middle">块内偏移</text>
+    <text x="595" y="557">组号选中一组；组内 2 行并行比较 Tag</text>
+    <text x="595" y="579" font-size="12">直接映射和全相联的折中：冲突少、成本可控</text>
+    <g>
+      <rect x="70" y="610" width="190" height="38" fill="#f7f5ee" stroke="#c9c0ae"/><text x="165" y="634" text-anchor="middle">组 0：行 0/1</text>
+      <rect x="280" y="610" width="190" height="38" fill="#f7f5ee" stroke="#c9c0ae"/><text x="375" y="634" text-anchor="middle">组 1：行 2/3</text>
+    </g>
+    <text x="490" y="634" font-size="12">同一组内两行可放两个不同块；组间互不影响</text>
+  </g>
+</svg>

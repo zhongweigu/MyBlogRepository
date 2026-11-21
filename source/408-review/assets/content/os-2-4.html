@@ -86,6 +86,12 @@ $$R = \frac{\text{等待时间} + \text{要求服务时间}}{\text{要求服务�
 </figure>
 <p>MLFQ 兼顾交互响应和吞吐量：交互型短作业在高优先级队列很快完成；CPU 密集型长作业逐级下降，用更大的时间片减少切换。代价是规则复杂，低优先级队列仍可能饥饿，需要定期提升（boost）所有进程的优先级来兜底。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="用一组到达/服务时间比较顺序、等待时间和响应；不要重复 os-2-3 的例子。" data-src="/408-review/assets/img/os-scheduling-algorithms-compare.svg" href="/408-review/assets/img/os-scheduling-algorithms-compare.svg">
+<img alt="FCFS、SJF 与 RR 在同一组进程上的调度对比" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-scheduling-algorithms-compare.svg"/>
+</a>
+<figcaption>用一组到达/服务时间比较顺序、等待时间和响应；不要重复 os-2-3 的例子。</figcaption>
+</figure>
 <h2 id="alg-example">七、同一组进程的对比</h2>
 <p>设三个进程，时间单位相同：</p>
 <div class="article-table"><table>

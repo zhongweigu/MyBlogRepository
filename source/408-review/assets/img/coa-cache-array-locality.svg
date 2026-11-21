@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-label="行优先与列优先访问的 Cache 块局部性">
+  <rect width="1080" height="620" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">同一块 4×4 数组：行为什么比列“更 Cache 友好”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="72">C 语言按行优先存储；设 Cache 块 = 2 个 int，Cache 初始为空。</text>
+
+    <g>
+      <rect x="55" y="100" width="80" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="95" y="126" text-anchor="middle">A00</text>
+      <rect x="135" y="100" width="80" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="175" y="126" text-anchor="middle">A01</text>
+      <rect x="215" y="100" width="80" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="255" y="126" text-anchor="middle">A02</text>
+      <rect x="295" y="100" width="80" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="335" y="126" text-anchor="middle">A03</text>
+      <rect x="55" y="142" width="80" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="95" y="168" text-anchor="middle">A10</text>
+      <rect x="135" y="142" width="80" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="175" y="168" text-anchor="middle">A11</text>
+      <rect x="215" y="142" width="80" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="255" y="168" text-anchor="middle">A12</text>
+      <rect x="295" y="142" width="80" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="335" y="168" text-anchor="middle">A13</text>
+      <rect x="55" y="184" width="80" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="95" y="210" text-anchor="middle">A20</text>
+      <rect x="135" y="184" width="80" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="175" y="210" text-anchor="middle">A21</text>
+      <rect x="215" y="184" width="80" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="255" y="210" text-anchor="middle">A22</text>
+      <rect x="295" y="184" width="80" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="335" y="210" text-anchor="middle">A23</text>
+      <rect x="55" y="226" width="80" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="95" y="252" text-anchor="middle">A30</text>
+      <rect x="135" y="226" width="80" height="42" fill="#e9f2f6" stroke="#4d7f95"/><text x="175" y="252" text-anchor="middle">A31</text>
+      <rect x="215" y="226" width="80" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="255" y="252" text-anchor="middle">A32</text>
+      <rect x="295" y="226" width="80" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="335" y="252" text-anchor="middle">A33</text>
+    </g>
+    <text x="50" y="290" font-size="12">内存顺序：A00 A01 | A02 A03 | A10 A11 | A12 A13 | …</text>
+    <text x="50" y="310" font-size="12">竖线表示一个 Cache 块（2 个 int）</text>
+
+    <text x="430" y="95" font-weight="700">行访问：A00, A01, A02, A03</text>
+    <text x="430" y="122">A00 缺失，块 0 带入 A00/A01</text>
+    <text x="430" y="146">A01 命中；A02 缺失，块 1 带入 A02/A03</text>
+    <text x="430" y="170">A03 命中</text>
+    <text x="430" y="198" fill="#b54b45">4 次访问：2 次缺失，2 次命中</text>
+
+    <text x="430" y="250" font-weight="700">列访问：A00, A10, A20, A30</text>
+    <text x="430" y="277">A00 缺失，块 0 带入 A00/A01</text>
+    <text x="430" y="301">A10 缺失，块 2 带入 A10/A11</text>
+    <text x="430" y="325">A20 缺失，块 4 带入 A20/A21</text>
+    <text x="430" y="349">A30 缺失，块 6 带入 A30/A31</text>
+    <text x="430" y="377" fill="#b54b45">4 次访问：4 次缺失；每次只用一个 int</text>
+
+    <rect x="45" y="420" width="990" height="85" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="445" font-weight="700">怎么读这张图</text>
+    <text x="65" y="469">行优先存储让“同一行的相邻元素”落在同一个块；连续访问一行能复用块内数据。</text>
+    <text x="65" y="493">列访问每次跨一行，块里另一个元素要等到下一次同行访问才可能用到；若 Cache 很小，块很快被换出。</text>
+
+    <text x="45" y="550" font-size="12" fill="#6b777f">命中次数还取决于 Cache 容量、相联度、替换算法和初始状态；图中只比较“仅这 4 次访问、块=2 个 int”的局部性。</text>
+  </g>
+</svg>

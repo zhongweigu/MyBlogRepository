@@ -1106,6 +1106,12 @@ void HeapSort(ElemType A[], int len) {
 <li>删除堆顶：用堆底元素补到堆顶，堆长减 1，再从堆顶向下调整；</li>
 <li>插入：新元素放到堆底，堆长加 1，再与父结点比较，向上调整（大根堆中比父结点大就交换）。</li>
 </ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="先分到单元素，再两两合并；每层合并 O(n)，共 log n 层。" data-src="/408-review/assets/img/ds-merge-sort-trace.svg" href="/408-review/assets/img/ds-merge-sort-trace.svg">
+<img alt="归并排序的分割与合并轨迹" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-merge-sort-trace.svg"/>
+</a>
+<figcaption>先分到单元素，再两两合并；每层合并 O(n)，共 log n 层。</figcaption>
+</figure>
 <h3 id="_8">归并排序</h3>
 <p><strong>归并</strong>：把两个或多个有序子序列合并成一个有序序列。二路归并就是"二合一"：每次比较两个子序列当前的首元素，把较小的放进结果；一个子序列取完后，把另一个剩下的元素直接接上。</p>
 <p><strong>二路归并排序</strong>：</p>

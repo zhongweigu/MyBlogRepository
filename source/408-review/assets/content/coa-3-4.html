@@ -10,7 +10,13 @@
 
 </details><div class="article-content">
 <p>Cache 性能题的主线只有三条：<strong>访问模式决定命中率</strong>、<strong>命中率/缺失代价决定 AMAT</strong>、<strong>缺失停顿决定程序总时间</strong>。先把这三条串起来，再看具体题型。</p>
-<h2 id="2-cache">题型2-Cache 命中率与数组访问优化</h2>
+<h2 id="2-cache"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="行优先让同一行相邻元素落在同一块；列访问每次跨行，块内另一个元素往往用不上。" data-src="/408-review/assets/img/coa-cache-array-locality.svg" href="/408-review/assets/img/coa-cache-array-locality.svg">
+<img alt="行优先与列优先访问的 Cache 块局部性" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-cache-array-locality.svg"/>
+</a>
+<figcaption>行优先让同一行相邻元素落在同一块；列访问每次跨行，块内另一个元素往往用不上。</figcaption>
+</figure>
+题型2-Cache 命中率与数组访问优化</h2>
 <p>题型2 按四步走：</p>
 <ol>
 <li><strong>确定访问粒度</strong>：访问对象是数组、指令，还是随机地址；</li>

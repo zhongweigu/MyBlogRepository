@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 620" role="img" aria-label="拓扑排序的入度删点过程">
+  <defs>
+    <marker id="tsa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="620" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">拓扑排序：反复挑入度为 0 的点，删点并更新入度</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <circle cx="100" cy="300" r="28" fill="#eef3e4" stroke="#6f8f45" stroke-width="2"/><text x="100" y="306" text-anchor="middle" font-weight="700">A</text>
+    <circle cx="310" cy="150" r="28" fill="#e9f2f6" stroke="#4d7f95" stroke-width="2"/><text x="310" y="156" text-anchor="middle" font-weight="700">B</text>
+    <circle cx="310" cy="450" r="28" fill="#e9f2f6" stroke="#4d7f95" stroke-width="2"/><text x="310" y="456" text-anchor="middle" font-weight="700">C</text>
+    <circle cx="540" cy="300" r="28" fill="#f7ecd9" stroke="#a8782c" stroke-width="2"/><text x="540" y="306" text-anchor="middle" font-weight="700">D</text>
+    <circle cx="540" cy="500" r="28" fill="#f3e6e6" stroke="#a85a5a" stroke-width="2"/><text x="540" y="506" text-anchor="middle" font-weight="700">F</text>
+    <circle cx="800" cy="300" r="28" fill="#eadff2" stroke="#7f5b9a" stroke-width="2"/><text x="800" y="306" text-anchor="middle" font-weight="700">E</text>
+
+    <g stroke="#9aa6ad" stroke-width="1.8" fill="none">
+      <path d="M128 290 L282 165" marker-end="url(#tsa)"/>
+      <path d="M128 310 L282 435" marker-end="url(#tsa)"/>
+      <path d="M338 162 L512 286" marker-end="url(#tsa)"/>
+      <path d="M338 438 L512 314" marker-end="url(#tsa)"/>
+      <path d="M568 300 L772 300" marker-end="url(#tsa)"/>
+      <path d="M338 462 L512 490" marker-end="url(#tsa)"/>
+      <path d="M568 488 C650 440, 700 350, 772 312" marker-end="url(#tsa)"/>
+    </g>
+    <g font-size="11" fill="#52605a">
+      <text x="195" y="215">A→B</text><text x="195" y="385">A→C</text><text x="420" y="215">B→D</text><text x="420" y="390">C→D</text>
+      <text x="660" y="285">D→E</text><text x="410" y="485">C→F</text><text x="610" y="450">F→E</text>
+    </g>
+
+    <rect x="45" y="520" width="970" height="75" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="545" font-weight="700">入度表与执行过程</text>
+    <text x="65" y="569">初始：A0, B1, C1, D2, E2, F1 → 取 A；删 A 的出边后 B0, C0</text>
+    <text x="65" y="589">取 B → D1；取 C → D0, F0；取 D → E1；取 F → E0；最后 E。拓扑序：A B C D F E</text>
+
+    <text x="45" y="490" font-size="12" fill="#b54b45">队列里同时有多个入度 0 的点时，拓扑序可能不唯一；本图按 A→B→C→D→F→E 取。</text>
+  </g>
+</svg>

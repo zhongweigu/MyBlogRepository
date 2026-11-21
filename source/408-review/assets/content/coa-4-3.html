@@ -1,5 +1,11 @@
 <div class="article-content">
-<h2 id="54">5.4 指令流水线</h2>
+<h2 id="54"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="横轴是时钟周期，纵轴是指令；对角线表示重叠，气泡表示停顿。" data-src="/408-review/assets/img/coa-pipeline-spacetime.svg" href="/408-review/assets/img/coa-pipeline-spacetime.svg">
+<img alt="五段流水线的时空图与一个停顿气泡" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-pipeline-spacetime.svg"/>
+</a>
+<figcaption>横轴是时钟周期，纵轴是指令；对角线表示重叠，气泡表示停顿。</figcaption>
+</figure>
+5.4 指令流水线</h2>
 <p>一条指令的执行可以拆成 5 段：IF 取指、ID 译码及取数、EXE 执行、MEM 访存、WB 写回。理想情况下每个时钟周期流出一条指令；但相邻指令之间会争资源、等数据或取错指令，流水线不得不停顿，这类冲突统称为冒险（hazard）。</p>
 <p><strong>流水线的性能计算。</strong> 设流水线有 $k$ 段，每段用时 $\Delta t$（取最慢的一段），共执行 $n$ 条指令，且没有停顿。</p>
 <div class="article-table"><table>

@@ -35,7 +35,13 @@
 <p>$$n\ge 2^{h/2}-1 \Rightarrow h\le 2\log_2(n+1)$$</p>
 <p>这里 $h$ 按内部结点的层数算（根为第 1 层，不把 NIL 层算进去）。</p>
 <p>所以红黑树的查找、插入、删除都是 $O(\log n)$。它不像 AVL 那样严格要求左右子树高度差不超过 1，平衡稍松，但插入/删除时旋转更少，常用作 <code>map</code>/<code>set</code> 的底层结构。</p>
-<h3 id="_2">红黑树的插入</h3>
+<h3 id="_2"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="父红叔红只变色；父红叔黑按 LL/RR/LR/RL 旋转并重新染色。" data-src="/408-review/assets/img/ds-redblack-insert-fixup.svg" href="/408-review/assets/img/ds-redblack-insert-fixup.svg">
+<img alt="红黑树插入后的变色与旋转 fix-up" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-redblack-insert-fixup.svg"/>
+</a>
+<figcaption>父红叔红只变色；父红叔黑按 LL/RR/LR/RL 旋转并重新染色。</figcaption>
+</figure>
+红黑树的插入</h3>
 <p>新结点先染红——这样不会改变任何路径上的黑结点数（不破坏黑高），只会可能出现"红-红"冲突。</p>
 <p>旋转方式和 AVL 完全一样：LL/RR 单旋，LR/RL 双旋，这里不展开。重点看<strong>旋转前后怎么染色、什么时候还要继续向上处理</strong>。</p>
 <div class="article-table"><table>

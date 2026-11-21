@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 640" role="img" aria-label="FCFS、SJF 与时间片轮转的调度对比">
+  <rect width="1100" height="640" fill="#fffdf8"/>
+  <text x="550" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">同一组进程：FCFS / SJF / RR 的甘特图对比</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="70">P1 到达 0、服务 5；P2 到达 2、服务 2；P3 到达 4、服务 1。</text>
+    <text x="45" y="93" font-size="12" fill="#52605a">时间轴 0–8；同一行同一时刻只能有一个进程占 CPU。</text>
+
+    <text x="45" y="140" font-weight="700">FCFS</text>
+    <text x="130" y="140" font-size="12">0</text><text x="220" y="140" font-size="12">1</text><text x="310" y="140" font-size="12">2</text><text x="400" y="140" font-size="12">3</text><text x="490" y="140" font-size="12">4</text><text x="580" y="140" font-size="12">5</text><text x="670" y="140" font-size="12">6</text><text x="760" y="140" font-size="12">7</text><text x="850" y="140" font-size="12">8</text>
+    <line x1="130" y1="150" x2="850" y2="150" stroke="#4d5b66"/>
+    <rect x="130" y="160" width="450" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="355" y="185" text-anchor="middle">P1</text>
+    <rect x="580" y="160" width="180" height="38" fill="#f7ecd9" stroke="#a8782c"/><text x="670" y="185" text-anchor="middle">P2</text>
+    <rect x="760" y="160" width="90" height="38" fill="#eef3e4" stroke="#6f8f45"/><text x="805" y="185" text-anchor="middle">P3</text>
+    <text x="880" y="183" font-size="12">等待 0/3/3，平均 2.00</text>
+
+    <text x="45" y="260" font-weight="700">SJF</text>
+    <text x="130" y="260" font-size="12">0</text><text x="220" y="260" font-size="12">1</text><text x="310" y="260" font-size="12">2</text><text x="400" y="260" font-size="12">3</text><text x="490" y="260" font-size="12">4</text><text x="580" y="260" font-size="12">5</text><text x="670" y="260" font-size="12">6</text><text x="760" y="260" font-size="12">7</text><text x="850" y="260" font-size="12">8</text>
+    <line x1="130" y1="270" x2="850" y2="270" stroke="#4d5b66"/>
+    <rect x="130" y="280" width="450" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="355" y="305" text-anchor="middle">P1</text>
+    <rect x="580" y="280" width="90" height="38" fill="#eef3e4" stroke="#6f8f45"/><text x="625" y="305" text-anchor="middle">P3</text>
+    <rect x="670" y="280" width="180" height="38" fill="#f7ecd9" stroke="#a8782c"/><text x="760" y="305" text-anchor="middle">P2</text>
+    <text x="880" y="303" font-size="12">等待 0/4/1，平均 1.67</text>
+
+    <text x="45" y="385" font-weight="700">RR（q=2）</text>
+    <text x="130" y="385" font-size="12">0</text><text x="220" y="385" font-size="12">1</text><text x="310" y="385" font-size="12">2</text><text x="400" y="385" font-size="12">3</text><text x="490" y="385" font-size="12">4</text><text x="580" y="385" font-size="12">5</text><text x="670" y="385" font-size="12">6</text><text x="760" y="385" font-size="12">7</text><text x="850" y="385" font-size="12">8</text>
+    <line x1="130" y1="395" x2="850" y2="395" stroke="#4d5b66"/>
+    <rect x="130" y="405" width="180" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="220" y="430" text-anchor="middle">P1</text>
+    <rect x="310" y="405" width="180" height="38" fill="#f7ecd9" stroke="#a8782c"/><text x="400" y="430" text-anchor="middle">P2</text>
+    <rect x="490" y="405" width="180" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="580" y="430" text-anchor="middle">P1</text>
+    <rect x="670" y="405" width="90" height="38" fill="#eef3e4" stroke="#6f8f45"/><text x="715" y="430" text-anchor="middle">P3</text>
+    <rect x="760" y="405" width="90" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="805" y="430" text-anchor="middle">P1</text>
+    <text x="880" y="428" font-size="12">等待 3/0/2，平均 1.67</text>
+
+    <rect x="45" y="475" width="1010" height="70" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="499" font-weight="700">读图</text>
+    <text x="65" y="523" font-size="13">FCFS 让先到的长作业先跑完，短作业等待；SJF 在 P1 结束后先选剩余最短的 P3；RR 按时间片轮转，长作业被切成多段。</text>
+
+    <text x="45" y="575" font-weight="700">注意</text>
+    <text x="45" y="600" font-size="13">SJF 是“非抢占”版本；SRTN 会在新短作业到达时抢占。RR 的等待时间不一定是最好，但响应更均匀。</text>
+    <text x="45" y="622" font-size="12" fill="#6b777f">本图只用于比较调度顺序；实际题目要按给出的到达/服务时间重新画表，不能用这张图的数值硬套。</text>
+  </g>
+</svg>

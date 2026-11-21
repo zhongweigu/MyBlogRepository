@@ -132,6 +132,12 @@
 </table></div>
 <p>缺页次数：<strong>FIFO 9 次，LRU 10 次，OPT 7 次</strong>。这个例子说明“LRU 比 FIFO 更聪明”不等于“任何访问串都更少缺页”；LRU 只是用过去近似未来，具体结果取决于访问串。OPT 是理论下界，用来评价其他算法，不能实现。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="页框增加缺页反而增加是 FIFO 特有现象；工作集是最近 Δ 次访问涉及的页集合。" data-src="/408-review/assets/img/os-belady-workingset.svg" href="/408-review/assets/img/os-belady-workingset.svg">
+<img alt="FIFO 的 Belady 异常与工作集窗口" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-belady-workingset.svg"/>
+</a>
+<figcaption>页框增加缺页反而增加是 FIFO 特有现象；工作集是最近 Δ 次访问涉及的页集合。</figcaption>
+</figure>
 <h2 id="vm-belady">六、Belady 异常与栈式算法</h2>
 <p><strong>Belady 异常</strong>：给进程增加物理块，缺页次数反而增加。FIFO 可能出现；LRU、OPT 不会，因为它们是<strong>栈式算法</strong>：n 个页框时的驻留集合始终是 n+1 个页框时驻留集合的子集，增加页框不会把原本能命中的页挤出去。</p>
 <p>“栈式”不是指用栈实现，而是指驻留集具有包含关系。LRU 的“最近使用”排序满足这个性质；FIFO 的“进入时间”不满足，所以会出现异常。</p>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 640" role="img" aria-label="红黑树插入后的变色与旋转修复">
+  <defs>
+    <marker id="rba" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1100" height="640" fill="#fffdf8"/>
+  <text x="550" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">红黑树插入 fix-up：先看叔叔颜色，再决定变色还是旋转</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 父红、叔红：只变色，问题上移</text>
+    <circle cx="270" cy="120" r="25" fill="#3b3b3b" stroke="#111"/><text x="270" y="126" text-anchor="middle" fill="#fff">G</text>
+    <circle cx="160" cy="220" r="25" fill="#c94b4b" stroke="#8a2f2f"/><text x="160" y="226" text-anchor="middle" fill="#fff">P</text>
+    <circle cx="380" cy="220" r="25" fill="#c94b4b" stroke="#8a2f2f"/><text x="380" y="226" text-anchor="middle" fill="#fff">U</text>
+    <circle cx="160" cy="320" r="25" fill="#c94b4b" stroke="#8a2f2f"/><text x="160" y="326" text-anchor="middle" fill="#fff">Z</text>
+    <path d="M252 140 L180 200" stroke="#4d5b66" stroke-width="2" marker-end="url(#rba)"/>
+    <path d="M288 140 L360 200" stroke="#4d5b66" stroke-width="2" marker-end="url(#rba)"/>
+    <path d="M160 245 L160 295" stroke="#4d5b66" stroke-width="2" marker-end="url(#rba)"/>
+    <text x="45" y="380">P、U 都红，G 必黑。把 P、U 染黑，G 染红；</text>
+    <text x="45" y="404">若 G 的父也是红，就把 G 当作新的 Z 继续向上。</text>
+    <text x="45" y="428" font-size="12" fill="#b54b45">这一步不旋转，只变色；可能一路传到根，最后把根染黑。</text>
+
+    <text x="600" y="75" font-weight="700">B. 父红、叔黑：旋转 + 变色，结束</text>
+    <circle cx="830" cy="120" r="25" fill="#3b3b3b" stroke="#111"/><text x="830" y="126" text-anchor="middle" fill="#fff">G</text>
+    <circle cx="720" cy="220" r="25" fill="#c94b4b" stroke="#8a2f2f"/><text x="720" y="226" text-anchor="middle" fill="#fff">P</text>
+    <rect x="920" y="198" width="58" height="44" fill="#f7f5ee" stroke="#9a9a9a"/><text x="949" y="226" text-anchor="middle" font-size="12">NIL</text>
+    <circle cx="660" cy="320" r="25" fill="#c94b4b" stroke="#8a2f2f"/><text x="660" y="326" text-anchor="middle" fill="#fff">Z</text>
+    <path d="M812 140 L742 200" stroke="#4d5b66" stroke-width="2" marker-end="url(#rba)"/>
+    <path d="M848 140 L925 198" stroke="#4d5b66" stroke-width="2" marker-end="url(#rba)"/>
+    <path d="M705 240 L672 296" stroke="#4d5b66" stroke-width="2" marker-end="url(#rba)"/>
+    <text x="600" y="375" font-size="12">左-左：以 G 右旋，P 上位；P 染黑，G 染红。</text>
+
+    <circle cx="830" cy="450" r="25" fill="#3b3b3b" stroke="#111"/><text x="830" y="456" text-anchor="middle" fill="#fff">P</text>
+    <circle cx="710" cy="550" r="25" fill="#c94b4b" stroke="#8a2f2f"/><text x="710" y="556" text-anchor="middle" fill="#fff">Z</text>
+    <circle cx="950" cy="550" r="25" fill="#c94b4b" stroke="#8a2f2f"/><text x="950" y="556" text-anchor="middle" fill="#fff">G</text>
+    <path d="M812 470 L730 526" stroke="#4d5b66" stroke-width="2" marker-end="url(#rba)"/>
+    <path d="M848 470 L930 526" stroke="#4d5b66" stroke-width="2" marker-end="url(#rba)"/>
+    <text x="600" y="605" font-size="12" fill="#52605a">旋转后子树根为黑，不再向上冲突。</text>
+    <text x="45" y="480" font-weight="700">四种旋转形状</text>
+    <text x="45" y="505">LL：以 G 右旋；RR：以 G 左旋；</text>
+    <text x="45" y="529">LR：先以 P 左旋，再以 G 右旋；</text>
+    <text x="45" y="553">RL：先以 P 右旋，再以 G 左旋。</text>
+    <text x="45" y="585" font-size="12" fill="#6b777f">先处理“父红叔黑”的旋转；父红叔红只变色。Z 可能是新插入结点，也可能是变色上移后的 G。</text>
+  </g>
+</svg>

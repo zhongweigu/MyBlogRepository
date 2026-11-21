@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" role="img" aria-label="操作系统从人工操作到分时实时的发展时间轴">
+  <defs>
+    <marker id="eva" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1100" height="620" fill="#fffdf8"/>
+  <text x="550" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">OS 发展：每一阶段都在解决上一阶段“谁在等谁”的问题</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <line x1="80" y1="320" x2="1020" y2="320" stroke="#c9c0ae" stroke-width="4"/>
+    <g>
+      <rect x="55" y="85" width="220" height="105" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+      <text x="165" y="112" text-anchor="middle" font-weight="700">人工操作</text>
+      <text x="165" y="136" text-anchor="middle" font-size="12">用户独占机器</text>
+      <text x="165" y="158" text-anchor="middle" font-size="12">装带/运行/卸带</text>
+      <text x="165" y="180" text-anchor="middle" font-size="12" fill="#b54b45">CPU 大量空等</text>
+    </g>
+    <g>
+      <rect x="310" y="85" width="220" height="105" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+      <text x="420" y="112" text-anchor="middle" font-weight="700">脱机 I/O</text>
+      <text x="420" y="136" text-anchor="middle" font-size="12">外围机处理慢设备</text>
+      <text x="420" y="158" text-anchor="middle" font-size="12">主机只跟磁带交互</text>
+      <text x="420" y="180" text-anchor="middle" font-size="12" fill="#b54b45">减少主机等待</text>
+    </g>
+    <g>
+      <rect x="565" y="85" width="220" height="105" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+      <text x="675" y="112" text-anchor="middle" font-weight="700">单道批处理</text>
+      <text x="675" y="136" text-anchor="middle" font-size="12">作业自动衔接</text>
+      <text x="675" y="158" text-anchor="middle" font-size="12">内存中仅一道</text>
+      <text x="675" y="180" text-anchor="middle" font-size="12" fill="#b54b45">I/O 时 CPU 仍闲</text>
+    </g>
+    <g>
+      <rect x="820" y="85" width="220" height="105" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+      <text x="930" y="112" text-anchor="middle" font-weight="700">多道批处理</text>
+      <text x="930" y="136" text-anchor="middle" font-size="12">多道程序驻留</text>
+      <text x="930" y="158" text-anchor="middle" font-size="12">I/O 时切换 CPU</text>
+      <text x="930" y="180" text-anchor="middle" font-size="12" fill="#b54b45">吞吐量提高</text>
+    </g>
+
+    <g>
+      <rect x="310" y="405" width="220" height="105" rx="4" fill="#eadff2" stroke="#7f5b9a"/>
+      <text x="420" y="432" text-anchor="middle" font-weight="700">分时</text>
+      <text x="420" y="456" text-anchor="middle" font-size="12">CPU 切成时间片</text>
+      <text x="420" y="478" text-anchor="middle" font-size="12">多个用户交互</text>
+      <text x="420" y="500" text-anchor="middle" font-size="12" fill="#b54b45">响应时间优先</text>
+    </g>
+    <g>
+      <rect x="565" y="405" width="220" height="105" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+      <text x="675" y="432" text-anchor="middle" font-weight="700">实时</text>
+      <text x="675" y="456" text-anchor="middle" font-size="12">任务有截止期</text>
+      <text x="675" y="478" text-anchor="middle" font-size="12">优先级抢占/调度</text>
+      <text x="675" y="500" text-anchor="middle" font-size="12" fill="#b54b45">不误期优先</text>
+    </g>
+
+    <path d="M275 137 L310 137" stroke="#4d5b66" stroke-width="2" marker-end="url(#eva)"/>
+    <path d="M530 137 L565 137" stroke="#4d5b66" stroke-width="2" marker-end="url(#eva)"/>
+    <path d="M785 137 L820 137" stroke="#4d5b66" stroke-width="2" marker-end="url(#eva)"/>
+    <path d="M930 190 C930 300, 700 300, 675 405" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#eva)"/>
+    <path d="M675 190 C675 300, 500 300, 420 405" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#eva)"/>
+    <path d="M530 457 L565 457" stroke="#4d5b66" stroke-width="2" marker-end="url(#eva)"/>
+
+    <text x="55" y="255" font-size="12">人工：人等机器</text>
+    <text x="310" y="255" font-size="12">脱机：慢设备离开主机</text>
+    <text x="565" y="255" font-size="12">单道：作业自动，但仍串行</text>
+    <text x="820" y="255" font-size="12">多道：用并发填 CPU 空闲</text>
+    <text x="310" y="555" font-size="12">分时：每个用户都觉得自己独占</text>
+    <text x="565" y="555" font-size="12">实时：错过截止期不可接受</text>
+
+    <rect x="55" y="570" width="985" height="38" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="594" font-size="12">主线：从“人机串行”到“多道并发”，再到“交互响应/截止期约束”；不是单纯按年代背名字。</text>
+  </g>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 600" role="img" aria-label="括号匹配的栈状态轨迹">
+  <rect width="1040" height="600" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">括号匹配：栈里存的是“还没等到右括号的左括号”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75">表达式：<tspan font-family="monospace" font-size="18">{ [ ( ) ] }</tspan></text>
+    <text x="45" y="100" font-size="12" fill="#52605a">遇到左括号压栈；遇到右括号，检查栈顶是否同类，匹配则弹出。</text>
+
+    <g font-size="12">
+      <text x="45" y="150">步骤</text><text x="150" y="150">读入</text><text x="230" y="150">动作</text><text x="420" y="150">栈（底 → 顶）</text>
+      <text x="45" y="190">1</text><text x="150" y="190">{</text><text x="230" y="190">压栈</text><text x="420" y="190">[ { ]</text>
+      <text x="45" y="230">2</text><text x="150" y="230">[</text><text x="230" y="230">压栈</text><text x="420" y="230">[ { , [ ]</text>
+      <text x="45" y="270">3</text><text x="150" y="270">(</text><text x="230" y="270">压栈</text><text x="420" y="270">[ { , [ , ( ]</text>
+      <text x="45" y="310">4</text><text x="150" y="310">)</text><text x="230" y="310">与栈顶 ( 匹配，弹出</text><text x="420" y="310">[ { , [ ]</text>
+      <text x="45" y="350">5</text><text x="150" y="350">]</text><text x="230" y="350">与栈顶 [ 匹配，弹出</text><text x="420" y="350">[ { ]</text>
+      <text x="45" y="390">6</text><text x="150" y="390">}</text><text x="230" y="390">与栈顶 { 匹配，弹出</text><text x="420" y="390">[ 空 ]</text>
+    </g>
+
+    <rect x="45" y="430" width="950" height="60" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="65" y="455" font-weight="700">最后栈为空 → 合法</text>
+    <text x="65" y="478" font-size="13">每一步只弹栈顶；不同类型的右括号不能“跳过”栈顶去匹配更下面。</text>
+
+    <text x="45" y="530" font-weight="700">两类失败</text>
+    <text x="45" y="555" font-size="13">① 右括号到来时栈空 → 多余右括号；② 右括号与栈顶不同类 → 类型不匹配；③ 扫描完栈非空 → 左括号未闭合。</text>
+  </g>
+</svg>

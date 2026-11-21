@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-label="Belady 异常与工作集窗口">
+  <defs>
+    <marker id="bwa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1080" height="620" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">Belady 异常与工作集：页框多了不一定更好</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. FIFO 的 Belady 异常</text>
+    <text x="45" y="102">访问串：1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5</text>
+    <line x1="100" y1="360" x2="520" y2="360" stroke="#4d5b66"/>
+    <rect x="120" y="210" width="100" height="150" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="170" y="195" text-anchor="middle">3 页框</text><text x="170" y="292" text-anchor="middle" font-size="22" font-weight="700">9</text><text x="170" y="320" text-anchor="middle" font-size="12">次缺页</text>
+    <rect x="330" y="180" width="100" height="180" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="380" y="165" text-anchor="middle">4 页框</text><text x="380" y="292" text-anchor="middle" font-size="22" font-weight="700">10</text><text x="380" y="320" text-anchor="middle" font-size="12">次缺页</text>
+    <text x="100" y="390">页框增加，缺页反而增加：FIFO 不满足栈式算法性质。</text>
+    <text x="100" y="414" font-size="12" fill="#b54b45">LRU/OPT 不会出现 Belady 异常；FIFO 会。</text>
+
+    <text x="560" y="75" font-weight="700">B. 工作集窗口 Δ=3</text>
+    <text x="560" y="102">访问串：… 1, 2, 3, 4, 1, 2 …</text>
+    <text x="560" y="145">t=5 时，最近 3 次访问：3, 4, 1</text>
+    <text x="560" y="169">工作集 W(5) = {1, 3, 4}</text>
+    <text x="560" y="210">t=6 时，最近 3 次访问：4, 1, 2</text>
+    <text x="560" y="234">工作集 W(6) = {1, 2, 4}</text>
+    <text x="560" y="275" font-size="12" fill="#52605a">工作集 = 窗口内出现过的不同页面集合；窗口滑动，集合随之变化。</text>
+
+    <rect x="560" y="310" width="470" height="95" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="580" y="335" font-weight="700">驻留集与工作集</text>
+    <text x="580" y="359" font-size="13">驻留集：进程当前在主存中的页框集合。</text>
+    <text x="580" y="381" font-size="13">工作集：最近 Δ 次访问涉及的页集合；驻留集应尽量覆盖工作集。</text>
+
+    <rect x="45" y="470" width="990" height="100" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="495" font-weight="700">抖动怎么看</text>
+    <text x="65" y="519">分配给进程的页框少于工作集 → 刚换入的页很快又被换出 → 缺页率飙升，CPU 有效利用率下降。</text>
+    <text x="65" y="543">增加页框可能缓解；但全局置换下，增加一个进程的页框可能抢走另一个进程的工作集。</text>
+    <text x="65" y="563" font-size="12" fill="#6b777f">工作集模型用“最近 Δ 次访问”近似局部性；Δ 太小/太大都会失真。</text>
+  </g>
+</svg>

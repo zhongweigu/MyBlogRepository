@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-label="五段流水线的时空图与停顿">
+  <rect width="1080" height="620" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">流水线时空图：同一时刻不同指令处在不同阶段</text>
+  <g font-family="sans-serif" font-size="13" fill="#24313a">
+    <text x="45" y="72" font-weight="700">A. 理想情况：4 条指令、5 段，无停顿</text>
+    <text x="360" y="72" font-size="12">T = (k + n − 1)Δt = (5+4−1)Δt = 8Δt</text>
+
+    <text x="45" y="105">指令</text>
+    <g>
+      <text x="180" y="105" text-anchor="middle">1</text><text x="245" y="105" text-anchor="middle">2</text><text x="310" y="105" text-anchor="middle">3</text><text x="375" y="105" text-anchor="middle">4</text><text x="440" y="105" text-anchor="middle">5</text><text x="505" y="105" text-anchor="middle">6</text><text x="570" y="105" text-anchor="middle">7</text><text x="635" y="105" text-anchor="middle">8</text>
+    </g>
+    <g font-size="12">
+      <text x="45" y="140">I1</text>
+      <rect x="150" y="125" width="60" height="28" fill="#e9f2f6" stroke="#4d7f95"/><text x="180" y="144" text-anchor="middle">IF</text>
+      <rect x="215" y="125" width="60" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="245" y="144" text-anchor="middle">ID</text>
+      <rect x="280" y="125" width="60" height="28" fill="#f7ecd9" stroke="#a8782c"/><text x="310" y="144" text-anchor="middle">EX</text>
+      <rect x="345" y="125" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="375" y="144" text-anchor="middle">MEM</text>
+      <rect x="410" y="125" width="60" height="28" fill="#eadff2" stroke="#7f5b9a"/><text x="440" y="144" text-anchor="middle">WB</text>
+
+      <text x="45" y="180">I2</text>
+      <rect x="215" y="165" width="60" height="28" fill="#e9f2f6" stroke="#4d7f95"/><text x="245" y="184" text-anchor="middle">IF</text>
+      <rect x="280" y="165" width="60" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="310" y="184" text-anchor="middle">ID</text>
+      <rect x="345" y="165" width="60" height="28" fill="#f7ecd9" stroke="#a8782c"/><text x="375" y="184" text-anchor="middle">EX</text>
+      <rect x="410" y="165" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="440" y="184" text-anchor="middle">MEM</text>
+      <rect x="475" y="165" width="60" height="28" fill="#eadff2" stroke="#7f5b9a"/><text x="505" y="184" text-anchor="middle">WB</text>
+
+      <text x="45" y="220">I3</text>
+      <rect x="280" y="205" width="60" height="28" fill="#e9f2f6" stroke="#4d7f95"/><text x="310" y="224" text-anchor="middle">IF</text>
+      <rect x="345" y="205" width="60" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="375" y="224" text-anchor="middle">ID</text>
+      <rect x="410" y="205" width="60" height="28" fill="#f7ecd9" stroke="#a8782c"/><text x="440" y="224" text-anchor="middle">EX</text>
+      <rect x="475" y="205" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="505" y="224" text-anchor="middle">MEM</text>
+      <rect x="540" y="205" width="60" height="28" fill="#eadff2" stroke="#7f5b9a"/><text x="570" y="224" text-anchor="middle">WB</text>
+
+      <text x="45" y="260">I4</text>
+      <rect x="345" y="245" width="60" height="28" fill="#e9f2f6" stroke="#4d7f95"/><text x="375" y="264" text-anchor="middle">IF</text>
+      <rect x="410" y="245" width="60" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="440" y="264" text-anchor="middle">ID</text>
+      <rect x="475" y="245" width="60" height="28" fill="#f7ecd9" stroke="#a8782c"/><text x="505" y="264" text-anchor="middle">EX</text>
+      <rect x="540" y="245" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="570" y="264" text-anchor="middle">MEM</text>
+      <rect x="605" y="245" width="60" height="28" fill="#eadff2" stroke="#7f5b9a"/><text x="635" y="264" text-anchor="middle">WB</text>
+    </g>
+    <text x="45" y="305" fill="#52605a">理想吞吐率：每个 Δt 流出一条；装入 5Δt，之后每拍一条。</text>
+
+    <text x="45" y="350" font-weight="700">B. 插入 1 个停顿（气泡）：I2 在 ID 后停 1 拍</text>
+    <g>
+      <text x="180" y="380" text-anchor="middle">1</text><text x="245" y="380" text-anchor="middle">2</text><text x="310" y="380" text-anchor="middle">3</text><text x="375" y="380" text-anchor="middle">4</text><text x="440" y="380" text-anchor="middle">5</text><text x="505" y="380" text-anchor="middle">6</text><text x="570" y="380" text-anchor="middle">7</text><text x="635" y="380" text-anchor="middle">8</text><text x="700" y="380" text-anchor="middle">9</text>
+    </g>
+    <g font-size="12">
+      <text x="45" y="415">I1</text>
+      <rect x="150" y="400" width="60" height="28" fill="#e9f2f6" stroke="#4d7f95"/><text x="180" y="419" text-anchor="middle">IF</text>
+      <rect x="215" y="400" width="60" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="245" y="419" text-anchor="middle">ID</text>
+      <rect x="280" y="400" width="60" height="28" fill="#f7ecd9" stroke="#a8782c"/><text x="310" y="419" text-anchor="middle">EX</text>
+      <rect x="345" y="400" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="375" y="419" text-anchor="middle">MEM</text>
+      <rect x="410" y="400" width="60" height="28" fill="#eadff2" stroke="#7f5b9a"/><text x="440" y="419" text-anchor="middle">WB</text>
+
+      <text x="45" y="455">I2</text>
+      <rect x="215" y="440" width="60" height="28" fill="#e9f2f6" stroke="#4d7f95"/><text x="245" y="459" text-anchor="middle">IF</text>
+      <rect x="280" y="440" width="60" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="310" y="459" text-anchor="middle">ID</text>
+      <rect x="345" y="440" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="375" y="459" text-anchor="middle">stall</text>
+      <rect x="410" y="440" width="60" height="28" fill="#f7ecd9" stroke="#a8782c"/><text x="440" y="459" text-anchor="middle">EX</text>
+      <rect x="475" y="440" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="505" y="459" text-anchor="middle">MEM</text>
+      <rect x="540" y="440" width="60" height="28" fill="#eadff2" stroke="#7f5b9a"/><text x="570" y="459" text-anchor="middle">WB</text>
+
+      <text x="45" y="495">I3</text>
+      <rect x="280" y="480" width="60" height="28" fill="#e9f2f6" stroke="#4d7f95"/><text x="310" y="499" text-anchor="middle">IF</text>
+      <rect x="410" y="480" width="60" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="440" y="499" text-anchor="middle">ID</text>
+      <rect x="475" y="480" width="60" height="28" fill="#f7ecd9" stroke="#a8782c"/><text x="505" y="499" text-anchor="middle">EX</text>
+      <rect x="540" y="480" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="570" y="499" text-anchor="middle">MEM</text>
+      <rect x="605" y="480" width="60" height="28" fill="#eadff2" stroke="#7f5b9a"/><text x="635" y="499" text-anchor="middle">WB</text>
+
+      <text x="45" y="535">I4</text>
+      <rect x="345" y="520" width="60" height="28" fill="#e9f2f6" stroke="#4d7f95"/><text x="375" y="539" text-anchor="middle">IF</text>
+      <rect x="475" y="520" width="60" height="28" fill="#eef3e4" stroke="#6f8f45"/><text x="505" y="539" text-anchor="middle">ID</text>
+      <rect x="540" y="520" width="60" height="28" fill="#f7ecd9" stroke="#a8782c"/><text x="570" y="539" text-anchor="middle">EX</text>
+      <rect x="605" y="520" width="60" height="28" fill="#f3e6e6" stroke="#a85a5a"/><text x="635" y="539" text-anchor="middle">MEM</text>
+      <rect x="670" y="520" width="60" height="28" fill="#eadff2" stroke="#7f5b9a"/><text x="700" y="539" text-anchor="middle">WB</text>
+    </g>
+    <text x="45" y="585" fill="#b54b45">一个气泡让总时间从 8Δt 变成 9Δt；气泡越多，加速比越低。</text>
+    <text x="620" y="585" font-size="12" fill="#52605a">数据冒险可用转发/停顿，控制冒险可用预测/冲刷。</text>
+  </g>
+</svg>

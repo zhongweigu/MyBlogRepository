@@ -1,5 +1,11 @@
 <div class="article-content">
-<h2 id="12-">考点12-拓扑排序</h2>
+<h2 id="12-"><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="每次取入度 0 的点，删除其出边并更新入度；队列中有多个点拓扑序不唯一。" data-src="/408-review/assets/img/ds-topological-sort.svg" href="/408-review/assets/img/ds-topological-sort.svg">
+<img alt="拓扑排序的入度删点过程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-topological-sort.svg"/>
+</a>
+<figcaption>每次取入度 0 的点，删除其出边并更新入度；队列中有多个点拓扑序不唯一。</figcaption>
+</figure>
+考点12-拓扑排序</h2>
 <p>拓扑排序是对<strong>有向无环图</strong>的顶点的一种排序：若存在一条从顶点 A 到顶点 B 的路径，则排序中 <strong>B 一定出现在 A 的后面</strong>。</p>
 <p>求法就是反复"挑入度为 0 的顶点"：</p>
 <ol>

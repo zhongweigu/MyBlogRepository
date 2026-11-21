@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 640" role="img" aria-label="Floyd 算法的距离矩阵按中间点逐轮更新">
+  <defs>
+    <marker id="fla" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1080" height="640" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">Floyd：每轮允许一个中间点，更新整张距离矩阵</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <circle cx="110" cy="280" r="28" fill="#eef3e4" stroke="#6f8f45" stroke-width="2"/><text x="110" y="286" text-anchor="middle" font-weight="700">A</text>
+    <circle cx="360" cy="130" r="28" fill="#e9f2f6" stroke="#4d7f95" stroke-width="2"/><text x="360" y="136" text-anchor="middle" font-weight="700">B</text>
+    <circle cx="360" cy="430" r="28" fill="#e9f2f6" stroke="#4d7f95" stroke-width="2"/><text x="360" y="436" text-anchor="middle" font-weight="700">C</text>
+    <circle cx="620" cy="280" r="28" fill="#f3e6e6" stroke="#a85a5a" stroke-width="2"/><text x="620" y="286" text-anchor="middle" font-weight="700">D</text>
+
+    <g stroke="#9aa6ad" stroke-width="1.6" fill="none">
+      <path d="M138 270 L332 146" marker-end="url(#fla)"/>
+      <path d="M138 290 L332 414" marker-end="url(#fla)"/>
+      <path d="M388 140 L592 268" marker-end="url(#fla)"/>
+      <path d="M388 420 L592 292" marker-end="url(#fla)"/>
+    </g>
+    <g font-size="12" fill="#52605a">
+      <text x="215" y="195">A→B 3</text>
+      <text x="215" y="360">A→C 8</text>
+      <text x="475" y="185">B→D 7</text>
+      <text x="475" y="390">C→D 2</text>
+      <text x="360" y="280">B→C 1</text>
+    </g>
+
+    <text x="750" y="85" font-weight="700">初始矩阵 D(0)</text>
+    <g font-size="12" text-anchor="middle">
+      <text x="770" y="112">A</text><text x="835" y="112">B</text><text x="900" y="112">C</text><text x="965" y="112">D</text>
+      <text x="735" y="140">A</text><text x="735" y="172">B</text><text x="735" y="204">C</text><text x="735" y="236">D</text>
+      <text x="770" y="140">0</text><text x="835" y="140">3</text><text x="900" y="140">8</text><text x="965" y="140">∞</text>
+      <text x="770" y="172">3</text><text x="835" y="172">0</text><text x="900" y="172">1</text><text x="965" y="172">7</text>
+      <text x="770" y="204">8</text><text x="835" y="204">1</text><text x="900" y="204">0</text><text x="965" y="204">2</text>
+      <text x="770" y="236">∞</text><text x="835" y="236">7</text><text x="900" y="236">2</text><text x="965" y="236">0</text>
+    </g>
+    <text x="750" y="270" font-size="12">无向图，矩阵对称；∞ 表示暂不可达。</text>
+
+    <text x="750" y="320" font-weight="700">依次允许中间点 A、B、C、D</text>
+    <text x="750" y="345" font-size="13">Dk[i][j] = min(D(k-1)[i][j],</text>
+    <text x="750" y="367" font-size="13">D(k-1)[i][k] + D(k-1)[k][j])</text>
+    <text x="750" y="394" font-size="12" fill="#52605a">本轮用 k 行/列更新所有 i,j；k 只能作为中间点。</text>
+
+    <text x="750" y="440" font-weight="700">最终矩阵 D(3)（允许 A、B、C、D 后）</text>
+    <g font-size="12" text-anchor="middle">
+      <text x="770" y="465">A</text><text x="835" y="465">B</text><text x="900" y="465">C</text><text x="965" y="465">D</text>
+      <text x="735" y="493">A</text><text x="735" y="525">B</text><text x="735" y="557">C</text><text x="735" y="589">D</text>
+      <text x="770" y="493">0</text><text x="835" y="493">3</text><text x="900" y="493">4</text><text x="965" y="493">6</text>
+      <text x="770" y="525">3</text><text x="835" y="525">0</text><text x="900" y="525">1</text><text x="965" y="525">3</text>
+      <text x="770" y="557">4</text><text x="835" y="557">1</text><text x="900" y="557">0</text><text x="965" y="557">2</text>
+      <text x="770" y="589">6</text><text x="835" y="589">3</text><text x="900" y="589">2</text><text x="965" y="589">0</text>
+    </g>
+
+    <text x="45" y="480" font-weight="700">读法</text>
+    <text x="45" y="505">D(0) 是直接边；D(3) 是所有点都可作中间点的最短距离。</text>
+    <text x="45" y="529">例：A→C 由 8 变为 A→B→C = 3+1 = 4；A→D 由 ∞ 变为 A→B→C→D = 3+1+2 = 6。</text>
+    <text x="45" y="553">Floyd 求所有点对；Dijkstra 求单源。两者输出形态不同，不要混成一张图。</text>
+    <text x="45" y="585" font-size="12" fill="#6b777f">负权边可用 Floyd（无负环），但不能用 Dijkstra；本图只演示非负权。</text>
+  </g>
+</svg>

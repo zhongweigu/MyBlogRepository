@@ -28,6 +28,12 @@
 <p>所以操作系统有两个经典视角。第一个是<strong>资源管理器</strong>：CPU、内存、文件、设备都是资源，OS 负责分配、回收、保护和调度。第二个是<strong>虚拟机</strong>：OS 在裸机之上再建一层“更好用的机器”，让用户感觉自己独占一台计算机。两个视角说的是同一件事的两面：抽象让程序好用，管理让资源有序。</p>
 <p>操作系统的目标也不止“方便”。它还要提高<strong>资源利用率</strong>、提高<strong>系统吞吐量</strong>、保证<strong>公平性</strong>和<strong>响应性</strong>、提供<strong>保护与安全</strong>，并让系统容易扩展。这些目标经常互相冲突：吞吐量大的策略可能响应慢，公平的策略可能开销大。后面每一种操作系统类型，本质上都是在这些目标之间选了一组不同的优先级。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="每一阶段都在解决上一阶段的等待问题：人等机器→慢设备脱机→多道填 CPU→分时响应→实时不误期。" data-src="/408-review/assets/img/os-evolution-timeline.svg" href="/408-review/assets/img/os-evolution-timeline.svg">
+<img alt="操作系统从人工操作到分时/实时的发展时间轴" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-evolution-timeline.svg"/>
+</a>
+<figcaption>每一阶段都在解决上一阶段的等待问题：人等机器→慢设备脱机→多道填 CPU→分时响应→实时不误期。</figcaption>
+</figure>
 <h2 id="os-manual">二、人工操作方式：没有操作系统的年代</h2>
 <p>早期计算机没有操作系统，程序员直接把程序和数据表示成纸带、卡片或插线板。上机流程大致是：预约机器 → 手工装入纸带/卡片 → 设置开关 → 启动 → 在控制台前观察 → 取走结果 → 下一个人再来。整个过程<strong>用户独占全机</strong>，机器在一段时间内只服务一个人。</p>
 <p>这种方式的问题不只是“麻烦”，而是<strong>CPU 的大量时间在等人</strong>。人装纸带、拔插头、记录结果的速度以秒计，而 CPU 执行一条指令以纳秒计，二者相差几个数量级。只要人还在操作，CPU 就只能空转。于是出现了第一对核心矛盾：<strong>人机速度矛盾</strong>。</p>
