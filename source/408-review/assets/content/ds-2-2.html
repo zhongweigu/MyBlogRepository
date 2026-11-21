@@ -149,6 +149,12 @@
 <li>可 rear 已经到底、没法再往后走，再入队就越界 —— <strong>明明有空位却用不上</strong>。</li>
 </ul>
 <p>这种"有空间却判成溢出"的情况就叫假溢出。<strong>循环队列</strong>就是为它准备的：把存储区看成<strong>首尾相接的环</strong>，指针移动一律写成 <code>(p + 1) % MAXSIZE</code>，rear 走到末尾后自动绕回开头，空出来的格子就能接着用了。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="普通顺序队列的假溢出，以及循环队列空、满与指针约定" data-src="/408-review/assets/img/ds-circular-queue.svg" href="/408-review/assets/img/ds-circular-queue.svg">
+<img alt="普通顺序队列假溢出，以及 M=8 的循环队列空队列和牺牲一个单元的满队列示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-circular-queue.svg"/>
+</a>
+<figcaption>front=rear 可能空也可能满；图用“牺牲一个单元”的约定展示满条件 (rear+1)%M==front，最多存 M−1 个。</figcaption>
+</figure>
 <h3 id="rear">两种指针约定（关键看 rear 指哪儿）</h3>
 <p><strong>代码里"先赋值还是先移指针"正好暴露了 rear 的含义</strong>，别被表面写法骗了：</p>
 <div class="article-table"><table>

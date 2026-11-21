@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 620" role="img" aria-label="顺序表与单链表结构及插入指针顺序">
+  <defs>
+    <marker id="la" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+    <marker id="lb" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1040" height="620" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">顺序表 vs 单链表，以及插入的指针顺序</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="78" font-weight="700">A. 顺序表：逻辑相邻 = 物理相邻</text>
+    <g>
+      <rect x="70" y="95" width="90" height="52" fill="#e9f2f6" stroke="#4d7f95"/><text x="115" y="127" text-anchor="middle">a1</text>
+      <rect x="160" y="95" width="90" height="52" fill="#e9f2f6" stroke="#4d7f95"/><text x="205" y="127" text-anchor="middle">a2</text>
+      <rect x="250" y="95" width="90" height="52" fill="#e9f2f6" stroke="#4d7f95"/><text x="295" y="127" text-anchor="middle">a3</text>
+      <rect x="340" y="95" width="90" height="52" fill="#e9f2f6" stroke="#4d7f95"/><text x="385" y="127" text-anchor="middle">a4</text>
+      <rect x="430" y="95" width="90" height="52" fill="#f7f5ee" stroke="#c9c0ae"/><text x="475" y="127" text-anchor="middle">空位</text>
+    </g>
+    <text x="550" y="118" font-size="12">地址连续；插入要移动后继元素</text>
+    <text x="550" y="137" font-size="12">按位查找 O(1)，插入/删除 O(n)</text>
+
+    <text x="45" y="205" font-weight="700">B. 单链表：逻辑相邻由 next 指针连接</text>
+    <g>
+      <rect x="55" y="235" width="150" height="58" fill="#eef3e4" stroke="#6f8f45"/>
+      <text x="130" y="258" text-anchor="middle">head</text>
+      <text x="130" y="278" text-anchor="middle" font-size="12">头指针</text>
+
+      <rect x="250" y="235" width="150" height="58" fill="#e9f2f6" stroke="#4d7f95"/>
+      <text x="325" y="258" text-anchor="middle">a1</text>
+      <text x="325" y="278" text-anchor="middle" font-size="12">data | next</text>
+      <rect x="445" y="235" width="150" height="58" fill="#e9f2f6" stroke="#4d7f95"/>
+      <text x="520" y="258" text-anchor="middle">a2</text>
+      <text x="520" y="278" text-anchor="middle" font-size="12">data | next</text>
+      <rect x="640" y="235" width="150" height="58" fill="#e9f2f6" stroke="#4d7f95"/>
+      <text x="715" y="258" text-anchor="middle">a3</text>
+      <text x="715" y="278" text-anchor="middle" font-size="12">data | next</text>
+      <rect x="835" y="235" width="150" height="58" fill="#f7f5ee" stroke="#c9c0ae"/>
+      <text x="910" y="258" text-anchor="middle">NULL</text>
+      <text x="910" y="278" text-anchor="middle" font-size="12">尾结点</text>
+    </g>
+    <path d="M205 264 L250 264" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#la)"/>
+    <path d="M400 264 L445 264" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#la)"/>
+    <path d="M595 264 L640 264" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#la)"/>
+    <path d="M790 264 L835 264" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#la)"/>
+    <text x="60" y="330" font-size="12">逻辑相邻 ≠ 物理相邻；按位查找需从头遍历 O(n)，已知前驱插入/删除 O(1)。</text>
+
+    <text x="45" y="390" font-weight="700">C. 在 p 之后插入 s：先接后继，再改前驱</text>
+    <g>
+      <rect x="90" y="425" width="220" height="58" fill="#f7ecd9" stroke="#a8782c"/>
+      <text x="200" y="448" text-anchor="middle">p</text>
+      <text x="200" y="468" text-anchor="middle" font-size="12">原结点</text>
+      <rect x="390" y="425" width="220" height="58" fill="#eef3e4" stroke="#6f8f45"/>
+      <text x="500" y="448" text-anchor="middle">s</text>
+      <text x="500" y="468" text-anchor="middle" font-size="12">待插入结点</text>
+      <rect x="690" y="425" width="220" height="58" fill="#e9f2f6" stroke="#4d7f95"/>
+      <text x="800" y="448" text-anchor="middle">q</text>
+      <text x="800" y="468" text-anchor="middle" font-size="12">p 原来的后继</text>
+    </g>
+    <path d="M310 454 L390 454" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#la)"/>
+    <path d="M610 454 L690 454" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#la)"/>
+    <path d="M500 425 C500 385, 800 385, 800 425" stroke="#b54b45" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#lb)"/>
+    <text x="620" y="392" fill="#b54b45" font-size="13">s→next = p→next（先保存 q）</text>
+    <path d="M200 483 C200 530, 420 530, 440 515" stroke="#b54b45" stroke-width="2" fill="none" marker-end="url(#lb)"/>
+    <text x="220" y="550" fill="#b54b45" font-size="13">p→next = s（后改 p 的后继）</text>
+    <text x="90" y="590" font-size="12" fill="#6b777f">若先执行 p→next=s，p 原来的后继 q 就丢失，s→next 无法再指向 q。</text>
+  </g>
+</svg>

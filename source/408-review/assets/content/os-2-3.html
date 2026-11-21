@@ -91,6 +91,12 @@ T_{\text{等待}} = T_{\text{周转}} - T_{\text{实际服务}}$$
 <p>平均周转时间、平均等待时间就是对所有进程求平均。响应时间只看到“第一次被响应”，不要求作业完成；分时系统更关心它。</p>
 <p>上面的等待时间公式默认<strong>只考虑 CPU 调度、进程没有 I/O 阻塞</strong>；如果进程中途等待 I/O，周转时间还包含阻塞时间，不能直接用“周转 − 服务”当成就绪队列等待时间。</p>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="FCFS、SJF 与时间片轮转的调度甘特图（教学示例）" data-src="/408-review/assets/img/os-cpu-scheduling-gantt.svg" href="/408-review/assets/img/os-cpu-scheduling-gantt.svg">
+<img alt="CPU 调度甘特图：FCFS、SJF 和时间片轮转在同一组进程上的执行区间与平均等待时间" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-cpu-scheduling-gantt.svg"/>
+</a>
+<figcaption>甘特图只画“谁在什么时间占 CPU”；等待时间仍要按到达、服务、完成时刻逐个计算，不能只看色块长度。</figcaption>
+</figure>
 <h2 id="sched-goals">六、目标冲突与线程调度</h2>
 <p>调度目标通常包括：CPU 利用率高、吞吐量大、周转时间短、等待时间短、响应快、公平、开销低。这些目标经常冲突：</p>
 <ul>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 620" role="img" aria-label="循环队列空、满与指针约定">
+  <defs>
+    <marker id="qa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+    <marker id="qb" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1040" height="620" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">循环队列：空、满与假溢出</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="78" font-weight="700">A. 普通顺序队列的假溢出</text>
+    <text x="45" y="104">front 后移、rear 顶到 MAXSIZE；前面虽有空位，rear 不能回绕 → 再入队越界。</text>
+    <g>
+      <rect x="55" y="125" width="760" height="44" fill="#f7f5ee" stroke="#c9c0ae"/>
+      <text x="435" y="152" text-anchor="middle">数组尾部已到 MAXSIZE，前面空位无法使用</text>
+    </g>
+    <path d="M110 175 L110 205" stroke="#4d5b66" stroke-width="2" marker-end="url(#qa)"/>
+    <text x="80" y="225">front</text>
+    <path d="M780 175 L780 205" stroke="#b54b45" stroke-width="2" marker-end="url(#qb)"/>
+    <text x="760" y="225">rear = MAXSIZE</text>
+
+    <text x="45" y="285" font-weight="700">B. 循环队列（M = 8，rear 指向队尾的下一个位置）</text>
+    <text x="45" y="311">空：front == rear；满（牺牲一个单元）：(rear + 1) % M == front；最多存 M−1 个。</text>
+
+    <text x="70" y="360">空队列</text>
+    <g>
+      <rect x="180" y="340" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="215" y="366" text-anchor="middle">0</text>
+      <rect x="250" y="340" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="285" y="366" text-anchor="middle">1</text>
+      <rect x="320" y="340" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="355" y="366" text-anchor="middle">2</text>
+      <rect x="390" y="340" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="425" y="366" text-anchor="middle">3</text>
+      <rect x="460" y="340" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="495" y="366" text-anchor="middle">4</text>
+      <rect x="530" y="340" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="565" y="366" text-anchor="middle">5</text>
+      <rect x="600" y="340" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="635" y="366" text-anchor="middle">6</text>
+      <rect x="670" y="340" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="705" y="366" text-anchor="middle">7</text>
+    </g>
+    <path d="M215 405 L215 380" stroke="#4d5b66" stroke-width="2" marker-end="url(#qa)"/>
+    <text x="175" y="425">front/rear</text>
+    <text x="760" y="370" font-size="12">front = rear = 0</text>
+
+    <text x="70" y="485">满队列</text>
+    <g>
+      <rect x="180" y="465" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="215" y="491" text-anchor="middle">a1</text>
+      <rect x="250" y="465" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="285" y="491" text-anchor="middle">a2</text>
+      <rect x="320" y="465" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="355" y="491" text-anchor="middle">a3</text>
+      <rect x="390" y="465" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="425" y="491" text-anchor="middle">a4</text>
+      <rect x="460" y="465" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="495" y="491" text-anchor="middle">a5</text>
+      <rect x="530" y="465" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="565" y="491" text-anchor="middle">a6</text>
+      <rect x="600" y="465" width="70" height="42" fill="#eef3e4" stroke="#6f8f45"/><text x="635" y="491" text-anchor="middle">a7</text>
+      <rect x="670" y="465" width="70" height="42" fill="#f7f5ee" stroke="#c9c0ae"/><text x="705" y="491" text-anchor="middle">空</text>
+    </g>
+    <path d="M215 530 L215 505" stroke="#4d5b66" stroke-width="2" marker-end="url(#qa)"/>
+    <text x="175" y="550">front=0</text>
+    <path d="M705 530 L705 505" stroke="#b54b45" stroke-width="2" marker-end="url(#qb)"/>
+    <text x="665" y="550">rear=7</text>
+    <text x="760" y="485" font-size="12">(7+1)%8=0=front</text>
+    <text x="760" y="505" font-size="12">最多 7 个元素</text>
+
+    <text x="45" y="595" font-size="13">长度（约定 A）：(rear − front + M) % M；入队/出队后指针都要对 M 取模。</text>
+  </g>
+</svg>

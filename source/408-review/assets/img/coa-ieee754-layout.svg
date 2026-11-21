@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 560" role="img" aria-label="IEEE 754 单精度与双精度字段划分">
+  <rect width="1040" height="560" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">IEEE 754 浮点数的字段划分（MSB 在左，LSB 在右）</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="35" y="92" font-weight="700">单精度 32 位</text>
+    <text x="35" y="174" font-size="12" fill="#52605a">bias = 127；规格化数隐藏位为 1</text>
+
+    <rect x="80" y="80" width="24" height="58" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="92" y="114" text-anchor="middle" font-size="13">S</text>
+    <rect x="104" y="80" width="190" height="58" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="199" y="106" text-anchor="middle">阶码 e（8 位）</text>
+    <text x="199" y="126" text-anchor="middle" font-size="12">e = E + 127</text>
+    <rect x="294" y="80" width="650" height="58" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="619" y="106" text-anchor="middle">尾数 f（23 位，不含隐藏位）</text>
+    <text x="619" y="126" text-anchor="middle" font-size="12">1.f 的小数部分</text>
+    <text x="92" y="158" text-anchor="middle" font-size="11">1 位</text>
+    <text x="199" y="158" text-anchor="middle" font-size="11">8 位</text>
+    <text x="619" y="158" text-anchor="middle" font-size="11">23 位</text>
+
+    <text x="944" y="98" font-size="12">bit 31</text>
+    <text x="944" y="116" font-size="12">← 高位</text>
+    <text x="944" y="134" font-size="12">低位 →</text>
+
+    <text x="35" y="240" font-weight="700">双精度 64 位</text>
+    <text x="35" y="324" font-size="12" fill="#52605a">bias = 1023；字段相对宽度按 64 位比例绘制</text>
+
+    <rect x="80" y="230" width="12" height="58" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="86" y="264" text-anchor="middle" font-size="12">S</text>
+    <rect x="92" y="230" width="129" height="58" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="156" y="256" text-anchor="middle">阶码 e（11 位）</text>
+    <text x="156" y="276" text-anchor="middle" font-size="12">e = E + 1023</text>
+    <rect x="221" y="230" width="723" height="58" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="582" y="256" text-anchor="middle">尾数 f（52 位，不含隐藏位）</text>
+    <text x="582" y="276" text-anchor="middle" font-size="12">1.f 的小数部分</text>
+    <text x="86" y="308" text-anchor="middle" font-size="11">1 位</text>
+    <text x="156" y="308" text-anchor="middle" font-size="11">11 位</text>
+    <text x="582" y="308" text-anchor="middle" font-size="11">52 位</text>
+
+    <text x="80" y="355" font-size="13">真值：V = (−1)^S × (1.f)₂ × 2^(e−bias)</text>
+    <text x="80" y="380" font-size="13">隐藏位只在规格化数中补 1；阶码全 0 时按 0.f，阶码全 1 时表示无穷/NaN。</text>
+
+    <rect x="80" y="410" width="850" height="108" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="100" y="436" font-size="13" font-weight="700">读位模式的顺序</text>
+    <text x="100" y="460" font-size="13">① 按字段宽度拆出 S、e、f　② 看 e 是全 0 / 全 1 / 普通值　③ 确定隐藏位和 bias</text>
+    <text x="100" y="484" font-size="13">④ 复原 1.f 或 0.f　⑤ 乘 2^(e−bias)　⑥ 最后加符号（−1)^S</text>
+    <text x="100" y="507" font-size="12" fill="#6b777f">位序号只表示字段顺序；图中横向长度按位数比例，不能用尺子量具体地址。</text>
+  </g>
+</svg>

@@ -62,6 +62,12 @@
 </tbody>
 </table></div>
 
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="顺序表与单链表结构，以及 p 之后插入 s 的指针顺序" data-src="/408-review/assets/img/ds-linked-list-insert.svg" href="/408-review/assets/img/ds-linked-list-insert.svg">
+<img alt="顺序表连续存储、单链表 next 指针连接，以及 p 之后插入 s 时先接后继再改前驱的示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/ds-linked-list-insert.svg"/>
+</a>
+<figcaption>顺序表靠连续地址，链表靠 next 指针；插入时若先改 p→next，就会丢失原来的后继 q。</figcaption>
+</figure>
 <h3>单链表插入/删除的指针顺序</h3>
 <p>在结点 `p` 之后插入 `s`，必须先让 `s->next = p->next`，再 `p->next = s`；顺序反了会把 `p` 原来的后继丢掉。</p>
 <pre><code class="language-c">s->next = p->next;

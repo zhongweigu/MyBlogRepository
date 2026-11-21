@@ -46,6 +46,12 @@
 </tbody>
 </table></div>
 <hr/>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="IEEE 754 单精度/双精度字段划分：S、e、f 与 bias" data-src="/408-review/assets/img/coa-ieee754-layout.svg" href="/408-review/assets/img/coa-ieee754-layout.svg">
+<img alt="IEEE 754 单精度 32 位和双精度 64 位的符号位、阶码字段、尾数字段划分" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-ieee754-layout.svg"/>
+</a>
+<figcaption>先按位宽拆字段，再用阶码判断类型：普通规格化数补隐藏位 1，阶码全 0 补 0，阶码全 1 表示无穷或 NaN。</figcaption>
+</figure>
 <p><strong>单精度的五种取值类型。</strong> 注意“阶码全 0”和“阶码全 1”都不是普通规格化数：</p>
 <div class="article-table"><table>
 <thead>

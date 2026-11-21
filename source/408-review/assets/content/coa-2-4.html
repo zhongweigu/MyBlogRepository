@@ -73,6 +73,12 @@
 </code></pre>
 <p>该结构体占用 8 字节。成员内容完全相同，仅仅改变声明顺序，占用空间就可能从 8 字节变成 12 字节。</p>
 </details>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="大小端字节序与结构体边界对齐：地址、字节、填充" data-src="/408-review/assets/img/coa-endian-align-layout.svg" href="/408-review/assets/img/coa-endian-align-layout.svg">
+<img alt="大小端字节序示例，以及 struct A 和 struct B 的边界对齐、填充字节布局" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-endian-align-layout.svg"/>
+</a>
+<figcaption>上半部分看多字节数据的地址顺序；下半部分看成员起点、填充和结构体总大小，三张结构体布局与正文对应。</figcaption>
+</figure>
 <blockquote>
 <p>408 题默认使用自然对齐，不考虑 <code>#pragma pack</code> 等强制取消填充的措施；题目若给出结构体总大小，则用最大成员对齐要求检查末尾是否需要补齐。</p>
 </blockquote>

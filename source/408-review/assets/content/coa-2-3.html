@@ -8,6 +8,12 @@
 <li><strong>舍入</strong>。</li>
 </ol>
 <hr/>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="浮点数加减流程：对阶、尾数加减、规格化、舍入、溢出检查" data-src="/408-review/assets/img/coa-float-add-flow.svg" href="/408-review/assets/img/coa-float-add-flow.svg">
+<img alt="浮点数加减运算流程图：对阶、尾数加减、规格化、舍入和溢出检查" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/coa-float-add-flow.svg"/>
+</a>
+<figcaption>关键顺序是“先对阶，再加减，最后只舍入一次”；舍入进位可能触发再次右规。</figcaption>
+</figure>
 <p><strong>对阶。</strong> 比较两个数的实际指数，使<mark>小阶向大阶看齐</mark>。阶差为</p>
 <p>$$\Delta E=E_{\text{大}}-E_{\text{小}}$$</p>
 <p>小阶数的尾数向右移动 $\Delta E$ 位，同时把它的阶码增加 $\Delta E$。</p>
