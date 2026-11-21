@@ -1,0 +1,120 @@
+// 二、描述内容 · 图画：图画作文第一段的背诵句库
+// src：A = PDF 原句（长句按分句拆开呈现，词序未改）；C = 仿写或节写。
+// library.js 中 31 词的桌边双人原句拆成两句收入 pic-contrast；24 词的河边原句超出
+// 本文件 10–22 词的可背长度，未逐字收录，仍保留在 library.js。
+// 高亮：每句用 [[...]] 标 1–2 处核心搭配、动词或名词，不整句高亮；一句一行。
+
+export const GROUP = {
+  id: "picture",
+  no: "二",
+  name: "描述内容 · 图画",
+  note: "图画描述段的取句库，按人物、场景、动作、神态、关系、对比和图中文字分类，一句一行，按需替换。",
+  sections: [
+    {
+      id: "pic-person",
+      name: "人物 · 身份与数量",
+      hint: "适用：交代图中人物是谁、有几个人",
+      items: [
+        { en: "In the picture, a [[middle-aged man]] in a dark suit stands alone in front of a notice board.", zh: "图中，一位穿深色西装的中年男子独自站在公告栏前。", use: "交代单人形象", src: "C" },
+        { en: "Several [[college students]] with backpacks are gathered around a notice board, reading a poster carefully.", zh: "几名背着书包的大学生围在公告栏前，仔细阅读一张海报。", use: "写学生群像", src: "C" },
+        { en: "By the river, an [[elderly couple]] in casual clothes watch a dragon boat race with bright smiles.", zh: "在河边，一对穿着便装的老年夫妇笑容满面地观看龙舟赛。", use: "写老年夫妇", src: "C" },
+        { en: "Not far away, a little girl holding her father's hand [[points excitedly]] at the boats on the water.", zh: "不远处，一个牵着父亲手的小女孩兴奋地指着水上的船。", use: "写孩子与家长", src: "C" },
+        { en: "In a crowded subway carriage, a young office worker leans against the door, [[staring at]] his phone.", zh: "在拥挤的地铁车厢里，一名年轻上班族靠着车门，盯着手机。", use: "写通勤上班族", src: "C" },
+        { en: "Behind the counter, a smiling shop assistant is [[serving]] a customer who is choosing fruit.", zh: "柜台后，一位面带微笑的店员正在接待一位挑选水果的顾客。", use: "写顾客与店员", src: "C" },
+        { en: "At the bus stop, a stranger in a grey coat [[waits in line]] with several other passengers.", zh: "在公交站，一位穿灰大衣的陌生人和其他几名乘客一起排队。", use: "写陌生路人", src: "C" },
+        { en: "On a park bench, a young mother holds her baby while an old man nearby [[feeds the pigeons]].", zh: "在公园长椅上，一位年轻母亲抱着孩子，旁边一位老人正在喂鸽子。", use: "写两三人物", src: "C" },
+      ],
+    },
+    {
+      id: "pic-place",
+      name: "方位与场景",
+      hint: "适用：交代室内外环境与人物所在位置",
+      items: [
+        { en: "In the picture, the scene is set in a bright classroom, where [[rows of students]] sit at wooden desks.", zh: "图中，场景设在一间明亮的教室里，一排排学生坐在木桌前。", use: "交代室内环境", src: "C" },
+        { en: "At the top of the picture, a notice board covered with posters [[hangs on]] the white wall.", zh: "图片上方，一块贴满海报的公告栏挂在白墙上。", use: "定位墙面公告栏", src: "C" },
+        { en: "In the background, green hills and a winding river [[stretch far]] into the distance.", zh: "背景中，青山和一条蜿蜒的河流一直延伸到远处。", use: "写室外远景", src: "C" },
+        { en: "On the left side of the picture, an old tree [[casts a long shadow]] over a stone table.", zh: "图片左侧，一棵老树在石桌上投下长长的影子。", use: "定位左侧景物", src: "C" },
+        { en: "The whole scene takes place in a newly built community park, with [[fitness facilities]] and flower beds.", zh: "整个场景发生在一座新建的社区公园里，里面有健身设施和花坛。", use: "交代公园环境", src: "C" },
+        { en: "Near the window of a small study, books and papers are [[piled on]] a wooden desk.", zh: "在一间小书房的窗边，书和纸张堆在木桌上。", use: "写书桌一角", src: "C" },
+        { en: "At the far end of the platform, a long [[queue of commuters]] waits beside the yellow line.", zh: "在站台尽头，一长队通勤者站在黄线旁等候。", use: "写站台候车", src: "C" },
+      ],
+    },
+    {
+      id: "pic-action",
+      name: "动作",
+      hint: "适用：写人物正在做什么、怎么做",
+      items: [
+        { en: "In the picture, a tired young man is lying on a sofa, [[checking his phone]] instead of sleeping.", zh: "图中，一个疲惫的年轻人躺在沙发上刷手机，而不是睡觉。", use: "写躺卧刷手机", src: "C" },
+        { en: "At a desk, a girl is [[writing carefully]] in her notebook, with a cup of tea beside her.", zh: "书桌前，一个女孩正在笔记本上认真书写，旁边放着一杯茶。", use: "写伏案书写", src: "C" },
+        { en: "Outside the library, two students are [[walking side by side]], talking about the exam they have just taken.", zh: "图书馆外，两名学生并肩走着，谈论刚考完的考试。", use: "写边走边谈", src: "C" },
+        { en: "In the park, an old man is [[jogging slowly]] along the path while his wife practises tai chi.", zh: "公园里，一位老人沿着小路慢跑，他的妻子在打太极。", use: "写晨练动作", src: "C" },
+        { en: "Several residents [[gather around]] the fitness equipment, waiting for their turn to exercise.", zh: "几位居民围在健身器材旁，等着轮到自己锻炼。", use: "写围观等待", src: "C" },
+        { en: "A group of children are [[running across]] the playground, laughing and shouting with excitement.", zh: "一群孩子跑过操场，又笑又喊，兴奋不已。", use: "写孩子奔跑", src: "C" },
+        { en: "By the river, a young couple are [[taking photos]] of the dragon boats with their phones.", zh: "河边，一对年轻夫妇正用手机给龙舟拍照。", use: "写拍照记录", src: "C" },
+        { en: "In the corner of the room, a boy is [[sitting alone]], staring at a blank sheet of paper.", zh: "房间角落里，一个男孩独自坐着，盯着一张白纸。", use: "写独坐发呆", src: "C" },
+        { en: "At the dinner table, family members are [[chatting happily]] while the mother brings in the dishes.", zh: "餐桌旁，家人们愉快地聊天，母亲端上饭菜。", use: "写家人交流", src: "C" },
+      ],
+    },
+    {
+      id: "pic-expression",
+      name: "表情与神态",
+      hint: "适用：写人物脸上的表情与心理状态",
+      items: [
+        { en: "In the picture, a young woman wears a [[bright smile]], as if she has just heard good news.", zh: "图中，一位年轻女子笑容灿烂，仿佛刚听到好消息。", use: "写高兴神情", src: "C" },
+        { en: "A puzzled student [[frowns at]] the question on the blackboard, unable to find the answer.", zh: "一个困惑的学生皱着眉头看黑板上的题，找不到答案。", use: "写困惑表情", src: "C" },
+        { en: "With dark circles under his eyes, the young man looks [[exhausted]] after a long night of work.", zh: "那个年轻人眼下发黑，熬了一整夜后显得疲惫不堪。", use: "写疲惫状态", src: "C" },
+        { en: "The boy lowers his head in silence, [[deeply disappointed]] by the result of the match.", zh: "男孩默默地低下头，对比赛结果深感失望。", use: "写失望低落", src: "C" },
+        { en: "At his desk, the student keeps his eyes [[fixed on]] the screen, completely absorbed in his work.", zh: "书桌前，这个学生目不转睛地盯着屏幕，完全专注于工作。", use: "写专注投入", src: "C" },
+        { en: "The mother looks [[worried]] as she watches her son cough at the dinner table.", zh: "母亲看着儿子在餐桌旁咳嗽，神情担忧。", use: "写担忧神态", src: "C" },
+        { en: "On hearing the news, the old man opens his eyes wide in [[surprise]] and says nothing.", zh: "听到这个消息，老人惊讶地睁大眼睛，一言不发。", use: "写吃惊反应", src: "C" },
+        { en: "Though standing in the crowd, the girl looks [[calm and confident]], with a slight smile on her face.", zh: "尽管站在人群中，这个女孩看起来从容自信，脸上带着浅浅的微笑。", use: "写从容自信", src: "C" },
+      ],
+    },
+    {
+      id: "pic-relation",
+      name: "人物关系",
+      hint: "适用：写人物之间的身份关系与互动",
+      items: [
+        { en: "In the picture, a father is [[holding his son]] on his shoulders so that the boy can see the race.", zh: "图中，一位父亲把儿子扛在肩上，好让孩子看到比赛。", use: "写亲子互动", src: "C" },
+        { en: "A patient teacher [[bends over]] a student's desk, explaining the problem in a low voice.", zh: "一位耐心的老师俯身站在学生桌旁，低声讲解这道题。", use: "写师生辅导", src: "C" },
+        { en: "The two classmates [[work together]] on a project, sharing ideas and dividing the tasks.", zh: "两名同学合作完成一个项目，分享想法并分工。", use: "写同伴合作", src: "C" },
+        { en: "At the entrance of the building, two neighbours stop to [[exchange greetings]] before going home.", zh: "在楼门口，两位邻居停下来互相问候，然后各自回家。", use: "写邻里寒暄", src: "C" },
+        { en: "In the queue, a young man [[gives up]] his seat to an elderly woman with a walking stick.", zh: "排队时，一个年轻人把座位让给一位拄拐杖的老妇人。", use: "写陌生人互助", src: "C" },
+        { en: "The couple [[sit close together]] on the bench, watching their daughter play in the sand.", zh: "这对夫妇紧挨着坐在长椅上，看着女儿在沙子里玩。", use: "写一家三口", src: "C" },
+        { en: "Across the table, the manager [[listens carefully]] to the young employee's suggestion.", zh: "桌子对面，经理认真听着这位年轻员工的建议。", use: "写上下级交流", src: "C" },
+        { en: "Two strangers [[sit face to face]] in the waiting room, neither willing to start a conversation.", zh: "两个陌生人在候诊室里面对面坐着，谁都不愿先开口。", use: "写陌生人疏离", src: "C" },
+      ],
+    },
+    {
+      id: "pic-contrast",
+      name: "对比与反差",
+      hint: "适用：两图对比、前后变化、群像与特写",
+      items: [
+        { en: "At a desk, a girl who is [[working attentively]] wants to finish early.", zh: "书桌前，一个认真工作的女孩希望尽早完成任务。", use: "写认真一方", src: "A" },
+        { en: "A boy [[sits back]] at another desk, saying that he will not start until the last minute.", zh: "另一个男孩靠坐在桌旁，说自己不到最后一刻不会动手。", use: "写拖延一方", src: "A" },
+        { en: "On the left, a young man [[checks his phone]] at the table; on the right, his parents talk in silence.", zh: "左边，一个年轻人在餐桌旁看手机；右边，他的父母沉默地交谈。", use: "左右图对照", src: "C" },
+        { en: "In the first picture, the couple look happy, whereas in the second they [[sit apart]] in silence.", zh: "第一幅图里，这对夫妇看起来很开心；第二幅图里，他们却沉默地分开坐着。", use: "写态度变化", src: "C" },
+        { en: "Compared with the crowded street outside, the small bookstore [[feels quiet and peaceful]].", zh: "与外面拥挤的街道相比，这家小书店显得安静而平和。", use: "写内外反差", src: "C" },
+        { en: "The wide shot shows a busy playground, while the close-up [[focuses on]] a lonely boy in the corner.", zh: "全景展示了一个热闹的操场，而特写则聚焦角落里一个孤独的男孩。", use: "群像与特写", src: "C" },
+        { en: "Unlike his classmates, who are [[chatting in groups]], Tom sits alone and reads a book.", zh: "与其他成群聊天的同学不同，汤姆独自坐着看书。", use: "写个体与群体", src: "C" },
+        { en: "At first, the garden was [[covered with weeds]]; now it is full of flowers and vegetables.", zh: "起初，花园里杂草丛生；现在则开满鲜花、种满蔬菜。", use: "写环境改变", src: "C" },
+        { en: "The number of volunteers rose from a few to dozens, [[a striking change]] in only one year.", zh: "志愿者人数从几个增加到几十个，仅仅一年就有如此显著的变化。", use: "写数量反差", src: "C" },
+        { en: "By contrast, the second picture [[tells the opposite story]]: the same street is clean and quiet.", zh: "相比之下，第二幅图讲述的却是相反的情形：同一条街干净又安静。", use: "写转折对比", src: "C" },
+      ],
+    },
+    {
+      id: "pic-words",
+      name: "图中文字与对话",
+      hint: "适用：图中标语、海报、标题、说明文字与对话",
+      items: [
+        { en: "Above the picture, a slogan reads: Every small step counts on the [[road to success]].", zh: "图片上方一句标语写道：在通往成功的路上，每一小步都算数。", use: "引出图中标语", src: "C" },
+        { en: "On the notice board, a poster says: [[Volunteers Wanted]] for the community library this weekend.", zh: "公告栏上的一张海报写着：社区图书馆本周末招募志愿者。", use: "引出海报文字", src: "C" },
+        { en: "The caption below the cartoon [[makes the message clear]]: small habits shape a person's future.", zh: "漫画下方的说明文字点明了主旨：小习惯塑造一个人的未来。", use: "引出图下说明", src: "C" },
+        { en: "In the speech bubble, the boy [[complains]]: I have no time to read anything except textbooks.", zh: "在对话气泡里，男孩抱怨道：除了课本，我没时间读任何东西。", use: "写引语抱怨", src: "C" },
+        { en: "In the picture, the mother asks her son why he looks upset, and he [[replies]] that he failed the exam.", zh: "图中，母亲问儿子为什么看起来很难过，他回答说考试没及格。", use: "写双人对话", src: "C" },
+        { en: "The cartoon is entitled The Price of Speed, which [[suggests a warning]] about careless driving.", zh: "这幅漫画题为《速度的代价》，暗示着对粗心驾驶的警告。", use: "引出漫画标题", src: "C" },
+        { en: "At the bottom of the picture, a line of text [[reminds readers]] that sharing is a form of happiness.", zh: "图片底部的一行文字提醒读者：分享也是一种幸福。", use: "引出说明文字", src: "C" },
+      ],
+    },
+  ],
+};

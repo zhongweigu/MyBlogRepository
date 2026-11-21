@@ -1,0 +1,192 @@
+// 起始段（第一段）背诵模板：15 类材料 × 5 句
+// 来源标记：A = PDF 模板原句（仅填主题词/材料）；C = 依 PDF 句式仿写或新写。
+// 标记约定：[[...]] 是渲染时高亮的核心搭配，也是考场可替换处，每句 1–2 处。
+
+export const GROUP = {
+  id: "start",
+  no: "一",
+  name: "起始段",
+  note: "每节 5 句，按总起、描述、概括、寓意、收束排列；考场取 2–3 句连成第一段，全段只换一次主题词。",
+  sections: [
+    {
+      id: "pic-single",
+      name: "图画 · 单人/单主体",
+      hint: "适用：画面只有一个主要人物或主体，没有对比",
+      items: [
+        { en: "Though deceptively simple, this [[scene]] conveys a meaningful message: [[description]].", zh: "尽管画面看似简单，却传递出深刻的寓意：【描述】。", use: "图画总起", src: "A" },
+        { en: "The picture shows [[a young man at work]], with his eyes fixed on the screen.", zh: "图中一名年轻人正在工作，两眼紧盯屏幕。", use: "主体描写", src: "C" },
+        { en: "Small as it is, the drawing captures [[a moment of quiet concentration]] that many viewers recognise.", zh: "画面虽小，却捕捉到许多观者都熟悉的专注时刻。", use: "画面概括", src: "C" },
+        { en: "What the artist stresses is not the setting but [[the spirit of persistence]] behind it.", zh: "作者强调的不是场景，而是画面背后的坚持精神。", use: "寓意提炼", src: "C" },
+        { en: "Such a scene [[invites us to reflect]] on the value of steady effort in an age that values quick results.", zh: "这样的画面让我们重新思考：在一个看重速成的时代，踏实努力有何价值。", use: "引出主题", src: "C" },
+      ],
+    },
+    {
+      id: "pic-contrast",
+      name: "图画 · 双人对比",
+      hint: "适用：左右两图或同图两人，态度、做法相反",
+      items: [
+        { en: "The two pictures [[set two attitudes side by side]]: one student works steadily, while the other [[waits until the last minute]].", zh: "两幅图并置两种态度：一名学生稳步推进，另一名却拖到最后一刻。", use: "双图总起", src: "C" },
+        { en: "In the left picture, a girl [[buries herself in work]], while the boy on the right [[lies back]].", zh: "左图中女孩埋头工作，右图中的男孩却靠坐着。", use: "左右分述", src: "C" },
+        { en: "The contrast is sharp: one sees the task as [[a chance to grow]], the other as a burden.", zh: "对比很鲜明：一个把任务看作成长的机会，另一个当成负担。", use: "对比概括", src: "C" },
+        { en: "Read together, they [[make it clear]] that [[attitude]] rather than ability decides the outcome.", zh: "合起来看，两图说明决定结果的是态度而非能力。", use: "合并寓意", src: "C" },
+        { en: "This [[pairing of images]] reminds us that good habits are formed in daily choices.", zh: "这两幅并置的图提醒我们，好习惯是在日常选择中养成的。", use: "引出主题", src: "C" },
+      ],
+    },
+    {
+      id: "pic-group",
+      name: "图画 · 群像",
+      hint: "适用：一群人做同一件事，没有突出个体",
+      items: [
+        { en: "In the picture, a group of residents [[are exercising]] beside trees and fitness equipment.", zh: "图中一群居民在树木和健身器材旁锻炼。", use: "群像总起", src: "C" },
+        { en: "Most of them [[look relaxed]], and a few are chatting while they stretch.", zh: "他们大多神情放松，还有几人在拉伸时聊天。", use: "人群细节", src: "C" },
+        { en: "With one of them [[praising the new park]], the scene suggests a shared sense of satisfaction.", zh: "其中一人称赞新建的公园，画面透出共同的满足感。", use: "特写一句", src: "C" },
+        { en: "Instead of naming individuals, the artist [[paints a community]] in which ordinary people thrive.", zh: "作者没有点名某个人，而是描绘了一个普通人也能蓬勃生长的社区。", use: "画面概括", src: "C" },
+        { en: "Such scenes show how [[shared space]] shapes [[the quality of daily life]].", zh: "这样的场景说明，共享空间如何塑造日常生活的质量。", use: "寓意收束", src: "C" },
+      ],
+    },
+    {
+      id: "pic-scene",
+      name: "图画 · 场景/环境",
+      hint: "适用：以地点、环境为主，人物只是点缀",
+      items: [
+        { en: "The drawing presents [[a quiet village scene]] at dusk, with smoke rising from the roofs.", zh: "画面呈现黄昏时分宁静的村庄，炊烟从屋顶升起。", use: "场景总起", src: "C" },
+        { en: "In the background, a newly built road [[winds through the fields]] toward the town.", zh: "背景中，一条新修的路穿过田野通向城镇。", use: "背景交代", src: "C" },
+        { en: "Nothing dramatic happens, yet the setting itself [[tells a story of change]].", zh: "没有戏剧性的事件，但环境本身就在讲述变化。", use: "场景概括", src: "C" },
+        { en: "The [[contrast between old and new]] is visible in every corner of the picture.", zh: "新旧之间的对比在画面每个角落都看得见。", use: "新旧对比", src: "C" },
+        { en: "What looks like a landscape is in fact [[a record of rural development]].", zh: "看似一幅风景画，其实是一份乡村发展的记录。", use: "点明主题", src: "C" },
+      ],
+    },
+    {
+      id: "pic-text",
+      name: "图画 · 图中文字/对话",
+      hint: "适用：图中有标题、标注或人物对话",
+      items: [
+        { en: "Above the figures, a [[caption reads]] that patience pays off in the end.", zh: "人物上方有一行文字：耐心终有回报。", use: "引出文字", src: "C" },
+        { en: "One of them [[says to the other]] that he will start early this time.", zh: "其中一人对另一人说，这次他要早点开始。", use: "对话内容", src: "C" },
+        { en: "The words are [[short and plain]], but they carry the weight of experience.", zh: "文字简短朴素，却带着经验的分量。", use: "评点文字", src: "C" },
+        { en: "By putting the sentence in the speaker's mouth, the artist [[makes the message personal]].", zh: "把这句话放进人物口中，作者让寓意变得切身。", use: "文字作用", src: "C" },
+        { en: "Behind this brief remark lies [[a simple truth about self-discipline]].", zh: "这句简短的话背后，是关于自律的一个朴素道理。", use: "收束主题", src: "C" },
+      ],
+    },
+    {
+      id: "chart-bar",
+      name: "图表 · 柱状图",
+      hint: "适用：分类比较的柱状图，横轴是类别",
+      items: [
+        { en: "The figures in the bar chart [[reveal notable changes]] concerning the reading habits of college students.", zh: "柱状图中的数据揭示了大学生阅读习惯的显著变化。", use: "图表总起", src: "A" },
+        { en: "Among the four categories, [[online reading]] ranks first at nearly 60%.", zh: "四个类别中，网络阅读以近六成居首。", use: "点出最高项", src: "C" },
+        { en: "Printed books, by contrast, [[account for only]] one fifth of the total.", zh: "相比之下，纸质书仅占总量五分之一。", use: "对比最低项", src: "C" },
+        { en: "The [[gap between the two]] has widened over the past five years.", zh: "过去五年，两者的差距拉大了。", use: "差距概括", src: "C" },
+        { en: "Such a distribution [[points to]] a [[deeper shift]] in how young people spend their spare time.", zh: "这样的分布指向更深层的变化：年轻人如何度过闲暇。", use: "趋势收束", src: "C" },
+      ],
+    },
+    {
+      id: "chart-line",
+      name: "图表 · 折线图",
+      hint: "适用：有年份变化的折线图，重点看起点与拐点",
+      items: [
+        { en: "The line chart [[traces]] the change in household spending on culture from 2015 to 2025.", zh: "折线图追踪了 2015 至 2025 年家庭文化支出的变化。", use: "折线总起", src: "C" },
+        { en: "Between 2015 and 2025, the figure [[rose steadily]] from about 800 yuan to around 2,400 yuan.", zh: "2015 至 2025 年，该数值从约 800 元稳步升至约 2400 元。", use: "写出起点终点", src: "A" },
+        { en: "It then [[levelled off]] after 2022, when growth slowed to a crawl.", zh: "2022 年之后趋于平稳，增速明显放缓。", use: "拐点描写", src: "C" },
+        { en: "One [[striking exception]] appears in 2020, when the line dipped for the first time.", zh: "2020 年出现一个显著例外，曲线首次下滑。", use: "点出异常点", src: "C" },
+        { en: "Overall, the trend [[mirrors]] a growing willingness to pay for cultural experiences.", zh: "总体而言，这一趋势反映出人们越来越愿意为文化体验付费。", use: "趋势含义", src: "C" },
+      ],
+    },
+    {
+      id: "chart-pie",
+      name: "图表 · 饼图",
+      hint: "适用：占比构成的饼图，各项相加为 100%",
+      items: [
+        { en: "The pie chart [[breaks down]] the sources of stress reported by first-year students.", zh: "饼图细分了一年级学生压力来源的构成。", use: "饼图总起", src: "C" },
+        { en: "Academic pressure [[accounts for the largest share]] of student stress, at 42%.", zh: "学业压力在学生压力中占比最大，为 42%。", use: "点出最大占比", src: "A" },
+        { en: "Together, the top two categories [[make up]] nearly two thirds of the total.", zh: "前两类合计接近总量的三分之二。", use: "合计占比", src: "C" },
+        { en: "Only a small slice, about 8%, [[goes to]] financial worries.", zh: "只有约 8% 的一小块属于经济压力。", use: "点出最小占比", src: "C" },
+        { en: "What the chart shows is not [[a list of numbers]] but [[a map of student life]].", zh: "这张图呈现的不是一串数字，而是学生生活的一幅地图。", use: "收束主题", src: "C" },
+      ],
+    },
+    {
+      id: "chart-table",
+      name: "图表 · 表格",
+      hint: "适用：行列数据的表格，纵向看趋势，横向看差距",
+      items: [
+        { en: "The table [[presents]] the average time spent on three activities across four age groups.", zh: "表格呈现四个年龄组在三项活动上的平均用时。", use: "表格总起", src: "C" },
+        { en: "All three items [[registered growth]], with online courses rising fastest.", zh: "三项均实现增长，其中网课增长最快。", use: "整体增长", src: "C" },
+        { en: "The [[gap between the oldest and the youngest]] groups is widest in physical exercise.", zh: "最高龄组与最年轻组的差距在体育锻炼一项上最大。", use: "横向差距", src: "C" },
+        { en: "In the same row, the figure for reading [[remained broadly stable]] across all four groups.", zh: "同一行中，阅读的数值在四个年龄组间基本稳定。", use: "点出平稳项", src: "C" },
+        { en: "Read row by row, the table [[reveals a quiet difference]] between what people value and what they do.", zh: "逐行读下来，表格揭示了人们所重视的与所做的事之间的微妙差距。", use: "表格含义", src: "C" },
+      ],
+    },
+    {
+      id: "chart-combo",
+      name: "图表 · 组合图",
+      hint: "适用：柱加线同图，或一张图配一张表",
+      items: [
+        { en: "The material offers [[two kinds of evidence]]: a bar chart on spending and a line chart showing satisfaction.", zh: "材料给出两类证据：一张支出柱状图和一张满意度折线图。", use: "组合总起", src: "C" },
+        { en: "Its bars [[rise year by year]], yet the line stays almost flat.", zh: "柱状图逐年上升，折线却几乎持平。", use: "两图对照", src: "C" },
+        { en: "This [[mismatch]] is the very point the designer wants us to notice.", zh: "这种不匹配正是设计者希望我们注意的地方。", use: "点出矛盾", src: "C" },
+        { en: "Money alone, the chart suggests, [[does not buy]] the result people expect.", zh: "图表表明，仅靠钱买不来人们期待的结果。", use: "提炼判断", src: "C" },
+        { en: "Taken together, the two figures [[expose]] a gap between input and outcome.", zh: "综合两图，投入与结果之间存在落差。", use: "合并收束", src: "C" },
+      ],
+    },
+    {
+      id: "text-opinion",
+      name: "文字材料 · 观点/评论",
+      hint: "适用：一段评论或观点，作者立场明确",
+      items: [
+        { en: "Whether students should choose their own courses has long been [[a subject of public debate]].", zh: "学生是否应自主选课，长期以来一直是公众讨论的话题。", use: "观点引入", src: "A" },
+        { en: "The passage offers [[a fresh perspective]] on this issue, arguing that choice should come with guidance.", zh: "文章就此提出新的视角，主张选择应当伴随指导。", use: "概括观点", src: "A" },
+        { en: "Its central claim is that [[freedom without support]] may do more harm than good.", zh: "其核心主张是：缺乏支持的自主可能弊大于利。", use: "提炼论点", src: "C" },
+        { en: "While this view may not convince everyone, I find it [[original and illuminating]], and I agree with it [[wholeheartedly]].", zh: "这一观点未必人人认同，但我认为它新颖而有启发性，并完全赞同。", use: "表明态度", src: "A" },
+        { en: "The remark matters because it [[turns a vague ideal]] into a practical demand.", zh: "这句话之所以重要，是因为它把空泛的理想变成了实际要求。", use: "收束观点", src: "C" },
+      ],
+    },
+    {
+      id: "text-quote",
+      name: "文字材料 · 引言/名言",
+      hint: "适用：一句名言或引言，需要解释并联系现实",
+      items: [
+        { en: "The material opens with a remark that [[sounds simple]] but deserves a second look.", zh: "材料以一句看似简单的话开篇，却值得再看一眼。", use: "引言引入", src: "C" },
+        { en: "In the author's words, success belongs to those who [[keep trying]] after failure.", zh: "用作者的话说，成功属于那些失败后仍不断尝试的人。", use: "复述名言", src: "C" },
+        { en: "Short as it is, the sentence [[draws on]] a long history of human experience.", zh: "这句话虽短，却凝聚着人类经验的漫长积累。", use: "评点分量", src: "C" },
+        { en: "Its [[underlying logic]] is easy to accept and hard to practise.", zh: "其内在逻辑容易接受，却难以做到。", use: "提炼道理", src: "C" },
+        { en: "That is why the quotation still [[speaks to]] anyone facing a difficult choice today.", zh: "正因如此，这句引言至今仍能打动面临难题的人。", use: "联系现实", src: "C" },
+      ],
+    },
+    {
+      id: "text-report",
+      name: "文字材料 · 研究/说明",
+      hint: "适用：调查、研究、报告类说明文字",
+      items: [
+        { en: "A recent survey [[reports]] that two thirds of graduates would rather change jobs than move house.", zh: "一项近期调查显示，三分之二毕业生宁愿换工作也不愿搬家。", use: "研究引入", src: "C" },
+        { en: "The finding [[comes as no surprise]] to those who follow housing costs.", zh: "对关注住房成本的人来说，这一发现并不意外。", use: "说明反应", src: "C" },
+        { en: "According to the report, the [[main reason]] is the rising rent in big cities.", zh: "报告称，主要原因是大城市房租上涨。", use: "说明原因", src: "C" },
+        { en: "The data are limited, yet they [[shed light on]] a problem few are willing to discuss.", zh: "数据有限，却照亮了一个少有人愿谈的问题。", use: "评价数据", src: "C" },
+        { en: "What the study describes is [[a quiet pressure]] on young workers across the country.", zh: "这项研究描述的是全国年轻劳动者身上一种无声的压力。", use: "收束主题", src: "C" },
+      ],
+    },
+    {
+      id: "mixed-pic-chart",
+      name: "混合材料 · 图画+图表",
+      hint: "适用：题目同时给图画和数据图，两者指向同一主题",
+      items: [
+        { en: "The picture and the chart [[tell the same story]] from two different angles.", zh: "图画与图表从两个角度讲述同一个故事。", use: "混合总起", src: "C" },
+        { en: "While the picture shows [[a single worker at his desk]], the chart confirms [[a nationwide trend]].", zh: "图画呈现一名在桌前工作的人，图表则印证了全国性的趋势。", use: "先图后表", src: "C" },
+        { en: "One [[concrete case]] and one set of figures make the argument hard to dismiss.", zh: "一个具体个案加一组数据，让这个论点难以反驳。", use: "说明作用", src: "C" },
+        { en: "Neither part is complete on its own, and that is [[the point of the design]].", zh: "两部分单独都不完整，这正是设计者的用意。", use: "点明关系", src: "C" },
+        { en: "Together they [[invite us to see]] a personal choice as part of a public issue.", zh: "两者合起来，请我们把个人选择看作公共议题的一部分。", use: "合并收束", src: "C" },
+      ],
+    },
+    {
+      id: "mixed-two",
+      name: "混合材料 · 双图/双表",
+      hint: "适用：两张图或两张表并列，需要合并概括",
+      items: [
+        { en: "Two charts are placed side by side, [[each covering]] a different period of time.", zh: "两张图并排放置，各自涵盖不同时期。", use: "双图总起", src: "C" },
+        { en: "The first chart shows the situation ten years ago; the second [[brings it up to date]].", zh: "第一张图是十年前的情况，第二张则更新到今天。", use: "分述两图", src: "C" },
+        { en: "Between the two, [[a clear shift]] becomes visible in every category.", zh: "两相对照，每一类都能看到明显变化。", use: "概括变化", src: "C" },
+        { en: "The [[direction of change]] matters more than any single number here.", zh: "这里变化的方向比任何单个数字都重要。", use: "指出重点", src: "C" },
+        { en: "Read as a whole, the pair [[records]] a decade of steady improvement.", zh: "合起来看，这组材料记录了十年稳步改善。", use: "合并收束", src: "C" },
+      ],
+    },
+  ],
+};

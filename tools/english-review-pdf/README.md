@@ -17,7 +17,7 @@
 
 1. `python extract_pdf_text.py`：把 4 份 PDF 的文字层导出为 `out/<文件名>.txt`。
 2. `python split_sections.py`：把套写实操按年份切成 `out/sec-<年份>.txt`，并生成 `out/digest.txt`（每年四版范文 + 审题）。
-3. `python gen_exam_texts.py`：生成 `source/english-review/assets/js-v1/data/exam-texts.js`（28 篇范文 + 中文对照）。
+3. `python gen_exam_texts.py`：生成 `source/english-review/assets/js-v2/data/exam-texts.js`（28 篇范文 + 中文对照）。
 4. `python crop_exam_images.py`：从每年第一页裁出题目原图，写入 `source/english-review/assets/img/exam-<年份>.png`。
 
 ## 注意

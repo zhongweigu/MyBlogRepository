@@ -114,9 +114,28 @@ function overlayKey(e) {
 
 export function footer() {
   return `<footer class="site-foot">
-    <div class="foot-brand">${icon("pen", 16)}<span><strong>英语复习台</strong> · 考研英语一作文</span></div>
-    <div class="foot-meta">静态页面 · 内容来自 4 份 PDF + 标注扩充 · <a href="#/sources">资料与完整性</a> · <a href="/">返回博客</a></div>
+    <div class="foot-brand">${icon("book", 16)}<span><strong>英语复习台</strong> · 考研英语一作文背诵</span></div>
+    <div class="foot-meta">静态页面 · 来源标记 A/B/C · <a href="#/sources">资料与完整性</a> · <a href="/">返回博客</a></div>
   </footer>`;
+}
+
+// 把 [[核心搭配]] 渲染成高亮；其余内容先转义。
+export function renderEn(str = "") {
+  return escapeHtml(str).replace(/\[\[(.+?)\]\]/g, '<mark class="hl">$1</mark>');
+}
+
+export function pageHead({ eyebrow = "", title = "", desc = "" } = {}) {
+  return `<div class="page-head">
+    ${eyebrow ? `<p class="eyebrow">${escapeHtml(eyebrow)}</p>` : ""}
+    <h1>${escapeHtml(title)}</h1>
+    ${desc ? `<p>${desc}</p>` : ""}
+  </div>`;
+}
+
+export function chunk(list, size) {
+  const out = [];
+  for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+  return out;
 }
 
 export function emptyBlock({ iconName = "spark", title, desc, action = "" }) {

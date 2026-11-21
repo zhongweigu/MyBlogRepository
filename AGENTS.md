@@ -340,7 +340,7 @@
 | 只补官方定性 / 年份数据 | 24.3 + 24.5 | 不要编造未出版的官方表述 |
 | 整体重构 / 换架构 / 合并模块 | 本文件 + 先向用户确认 | 不要擅自大改 |
 
-### 24.0 重构方向与任务路线（2026-11-21 用户定稿，待批准执行）
+### 24.0 重构方向与任务路线（2026-11-21 用户批准并执行）
 
 **产品定位**：这是一个背诵工具，不是策略课。第一屏就要能背；英文是主体，中文只做小字注释；“策略”只回答“这句模板什么时候用”。
 
@@ -394,19 +394,19 @@
 
 **策略**：只保留 3 篇类型示例（图画 / 图表 / 文字材料）+ 1 篇评分与考场；每篇先放真题图/材料，再按“看到什么 → 套哪句”走；不写“X 步法”“N 种方法”。
 
-**任务路线（批准后按序执行）**
+**任务路线（已执行）**
 
 | 阶段 | 做什么 | 验收 |
 | --- | --- | --- |
 | Phase 0 架构与视觉基线 | 删 `#/desk` 与 `desk.js`；导航改为 今日/背诵/语料/真题/策略；重设字体与高亮 CSS（英文 17–18px、中文 12px、`mark.hl`/`.hl-strong`）；去掉 hero 统计与彩色卡片 | 5 条路由可达；首页无写作台入口；英文正文 ≥17px |
-| Phase 1 模板库重建 | 按 24.0 六类目录与句数配额重写 `templates.js`/`library.js`；描述类穷举所有情况，起始/结尾按 4–5 句；仿照 PDF 例句扩写并标 C；一句一行 | 子类全覆盖；句数符合配额；描述类无遗漏；无重复句 |
+| Phase 1 模板库重建 | 按 24.0 六类目录与句数配额重建 `data/g1-start.js`～`g4-analysis.js` 与 `data/letter-templates.js`；描述类穷举所有情况，起始/结尾按 4–5 句；仿照 PDF 例句扩写并标 C；一句一行 | 子类全覆盖；句数符合配额；描述类无遗漏；无重复句 |
 | Phase 2 语料紧凑化 | 保留 `corpus.js` 数据；重做展示：表格/列表、英文高亮、槽位筛选；删大卡片 | 七类 × 7 槽位可见；搜索/筛选正常 |
 | Phase 3 应用文 | 13 类各补“可背模板”（开头/主体/结尾/替换词）；删 `LETTER_TASKS` 表 | 每类有范文 + 模板；页面无“场景→任务”表 |
 | Phase 4 策略重写 | 只留 3 篇类型示例 + 1 篇评分与考场；每篇嵌真题图，按步骤插模板句 | 图可见；每步有对应模板；无“X 步法”总结 |
 | Phase 5 真题精简 | 按题型选代表年份（2021/2023 图画、2025/2026 图表、2024 混合），最多 5 篇；只留满分版；可背句高亮；删四版切换与填空大表 | 4–5 篇；高亮可见；无四版切换 |
 | Phase 6 验收与推送 | 构建、5 条路由、520px、字号/高亮抽查；更新 sources 与 §24；按 §25 推送 | 无报错；字号达标；工作区干净 |
 
-**执行状态**：2026-11-21 只更新本规则，未改任何内容；等用户批准后从 Phase 0 开始。以下 24.1–24.8 描述重构前的实现，Phase 0–6 完成后按新结构改写；冲突处以 24.0 为准。
+**执行状态**：2026-11-21 已执行 Phase 0–5：删除写作台、导航精简为 5 项、英文/中文/高亮重设、模板库 323 句、应用文 128 句、语料紧凑化、策略 4 篇、真题 5 篇代表。Phase 6 正在做最终构建与推送验收。以下 24.1–24.8 已按新结构改写。
 
 ### 24.1 三条底线
 
@@ -416,14 +416,15 @@
 
 ### 24.2 目录与数据归属
 
-下表 `data/` 指 `assets/js-v1/data/`，`views/` 指 `assets/js-v1/views/`，`content/` 指 `assets/content/`。
+下表 `data/` 指 `assets/js-v2/data/`，`views/` 指 `assets/js-v2/views/`，`content/` 指 `assets/content/`。
 
 | 要改什么 | 改哪里 | 约束 |
 | --- | --- | --- |
 | 七类语料、槽位 | `data/corpus.js` | 每条中英成对；【相关战略】必须是 `{ zh, en, subs? }` 对象，不能写成数组 |
-| 三版模板、9/5/5 填空表、材料规则 | `data/templates.js` | 模板句保留原文与 A 标记；新增限制写 B |
-| 小作文 13 场景 | `data/letters.js` | 每个场景必须有 use / tone / tasks / opening / body / closing / swaps / sample / pitfalls / variants |
-| 段落功能、图画、图表 | `data/library.js` | 每条句型标 A 或 C；给“何时用/易错” |
+| 背诵模板六类、句数配额 | `data/g1-start.js`～`g4-analysis.js` | 新写句标 C；PDF 原句标 A；`templates.js` / `library.js` 只作 A 级归档，不再作页面主数据 |
+| 小作文 13 场景与可背模板 | `data/letters.js`、`data/letter-templates.js` | `letters.js` 保留范文/任务；模板放 `letter-templates.js`（开头/主体/结尾） |
+| 模板聚合与渲染顺序 | `data/recite-groups.js` | 六类分组；描述内容合并图画与图表；不要改分组顺序 |
+| 段落功能、图画、图表（旧） | `data/library.js` | A 级归档，不再作为主数据 |
 | 表达、搭配、连接、句型、中式对照 | `data/expressions.js` | 不确定表达标“待核验”，不进核心背诵 |
 | 真题元数据（主题、官方定性、槽位、提醒） | `data/exams.js` | `slots` 为 `[槽位, 英文, 中文, 出处]`；`versions` 顺序固定为满分 / 简化 / 速通标准 / 速通无脑 |
 | 真题范文与中文对照 | `data/exam-texts.js` | **脚本生成，禁止手改**；改文句回 PDF 或改脚本后重跑 |
@@ -431,10 +432,10 @@
 | 策略目录 | `data/meta.js` 的 `STRATEGY` | 新增文章先加目录项，再建 `content/<id>.html` |
 | 策略长文 | `assets/content/str-XX.html` | 首段 `.article-lead`，`h2` 分节，来源标记用 `src-mark` |
 | 样式 | `assets/css/english.css` | 不改 `app.css`（408/政治共用） |
-| 路由、渲染、交互 | `assets/js-v1/app.js`、`views/*.js` | 改路由必须同步导航与深链 |
+| 路由、渲染、交互 | `assets/js-v2/app.js`、`views/*.js` | 改路由必须同步导航与深链 |
 | 真题题目图 | `assets/img/exam-<年份>.png` | 只放本地图，不用外链 |
 
-**稳定 ID（不要改名）**：语料 `harmony / prosperity / civilization / dedication / kindness / patriotism / integrity`；小作文 `invite / suggest / thanks / apology / apply / notice / recommend / introduce / complain / inquire / congratulate / decline / minutes`；策略 `str-01…str-09`；真题用年份。改名会断卡片、断深链、断组装器选项。
+**稳定 ID（不要改名）**：语料 `harmony / prosperity / civilization / dedication / kindness / patriotism / integrity`；小作文 `invite / suggest / thanks / apology / apply / notice / recommend / introduce / complain / inquire / congratulate / decline / minutes`；策略 `str-01…str-04`；真题用年份。改名会断卡片、断深链。
 
 ### 24.3 用户发来资料时怎么接入
 
@@ -448,7 +449,7 @@
 6. **补记录**：在 `views/sources.js` 的 `SOURCES` / `COVERAGE` 增加文件清单、读取方式、去向、未识别页；有版本差异写进“重复、版本与矛盾”。
 7. **验收**：按 24.6 跑构建与路由检查，并在回复里说明来源、去向、未完成项。
 
-**真题新增一年**：① 取题目图存 `assets/img/exam-<年份>.png`；② 把 PDF 放入 `tools/english-review-pdf` 的源目录，跑 `extract_pdf_text.py → split_sections.py → gen_exam_texts.py`；③ 在 `exams.js` 的 `META` 补 kind / title / material / official / officialNote / analysis / slots / versions / takeaways；④ `sources.js` 的逐年表加一行；⑤ 构建并抽查四版切换。
+**真题新增一年**：① 取题目图存 `assets/img/exam-<年份>.png`；② 把 PDF 放入 `tools/english-review-pdf` 的源目录，跑 `extract_pdf_text.py → split_sections.py → gen_exam_texts.py`；③ 在 `exams.js` 的 `META` 补 kind / title / material / official / officialNote / analysis / slots / versions / takeaways；④ `sources.js` 的逐年表加一行；⑤ 构建并抽查该年主范文与高亮。
 
 **小作文对齐真题**：目前 13 个场景是 C（扩充）。拿到某年 A 节真题后，在 `letters.js` 补“年份—场景—任务点”，把该场景的 `sample` 与 `tasks` 校准；不要删原有场景。
 
@@ -470,11 +471,11 @@
 
 ### 24.5 常见修改任务
 
-- **改模板句**：改 `templates.js` 对应 block（保留 A 标记）→ 检查 `cards.js` 的模板卡与真题页引用。Phase 0 起写作台已删除，不再检查组装器。
+- **改模板句**：改 `g1-start.js`～`g4-analysis.js` 对应 section（A 句保留 A 标记）→ 检查 `cards.js` 与 `#/recite` 渲染。写作台已删除，不再检查组装器。
 - **加语料**：在对应 `value.slots.<slot>` 追加 `[en, zh]`；战略用 `{zh, en}`；检查词性；每日卡会自动增加。
-- **改小作文**：改 `letters.js` 对应场景；同时检查 `LETTER_TASKS` 行与 `#/recite?tab=letters&open=<id>` 深链。
-- **加策略长文**：`meta.js` 加 `str-10` 目录项 → 新建 `content/str-10.html` → 正文首段放 `.article-lead`、`h2` 分节、来源标记 → 构建后看目录自动生成。
-- **改官方定性**：找到原文 → 引用（标 A）→ 同步 `exams.js` 的 official/officialNote、`str-02` 的逐年表、`sources.js` 的未完成清单；三者不能互相矛盾。
+- **改小作文**：改 `letters.js` 的范文/任务，改 `letter-templates.js` 的开头/主体/结尾；检查 `#/recite?open=<id>` 深链。
+- **加策略长文**：`meta.js` 加 `str-05` 目录项 → 新建 `content/str-05.html` → 正文首段 `.article-lead`、`h2` 分节 → 构建后目录自动生成。
+- **改官方定性**：找到原文 → 引用（标 A）→ 同步 `exams.js` 的 official/officialNote 与 `sources.js` 的未完成清单；两者不能互相矛盾。
 - **修渲染错误**：先看控制台与路由；常见原因是可选字段未判空、`corpus` 的 strategy 写成数组、`exam-texts` 与 `versions` 下标不匹配、图片路径写错。
 
 ### 24.6 构建、验证与缓存
@@ -486,9 +487,9 @@ python -m http.server --directory public
 
 改 `_config`、路由、schema、批量图片才 `npx hexo clean`；日常只 generate。
 
-**必查路由**：`#/today`、`#/recite?tab=big`、`#/recite?tab=letters&open=invite`、`#/corpus`、`#/exams?year=2024&v=1`、`#/strategy/str-01`、`#/sources`。改哪页查哪页，另加一个入口。`#/desk` 在 Phase 0 删除后不再检查。
+**必查路由**：`#/today`、`#/recite`、`#/recite?g=letters`、`#/recite?open=invite`、`#/corpus`、`#/exams?year=2024`、`#/strategy/str-01`、`#/sources`。改哪页查哪页，另加一个入口。
 
-**通过标准**：无“页面渲染失败 / 正文读取失败 / 正在铺开复习台 / undefined”；策略长文能 fetch；小作文深链能展开；语料搜索与槽位筛选正常；桌面 1440 与移动 520 无横向溢出（headless 的 390 实际视口约 518，截图右侧会被裁，不是布局问题）。
+**通过标准**：无“页面渲染失败 / 正文读取失败 / 正在铺开复习台 / undefined”；六类模板与 13 类应用文可见；策略长文能 fetch 且图片可见；语料搜索与槽位筛选正常；真题只显示 1 篇主范文、无四版切换；桌面 1440 与移动 520 无横向溢出（headless 的 390 实际视口约 518，截图右侧会被裁，不是布局问题）。
 
 **缓存**：改 JS/CSS 时递增 `assets/js-vN` 或 `english.css?v=...`；只改数据文件通常不用 bump，但线上强缓存时也要改查询参数。
 
@@ -505,11 +506,13 @@ python -m http.server --directory public
 
 ### 24.8 当前未完成（每次更新后同步）
 
-- 小作文 13 场景为扩充（C），尚未按 2010–2026 英语一 A 节真题逐年对齐“年份—场景—任务点”。
+- 模板库 323 句、应用文 128 句均为 C（仿写/扩充）；A 句只在 PDF 原句处标 A，仍需老师或真题范文复核。
+- 小作文 13 类是扩充（C），尚未按 2010–2026 英语一 A 节真题逐年对齐“年份—场景—任务点”。
 - 2020–2022 官方《试题分析》未收录；2026 官方《考试分析》未出版。这四年只有题目与作者审题，`sources` 页已注明。
+- 真题页只展示 2021 / 2023 / 2024 / 2025 / 2026 五篇代表；2020 / 2022 数据仍保留在 `exam-texts.js`，未展示。
 - 《模版使用说明》第 16–29 页为官方文件截图，摘录可能存在识读误差；关键引用已用上下文校对。
 - 语料库第 10–13 页为分栏排版，文本层顺序错位，已按语义复原；若有出入以原 PDF 为准。
-- 以上四项在 `views/sources.js` 的“尚未完成 / 需要人工确认”中同步维护。
+- 以上在 `views/sources.js` 的“尚未完成 / 需要人工确认”中同步维护。
 
 ---
 
