@@ -12,8 +12,8 @@
 
 | 任务 | 必须先读 | 不要做什么 |
 | --- | --- | --- |
-| 用户提供图片/文字/文件/教材/课件/笔记/真题，要求更新知识库 | [`docs/rules/408-knowledge-update.md`](docs/rules/408-knowledge-update.md) + [`docs/rules/408-knowledge-base.md`](docs/rules/408-knowledge-base.md) | 不要跳过资料识别/查重/冲突判断；改完必须检查卡片同步 |
-| 新增/修改/删除知识库章节、讲解、图示、例题说明 | [`docs/rules/408-knowledge-base.md`](docs/rules/408-knowledge-base.md) | 不要只改正文就结束；改完必须检查卡片同步 |
+| 用户提供图片/文字/文件/教材/课件/笔记/真题，要求更新知识库 | [`docs/rules/408-knowledge-update.md`](docs/rules/408-knowledge-update.md) + [`docs/rules/408-visualization.md`](docs/rules/408-visualization.md) + [`docs/rules/408-knowledge-base.md`](docs/rules/408-knowledge-base.md) | 不要跳过资料识别/查重/冲突判断；改完必须检查图示与卡片同步 |
+| 新增/修改/删除知识库章节、讲解、图示、例题说明 | [`docs/rules/408-visualization.md`](docs/rules/408-visualization.md) + [`docs/rules/408-knowledge-base.md`](docs/rules/408-knowledge-base.md) | 不要只改正文就结束；改完必须判断可视化需求并检查卡片同步 |
 | 每日复习、抽卡、改卡、卡片库同步 | [`docs/rules/408-review-cards.md`](docs/rules/408-review-cards.md) | 不要在每日复习里重写知识库或重新做知识库重构 |
 | 只改站点路由、样式、JS、构建/缓存 | `docs/408-review-maintenance.md` + 本文件 §20 | 不要顺手改知识内容或卡片 schema |
 
@@ -21,11 +21,12 @@
 
 **硬门禁：**
 
-1. 用户发来资料要求更新知识库时，必须先读 `408-knowledge-update.md` 和 `408-knowledge-base.md`；不得直接按原文复制进正文。
+1. 用户发来资料要求更新知识库时，必须先读 `408-knowledge-update.md`、`408-visualization.md` 和 `408-knowledge-base.md`；不得直接按原文复制进正文。
 2. 知识库内容变化后，必须读取 `408-review-cards.md` 的“知识库变更后的卡片同步”，检查并报告卡片是否同步；不得只改知识库。
-3. 每日复习只使用 `408-review-cards.md` 和现有卡片数据，不重新执行知识库编写/章节重构/全量抽卡。
-4. 三份规则职责不同，不互相覆盖；规范与当前站点实现不一致时，先报告差异，不擅自重构。
-5. 用户在当前任务中的明确指令优先于规则；但用户没有授权时，不得借规则之名做无关的大规模改写。
+3. 知识库内容变化后，必须按 `408-visualization.md` 判断是否需要新增/修改图示，并在报告中写明结果；不得只改文字。
+4. 每日复习只使用 `408-review-cards.md` 和现有卡片数据，不重新执行知识库编写/章节重构/全量抽卡。
+5. 四份规则职责不同，不互相覆盖；规范与当前站点实现不一致时，先报告差异，不擅自重构。
+6. 用户在当前任务中的明确指令优先于规则；但用户没有授权时，不得借规则之名做无关的大规模改写。
 
 ---
 
@@ -44,7 +45,7 @@
 - **流程类图解**放 `data/diagrams.js` 的 `process` 分类；缺图自己画 SVG，或明确让用户上传。
 - 用户明确不要：评论、路线 / 纲领、P0–P3 优先级、英文版；不要加回。
 - 视觉参考 `docs.cpl.icu/kangaroo-review/site/`：网格纸、衬线标题、硬边卡片、红色索引；不要大圆角 + 重阴影。
-- 所有图片必须落地到 `assets/textbook/` 或 `assets/img/`，在正文对应段落插入；不要只堆文末。
+- 所有图片必须落地到 `assets/textbook/` 或 `assets/img/`，在正文对应段落插入；不要只堆文末。图示设计执行 [`docs/rules/408-visualization.md`](docs/rules/408-visualization.md)：先判断知识关系，再选择 SVG/Mermaid/图表，不把地址或结构图硬套成流程图。
 - 原帖图片可用 `python scripts/build-review-content.py` 生成（46 篇 + 图片）；`coa-4-3` / `coa-4-4` / `coa-4-5` / `coa-4-6` / `coa-5-1` / `coa-5-2` / `coa-6-1` / `coa-6-2` / `coa-6-3` 和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6`、`os-3-1` 到 `os-3-5`、`os-4-1` 到 `os-4-4`、`os-5-1` 到 `os-5-9`、`os-6-1` 到 `os-6-8` 是手写长文，脚本会跳过；`ds-1-1` / `ds-1-2` / `ds-1-3` 的例题要保留在正文里（边做边讲），由 `KEEP_EXAMPLES` 控制。
 - 题目、代码、流程图的自动抽取/生成脚本改完要一起跑；数据结构长文改动后跑 `extract-code.py`。
 - 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。
@@ -274,16 +275,18 @@
 | 文件 | 职责 | 不负责 |
 | --- | --- | --- |
 | [`docs/rules/408-knowledge-update.md`](docs/rules/408-knowledge-update.md) | 用户发来图片/文字/文件/教材/课件/笔记/真题后的资料识别、对照、整合、更新与汇报流程；大规模修改先确认 | 内容写法标准、卡片提取细节 |
+| [`docs/rules/408-visualization.md`](docs/rules/408-visualization.md) | 可视化需求判断、图示形式选择、绘图准确性、图文结合与图示验收 | 改写正文事实、卡片提取、站点样式 |
 | [`docs/rules/408-knowledge-base.md`](docs/rules/408-knowledge-base.md) | 知识库内容范围、准确性、组织详略、概念/实例、图文、来源处理、更新后检查 | 卡片抽取、每日复习界面、卡片增量同步 |
 | [`docs/rules/408-review-cards.md`](docs/rules/408-review-cards.md) | 卡片提取、粒度/问题/答案、每日复习展示、知识库变化后的卡片同步、卡片质量审查 | 重写知识库、章节重构、全量重建知识库 |
-| [`docs/rules/README.md`](docs/rules/README.md) | 规则索引、任务路由、优先级、冲突处理入口 | 替代三份主规则 |
+| [`docs/rules/README.md`](docs/rules/README.md) | 规则索引、任务路由、优先级、冲突处理入口 | 替代四份主规则 |
 
 ### 2. 职责边界
 
 - **资料更新规则**决定“用户发来的资料怎样识别、对照、整合，以及什么情况下先确认”。
-- **知识库规则**决定“正文写什么、写到什么深度、怎么组织、图怎么配、来源怎么处理”。
+- **可视化规则**决定“哪些知识需要图、选什么图、图怎样标注/验收；不得改变正文事实”。
+- **知识库规则**决定“正文写什么、写到什么深度、怎么组织、来源怎么处理”。
 - **复习卡片规则**决定“从正文抽什么、卡片多大、怎么问、答案怎么组织、每日怎么展示、知识库变了同步哪些卡”。
-- 三份规则共享“知识库是事实来源”这一前提，但**不互相替代**：资料接入不等于内容标准，知识库写得好也不等于卡片自动正确。
+- 四份规则共享“知识库是事实来源”这一前提，但**不互相替代**：资料接入不等于内容标准，图示设计不等于内容准确，知识库写得好也不等于卡片自动正确。
 - 站点/构建规则（`AGENTS.md` §20、`docs/408-review-maintenance.md`）决定“怎么落地、怎么构建、缓存怎么处理”，不决定内容对错。
 
 ### 3. 优先级
@@ -291,11 +294,11 @@
 同一事项冲突时：
 
 1. 用户在当前任务中的明确指令；
-2. 对应职责的规则文件（资料接入 → `408-knowledge-update.md`；卡片/每日复习 → `408-review-cards.md`；知识库内容 → `408-knowledge-base.md`）；
+2. 对应职责的规则文件（资料接入 → `408-knowledge-update.md`；图示 → `408-visualization.md`；卡片/每日复习 → `408-review-cards.md`；知识库内容 → `408-knowledge-base.md`）；
 3. `AGENTS.md` §20/§22 与维护手册中的项目结构、格式、站点约定；
 4. 一般写作习惯。
 
-三份规则不是“新文件覆盖旧文件”的关系；资料接入、内容标准、卡片同步按 §2 的边界判断，不能判断时暂停并报告。
+四份规则不是“新文件覆盖旧文件”的关系；资料接入、内容标准、图示设计、卡片同步按 §2 的边界判断，不能判断时暂停并报告。
 
 ### 4. 旧规则的处理
 
@@ -313,7 +316,7 @@
 每次 408 任务开始时：
 
 1. 判断任务类型（知识库 / 卡片 / 站点 / 混合）；
-2. 读取对应规则文件；资料更新任务读 `408-knowledge-update.md` + `408-knowledge-base.md`，混合任务按需补 `408-review-cards.md`；
+2. 读取对应规则文件；资料更新任务读 `408-knowledge-update.md` + `408-visualization.md` + `408-knowledge-base.md`，混合任务按需补 `408-review-cards.md`；
 3. 在动手前确认当前任务是否授权修改知识库、卡片或站点；
 4. 完成后按对应规则检查，并在报告中写明规则读取与检查结果；
 5. 知识库任务必须额外执行卡片同步检查；每日复习任务不得反向重构知识库。
