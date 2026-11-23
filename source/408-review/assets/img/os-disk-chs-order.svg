@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 620" role="img" aria-label="柱面优先的 CHS 编址">
+  <defs>
+    <marker id="chsa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="620" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">为什么先柱面、再盘面、最后扇区</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">同一柱面：换磁头不寻道</text>
+    <g>
+      <ellipse cx="300" cy="190" rx="180" ry="42" fill="#e9f2f6" stroke="#4d7f95"/>
+      <ellipse cx="300" cy="230" rx="180" ry="42" fill="#eef3e4" stroke="#6f8f45"/>
+      <ellipse cx="300" cy="270" rx="180" ry="42" fill="#f7ecd9" stroke="#a8782c"/>
+      <text x="300" y="196" text-anchor="middle" font-size="12">盘面 0 / 磁头 0</text>
+      <text x="300" y="236" text-anchor="middle" font-size="12">盘面 1 / 磁头 1</text>
+      <text x="300" y="276" text-anchor="middle" font-size="12">盘面 2 / 磁头 2</text>
+    </g>
+    <line x1="120" y1="190" x2="480" y2="190" stroke="#b54b45" stroke-width="2" stroke-dasharray="5 4"/>
+    <line x1="120" y1="230" x2="480" y2="230" stroke="#b54b45" stroke-width="2" stroke-dasharray="5 4"/>
+    <line x1="120" y1="270" x2="480" y2="270" stroke="#b54b45" stroke-width="2" stroke-dasharray="5 4"/>
+    <text x="510" y="210">同一柱面、不同盘面：</text>
+    <text x="510" y="234">电子切换磁头，磁臂不动</text>
+    <text x="510" y="258" font-size="12" fill="#b54b45">→ 不产生寻道时间</text>
+
+    <text x="45" y="350" font-weight="700">换柱面：必须径向移动磁臂</text>
+    <path d="M120 390 C250 330, 390 330, 470 390" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#chsa)"/>
+    <text x="300" y="325" text-anchor="middle" font-size="12">从柱面 c 到 c+1，产生寻道时间</text>
+    <text x="45" y="430" font-weight="700">地址顺序</text>
+    <text x="45" y="456">(C0,H0,S0) (C0,H0,S1) … (C0,H0,Sn)</text>
+    <text x="45" y="479">→ (C0,H1,S0) …（同柱面换磁头，不寻道）</text>
+    <text x="45" y="502">→ (C1,H0,S0) …（换柱面，开始下一次寻道）</text>
+
+    <rect x="45" y="535" width="950" height="55" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="558" font-weight="700">好处</text>
+    <text x="65" y="580" font-size="13">把一次寻道能覆盖的同柱面数据先用完，减少寻道次数；容量公式也按 C×H×S×扇区大小计算。</text>
+  </g>
+</svg>

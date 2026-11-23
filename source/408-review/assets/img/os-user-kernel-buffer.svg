@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" role="img" aria-label="内核缓冲区与用户缓冲区的数据路径和读写优化">
+  <defs>
+    <marker id="uba" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+    <marker id="ubb" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1080" height="600" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">内核缓冲区 vs 用户缓冲区：数据先落在哪、谁能优化</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="55" y="105" width="180" height="80" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="145" y="133" text-anchor="middle" font-weight="700">磁盘 / 设备</text>
+    <text x="145" y="157" text-anchor="middle" font-size="12">DMA / 中断传送</text>
+
+    <rect x="410" y="95" width="250" height="110" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="535" y="120" text-anchor="middle" font-weight="700">内核缓冲区</text>
+    <text x="535" y="143" text-anchor="middle" font-size="12">OS 控制；页缓存/块缓存</text>
+    <text x="535" y="164" text-anchor="middle" font-size="12">能接住“目标进程暂时不能接收”</text>
+    <text x="535" y="185" text-anchor="middle" font-size="12">read-ahead / delayed write 的主战场</text>
+
+    <rect x="820" y="95" width="200" height="110" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="920" y="120" text-anchor="middle" font-weight="700">用户缓冲区</text>
+    <text x="920" y="143" text-anchor="middle" font-size="12">进程地址空间</text>
+    <text x="920" y="164" text-anchor="middle" font-size="12">read/write 的 buf</text>
+    <text x="920" y="185" text-anchor="middle" font-size="12">应用/库可再做一层缓冲</text>
+
+    <path d="M235 135 L410 135" stroke="#4d5b66" stroke-width="2" marker-end="url(#uba)"/>
+    <path d="M660 135 L820 135" stroke="#4d5b66" stroke-width="2" marker-end="url(#uba)"/>
+    <text x="285" y="125" font-size="12">设备→内核</text>
+    <text x="710" y="125" font-size="12">内核→用户</text>
+
+    <text x="410" y="245" font-weight="700">读路径</text>
+    <text x="410" y="270">设备→内核缓冲区→用户 buf；read 返回前复制一次。</text>
+    <text x="410" y="294" font-size="12" fill="#52605a">内核 read-ahead：多读后续块到内核缓存；用户 read-ahead：从内核多拷一些到用户缓冲。</text>
+
+    <text x="410" y="345" font-weight="700">写路径</text>
+    <text x="410" y="370">用户 buf→内核缓冲区→磁盘；延迟写让 write 先返回。</text>
+    <text x="410" y="394" font-size="12" fill="#52605a">内核 delayed write：脏页稍后批量写回；用户 delayed write：应用先写用户缓冲，稍后再 write/fsync。</text>
+
+    <rect x="55" y="440" width="970" height="75" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="465" font-weight="700">为什么要有内核缓冲区</text>
+    <text x="75" y="489">设备数据到达时，目标进程可能被换出/退出/未准备好；内核缓冲区由 OS 管理，能先接住数据，唤醒进程后再复制。</text>
+    <text x="75" y="507" font-size="12" fill="#6b777f">零拷贝可以绕过“用户复制”，但基础模型仍是设备→内核缓冲→用户缓冲；不要把优化当默认路径。</text>
+
+    <text x="55" y="560" font-size="12" fill="#b54b45">代价：内核→用户的一次复制、写回延迟带来的掉电风险；用户缓冲的延迟写若未 write/fsync，数据仍在进程内存，不算落盘。</text>
+  </g>
+</svg>

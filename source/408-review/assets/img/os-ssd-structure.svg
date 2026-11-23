@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 640" role="img" aria-label="固态硬盘结构：总线、FTL、闪存芯片、块与页">
+  <defs>
+    <marker id="ssa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1100" height="640" fill="#fffdf8"/>
+  <text x="550" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">SSD 结构：OS 看到逻辑块，FTL 映射到物理页</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="45" y="95" width="190" height="70" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="140" y="121" text-anchor="middle" font-weight="700">主机 / OS</text>
+    <text x="140" y="144" text-anchor="middle" font-size="12">读/写 LBA 逻辑块</text>
+
+    <rect x="305" y="95" width="190" height="70" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="400" y="121" text-anchor="middle" font-weight="700">I/O 总线</text>
+    <text x="400" y="144" text-anchor="middle" font-size="12">SATA / PCIe / NVMe</text>
+
+    <rect x="565" y="85" width="270" height="105" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="700" y="110" text-anchor="middle" font-weight="700">SSD 控制器 / FTL</text>
+    <text x="700" y="133" text-anchor="middle" font-size="12">LBA → 物理页映射</text>
+    <text x="700" y="154" text-anchor="middle" font-size="12">垃圾回收 · 磨损均衡 · 坏块管理</text>
+    <text x="700" y="175" text-anchor="middle" font-size="12">对外表现为块设备</text>
+
+    <rect x="875" y="95" width="180" height="70" rx="4" fill="#eadff2" stroke="#7f5b9a"/>
+    <text x="965" y="121" text-anchor="middle" font-weight="700">闪存芯片</text>
+    <text x="965" y="144" text-anchor="middle" font-size="12">多个 die / plane</text>
+
+    <path d="M235 130 L305 130" stroke="#4d5b66" stroke-width="2" marker-end="url(#ssa)"/>
+    <path d="M495 130 L565 130" stroke="#4d5b66" stroke-width="2" marker-end="url(#ssa)"/>
+    <path d="M835 130 L875 130" stroke="#4d5b66" stroke-width="2" marker-end="url(#ssa)"/>
+
+    <text x="45" y="240" font-weight="700">闪存内部组织</text>
+    <rect x="55" y="265" width="310" height="230" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="210" y="290" text-anchor="middle" font-weight="700">块（擦除单位）</text>
+    <g>
+      <rect x="80" y="310" width="260" height="35" fill="#e9f2f6" stroke="#4d7f95"/><text x="210" y="333" text-anchor="middle">页 0（读/写单位）</text>
+      <rect x="80" y="345" width="260" height="35" fill="#eef3e4" stroke="#6f8f45"/><text x="210" y="368" text-anchor="middle">页 1</text>
+      <rect x="80" y="380" width="260" height="35" fill="#f7ecd9" stroke="#a8782c"/><text x="210" y="403" text-anchor="middle">页 2</text>
+      <rect x="80" y="415" width="260" height="35" fill="#f3e6e6" stroke="#a85a5a"/><text x="210" y="438" text-anchor="middle">… 页 n−1</text>
+    </g>
+    <text x="80" y="475" font-size="12" fill="#b54b45">整块一起擦除，不能只擦一页</text>
+
+    <rect x="420" y="265" width="320" height="155" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="580" y="290" text-anchor="middle" font-weight="700">读 / 写 / 擦除</text>
+    <text x="440" y="316" font-size="13">读：按页读出</text>
+    <text x="440" y="340" font-size="13">写：按页编程；不能原地覆盖旧页</text>
+    <text x="440" y="364" font-size="13">擦：按块擦除，擦除次数有限</text>
+    <text x="440" y="390" font-size="12" fill="#b54b45">修改已有页 → 写新页 + 改映射 + 旧页待 GC</text>
+
+    <rect x="780" y="265" width="275" height="155" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="917" y="290" text-anchor="middle" font-weight="700">FTL 的工作</text>
+    <text x="800" y="316" font-size="13">逻辑块 → 物理页映射表</text>
+    <text x="800" y="340" font-size="13">垃圾回收：搬有效页、擦旧块</text>
+    <text x="800" y="364" font-size="13">磨损均衡：分散擦除次数</text>
+    <text x="800" y="390" font-size="12" fill="#52605a">对 OS 隐藏闪存差异</text>
+
+    <text x="45" y="545" font-weight="700">容量数量级</text>
+    <text x="45" y="570">页常见 4KB 量级；块通常包含几十到几百页；具体以 SSD 规格为准，题目若给参数按参数算。</text>
+    <text x="45" y="600" font-size="12" fill="#6b777f">FTL 不是文件系统；文件系统管理“文件→逻辑块”，FTL 管理“逻辑块→物理页”。</text>
+  </g>
+</svg>

@@ -1,0 +1,93 @@
+<div class="article-content">
+<p>固态硬盘（SSD）不是“更快的机械盘”，而是用<strong>闪存 + 闪存翻译层（FTL）</strong>模拟块设备。操作系统仍然按“读/写磁盘块”的方式使用它，但底层的读写单位、擦除方式和寿命管理完全不同。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#ssd-why">一、SSD 与机械盘的根本区别</a></li>
+<li><a href="#ssd-struct">二、结构：总线、FTL、闪存、块、页</a></li>
+<li><a href="#ssd-rw">三、读/写以页为单位，擦除以块为单位</a></li>
+<li><a href="#ssd-ftl">四、FTL、映射与垃圾回收</a></li>
+<li><a href="#ssd-wear">五、磨损均衡：动态与静态</a></li>
+<li><a href="#ssd-perf">六、性能、可靠性与使用边界</a></li>
+<li><a href="#ssd-pitfalls">七、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="ssd-why">一、SSD 与机械盘的根本区别</h2>
+<p>机械盘靠磁头寻道和盘片旋转定位，随机访问要付寻道/旋转延迟；SSD 没有机械运动，随机读由闪存和控制器直接定位，因此随机读延迟低、抗震动，但写操作受“先擦后写”和寿命限制。</p>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>机械硬盘 HDD</th><th>固态硬盘 SSD</th></tr></thead>
+<tbody>
+<tr><td>定位</td><td>寻道 + 旋转延迟</td><td>控制器/FTL 映射，无机械寻道</td></tr>
+<tr><td>读单位</td><td>扇区/块</td><td>页（典型 4KB，因器件而异）</td></tr>
+<tr><td>写单位</td><td>扇区/块，可原地覆盖</td><td>页编程；不能原地覆盖，需先擦除整块</td></tr>
+<tr><td>擦除单位</td><td>无“擦除”概念</td><td>块（典型几十到几百页）</td></tr>
+<tr><td>寿命</td><td>机械磨损/磁头故障</td><td>闪存擦写次数有限，需要磨损均衡</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="ssd-struct">二、结构：总线、FTL、闪存、块、页</h2>
+<p>SSD 对外表现为一个块设备：主机通过 <strong>I/O 总线</strong>（SATA、PCIe/NVMe 等）发读写命令；SSD 控制器中的 <strong>闪存翻译层 FTL</strong> 把逻辑块地址 LBA 映射到闪存的物理页；下层是若干闪存芯片，芯片内部按“块（block）→页（page）”组织。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="SSD 结构：I/O 总线、控制器/FTL、闪存芯片、块与页" data-src="/408-review/assets/img/os-ssd-structure.svg" href="/408-review/assets/img/os-ssd-structure.svg">
+<img alt="固态硬盘结构示意：主机经 I/O 总线和控制器/FTL 访问闪存块与页" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-ssd-structure.svg"/>
+</a>
+<figcaption>OS 看到的是逻辑块；FTL 把逻辑块映射到物理页。页是可读写单位，块是可擦除单位；具体页/块大小因器件而异。</figcaption>
+</figure>
+<p>层次可以记成：<strong>主机 → I/O 总线 → SSD 控制器/FTL → 闪存芯片 → 块 → 页</strong>。FTL 是 SSD 内部的“地址翻译 + 垃圾回收 + 磨损均衡”层，不是操作系统里的文件系统。</p>
+
+<h2 id="ssd-rw">三、读/写以页为单位，擦除以块为单位</h2>
+<ul>
+<li><strong>读</strong>：按页读取；随机读不需要机械寻道，延迟主要来自控制器、闪存读取和队列。</li>
+<li><strong>写</strong>：按页编程；但闪存页不能像内存那样直接覆盖旧内容。要修改一个已有页，通常先把该块中的有效页复制到新块，再擦除旧块，最后写入新数据。</li>
+<li><strong>擦除</strong>：以块为单位；擦除次数有限，是 SSD 寿命的核心约束。</li>
+</ul>
+<p>因此“写一页”可能引发“读整块有效页 + 写新块 + 擦旧块”的连锁操作，称为<strong>写放大</strong>。FTL 会尽量把顺序写、合并空闲页，并在后台做垃圾回收（GC）。</p>
+
+<h2 id="ssd-ftl">四、FTL、映射与垃圾回收</h2>
+<p>FTL 维护<strong>逻辑块地址 → 物理页</strong>的映射表。写新数据时，FTL 往往写到新的空闲页，再把逻辑地址改指向新页；旧页变成“无效页”。当空闲块不足时，GC 选择一个块，把其中仍有效的页搬到新块，然后擦除整块回收空间。</p>
+<p>这解释了 SSD 的几个现象：</p>
+<ul>
+<li>顺序写通常比随机写友好，因为随机写会产生更多无效页和 GC；</li>
+<li>盘越满，GC 越频繁，写性能可能下降；</li>
+<li>TRIM 告诉 SSD 哪些逻辑块已不再使用，减少无意义的有效页搬运；</li>
+<li>FTL 的映射表需要内存/缓存，掉电保护很重要。</li>
+</ul>
+
+<h2 id="ssd-wear">五、磨损均衡：动态与静态</h2>
+<p>闪存块的擦除次数有限。如果总是反复写同一批块，它们会先坏。<strong>磨损均衡</strong>把写/擦除分散到不同块，延长整体寿命，并用<strong>擦除计数</strong>记录每个块的磨损。</p>
+<div class="article-table"><table>
+<thead><tr><th>方式</th><th>做法</th><th>优点/局限</th></tr></thead>
+<tbody>
+<tr><td>动态磨损均衡</td><td>只在“正在被写入/可分配”的块之间轮换，冷数据长期不动</td><td>实现简单；冷数据占用的块几乎不被擦写，磨损分布仍可能不均</td></tr>
+<tr><td>静态磨损均衡</td><td>除了动态轮换，还会主动搬移长期不动的冷数据，让老块也参与轮换</td><td>磨损更均匀、寿命更长；需要额外搬移，带来写放大和开销</td></tr>
+</tbody>
+</table></div>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="动态磨损均衡与静态磨损均衡：静态会把冷数据搬走来分摊擦除次数" data-src="/408-review/assets/img/os-ssd-wear-leveling.svg" href="/408-review/assets/img/os-ssd-wear-leveling.svg">
+<img alt="动态和静态磨损均衡的块擦除次数分布对比" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-ssd-wear-leveling.svg"/>
+</a>
+<figcaption>动态只轮换“热”块，冷数据可能一直占着低磨损块；静态会主动迁移冷数据，让所有块都参与擦除，代价是额外搬移。</figcaption>
+</figure>
+
+<h2 id="ssd-perf">六、性能、可靠性与使用边界</h2>
+<ul>
+<li><strong>随机读</strong>：SSD 的优势场景，不需要寻道/旋转；但受队列深度、控制器和闪存并行度影响。</li>
+<li><strong>随机写</strong>：受“先擦后写”、GC 和写放大影响，未必比顺序写快；盘满时更明显。</li>
+<li><strong>寿命</strong>：用 TBW/DWPD 等指标描述；磨损均衡、预留空间（OP）和 TRIM 都会影响实际寿命。</li>
+<li><strong>可靠性</strong>：没有机械寻道，但闪存有保持时间、坏块、掉电保护等问题；RAID 仍可用于冗余，但不能把 SSD 当成“不会坏”。</li>
+<li><strong>调度</strong>：HDD 的寻道优化（SSTF/SCAN 等）对 SSD 没有同样的机械意义；SSD 更关心队列、并行度、GC 和写放大。传统磁盘调度算法在 SSD 上通常不再按“减少寻道”来评价。</li>
+</ul>
+
+<h2 id="ssd-pitfalls">七、易错点与收束</h2>
+<ul>
+<li><strong>“SSD 按块读写”</strong>：读/写的基本单位是页，擦除单位才是块。</li>
+<li><strong>“SSD 可以原地覆盖写”</strong>：闪存页不能直接覆盖，通常要写新页、改映射，旧页等待 GC 回收。</li>
+<li><strong>“磨损均衡只是按顺序轮换”</strong>：动态/静态策略不同；静态会搬移冷数据，代价是额外写。</li>
+<li><strong>“SSD 不需要文件系统/FTL”</strong>：文件系统仍管理逻辑文件，FTL 管理逻辑块到物理页；二者层次不同。</li>
+<li><strong>“SSD 上 SCAN 一定更好”</strong>：没有机械寻道，传统寻道调度收益很小；应关注并行度、GC、写放大和寿命。</li>
+</ul>
+<p>收束：<strong>SSD = 闪存 + FTL + 块设备接口；读/写按页，擦除按块，靠映射、GC 和磨损均衡把“不能覆盖写、擦除次数有限”的闪存伪装成普通磁盘。</strong></p>
+</div>
+<p class="article-source">内容整理自操作系统 I/O 专题讲义与闪存/SSD 通用教材框架；页/块容量为典型数量级，具体以器件规格为准。</p>

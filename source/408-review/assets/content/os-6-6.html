@@ -2,14 +2,15 @@
 <p>磁盘既是共享设备，也是块设备。它有两个常被混在一起的问题：<strong>数据放在哪里</strong>（柱面/磁头/扇区、逻辑块号）和<strong>先服务哪个请求</strong>（磁盘调度）。前者决定一次访问要移动多少，后者决定多个请求的平均等待。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>6 节</span></summary>
+<summary>本页目录 <span>7 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#disk-geom">一、盘面、磁道、柱面与扇区</a></li>
 <li><a href="#disk-addr">二、从逻辑块号到物理地址</a></li>
 <li><a href="#disk-time">三、存取时间的三段</a></li>
-<li><a href="#disk-algo">四、四种磁盘调度算法</a></li>
-<li><a href="#disk-calc">五、同一个请求序列的完整计算</a></li>
-<li><a href="#disk-pitfalls">六、易错点与收束</a></li>
+<li><a href="#disk-algo">四、磁盘调度算法与 NStepSCAN/FSCAN</a></li>
+<li><a href="#disk-improve">五、提高磁盘 I/O 的方法</a></li>
+<li><a href="#disk-calc">六、同一个请求序列的完整计算</a></li>
+<li><a href="#disk-pitfalls">七、易错点与收束</a></li>
 </ul></div>
 </details>
 
@@ -33,6 +34,21 @@
 <pre><code class="language-text">逻辑块号 → 柱面号 C + 磁头号 H + 扇区号 S
 容量 = 柱面数 × 磁头数 × 每道扇区数 × 扇区大小</code></pre>
 <p>转换的关键是“先按柱面、再按磁头、最后按扇区”的编号约定；题目若给出 LBA 与每柱面/每磁头扇区数，要先用整除和取余拆出 C/H/S，不能直接拿逻辑块号当物理地址。</p>
+<h3 id="disk-chs-why">为什么常用（柱面号，盘面号，扇区号）</h3>
+<p>把<strong>柱面号</strong>放在最前面，不只是“习惯”，而是让地址顺序贴近磁盘的机械运动：</p>
+<ul>
+<li>同一柱面内换盘面/磁头只需要电子切换，<strong>磁头不用径向移动</strong>；换柱面才需要寻道。</li>
+<li>按“柱面→盘面→扇区”编号，连续的逻辑块会先填满同一柱面的所有磁头，再移动到下一个柱面，能把一次寻道覆盖的数据量做大。</li>
+<li>容量公式也自然写成：<code>柱面数 × 盘面数 × 每道扇区数 × 扇区大小</code>；C/H/S 三个坐标唯一确定一个扇区。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="柱面优先的 CHS 编址：同一柱面内切换磁头不需寻道，换柱面才移动磁臂" data-src="/408-review/assets/img/os-disk-chs-order.svg" href="/408-review/assets/img/os-disk-chs-order.svg">
+<img alt="磁盘柱面、盘面、磁头与 CHS 编址顺序示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-disk-chs-order.svg"/>
+</a>
+<figcaption>柱面号决定是否寻道，盘面号决定选哪个磁头，扇区号决定旋转到哪一段；这就是“先柱面、后盘面、再扇区”的原因。</figcaption>
+</figure>
+<p>注意：这是传统 CHS 模型的讲法。现代磁盘对外多用 <strong>LBA 逻辑块地址</strong>，由磁盘控制器/固件完成 LBA→物理位置映射；题目若明确给 CHS，就按题目约定计算。</p>
+
 
 <h2 id="disk-time">三、存取时间的三段</h2>
 <p>一次磁盘访问的时间由三段组成：</p>
@@ -46,8 +62,18 @@
 </tbody>
 </table></div>
 <p>若转速为 r 转/秒，旋转一圈时间为 1/r；平均旋转延迟为 1/(2r)。传输一个扇区的时间近似为“旋转一圈时间 ÷ 每道扇区数”；传输多个连续扇区时还要考虑跨磁道/跨柱面。</p>
+<h3 id="disk-interleave">减少旋转延迟：交替编号</h3>
+<p>磁盘读完一个扇区后，控制器/CPU 需要时间处理，磁头仍在继续旋转。如果逻辑相邻的扇区在物理上也紧挨着，等处理完再读下一个扇区时，目标可能已经转过去了，只能再等接近一整圈。</p>
+<p><strong>交替编号</strong>就是把逻辑相邻的扇区在物理上隔开：例如单重交替（因子 2）按 1、3、5、7、2、4、6、8 的顺序放逻辑块，逻辑 1 和 2 之间隔一个扇区；因子 3 则隔两个。这样给控制器留出处理时间，连续读时不容易“每读一个就等一圈”。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="连续编号与交替编号：交替给控制器留出处理时间，减少旋转等待" data-src="/408-review/assets/img/os-disk-interleave.svg" href="/408-review/assets/img/os-disk-interleave.svg">
+<img alt="磁盘扇区连续编号和交替编号的旋转时间线对比" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-disk-interleave.svg"/>
+</a>
+<figcaption>交替因子不是越大越好：因子过大虽然给处理留时间，但同一批连续数据的物理跨度变大；现代磁盘常用整道缓存/控制器优化，考试按题目给的编号规则算。</figcaption>
+</figure>
 
-<h2 id="disk-algo">四、四种磁盘调度算法</h2>
+
+<h2 id="disk-algo">四、磁盘调度算法与 NStepSCAN/FSCAN</h2>
 <p>多个进程同时发磁盘请求时，操作系统/磁盘控制器要决定先服务谁。目标通常是<strong>减少总寻道距离/平均寻道时间</strong>，但也要兼顾公平和饥饿。</p>
 <div class="article-table"><table>
 <thead><tr><th>算法</th><th>规则</th><th>优点</th><th>缺点</th></tr></thead>
@@ -59,6 +85,16 @@
 </tbody>
 </table></div>
 <p>SCAN 有一个常考变体 <strong>LOOK</strong>：不走到磁盘端点，而是到该方向上最远的请求就反向。很多教材/题目把“SCAN/C-SCAN”默认按 LOOK 实现；做题时必须看题目是否明确说“到端点”还是“到最远请求”。</p>
+<h3 id="disk-nstep">NStepSCAN 与 FSCAN</h3>
+<p>普通 SCAN 在请求不断到达时，可能出现磁臂总在某一区域来回、远端请求长期得不到服务。NStepSCAN 把请求队列分成 N 个子队列，每次只对一个子队列做 SCAN；新到的请求放到其他子队列，不会插进当前这批。这样一批请求的服务区间有限，能抑制“磁臂黏着”，也让等待时间更可预测。</p>
+<p><strong>FSCAN</strong> 是 NStepSCAN 的常用简化：只设两个队列——当前扫描队列和新生请求队列。扫描期间新到的请求全部进入“新队列”，等当前队列服务完再交换；因此新请求不会无限插队，当前批次能完整结束。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="NStepSCAN 的分批扫描与 FSCAN 的双队列" data-src="/408-review/assets/img/os-disk-nstep.svg" href="/408-review/assets/img/os-disk-nstep.svg">
+<img alt="NStepSCAN 将请求分成多个子队列，FSCAN 使用当前队列和新请求队列" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-disk-nstep.svg"/>
+</a>
+<figcaption>NStepSCAN 用“分批”限制一次 SCAN 的服务范围；FSCAN 用“当前/新队列”避免新请求不断插队。二者都不是新的磁头运动方向规则，而是队列组织规则。</figcaption>
+</figure>
+
 
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="FCFS：按请求顺序 55,58,39,18,90,160,150,38,184 服务，磁头总移动 498 个磁道" data-src="/408-review/assets/img/os-io-fcfs.png" href="/408-review/assets/img/os-io-fcfs.png">
@@ -82,10 +118,27 @@
 <a class="figure-link" data-action="zoom-image" data-caption="C-SCAN：单向服务，到端点后快速返回另一端，示例总移动 390 个磁道" data-src="/408-review/assets/img/os-io-cscan.png" href="/408-review/assets/img/os-io-cscan.png">
 <img alt="C-SCAN 磁盘调度示例：单向服务，返回途中不服务，总移动 390 个磁道" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-io-cscan.png"/>
 </a>
-<figcaption>C-SCAN 的返回空走要计入总移动；它换来更均匀的等待时间。</figcaption>
+<figcaption>若题目要求磁头走到端点再返回，返回空走要计入总移动；若题目把磁道看成循环序列，则跨过最大请求后按回绕距离算。示例按“走到端点”计。</figcaption>
 </figure>
 
-<h2 id="disk-calc">五、同一个请求序列的完整计算</h2>
+
+<h2 id="disk-improve">五、提高磁盘 I/O 的方法</h2>
+<p>提高磁盘 I/O 不是只靠“换更快的盘”，而是从<strong>减少访问次数、减少每次寻道/旋转、并行化</strong>三个方向下手。常见方法如下：</p>
+<div class="article-table"><table>
+<thead><tr><th>方法</th><th>做什么</th><th>主要收益/代价</th></tr></thead>
+<tbody>
+<tr><td>磁盘缓存（块缓存/页缓存）</td><td>把最近访问的磁盘块留在内存，命中时不再访问磁盘</td><td>减少物理 I/O；容量有限，命中率取决于局部性</td></tr>
+<tr><td>磁盘调度</td><td>重排请求顺序（FCFS/SSTF/SCAN/C-SCAN/NStepSCAN/FSCAN）</td><td>减少总寻道；可能饥饿或增加等待方差</td></tr>
+<tr><td>提前读（read-ahead）</td><td>预测后续访问，先把更多连续块读入缓冲区</td><td>减少后续等待；预测错误会浪费 I/O</td></tr>
+<tr><td>延迟写（delayed write）</td><td>写操作先写脏页/缓冲区，稍后批量写回</td><td>减少写次数、合并写；崩溃可能丢失未写回数据</td></tr>
+<tr><td>优化数据分布</td><td>把相关文件/块放在同一柱面或连续区域，减少跨柱面跳转</td><td>减少寻道/旋转；受分配策略和碎片影响</td></tr>
+<tr><td>虚拟盘（RAM disk）</td><td>用内存模拟块设备，读写不走机械磁盘</td><td>极快、随机访问好；容量小、断电丢失</td></tr>
+<tr><td>RAID</td><td>条带化/镜像/校验，把 I/O 分散到多盘</td><td>提高并行带宽/可靠性；RAID 5 写有校验开销</td></tr>
+</tbody>
+</table></div>
+<p><strong>重点：提前读与延迟写。</strong> 提前读利用空间局部性，把“下一次要读”的数据先搬进内核缓冲区；延迟写利用时间局部性，把多次小写合并成较大的写回。二者都依赖缓冲区，但一个偏读、一个偏写：提前读可能读多浪费，延迟写可能因掉电丢数据。需要持久化时用 <code>fsync</code> 等同步操作。</p>
+<p>这些方法与“磁盘调度”不是同一层：调度改变请求顺序，缓存/提前读减少请求次数，延迟写减少写回次数，RAID/虚拟盘改变设备或并行度。</p>
+<h2 id="disk-calc">六、同一个请求序列的完整计算</h2>
 <p>设磁头初始在 100 号磁道，请求队列为：<code>55, 58, 39, 18, 90, 160, 150, 38, 184</code>，磁盘范围 0～200。</p>
 <div class="article-table"><table>
 <thead><tr><th>算法</th><th>服务顺序</th><th>总移动量</th><th>平均寻道长度</th></tr></thead>
@@ -96,9 +149,9 @@
 <tr><td>C-SCAN（向增加方向，返回 0 不服务）</td><td>150, 160, 184, 200, 0, 18, 38, 39, 55, 58, 90</td><td>50+10+24+16+200+18+20+1+16+3+32 = <strong>390</strong></td><td>390/9 ≈ <strong>43.3</strong></td></tr>
 </tbody>
 </table></div>
-<p>计算时抓住三点：<strong>起点是当前磁头位置</strong>、<strong>每次移动取绝对差</strong>、<strong>总移动量除以请求数得平均</strong>。SCAN/C-SCAN 的“到端点”与“到最远请求”会产生不同结果，题目必须按给定规则算。</p>
+<p>计算时抓住三点：<strong>起点是当前磁头位置</strong>、<strong>每次移动取绝对差</strong>、<strong>总移动量除以请求数得平均</strong>。SCAN/C-SCAN 的“到端点”与“到最远请求”会产生不同结果，题目必须按给定规则算。</p><p><strong>C-SCAN 的回绕距离要按题目约定。</strong> 有的题把磁道看成循环序列，只计算请求之间的循环距离（例如从 120 回到 30 记 90 道，不额外把磁头开到端点）；有的题明确要求走到端点再返回，则空走要计入。2010 年真题采用前一种循环距离口径，答案是 190.4ms；本页上面的 C-SCAN 示例采用“走到端点”口径，所以总移动不同。</p>
 
-<h2 id="disk-pitfalls">六、易错点与收束</h2>
+<h2 id="disk-pitfalls">七、易错点与收束</h2>
 <ul>
 <li><strong>“平均寻道时间 = 总移动量 / 磁道数”</strong>：应除以请求数（或按题目定义），不是磁盘总磁道数。</li>
 <li><strong>“SSTF 一定最优”</strong>：它只对当前一步局部最优；可能造成远端饥饿，也可能总移动量不如 SCAN。</li>

@@ -149,6 +149,22 @@
 <li><strong>延迟写（delayed write）</strong>：写操作先写缓冲区，不立即落盘；等缓冲区满/需要复用/同步时才写回，减少 I/O 次数，但崩溃时可能丢数据。</li>
 </ul>
 <p><strong>缓冲区与 Cache 的区别</strong>：缓冲区主要解决速度不匹配和并发解耦，通常只保存“正在传送”的数据；Cache 主要利用局部性，保存“可能再次访问”的数据副本，强调命中率。二者都可能在内存中，但目的和组织方式不同。</p>
+<h3 id="buf-two-levels">内核缓冲与用户缓冲的分工</h3>
+<div class="article-table"><table>
+<thead><tr><th>层次</th><th>谁管理/在哪里</th><th>提前读</th><th>延迟写</th><th>主要收益与风险</th></tr></thead>
+<tbody>
+<tr><td>内核缓冲区</td><td>OS 管理，位于内核地址空间；常见为页缓存/块缓存</td><td>预测后续访问，把更多磁盘块读入内核缓存</td><td>write 先写脏页/内核缓冲，稍后批量写回磁盘</td><td>减少磁盘 I/O、合并写、承接目标进程暂不能接收的数据；掉电可能丢未写回数据</td></tr>
+<tr><td>用户缓冲区</td><td>进程自己的地址空间，通常是 read/write 的 buf 或库缓冲</td><td>从内核缓存多复制一些数据到用户缓冲，减少后续 read 陷入</td><td>应用先写用户缓冲，累积后再调用 write/fsync</td><td>减少系统调用/CPU 模式切换；数据未 write/fsync 前不保证落盘</td></tr>
+</tbody>
+</table></div>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="内核缓冲区与用户缓冲区的数据路径，以及两层各自的提前读/延迟写" data-src="/408-review/assets/img/os-user-kernel-buffer.svg" href="/408-review/assets/img/os-user-kernel-buffer.svg">
+<img alt="磁盘、内核缓冲区、用户缓冲区的读写路径和提前读、延迟写示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/os-user-kernel-buffer.svg"/>
+</a>
+<figcaption>设备数据先到内核缓冲区，再由 read 复制到用户缓冲区；写路径相反。提前读和延迟写是两层都可用的优化，但“未写回/未 write”不等于持久化。</figcaption>
+</figure>
+<p><strong>和已有知识怎么串：</strong> 中断/DMA 把数据送入内核缓冲区（os-6-2/6-3）；read 沿 fd→打开文件表→内存 inode 找到数据，再复制到用户 buf（os-5-4）；缓冲池/单双缓冲解决设备与 CPU 的速度差（本页前半）；磁盘调度减少寻道（os-6-6）；延迟写最终仍要由文件系统/块设备写回。</p>
+
 
 <h2 id="buf-pitfalls">八、易错点与收束</h2>
 <ul>

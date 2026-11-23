@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 580" role="img" aria-label="磁盘扇区交替编号减少旋转等待">
+  <defs>
+    <marker id="ila" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1040" height="580" fill="#fffdf8"/>
+  <text x="520" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">交替编号：给控制器留出处理时间</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">连续编号：逻辑 1、2、3… 紧挨着</text>
+    <g>
+      <rect x="55" y="95" width="100" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="105" y="121" text-anchor="middle">1</text>
+      <rect x="155" y="95" width="100" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="205" y="121" text-anchor="middle">2</text>
+      <rect x="255" y="95" width="100" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="305" y="121" text-anchor="middle">3</text>
+      <rect x="355" y="95" width="100" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="405" y="121" text-anchor="middle">4</text>
+      <rect x="455" y="95" width="100" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="505" y="121" text-anchor="middle">5</text>
+    </g>
+    <text x="570" y="112">读完 1 后处理需要 P；</text>
+    <text x="570" y="134">磁头已转过了 2，只能等近一圈</text>
+    <path d="M105 145 C105 200, 505 200, 405 145" stroke="#b54b45" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#ila)"/>
+    <text x="45" y="218" fill="#b54b45">读完 1 后处理 P，磁头已转过 2 → 只能等接近一整圈，旋转延迟大</text>
+
+    <text x="45" y="255" font-weight="700">交替编号（因子 2）：逻辑 1 和 2 中间隔一个物理扇区</text>
+    <g>
+      <rect x="55" y="275" width="100" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="105" y="301" text-anchor="middle">1（逻辑1）</text>
+      <rect x="155" y="275" width="100" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="205" y="301" text-anchor="middle">间隔</text>
+      <rect x="255" y="275" width="100" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="305" y="301" text-anchor="middle">2（逻辑2）</text>
+      <rect x="355" y="275" width="100" height="40" fill="#f7f5ee" stroke="#c9c0ae"/><text x="405" y="301" text-anchor="middle">间隔</text>
+      <rect x="455" y="275" width="100" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="505" y="301" text-anchor="middle">3（逻辑3）</text>
+    </g>
+    <path d="M105 320 C205 350, 255 350, 305 320" stroke="#4d5b66" stroke-width="2" fill="none" marker-end="url(#ila)"/>
+    <text x="180" y="372" font-size="12">读 1 后的 P 时间正好跨过“间隔”</text>
+    <text x="355" y="320" font-size="12">→ 逻辑 2 到达磁头下方</text>
+
+    <text x="45" y="425" font-weight="700">因子不是越大越好</text>
+    <text x="45" y="450">因子 2 = 隔 1 个扇区；因子 3 = 隔 2 个扇区；因子过大时同一批连续数据的物理跨度变大。</text>
+    <text x="45" y="474">现代磁盘常用控制器整道缓存/重排，交替编号的收益不如早期；但考题可能给出编号规则，按规则算。</text>
+
+    <rect x="45" y="515" width="950" height="45" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="543" font-size="13">核心：让“处理完当前扇区”和“下一个逻辑扇区到达磁头”在时间上对齐，减少空等一圈。</text>
+  </g>
+</svg>

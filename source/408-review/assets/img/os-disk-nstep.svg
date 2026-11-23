@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 560" role="img" aria-label="NStepSCAN 分批扫描与 FSCAN 双队列">
+  <defs>
+    <marker id="nsa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="560" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">NStepSCAN 与 FSCAN：限制“这一批”服务范围</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">NStepSCAN：请求分成 N 个子队列，每次只 SCAN 一个子队列</text>
+    <g>
+      <rect x="60" y="100" width="190" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="155" y="128" text-anchor="middle">子队列 Q1</text>
+      <rect x="270" y="100" width="190" height="45" fill="#eef3e4" stroke="#6f8f45"/><text x="365" y="128" text-anchor="middle">子队列 Q2</text>
+      <rect x="480" y="100" width="190" height="45" fill="#f7ecd9" stroke="#a8782c"/><text x="575" y="128" text-anchor="middle">子队列 Q3</text>
+      <rect x="690" y="100" width="190" height="45" fill="#eadff2" stroke="#7f5b9a"/><text x="785" y="128" text-anchor="middle">子队列 Q4</text>
+    </g>
+    <path d="M155 145 L155 190" stroke="#4d5b66" stroke-width="2" marker-end="url(#nsa)"/>
+    <text x="180" y="175" font-size="12">先扫描 Q1 中的请求</text>
+    <text x="155" y="220" font-size="12" fill="#52605a">Q1 服务完，再交换到 Q2；新请求不能插进当前 Q1</text>
+    <text x="45" y="260">效果：每批服务范围有限，避免磁臂长期被某个区域“黏住”，也降低响应时间的不可预测性。</text>
+
+    <text x="45" y="315" font-weight="700">FSCAN：NStepSCAN 的 N=2 常用形式</text>
+    <rect x="230" y="345" width="220" height="60" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="340" y="370" text-anchor="middle" font-weight="700">当前扫描队列</text>
+    <text x="340" y="391" text-anchor="middle" font-size="12">本轮正在服务</text>
+    <rect x="620" y="345" width="220" height="60" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="730" y="370" text-anchor="middle" font-weight="700">新请求队列</text>
+    <text x="730" y="391" text-anchor="middle" font-size="12">扫描期间到达，先排队</text>
+    <path d="M450 375 L620 375" stroke="#4d5b66" stroke-width="2" marker-end="url(#nsa)"/>
+    <text x="485" y="360" font-size="12">当前队列空后</text>
+    <text x="485" y="410" font-size="12">交换两队列</text>
+    <path d="M730 415 C730 460, 340 460, 340 415" stroke="#b54b45" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#nsa)"/>
+    <text x="450" y="485" text-anchor="middle" fill="#b54b45">新请求不会无限插队，当前批次完整结束</text>
+
+    <text x="45" y="530" font-size="12" fill="#6b777f">注意：NStepSCAN/FSCAN 改变的是“队列怎么分批”，不是磁头方向；它们通常仍以 SCAN 为基础。</text>
+  </g>
+</svg>

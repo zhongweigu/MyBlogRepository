@@ -40,13 +40,13 @@
 - 考点页正文在 `assets/content/<topic-id>.html`，按需 fetch；`topic.points` 只是速记层。
 - 考点页结构：背诵清单 / 考场答法（由 points 派生）→ 理解长文 → 图解（正文图 + 自绘 SVG）→ 关联真题。
 - `views/glossary.js` + `data/review-cards.js` 组成「复习库」页面（术语 + 流程，顶部导航标签也是「复习库」）；旧的 `data/glossary.js` 不再使用。`views/diagrams.js` + `data/diagrams.js`（代表题型/流程图解）、`views/code.js` + `data/code.js`（数据结构与 OS 知识点代码库）导航已接入。
-- 操作系统是第三个科目（`os`），目前 `os-1` 概述（发展、CPU 模式、系统调用、引导、虚拟机）、`os-2` 进程与线程（进程控制、线程、调度指标、调度算法、同步互斥、死锁）、`os-3` 信号量与 PV（三类模型、生产者-消费者、读者-写者、哲学家、做题策略）、`os-4` 内存管理（装入/连续分配、分页/多级页表、分段/段页式、虚拟存储/置换）、`os-5` 文件管理（目录/inode、逻辑结构、物理结构、共享/打开文件、空闲空间、磁盘布局、VFS、挂载、文件保护）和 `os-6` I/O 管理（层次/控制器、查询/中断/DMA、驱动、缓冲、分配/SPOOLing、磁盘调度、格式化/启动、全流程）共 37 个考点；数据在 `data/os.js` / `data/os-extra.js`，长文在 `content/os-*.html` 手写维护。科目主题色用 `--violet`，视图统一走 `subjectClass()`，不要再写 `coa ? is-coa : is-ds` 的三元。
+- 操作系统是第三个科目（`os`），目前 `os-1` 概述（发展、CPU 模式、系统调用、引导、虚拟机）、`os-2` 进程与线程（进程控制、线程、调度指标、调度算法、同步互斥、死锁）、`os-3` 信号量与 PV（三类模型、生产者-消费者、读者-写者、哲学家、做题策略）、`os-4` 内存管理（装入/连续分配、分页/多级页表、分段/段页式、虚拟存储/置换）、`os-5` 文件管理（目录/inode、逻辑结构、物理结构、共享/打开文件、空闲空间、磁盘布局、VFS、挂载、文件保护）和 `os-6` I/O 管理（层次/控制器、查询/中断/DMA、驱动、缓冲、分配/SPOOLing、磁盘调度/CHS/交替编号、格式化/启动、SSD、全流程）共 38 个考点；数据在 `data/os.js` / `data/os-extra.js`，长文在 `content/os-*.html` 手写维护。科目主题色用 `--violet`，视图统一走 `subjectClass()`，不要再写 `coa ? is-coa : is-ds` 的三元。
 - **代码库**由 `python scripts/extract-code.py` 从 `content/ds-*.html`、`content/os-2-5.html`、`content/os-3-1.html` 到 `os-3-4.html` 抽取；改完数据结构/OS 同步/PV 长文要重跑。
 - **流程类图解**放 `data/diagrams.js` 的 `process` 分类；缺图自己画 SVG，或明确让用户上传。
 - 用户明确不要：评论、路线 / 纲领、P0–P3 优先级、英文版；不要加回。
 - 视觉参考 `docs.cpl.icu/kangaroo-review/site/`：网格纸、衬线标题、硬边卡片、红色索引；不要大圆角 + 重阴影。
 - 所有图片必须落地到 `assets/textbook/` 或 `assets/img/`，在正文对应段落插入；不要只堆文末。图示设计执行 [`docs/rules/408-visualization.md`](docs/rules/408-visualization.md)：先判断知识关系，再选择 SVG/Mermaid/图表，不把地址或结构图硬套成流程图。
-- 原帖图片可用 `python scripts/build-review-content.py` 生成（46 篇 + 图片）；`coa-4-3` / `coa-4-4` / `coa-4-5` / `coa-4-6` / `coa-5-1` / `coa-5-2` / `coa-6-1` / `coa-6-2` / `coa-6-3` 和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6`、`os-3-1` 到 `os-3-5`、`os-4-1` 到 `os-4-4`、`os-5-1` 到 `os-5-9`、`os-6-1` 到 `os-6-8` 是手写长文，脚本会跳过；`ds-1-1` / `ds-1-2` / `ds-1-3` 的例题要保留在正文里（边做边讲），由 `KEEP_EXAMPLES` 控制。
+- 原帖图片可用 `python scripts/build-review-content.py` 生成（46 篇 + 图片）；`coa-4-3` / `coa-4-4` / `coa-4-5` / `coa-4-6` / `coa-5-1` / `coa-5-2` / `coa-6-1` / `coa-6-2` / `coa-6-3` 和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6`、`os-3-1` 到 `os-3-5`、`os-4-1` 到 `os-4-4`、`os-5-1` 到 `os-5-9`、`os-6-1` 到 `os-6-9` 是手写长文，脚本会跳过；`ds-1-1` / `ds-1-2` / `ds-1-3` 的例题要保留在正文里（边做边讲），由 `KEEP_EXAMPLES` 控制。
 - 题目、代码、流程图的自动抽取/生成脚本改完要一起跑；数据结构长文改动后跑 `extract-code.py`。
 - 用户明确：**帖子不再编辑**；新考点/知识点/图片只加到复习台。
 - **题目归题库**：完整例题/真题统一进 `questions.js` / `questions-extra.js` / `questions-manual-extra.js`；正文不保留例题和答案解析。存储专题里没有选项、没有分问的小例题不录。
@@ -54,8 +54,8 @@
 - **以历年真题为主**：不要批量手写选择题充数；真题页用「全部 / 选择题 / 大题」三个 tab 分开。代码库只收知识点代码，跳过例题/练习/复杂度题的代码。
 - 自动抽题：`python scripts/extract-questions.py`；正文去例题：`python scripts/build-review-content.py`。改完这两个脚本要同步跑。
 - 用户发图/知识点时：先判断是知识点还是完整题目；知识点要自行提取、总结、画 SVG 或贴截图并融入已有考点；完整题目入库并链接相关考点。
-- 验证提速：日常只查改动页 + 一个入口 + 390px，不每次全量 93 篇；只有改路由/schema/批量图片/模板时才全量。
-- 改完默认 `npx hexo generate`；只有改 `_config`、路由/schema、批量图片或生成异常时才 `npx hexo clean`。日常验证改动页 + 一个入口 + 390px，不全量跑 93 篇。
+- 验证提速：日常只查改动页 + 一个入口 + 390px，不每次全量 94 篇；只有改路由/schema/批量图片/模板时才全量。
+- 改完默认 `npx hexo generate`；只有改 `_config`、路由/schema、批量图片或生成异常时才 `npx hexo clean`。日常验证改动页 + 一个入口 + 390px，不全量跑 94 篇。
 - **缓存**：Netlify/Cloudflare 对 `assets/*` 可能给 4 小时缓存。改 JS/CSS 时必须递增 `assets/js-vN` 目录版本或 `app.css?v=...`，否则用户普通刷新仍会用旧文件。
 
 ---

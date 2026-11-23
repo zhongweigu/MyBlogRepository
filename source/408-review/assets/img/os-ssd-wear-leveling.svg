@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" role="img" aria-label="动态与静态磨损均衡的擦除次数分布">
+  <rect width="1080" height="600" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">磨损均衡：让擦除次数分散到不同块</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 动态磨损均衡：只轮换正在写的“热”块</text>
+    <text x="45" y="100">冷数据长期占着低擦除次数的块，热块反复擦写，磨损分布仍不均。</text>
+    <g>
+      <rect x="55" y="130" width="80" height="50" fill="#f7f5ee" stroke="#c9c0ae"/><text x="95" y="160" text-anchor="middle">冷块</text>
+      <rect x="145" y="130" width="80" height="50" fill="#f3e6e6" stroke="#a85a5a"/><text x="185" y="160" text-anchor="middle">热块</text>
+      <rect x="235" y="130" width="80" height="50" fill="#f3e6e6" stroke="#a85a5a"/><text x="275" y="160" text-anchor="middle">热块</text>
+      <rect x="325" y="130" width="80" height="50" fill="#f7f5ee" stroke="#c9c0ae"/><text x="365" y="160" text-anchor="middle">冷块</text>
+      <rect x="415" y="130" width="80" height="50" fill="#f3e6e6" stroke="#a85a5a"/><text x="455" y="160" text-anchor="middle">热块</text>
+      <rect x="505" y="130" width="80" height="50" fill="#f7f5ee" stroke="#c9c0ae"/><text x="545" y="160" text-anchor="middle">冷块</text>
+    </g>
+    <text x="620" y="160" font-size="12">擦除计数：冷块低、热块高</text>
+
+    <text x="45" y="240" font-weight="700">B. 静态磨损均衡：主动搬移冷数据</text>
+    <text x="45" y="265">把长期不动的冷数据搬到擦除次数较少的块，让老块也参与轮换。</text>
+    <g>
+      <rect x="55" y="295" width="80" height="50" fill="#eef3e4" stroke="#6f8f45"/><text x="95" y="325" text-anchor="middle">冷→搬</text>
+      <rect x="145" y="295" width="80" height="50" fill="#e9f2f6" stroke="#4d7f95"/><text x="185" y="325" text-anchor="middle">轮换</text>
+      <rect x="235" y="295" width="80" height="50" fill="#f7ecd9" stroke="#a8782c"/><text x="275" y="325" text-anchor="middle">轮换</text>
+      <rect x="325" y="295" width="80" height="50" fill="#eef3e4" stroke="#6f8f45"/><text x="365" y="325" text-anchor="middle">冷→搬</text>
+      <rect x="415" y="295" width="80" height="50" fill="#e9f2f6" stroke="#4d7f95"/><text x="455" y="325" text-anchor="middle">轮换</text>
+      <rect x="505" y="295" width="80" height="50" fill="#f7ecd9" stroke="#a8782c"/><text x="545" y="325" text-anchor="middle">轮换</text>
+    </g>
+    <text x="620" y="325" font-size="12">擦除计数更接近，寿命更长</text>
+
+    <rect x="55" y="390" width="970" height="85" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="415" font-weight="700">关键区别</text>
+    <text x="75" y="439" font-size="13">动态：只在本轮写/可分配的块之间轮换；静态：会主动搬迁冷数据，额外产生写放大和搬移开销。</text>
+    <text x="75" y="463" font-size="13">两者都用擦除计数做依据；静态更均匀，但实现更复杂，是否启用取决于控制器策略。</text>
+
+    <text x="45" y="525" font-weight="700">与 GC 的关系</text>
+    <text x="45" y="550">垃圾回收搬有效页时，顺带选择擦除次数较低的块，就能把磨损均衡融进回收过程；但 GC 本身也会产生额外写。</text>
+    <text x="45" y="580" font-size="12" fill="#6b777f">磨损均衡不能消除闪存寿命限制，只是把擦除分散；SSD 仍有 TBW/DWPD 和坏块上限。</text>
+  </g>
+</svg>
