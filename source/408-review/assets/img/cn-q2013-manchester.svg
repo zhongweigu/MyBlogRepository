@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220">
+<rect width="900" height="220" fill="#fffdf8"/>
+<text x="450" y="26" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700">10BaseT 接收波形（曼彻斯特）</text>
+<line x1="80" y1="45" x2="80" y2="140" stroke="#c9c0ae" stroke-dasharray="4 4"/><line x1="175" y1="45" x2="175" y2="140" stroke="#c9c0ae" stroke-dasharray="4 4"/><line x1="270" y1="45" x2="270" y2="140" stroke="#c9c0ae" stroke-dasharray="4 4"/><line x1="365" y1="45" x2="365" y2="140" stroke="#c9c0ae" stroke-dasharray="4 4"/><line x1="460" y1="45" x2="460" y2="140" stroke="#c9c0ae" stroke-dasharray="4 4"/><line x1="555" y1="45" x2="555" y2="140" stroke="#c9c0ae" stroke-dasharray="4 4"/><line x1="650" y1="45" x2="650" y2="140" stroke="#c9c0ae" stroke-dasharray="4 4"/><line x1="745" y1="45" x2="745" y2="140" stroke="#c9c0ae" stroke-dasharray="4 4"/>
+<path d="M80,55 L127.5,55 L127.5,120 L175,120 L175,55 L222.5,55 L222.5,120 L270,120 L270,120 L317.5,120 L317.5,55 L365,55 L365,120 L412.5,120 L412.5,55 L460,55 L460,55 L507.5,55 L507.5,120 L555,120 L555,120 L602.5,120 L602.5,55 L650,55 L650,120 L697.5,120 L697.5,55 L745,55 L745,55 L792.5,55 L792.5,120 L840,120" fill="none" stroke="#24313a" stroke-width="3"/>
+<text x="80" y="175" font-family="sans-serif" font-size="12" fill="#6b777f">每个虚线区间为一个比特；看区间中间跳变方向。</text>
+</svg>

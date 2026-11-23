@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-label="中继器和集线器在物理层扩展网络">
+  <defs>
+    <marker id="rha" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3f6f8a"/></marker>
+    <marker id="rhb" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1080" height="620" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">中继器与集线器：只在物理层“再生/复制”比特</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">中继器（repeater）：两端口，整形再生</text>
+    <rect x="65" y="105" width="120" height="55" fill="#e9f2f6" stroke="#4d7f95"/><text x="125" y="137" text-anchor="middle">网段 A</text>
+    <rect x="330" y="105" width="140" height="55" fill="#f7ecd9" stroke="#a8782c"/><text x="400" y="137" text-anchor="middle">中继器</text>
+    <rect x="620" y="105" width="120" height="55" fill="#e9f2f6" stroke="#4d7f95"/><text x="680" y="137" text-anchor="middle">网段 B</text>
+    <path d="M185 132 L330 132" stroke="#3f6f8a" stroke-width="2" marker-end="url(#rha)"/>
+    <path d="M470 132 L620 132" stroke="#3f6f8a" stroke-width="2" marker-end="url(#rha)"/>
+    <text x="530" y="200" font-size="12">把衰减/畸变的数字信号<strong>再生</strong>后转发，不是简单模拟放大</text>
+    <text x="530" y="223" font-size="12">只识比特，不识别帧、MAC/IP；两端仍在同一冲突域/广播域</text>
+
+    <line x1="45" y1="255" x2="1035" y2="255" stroke="#e1d8c8"/>
+    <text x="45" y="290" font-weight="700">集线器（Hub）：多端口中继器</text>
+    <circle cx="540" cy="390" r="52" fill="#eef3e4" stroke="#6f8f45" stroke-width="2"/>
+    <text x="540" y="396" text-anchor="middle" font-weight="700">Hub</text>
+    <g font-size="12">
+      <circle cx="300" cy="300" r="22" fill="#e9f2f6" stroke="#4d7f95"/><text x="300" y="305" text-anchor="middle">A</text>
+      <circle cx="780" cy="300" r="22" fill="#e9f2f6" stroke="#4d7f95"/><text x="780" y="305" text-anchor="middle">B</text>
+      <circle cx="300" cy="480" r="22" fill="#e9f2f6" stroke="#4d7f95"/><text x="300" y="485" text-anchor="middle">C</text>
+      <circle cx="780" cy="480" r="22" fill="#e9f2f6" stroke="#4d7f95"/><text x="780" y="485" text-anchor="middle">D</text>
+    </g>
+    <path d="M322 305 L488 370" stroke="#3f6f8a" stroke-width="2" marker-end="url(#rha)"/>
+    <path d="M758 305 L592 370" stroke="#3f6f8a" stroke-width="2" marker-end="url(#rha)"/>
+    <path d="M322 475 L488 410" stroke="#3f6f8a" stroke-width="2" marker-end="url(#rha)"/>
+    <path d="M758 475 L592 410" stroke="#3f6f8a" stroke-width="2" marker-end="url(#rha)"/>
+    <path d="M505 370 C420 350, 380 330, 322 305" stroke="#b54b45" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#rhb)"/>
+    
+    <text x="560" y="520" font-size="12">所有端口同一冲突域、同一广播域；同一时刻只能一个端口发送（半双工）</text>
+
+    <rect x="45" y="545" width="990" height="55" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="568" font-weight="700">5-4-3 规则</text>
+    <text x="65" y="590" font-size="13">4 个中继器串联的 5 段通信介质，只有 3 段可连接计算机；这是早期 10Mb/s 以太网的距离/冲突域限制。</text>
+  </g>
+</svg>

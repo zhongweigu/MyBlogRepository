@@ -1,0 +1,86 @@
+<div class="article-content">
+<p>物理层不只“画波形”，还要规定接口怎么接、信号走什么介质、用什么设备扩展距离。这一节把接口四特性、传输介质和中继器/集线器串起来。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>6 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#phy-four">一、物理层四大特性</a></li>
+<li><a href="#phy-media">二、传输介质</a></li>
+<li><a href="#phy-repeater">三、中继器</a></li>
+<li><a href="#phy-hub">四、集线器 Hub</a></li>
+<li><a href="#phy-domain">五、冲突域、广播域与 5-4-3</a></li>
+<li><a href="#phy-pitfalls">六、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="phy-four">一、物理层四大特性</h2>
+<p>物理层接口规范通常从四个方面描述：</p>
+<div class="article-table"><table>
+<thead><tr><th>特性</th><th>描述什么</th><th>记忆</th></tr></thead>
+<tbody>
+<tr><td>机械特性</td><td>接插件的形状、尺寸、引脚数目/排列、固定和锁定方式</td><td>机械看外形</td></tr>
+<tr><td>电气特性</td><td>各条线上电压范围、阻抗、传输速率等电气参数</td><td>电气看电压</td></tr>
+<tr><td>功能特性</td><td>某条线上某一电平表示什么意义（数据/控制/定时）</td><td>功能看意义</td></tr>
+<tr><td>过程特性（规程特性）</td><td>不同功能的各种可能事件的出现顺序</td><td>过程看时序</td></tr>
+</tbody>
+</table></div>
+<p>“物理地址（MAC 地址）”不属于物理层规范，它是数据链路层的概念；这是 2018 年真题的考点。</p>
+
+<h2 id="phy-media">二、传输介质</h2>
+<p>传输介质分<strong>导向介质</strong>（信号沿固体通路传播）和<strong>非导向介质</strong>（无线）：</p>
+<ul>
+<li><strong>双绞线</strong>：两根绝缘铜线绞合，抵消部分电磁干扰；UTP/STP，以太网常用，约 100m；便宜、易施工。</li>
+<li><strong>同轴电缆</strong>：内导体、绝缘层、外屏蔽层、护套；抗干扰较好，早期以太网/有线电视使用；比双绞线粗、贵。</li>
+<li><strong>光纤</strong>：光在纤芯中全反射；单模芯径小、激光、远距离，多模芯径大、LED、较短距离；带宽高、抗电磁干扰。</li>
+<li><strong>无线</strong>：无线电/微波/红外；无需布线、覆盖灵活，但受干扰、遮挡、频谱管制影响。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="双绞线、同轴电缆、光纤和无线介质的对比" data-src="/408-review/assets/img/cn-phy-media.svg" href="/408-review/assets/img/cn-phy-media.svg">
+<img alt="双绞线、同轴电缆、光纤、无线介质对比" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-phy-media.svg"/>
+</a>
+<figcaption>介质只负责传信号，不负责寻址；选择介质看距离、带宽、抗干扰、成本和施工条件。</figcaption>
+</figure>
+
+<h2 id="phy-repeater">三、中继器</h2>
+<p><strong>中继器（repeater）</strong>工作在物理层，把衰减/畸变的数字信号<strong>整形、再生</strong>后转发，从而扩展传输距离。它只有两个端口，只识别比特，不识别帧、MAC 地址或 IP 地址。</p>
+<ul>
+<li>“再生”不是“模拟放大”：中继器重新产生干净的数字波形；放大器只是把模拟信号幅度放大，噪声也一起放大。</li>
+<li>中继器两端的网段仍属于同一个冲突域、同一个广播域。</li>
+</ul>
+
+<h2 id="phy-hub">四、集线器 Hub</h2>
+<p><strong>集线器</strong>本质是多端口中继器：一个端口进入的数据会被复制/转发到所有其他端口。它工作在物理层，不学习 MAC 地址，也不做路径选择。</p>
+<ul>
+<li>所有端口在同一冲突域；同一时刻只能一个端口发送，因此通常是半双工。</li>
+<li>所有端口在同一广播域；广播会从所有端口发出。</li>
+<li>用 Hub 组网时，带宽由所有端口共享，冲突会降低有效吞吐。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="中继器再生信号，集线器把数据复制到所有端口" data-src="/408-review/assets/img/cn-repeater-hub.svg" href="/408-review/assets/img/cn-repeater-hub.svg">
+<img alt="中继器与集线器的结构和冲突域示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-repeater-hub.svg"/>
+</a>
+<figcaption>中继器/集线器都不隔离冲突域或广播域；隔离冲突域靠交换机，隔离广播域靠路由器（或 VLAN）。</figcaption>
+</figure>
+
+<h2 id="phy-domain">五、冲突域、广播域与 5-4-3</h2>
+<p><strong>冲突域</strong>是可能发生介质访问冲突的范围；<strong>广播域</strong>是广播帧能到达的范围。物理层设备不改变这两个范围：</p>
+<div class="article-table"><table>
+<thead><tr><th>设备</th><th>隔离冲突域</th><th>隔离广播域</th><th>工作层次</th></tr></thead>
+<tbody>
+<tr><td>中继器 / Hub</td><td>否</td><td>否</td><td>物理层</td></tr>
+<tr><td>交换机</td><td>是（每端口）</td><td>否（默认）</td><td>数据链路层</td></tr>
+<tr><td>路由器</td><td>是</td><td>是</td><td>网络层</td></tr>
+</tbody>
+</table></div>
+<p><strong>5-4-3 规则</strong>：早期 10Mb/s 以太网中，用 4 个中继器串联的 5 段通信介质，只有 3 段可以连接计算机。它是冲突域/时延限制的经验规则，现代交换式网络不再机械套用。</p>
+
+<h2 id="phy-pitfalls">六、易错点与收束</h2>
+<ul>
+<li><strong>“中继器放大模拟信号”</strong>：中继器再生数字信号；放大器放大模拟信号。</li>
+<li><strong>“Hub 隔离冲突域”</strong>：Hub 所有端口在同一冲突域；交换机才隔离冲突域。</li>
+<li><strong>“光纤一定用激光”</strong>：单模常用激光，多模常用 LED，不能一概而论。</li>
+<li><strong>“物理地址属于物理层”</strong>：物理地址是 MAC 层/数据链路层概念。</li>
+<li><strong>“无线没有介质”</strong>：空气/真空就是传播介质，只是非导向。</li>
+</ul>
+<p>收束：<strong>物理层规定“接口怎么接、信号怎么传、介质怎么选、设备怎么扩距离”</strong>；它只处理比特，不处理帧、MAC 地址和 IP 地址。</p>
+</div>

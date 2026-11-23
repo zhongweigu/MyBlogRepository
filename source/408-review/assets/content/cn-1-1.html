@@ -1,0 +1,81 @@
+<div class="article-content">
+<p>物理层是网络协议栈最底下的一层。它不负责“这一帧发给谁”，只负责把 0/1 变成可以在介质上传输的信号，并规定接口、电气参数、介质和最简单的转发设备。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>6 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#cn-data">一、数据、信号与码元</a></li>
+<li><a href="#cn-analog">二、模拟信号与数字信号</a></li>
+<li><a href="#cn-baseband">三、基带信号与带通信号</a></li>
+<li><a href="#cn-duplex">四、单工、半双工与全双工</a></li>
+<li><a href="#cn-rate">五、比特率与波特率</a></li>
+<li><a href="#cn-pitfalls">六、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="cn-data">一、数据、信号与码元</h2>
+<p><strong>数据</strong>是传递信息的实体，<strong>信号</strong>是数据在介质上的电、光或电磁表现，<strong>码元</strong>是固定时长内的一种波形。一个码元可以只携带 1 bit，也可以携带多个 bit；后者由码元的离散状态数决定。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="模拟/数字信号、基带/带通信号与码元的关系" data-src="/408-review/assets/img/cn-signal-types.svg" href="/408-review/assets/img/cn-signal-types.svg">
+<img alt="模拟信号、数字信号、基带信号、带通信号和码元示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-signal-types.svg"/>
+</a>
+<figcaption>模拟/数字看参数是否连续；基带/带通看频谱位置；码元看“一个波形带多少比特”。</figcaption>
+</figure>
+<p>一个码元带 <code>n</code> bit 时，<code>n = log2V</code>，V 是码元的离散状态数。例如 4 种相位可带 2 bit，16 种 QAM 状态可带 4 bit。</p>
+
+<h2 id="cn-analog">二、模拟信号与数字信号</h2>
+<p><strong>模拟信号</strong>的参数取值连续，例如正弦波的幅度/频率/相位可以连续变化；<strong>数字信号</strong>的参数只取有限个离散值，例如高/低电平。信源可以是模拟的，也可以是数字的；<strong>数据是数字的</strong>不等于<strong>信号一定是数字的</strong>：数字数据可以先调制到模拟载波上传输。</p>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>模拟信号</th><th>数字信号</th></tr></thead>
+<tbody>
+<tr><td>参数取值</td><td>连续</td><td>离散（有限个电平/状态）</td></tr>
+<tr><td>典型例子</td><td>话筒输出、传统电话线语音</td><td>计算机网卡输出的高低电平</td></tr>
+<tr><td>抗干扰</td><td>噪声会直接叠加，难以完全恢复</td><td>判决再生后可恢复，但采样/同步要求高</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="cn-baseband">三、基带信号与带通信号</h2>
+<p><strong>基带信号</strong>是来自信源的原始信号，频谱从 0 附近开始，含有低频/直流分量。很多信道（如无线、电话线）不能有效传输低频/直流，因此需要把基带信号<strong>调制</strong>到较高频率的载波上，形成<strong>带通信号</strong>。</p>
+<ul>
+<li>基带传输：直接传基带信号，适合短距离、有线、低通信道；</li>
+<li>带通传输：先调制再传输，适合特定频段、无线或远距离信道。</li>
+</ul>
+<p>注意“基带”描述的是频谱位置，不是“数字”的同义词；模拟信号也可以是基带信号。</p>
+
+<h2 id="cn-duplex">四、单工、半双工与全双工</h2>
+<p>这三者描述的是<strong>通信方向</strong>，不是“有几条物理线”：</p>
+<ul>
+<li><strong>单工</strong>：只能一个方向传，如广播、电视；</li>
+<li><strong>半双工</strong>：两个方向都能传，但同一时刻只能一个方向，如对讲机、共享式 Hub 网络；</li>
+<li><strong>全双工</strong>：两个方向可同时传，如电话、交换式以太网的点对点链路。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="单工、半双工、全双工的方向对比" data-src="/408-review/assets/img/cn-duplex.svg" href="/408-review/assets/img/cn-duplex.svg">
+<img alt="单工、半双工、全双工通信方向对比" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-duplex.svg"/>
+</a>
+<figcaption>半双工可以只有一条双向信道，也可以有两条单向信道但不同时使用；不要用“线数”判断。</figcaption>
+</figure>
+
+<h2 id="cn-rate">五、比特率与波特率</h2>
+<p><strong>比特率</strong>是每秒传输的比特数（b/s）；<strong>波特率</strong>是每秒传输的码元数（Baud，码元/秒）。二者关系：</p>
+<p>$$R_b = R_B \times \log_2 V$$</p>
+<p>其中 V 是一个码元的离散状态数。一个码元只带 1 bit 时二者相等；4 种状态时比特率是波特率的 2 倍；16 种状态时是 4 倍。</p>
+<div class="article-table"><table>
+<thead><tr><th>调制/编码</th><th>状态数 V</th><th>每码元比特数</th><th>关系</th></tr></thead>
+<tbody>
+<tr><td>2ASK / 2FSK / 2PSK</td><td>2</td><td>1</td><td>比特率 = 波特率</td></tr>
+<tr><td>4 相位 PSK</td><td>4</td><td>2</td><td>比特率 = 2 × 波特率</td></tr>
+<tr><td>QAM-16</td><td>16</td><td>4</td><td>比特率 = 4 × 波特率</td></tr>
+<tr><td>曼彻斯特</td><td>每比特至少 2 次跳变</td><td>1</td><td>波特率 = 2 × 比特率</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="cn-pitfalls">六、易错点与收束</h2>
+<ul>
+<li><strong>“数字数据一定用数字信号”</strong>：数字数据可以调制成模拟信号；模拟数据也可以数字化。</li>
+<li><strong>“基带就是数字信号”</strong>：基带只看频谱从低频开始，模拟基带也存在。</li>
+<li><strong>“波特率就是比特率”</strong>：只有一码元 1 bit 时才相等；多进制调制下比特率更高。</li>
+<li><strong>“半双工就是两条线”</strong>：方向限制和物理线数不是一回事。</li>
+</ul>
+<p>收束：<strong>数据 → 信号 → 码元 → 比特率/波特率</strong> 是一条链；下一节把“0/1 怎样画成波形”展开成编码与调制。</p>
+</div>

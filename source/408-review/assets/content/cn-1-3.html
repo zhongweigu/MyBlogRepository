@@ -1,0 +1,76 @@
+<div class="article-content">
+<p>上一节解决“一个码元能带多少比特”，这一节回答“每秒最多能传多少个码元/比特”。两个经典上限：无噪声的奈氏准则，有噪声的香农定理。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>6 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#cap-nyquist">一、奈氏准则</a></li>
+<li><a href="#cap-shannon">二、香农定理</a></li>
+<li><a href="#cap-db">三、信噪比与 dB</a></li>
+<li><a href="#cap-both">四、两个公式同时出现</a></li>
+<li><a href="#cap-examples">五、典型题型</a></li>
+<li><a href="#cap-pitfalls">六、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="cap-nyquist">一、奈氏准则</h2>
+<p>理想低通信道、带宽为 W（Hz），每个码元有 V 种离散状态时，无码间串扰的最高码元速率为 <code>2W Baud</code>，极限数据传输速率为：</p>
+<p>$$C = 2W \log_2 V \quad (\text{b/s})$$</p>
+<p>这里的 <code>2W</code> 来自理想低通信道的奈奎斯特采样/成形条件；V 是码元状态数，不是比特数。V=2 时一码元 1 bit，V=4 时一码元 2 bit，V=16 时一码元 4 bit。</p>
+
+<h2 id="cap-shannon">二、香农定理</h2>
+<p>有噪声信道的极限数据传输速率为：</p>
+<p>$$C = W \log_2\left(1+\frac{S}{N}\right) \quad (\text{b/s})$$</p>
+<p>其中 W 是带宽（Hz），S 是信号平均功率，N 是噪声平均功率，S/N 是功率比（不是 dB）。香农给出的是理论上限，实际编码/调制通常达不到。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="奈氏准则与香农定理的输入、公式和取小关系" data-src="/408-review/assets/img/cn-nyquist-shannon.svg" href="/408-review/assets/img/cn-nyquist-shannon.svg">
+<img alt="奈氏准则和香农定理的公式与取小关系" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-nyquist-shannon.svg"/>
+</a>
+<figcaption>无噪声看奈氏，有噪声看香农；同时给条件时，两个上限都要算，取较小值。</figcaption>
+</figure>
+
+<h2 id="cap-db">三、信噪比与 dB</h2>
+<p>信噪比常用分贝表示：</p>
+<p>$$\text{SNR(dB)} = 10\log_{10}\left(\frac{S}{N}\right)$$</p>
+<div class="article-table"><table>
+<thead><tr><th>SNR(dB)</th><th>S/N</th><th>香农中的 log2(1+S/N)</th></tr></thead>
+<tbody>
+<tr><td>10dB</td><td>10</td><td>≈3.46</td></tr>
+<tr><td>20dB</td><td>100</td><td>≈6.66</td></tr>
+<tr><td>30dB</td><td>1000</td><td>≈9.97</td></tr>
+<tr><td>40dB</td><td>10000</td><td>≈13.29</td></tr>
+</tbody>
+</table></div>
+<p>30dB 不是 S/N=30，而是 S/N=1000；这是真题最常设的坑。</p>
+
+<h2 id="cap-both">四、两个公式同时出现</h2>
+<p>如果题目同时给出带宽 W、码元状态数 V 和信噪比，分别计算：</p>
+<ul>
+<li>奈氏上限 <code>C_N = 2W log2V</code>；</li>
+<li>香农上限 <code>C_S = W log2(1+S/N)</code>；</li>
+<li>实际可达到的极限取 <code>min(C_N, C_S)</code>。</li>
+</ul>
+<p>如果题目还说“实际速率是理论的 50%”，再乘 0.5。若只给带宽和信噪比，不要硬套奈氏；若只给无噪声和 V，不要硬套香农。</p>
+
+<h2 id="cap-examples">五、典型题型</h2>
+<div class="article-table"><table>
+<thead><tr><th>已知</th><th>先算什么</th><th>注意</th></tr></thead>
+<tbody>
+<tr><td>带宽 W、V 种状态、无噪声</td><td>2W log2V</td><td>V 是状态数，不是 bit 数</td></tr>
+<tr><td>带宽 W、SNR(dB)</td><td>先换 S/N，再 W log2(1+S/N)</td><td>30dB→1000</td></tr>
+<tr><td>W、V、SNR 都给</td><td>两个都算，取小</td><td>不要相加</td></tr>
+<tr><td>实际是理论的 x%</td><td>先算理论上限，再乘 x%</td><td>别把百分比当上限</td></tr>
+<tr><td>给最大速率反求 QAM 阶数</td><td>用 2W log2M = 速率</td><td>M 是星座点数</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="cap-pitfalls">六、易错点与收束</h2>
+<ul>
+<li><strong>“带宽 8kHz，所以 8kb/s”</strong>：带宽只是 W，还要乘 log2V；有噪声还要看香农。</li>
+<li><strong>“30dB 就是 S/N=30”</strong>：30dB 对应 1000 倍功率比。</li>
+<li><strong>“奈氏和香农相加”</strong>：不是相加；两个上限同时满足时取较小值。</li>
+<li><strong>“无噪声信道用香农”</strong>：无噪声用奈氏；N=0 时香农公式失去意义。</li>
+<li><strong>“4 个幅值就是 4 bit”</strong>：4 种状态只带 log2 4=2 bit。</li>
+</ul>
+<p>收束：<strong>奈氏管“符号率 × 每符号比特数”，香农管“噪声下的信息量上限”</strong>；题目同时给条件时，两个都算，取小。</p>
+</div>

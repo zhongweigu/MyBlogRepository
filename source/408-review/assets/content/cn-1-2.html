@@ -1,0 +1,98 @@
+<div class="article-content">
+<p>编码与调制都在解决“0/1 怎样变成波形”，但目标不同：基带编码把数字基带信号写成适合基带信道传输的电平/跳变；带通调制把基带信号搬到载波附近，适合无线、电话线等带通信道。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#enc-baseband">一、基带编码总览</a></li>
+<li><a href="#enc-nrz">二、NRZ 与 NRZI</a></li>
+<li><a href="#enc-man">三、曼彻斯特与差分曼彻斯特</a></li>
+<li><a href="#enc-passband">四、ASK、FSK、PSK</a></li>
+<li><a href="#enc-qam">五、QAM 与每码元比特数</a></li>
+<li><a href="#enc-10baset">六、10BaseT 与速率关系</a></li>
+<li><a href="#enc-pitfalls">七、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="enc-baseband">一、基带编码总览</h2>
+<p>基带编码（line coding）把数字基带信号的 0/1 映射成电平或跳变。好的编码要满足两件事：接收端能<strong>判位</strong>（区分 0/1），还能<strong>提取时钟</strong>（知道一个比特何时开始/结束）。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="NRZ 与曼彻斯特编码对同一串比特的波形" data-src="/408-review/assets/img/cn-encoding-waveforms.svg" href="/408-review/assets/img/cn-encoding-waveforms.svg">
+<img alt="NRZ 和曼彻斯特编码波形对比" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-encoding-waveforms.svg"/>
+</a>
+<figcaption>NRZ 看整段电平；曼彻斯特看每个比特中间那一次跳变。图中采用“0：高→低，1：低→高”的约定。</figcaption>
+</figure>
+
+<h2 id="enc-nrz">二、NRZ 与 NRZI</h2>
+<ul>
+<li><strong>NRZ（不归零）</strong>：高电平表示 1、低电平表示 0（也可相反）。实现简单，但连续相同比特时电平不变，接收端缺少时钟信息。</li>
+<li><strong>NRZI（不归零反转）</strong>：看电平是否<strong>跳变</strong>：跳变表示 0，不变表示 1（也有相反的约定）。它仍然可能在长串 1 时没有跳变。</li>
+<li><strong>归零编码（RZ）</strong>：每个比特中间回到零电平，能提供时钟，但占用更多带宽。</li>
+</ul>
+<p>NRZ/NRZI 的共同问题：长时间没有跳变时，接收端难以维持位同步；曼彻斯特通过“每比特中间必跳变”解决这个问题。</p>
+
+<h2 id="enc-man">三、曼彻斯特与差分曼彻斯特</h2>
+<p><strong>曼彻斯特编码</strong>：每个比特的中间必有一次跳变，既传数据又传时钟。常见两种相反约定：</p>
+<ul>
+<li>约定 A：向下跳变表示 1，向上跳变表示 0；</li>
+<li>约定 B：向下跳变表示 0，向上跳变表示 1。IEEE 802.3 10BaseT 常用这一种。</li>
+</ul>
+<p><strong>差分曼彻斯特编码</strong>：每个比特中间仍然必跳变（时钟）；看比特<strong>开始边界</strong>是否跳变：有跳变表示 0，无跳变表示 1（也可相反）。它不依赖绝对电平，抗极性反转更好。</p>
+<div class="article-table"><table>
+<thead><tr><th>编码</th><th>0/1 的表示</th><th>是否自带时钟</th><th>主要特点</th></tr></thead>
+<tbody>
+<tr><td>NRZ</td><td>高/低电平</td><td>否（需额外时钟或扰码）</td><td>简单、频带利用率高</td></tr>
+<tr><td>NRZI</td><td>跳变/不跳变</td><td>部分（依赖跳变）</td><td>抗极性反转，长串仍可能失步</td></tr>
+<tr><td>曼彻斯特</td><td>比特中间跳变方向</td><td>是</td><td>每比特至少一次跳变；波特率是比特率 2 倍</td></tr>
+<tr><td>差分曼彻斯特</td><td>起始边界有无跳变</td><td>是</td><td>抗极性反转；中间跳变只作时钟</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="enc-passband">四、ASK、FSK、PSK</h2>
+<p>带通调制用载波 <code>f_c</code> 承载基带信号，改变载波的不同参数：</p>
+<ul>
+<li><strong>ASK（幅移键控）</strong>：改变载波幅度，0/1 对应不同幅度；</li>
+<li><strong>FSK（频移键控）</strong>：改变载波频率，0/1 对应不同频率；</li>
+<li><strong>PSK（相移键控）</strong>：改变载波相位，0/1 对应不同相位。</li>
+</ul>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="ASK、FSK、PSK 改变载波的幅度、频率、相位" data-src="/408-review/assets/img/cn-passband.svg" href="/408-review/assets/img/cn-passband.svg">
+<img alt="ASK、FSK、PSK 三种带通调制波形示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-passband.svg"/>
+</a>
+<figcaption>ASK 改幅度，FSK 改频率，PSK 改相位；图中波形为原理示意，不按真实载波比例绘制。</figcaption>
+</figure>
+<p>2ASK/2FSK/2PSK 都只有两种状态，一个码元携带 1 bit；若采用 4 相 PSK，则有 4 种状态，一个码元携带 2 bit。</p>
+
+<h2 id="enc-qam">五、QAM 与每码元比特数</h2>
+<p><strong>QAM（正交幅度调制）</strong>同时改变幅度和相位，把信号点放在二维星座上。若幅度有 m 种、相位有 n 种，则状态数最多为 <code>m×n</code>，比特率为：</p>
+<p>$$R_b = B \times \log_2(mn)$$</p>
+<p>其中 B 是波特率。若题目直接给“星座点数 M”，则用 <code>log2M</code>：QAM-16 一个码元 4 bit，QAM-64 一个码元 6 bit，QAM-256 一个码元 8 bit。</p>
+<div class="article-table"><table>
+<thead><tr><th>调制</th><th>状态数</th><th>每码元比特数</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>2ASK / 2FSK / 2PSK</td><td>2</td><td>1</td><td>二进制调制</td></tr>
+<tr><td>4PSK（QPSK）</td><td>4</td><td>2</td><td>四种相位</td></tr>
+<tr><td>QAM-16</td><td>16</td><td>4</td><td>幅度/相位组合</td></tr>
+<tr><td>QAM-64</td><td>64</td><td>6</td><td>常用于高速链路</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="enc-10baset">六、10BaseT 与速率关系</h2>
+<p>10BaseT 的名称可以拆成三部分：<strong>10</strong> = 10Mb/s 比特率，<strong>Base</strong> = 基带传输，<strong>T</strong> = 双绞线（Twisted pair）。它使用曼彻斯特编码：</p>
+<ul>
+<li>比特率：10Mb/s；</li>
+<li>每个比特至少两次跳变，波特率：20MBaud；</li>
+<li>因此曼彻斯特的波特率是比特率的 2 倍。</li>
+</ul>
+<p>一般关系仍是 <code>R_b = R_B log2V</code>；编码/调制方式决定 V 或每比特跳变次数，信道带宽和噪声决定波特率/速率的<strong>上限</strong>（下一节）。</p>
+
+<h2 id="enc-pitfalls">七、易错点与收束</h2>
+<ul>
+<li><strong>“曼彻斯特的波特率等于比特率”</strong>：错；10BaseT 是 10Mb/s、20MBaud。</li>
+<li><strong>“NRZI 的 1 一定跳变”</strong>：不同教材约定可能相反；看题目定义。</li>
+<li><strong>“QAM 只调相位”</strong>：QAM 同时调幅度和相位；只调相位是 PSK。</li>
+<li><strong>“一个码元只能带 1 bit”</strong>：V 种状态可带 log2V bit；QAM-16 一码元 4 bit。</li>
+<li><strong>“向下跳一定表示 1”</strong>：曼彻斯特有相反约定；10BaseT 常用“向下=0、向上=1”，以题目图例为准。</li>
+</ul>
+<p>收束：<strong>基带编码解决“怎么画”，带通调制解决“搬到哪个频段”，QAM 解决“一个码元塞几个 bit”</strong>；下一节用奈氏/香农给这些波形定上限。</p>
+</div>

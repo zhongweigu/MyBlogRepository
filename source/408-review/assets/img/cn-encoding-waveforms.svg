@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620">
+<rect width="1080" height="620" fill="#fffdf8"/>
+<text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">基带编码波形：同一串比特的两种画法</text>
+<g font-family="sans-serif" font-size="14" fill="#24313a">
+<text x="45" y="66" font-weight="700">比特流</text>
+<line x1="140" y1="72" x2="140" y2="325" stroke="#c9c0ae" stroke-dasharray="4 4"/><text x="180.0" y="62" text-anchor="middle" font-size="14">0</text><line x1="220" y1="72" x2="220" y2="325" stroke="#c9c0ae" stroke-dasharray="4 4"/><text x="260.0" y="62" text-anchor="middle" font-size="14">1</text><line x1="300" y1="72" x2="300" y2="325" stroke="#c9c0ae" stroke-dasharray="4 4"/><text x="340.0" y="62" text-anchor="middle" font-size="14">1</text><line x1="380" y1="72" x2="380" y2="325" stroke="#c9c0ae" stroke-dasharray="4 4"/><text x="420.0" y="62" text-anchor="middle" font-size="14">0</text><line x1="460" y1="72" x2="460" y2="325" stroke="#c9c0ae" stroke-dasharray="4 4"/><text x="500.0" y="62" text-anchor="middle" font-size="14">0</text><line x1="540" y1="72" x2="540" y2="325" stroke="#c9c0ae" stroke-dasharray="4 4"/><text x="580.0" y="62" text-anchor="middle" font-size="14">1</text><line x1="620" y1="72" x2="620" y2="325" stroke="#c9c0ae" stroke-dasharray="4 4"/><text x="660.0" y="62" text-anchor="middle" font-size="14">1</text><line x1="700" y1="72" x2="700" y2="325" stroke="#c9c0ae" stroke-dasharray="4 4"/><text x="740.0" y="62" text-anchor="middle" font-size="14">1</text>
+<text x="45" y="118" font-weight="700">NRZ</text>
+<path d="M140,150 L220,150 L220,90 L300,90 L300,90 L380,90 L380,150 L460,150 L460,150 L540,150 L540,90 L620,90 L620,90 L700,90 L700,90 L780,90" fill="none" stroke="#3f6f8a" stroke-width="3"/>
+<text x="790" y="105" font-size="12">高=1，低=0（也可反约定）</text>
+<text x="790" y="125" font-size="12" fill="#52605a">连续相同比特时电平不变</text>
+<text x="45" y="268" font-weight="700">曼彻斯特</text>
+<path d="M140,235 L180.0,235 L180.0,295 L220,295 L220,295 L260.0,295 L260.0,235 L300,235 L300,295 L340.0,295 L340.0,235 L380,235 L380,235 L420.0,235 L420.0,295 L460,295 L460,235 L500.0,235 L500.0,295 L540,295 L540,295 L580.0,295 L580.0,235 L620,235 L620,295 L660.0,295 L660.0,235 L700,235 L700,295 L740.0,295 L740.0,235 L780,235" fill="none" stroke="#6f8f45" stroke-width="3"/>
+<text x="790" y="250" font-size="12">每比特中间必跳变</text>
+<text x="790" y="270" font-size="12">0：高→低；1：低→高</text>
+<text x="790" y="290" font-size="12" fill="#b54b45">IEEE 10BaseT 常用此约定</text>
+<line x1="120" y1="345" x2="940" y2="345" stroke="#c9c0ae"/>
+<text x="45" y="372" font-weight="700">读图顺序</text>
+<text x="45" y="396" font-size="13">先按虚线切出每个比特的区间；NRZ 看整段电平，曼彻斯特看区间中间那一次跳变的方向。</text>
+<text x="45" y="419" font-size="13">曼彻斯特每个比特至少一次跳变，接收端可以从跳变中恢复时钟；代价是波特率是比特率的 2 倍。</text>
+<rect x="45" y="445" width="990" height="75" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+<text x="65" y="468" font-weight="700">其他编码</text>
+<text x="65" y="490" font-size="13">NRZI：电平跳变=0、不变=1；差分曼彻斯特：中间必跳变，起始边界有跳变=0、无跳变=1。</text>
+<text x="65" y="509" font-size="12" fill="#6b777f">不同教材可能把 0/1 约定反过来；做题时先看题目给出的定义或图例，不要只背一个方向。</text>
+<text x="45" y="552" font-weight="700">10BaseT</text>
+<text x="45" y="575" font-size="13">10Mb/s 基带双绞线以太网，采用曼彻斯特编码；比特率 10Mb/s，波特率 20MBaud。</text>
+<text x="45" y="598" font-size="12" fill="#6b777f">“10”是比特率，不是波特率；“Base”是基带，“T”是双绞线。</text>
+</g></svg>

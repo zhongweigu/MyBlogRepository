@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-label="模拟信号、数字信号、基带与带通信号">
+  <rect width="1080" height="620" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">数据、信号与码元：先分清“信息”和“波形”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">模拟信号：参数连续</text>
+    <path d="M60 150 C100 80, 150 80, 190 150 S280 220, 320 150 S410 80, 450 150" fill="none" stroke="#3f6f8a" stroke-width="3"/>
+    <line x1="55" y1="190" x2="470" y2="190" stroke="#c9c0ae"/>
+    <text x="60" y="215" font-size="12">幅度/频率/相位可以连续变化</text>
+
+    <text x="560" y="75" font-weight="700">数字信号：参数离散</text>
+    <path d="M570 170 L620 170 L620 110 L680 110 L680 170 L740 170 L740 110 L800 110 L800 170 L860 170" fill="none" stroke="#6f8f45" stroke-width="3"/>
+    <line x1="565" y1="190" x2="880" y2="190" stroke="#c9c0ae"/>
+    <text x="570" y="215" font-size="12">只取有限个电平（如高/低）</text>
+
+    <text x="45" y="275" font-weight="700">基带信号：频谱从 0 附近开始</text>
+    <g>
+      <line x1="70" y1="330" x2="470" y2="330" stroke="#4d5b66"/>
+      <line x1="70" y1="330" x2="70" y2="275" stroke="#4d5b66"/>
+      <path d="M70 330 C110 310, 140 300, 180 310 S250 335, 300 325 S380 305, 450 330" fill="none" stroke="#3f6f8a" stroke-width="2"/>
+    </g>
+    <text x="70" y="365" font-size="12">含低频/直流，长距离信道常不适合直接传</text>
+
+    <text x="560" y="275" font-weight="700">带通信号：频谱搬到载波附近</text>
+    <g>
+      <line x1="590" y1="330" x2="980" y2="330" stroke="#4d5b66"/>
+      <path d="M590 330 C630 315, 650 305, 680 315 S720 340, 750 325 S800 300, 840 320 S920 340, 970 330" fill="none" stroke="#a8782c" stroke-width="2"/>
+      <line x1="760" y1="330" x2="760" y2="270" stroke="#b54b45" stroke-dasharray="4 3"/>
+      <text x="765" y="285" font-size="12" fill="#b54b45">载波 f_c</text>
+    </g>
+    <text x="590" y="365" font-size="12">经调制搬移，适合特定频段的信道</text>
+
+    <rect x="45" y="420" width="990" height="75" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="445" font-weight="700">码元（symbol）</text>
+    <text x="65" y="468" font-size="13">一个固定时长内的波形；一个码元可携带 1 bit，也可携带多个 bit。码元速率 = 每秒码元数，比特率 = 每秒比特数。</text>
+    <text x="65" y="486" font-size="12" fill="#6b777f">“数据”是信息实体，“信号”是它在介质上的电/光/电磁表现；三者不要混用。</text>
+
+    <text x="45" y="555" font-weight="700">一句话</text>
+    <text x="45" y="580" font-size="13">模拟/数字看参数是否连续；基带/带通看频谱位置；单工/半双工/全双工看方向——这是三组不同分类。</text>
+  </g>
+</svg>

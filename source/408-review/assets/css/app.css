@@ -28,6 +28,10 @@
   --violet-deep: #4f3555;
   --violet-soft: #eee3f0;
   --violet-soft-2: #f8f2f9;
+  --blue: #3f6f8a;
+  --blue-deep: #2f5367;
+  --blue-soft: #e5eff4;
+  --blue-soft-2: #f3f8fa;
   --red: #af3a2c;
   --red-soft: #f7e3df;
   --green: #3f7d58;
@@ -79,6 +83,10 @@
   --violet-deep: #dcb4e3;
   --violet-soft: #332638;
   --violet-soft-2: #271e2b;
+  --blue: #8db7d0;
+  --blue-deep: #a9cde0;
+  --blue-soft: #24343d;
+  --blue-soft-2: #1c292f;
   --red: #e07361;
   --red-soft: #38211d;
   --green: #7fc596;
@@ -3187,3 +3195,17 @@ h1, h2, h3, h4,
   .topic-rail { display: none; }
   .topic-article { width: 100%; min-width: 0; }
 }
+
+
+/* 计算机网络（物理层首章）主题色 */
+.tag-cn { background: var(--blue-soft-2); color: var(--blue); border-color: color-mix(in srgb, var(--blue) 20%, transparent); }
+.subject-bar.is-cn .sb-dot { background: var(--blue); }
+.subject-bar.is-cn .sb-track i { background: var(--blue); }
+.view-map.is-cn,
+.view-chapter.is-cn,
+.view-topic.is-cn { --accent: var(--blue); --accent-soft: var(--blue-soft); --accent-soft-2: var(--blue-soft-2); --accent-deep: var(--blue-deep); }
+.subject-tab.is-cn.is-active { border-left: 3px solid var(--blue); }
+.subject-tab.is-cn .st-pct b { color: var(--blue); }
+.subject-hero.is-cn { --accent: var(--blue); --accent-soft: var(--blue-soft); --accent-soft-2: var(--blue-soft-2); --accent-deep: var(--blue-deep); }
+.filter-chip.is-cn .fc-dot { background: var(--blue); }
+.daily-item.is-cn { --accent: var(--blue); --accent-soft: var(--blue-soft); }

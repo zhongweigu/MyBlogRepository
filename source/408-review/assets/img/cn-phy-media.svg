@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" role="img" aria-label="双绞线、同轴电缆、光纤和无线介质">
+  <rect width="1080" height="600" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">传输介质：导向介质把信号“关”在物理通路里</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">传输介质（前三种为导向介质，无线为非导向）</text>
+    <g>
+      <rect x="55" y="100" width="230" height="150" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+      <text x="170" y="126" text-anchor="middle" font-weight="700">双绞线</text>
+      <text x="75" y="152" font-size="12">UTP / STP；两根铜线绞合</text>
+      <text x="75" y="174" font-size="12">抵消部分电磁干扰</text>
+      <text x="75" y="196" font-size="12">以太网常用；约 100m</text>
+      <text x="75" y="218" font-size="12" fill="#52605a">便宜、易施工；带宽/距离有限</text>
+    </g>
+    <g>
+      <rect x="305" y="100" width="230" height="150" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+      <text x="420" y="126" text-anchor="middle" font-weight="700">同轴电缆</text>
+      <text x="325" y="152" font-size="12">内导体 + 绝缘 + 屏蔽 + 护套</text>
+      <text x="325" y="174" font-size="12">抗干扰较好</text>
+      <text x="325" y="196" font-size="12">早期以太网/有线电视</text>
+      <text x="325" y="218" font-size="12" fill="#52605a">比双绞线粗、贵</text>
+    </g>
+    <g>
+      <rect x="555" y="100" width="230" height="150" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+      <text x="670" y="126" text-anchor="middle" font-weight="700">光纤</text>
+      <text x="575" y="152" font-size="12">全反射传输光信号</text>
+      <text x="575" y="174" font-size="12">单模：激光、远距离</text>
+      <text x="575" y="196" font-size="12">多模：LED、较短距离</text>
+      <text x="575" y="218" font-size="12" fill="#52605a">带宽高、抗电磁干扰</text>
+    </g>
+    <g>
+      <rect x="805" y="100" width="220" height="150" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+      <text x="915" y="126" text-anchor="middle" font-weight="700">无线（非导向）</text>
+      <text x="825" y="152" font-size="12">无线电/微波/红外</text>
+      <text x="825" y="174" font-size="12">无需布线，覆盖灵活</text>
+      <text x="825" y="196" font-size="12">受干扰/遮挡/频谱管制</text>
+      <text x="825" y="218" font-size="12" fill="#52605a">空气也是传播介质</text>
+    </g>
+
+    <text x="45" y="300" font-weight="700">怎么选</text>
+    <text x="45" y="325">短距离、低成本、桌面接入 → 双绞线；抗干扰/较长距离 → 同轴或光纤；高带宽/远距离/强电磁环境 → 光纤；移动/难布线 → 无线。</text>
+    <text x="45" y="350" font-size="12" fill="#52605a">介质只负责传信号，不负责“发给哪个 MAC/IP”；寻址在链路层/网络层。</text>
+
+    <rect x="45" y="390" width="990" height="80" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="415" font-weight="700">物理层四特性</text>
+    <text x="65" y="439" font-size="13">机械：接口形状/引脚排列；电气：电压范围/阻抗；功能：每条线的电平表示什么；过程：事件发生的顺序。</text>
+    <text x="65" y="460" font-size="12" fill="#52605a">记法：机械看外形，电气看电压，功能看意义，过程看时序。</text>
+
+    <text x="45" y="525" font-weight="700">注意</text>
+    <text x="45" y="550" font-size="13">“传输介质”和“物理层设备”是两件事：介质是通路，中继器/集线器是扩展通路的设备。</text>
+    <text x="45" y="575" font-size="12" fill="#6b777f">光纤并不“不会坏”，弯折、接头污染、光功率不足都会影响传输。</text>
+  </g>
+</svg>
