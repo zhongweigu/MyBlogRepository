@@ -46,6 +46,7 @@ export function todayView() {
     })}
     <div class="today-links">
       <a href="#/recite">背诵模板</a>
+      <a href="#/dictation">默写自测</a>
       <a href="#/recite?g=letters">应用文</a>
       <a href="#/corpus">语料库</a>
       <a href="#/exams">真题示例</a>

@@ -6,7 +6,7 @@ import re
 HERE = os.path.dirname(__file__)
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "out")
-TARGET = os.path.join(ROOT, "source", "english-review", "assets", "js-v2", "data", "exam-texts.js")
+TARGET = os.path.join(ROOT, "source", "english-review", "assets", "js-v3", "data", "exam-texts.js")
 YEARS = ["2026", "2025", "2024", "2023", "2022", "2021", "2020"]
 VERSIONS = ["满分版", "简化版", "速通版 · 标准套写", "速通版 · 无脑套写"]
 

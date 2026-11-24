@@ -71,6 +71,11 @@ export function reciteView(query = {}) {
       desc: "按段落功能分组，一句一行；<mark class=\"hl\">高亮</mark>处是核心搭配，先记它。英文是主体，中文只做注释。应用文模板在最后。",
     })}
 
+    <div class="mode-tabs">
+      <a class="is-active" href="#/recite">背诵模板</a>
+      <a href="#/dictation">默写自测</a>
+    </div>
+
     <nav class="recite-index" aria-label="背诵分组">
       ${RECITE_GROUPS.map((g) => `<a href="#/recite?g=${g.id}"><b>${g.no}</b>${escapeHtml(g.name)}</a>`).join("")}
       <a href="#/recite?g=letters"><b>七</b>应用文</a>

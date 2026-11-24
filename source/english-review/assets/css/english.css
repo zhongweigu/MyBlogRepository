@@ -64,6 +64,132 @@
   color: var(--ink-2);
 }
 
+/* ---------- 背诵 / 默写切换 ---------- */
+.mode-tabs {
+  display: flex;
+  gap: 18px;
+  margin: 0 0 20px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.mode-tabs a {
+  padding: 8px 2px;
+  margin-bottom: -1px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  border-bottom: 2px solid transparent;
+}
+.mode-tabs a.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--indigo);
+}
+
+/* ---------- 默写自测 ---------- */
+.quiz-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  margin: 0 0 14px;
+}
+.quiz-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.quiz-toolbar select {
+  max-width: 260px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12.5px;
+}
+.quiz-stage { max-width: 780px; }
+.quiz-card {
+  padding: 22px 24px 20px;
+  border: 1px solid var(--line);
+  background: transparent;
+}
+.quiz-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.quiz-instruction {
+  margin: 18px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.quiz-zh {
+  margin: 4px 0 12px;
+  font-family: var(--serif);
+  font-size: 21px;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.quiz-note {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+.quiz-input {
+  width: 100%;
+  min-height: 92px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16.5px;
+  line-height: 1.7;
+  resize: vertical;
+}
+.quiz-input:focus {
+  outline: none;
+  border-color: var(--indigo);
+}
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.quiz-answer {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+.quiz-answer summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  color: var(--indigo-deep);
+}
+.quiz-answer summary::-webkit-details-marker { display: none; }
+.quiz-answer .en {
+  margin: 10px 0 4px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--en-ink);
+}
+
 /* ---------- 今日 ---------- */
 .today-date {
   margin: 0 0 4px;
@@ -415,6 +541,10 @@ mark.hl-strong {
   .corpus-row .corpus-en { font-size: 16.5px; }
   .tpl-en { font-size: 17px; }
   .exam-essay p { font-size: 17.5px; }
+  .quiz-card { padding: 16px 14px; }
+  .quiz-zh { font-size: 19px; }
+  .quiz-toolbar label { width: 100%; align-items: flex-start; flex-direction: column; gap: 4px; }
+  .quiz-toolbar select { width: 100%; max-width: none; }
 }
 
 @media print {

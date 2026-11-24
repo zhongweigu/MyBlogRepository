@@ -3,6 +3,7 @@ import { CORPUS, EXTRA_CORPUS } from "../data/corpus.js";
 import { LETTERS } from "../data/letters.js";
 import { EXAMS } from "../data/exams.js";
 import { CARDS } from "../data/cards.js";
+import { DICTATION_ITEMS } from "../data/dictation.js";
 import { footer, pageHead, escapeHtml } from "../ui.js";
 
 const COVERAGE = [
@@ -15,7 +16,8 @@ const COVERAGE = [
   ["官方写作要求、字数与评分原则", "使用说明 p.16–17（截图）", "#/strategy/str-04", "A"],
   ["2023 / 2024 / 2025 官方定性", "使用说明 p.19–21、p.28–29（截图）", "#/exams", "A"],
   ["小作文 13 场景与可背模板", "PDF 未涉及，依据大纲扩充", "#/recite?g=letters", "C"],
-  ["模板句扩写（约 300 句）", "以 PDF 例句为骨架仿写", "#/recite", "C"],
+  ["模板句扩写（323 句）", "以 PDF 例句为骨架仿写", "#/recite", "C"],
+  ["默写题库（背诵 + 语料）", "从现有模板与语料自动派生", "#/dictation", "B"],
 ];
 
 export function sourcesView() {
@@ -53,7 +55,7 @@ export function sourcesView() {
     <h2 style="font-family:var(--serif);font-size:19px;margin:28px 0 8px">数量</h2>
     <p class="small" style="line-height:2">
       PDF 4 份 / 151 页；语料 ${corpusCount} 条；真题 ${EXAMS.length} 年 × 4 版（页面只展示 5 篇主范文）；
-      小作文 ${LETTERS.length} 类；每日卡 ${CARDS.length} 张；策略 ${STRATEGY.length} 篇。
+      小作文 ${LETTERS.length} 类；每日卡 ${CARDS.length} 张；默写题库 ${DICTATION_ITEMS.length} 条；策略 ${STRATEGY.length} 篇。
     </p>
 
     <h2 style="font-family:var(--serif);font-size:19px;margin:28px 0 8px">尚未完成</h2>

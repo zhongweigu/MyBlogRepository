@@ -1,5 +1,6 @@
 import { todayView } from "./views/today.js";
 import { reciteView } from "./views/recite.js";
+import { dictationView, initDictation } from "./views/dictation.js";
 import { corpusView, filterCorpus } from "./views/corpus.js";
 import { examsView } from "./views/exams.js";
 import { strategyView, hydrateStrategy } from "./views/strategy.js";
@@ -70,6 +71,10 @@ function render({ scroll = true } = {}) {
       html = reciteView(route.query);
       nav = "recite";
       title = "背诵";
+    } else if (name === "dictation") {
+      html = dictationView(route.query);
+      nav = "recite";
+      title = "默写";
     } else if (name === "corpus") {
       html = corpusView(route.query);
       nav = "corpus";
@@ -119,6 +124,7 @@ function render({ scroll = true } = {}) {
 function afterRender(route) {
   const [name, param] = route.parts;
   if (name === "strategy" && param) hydrateStrategy(param);
+  if (name === "dictation") initDictation();
   if (name === "recite" && route.query.g) {
     const target = document.getElementById(`g-${route.query.g}`);
     if (target) setTimeout(() => target.scrollIntoView({ block: "start" }), 60);

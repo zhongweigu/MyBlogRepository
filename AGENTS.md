@@ -411,7 +411,9 @@
 | Phase 5 真题精简 | 按题型选代表年份（2021/2023 图画、2025/2026 图表、2024 混合），最多 5 篇；只留满分版；可背句高亮；删四版切换与填空大表 | 4–5 篇；高亮可见；无四版切换 |
 | Phase 6 验收与推送 | 构建、5 条路由、520px、字号/高亮抽查；更新 sources 与 §24；按 §25 推送 | 无报错；字号达标；工作区干净 |
 
-**执行状态**：2026-11-21 已执行 Phase 0–5：删除写作台、导航精简为 5 项、英文/中文/高亮重设、模板库 323 句、应用文 128 句、语料紧凑化、策略 4 篇、真题 5 篇代表。Phase 6 正在做最终构建与推送验收。以下 24.1–24.8 已按新结构改写。
+**执行状态**：2026-11-21 已执行 Phase 0–5：删除写作台、导航精简为 5 项、英文/中文/高亮重设、模板库 323 句、应用文 128 句、语料紧凑化、策略 4 篇、真题 5 篇代表。Phase 6 已完成构建与推送。
+
+**2026-11-24 追加：默写自测。** `#/dictation` 从 `g1-start`～`g4-analysis`、`letter-templates`、`corpus` 自动派生 **708 条**题库；卡片显示中文、英文答案折叠，不检查对错；范围可选六类背诵、应用文、七类语料、选背。入口在背诵页的「默写自测」标签与今日链接，主导航仍保持 5 项。
 
 ### 24.1 三条底线
 
@@ -421,7 +423,7 @@
 
 ### 24.2 目录与数据归属
 
-下表 `data/` 指 `assets/js-v2/data/`，`views/` 指 `assets/js-v2/views/`，`content/` 指 `assets/content/`。
+下表 `data/` 指 `assets/js-v3/data/`，`views/` 指 `assets/js-v3/views/`，`content/` 指 `assets/content/`。
 
 | 要改什么 | 改哪里 | 约束 |
 | --- | --- | --- |
@@ -429,6 +431,7 @@
 | 背诵模板六类、句数配额 | `data/g1-start.js`～`g4-analysis.js` | 新写句标 C；PDF 原句标 A；`templates.js` / `library.js` 只作 A 级归档，不再作页面主数据 |
 | 小作文 13 场景与可背模板 | `data/letters.js`、`data/letter-templates.js` | `letters.js` 保留范文/任务；模板放 `letter-templates.js`（开头/主体/结尾） |
 | 模板聚合与渲染顺序 | `data/recite-groups.js` | 六类分组；描述内容合并图画与图表；不要改分组顺序 |
+| 默写题库（背诵 + 语料） | `data/dictation.js` | 只读派生，不手工抄一份；范围选项由 `DICTATION_SCOPES` 生成 |
 | 段落功能、图画、图表（旧） | `data/library.js` | A 级归档，不再作为主数据 |
 | 表达、搭配、连接、句型、中式对照 | `data/expressions.js` | 不确定表达标“待核验”，不进核心背诵 |
 | 真题元数据（主题、官方定性、槽位、提醒） | `data/exams.js` | `slots` 为 `[槽位, 英文, 中文, 出处]`；`versions` 顺序固定为满分 / 简化 / 速通标准 / 速通无脑 |
@@ -437,7 +440,7 @@
 | 策略目录 | `data/meta.js` 的 `STRATEGY` | 新增文章先加目录项，再建 `content/<id>.html` |
 | 策略长文 | `assets/content/str-XX.html` | 首段 `.article-lead`，`h2` 分节，来源标记用 `src-mark` |
 | 样式 | `assets/css/english.css` | 不改 `app.css`（408/政治共用） |
-| 路由、渲染、交互 | `assets/js-v2/app.js`、`views/*.js` | 改路由必须同步导航与深链 |
+| 路由、渲染、交互 | `assets/js-v3/app.js`、`views/*.js` | 改路由必须同步导航与深链 |
 | 真题题目图 | `assets/img/exam-<年份>.png` | 只放本地图，不用外链 |
 
 **稳定 ID（不要改名）**：语料 `harmony / prosperity / civilization / dedication / kindness / patriotism / integrity`；小作文 `invite / suggest / thanks / apology / apply / notice / recommend / introduce / complain / inquire / congratulate / decline / minutes`；策略 `str-01…str-04`；真题用年份。改名会断卡片、断深链。
@@ -480,6 +483,7 @@
 - **加语料**：在对应 `value.slots.<slot>` 追加 `[en, zh]`；战略用 `{zh, en}`；检查词性；每日卡会自动增加。
 - **改小作文**：改 `letters.js` 的范文/任务，改 `letter-templates.js` 的开头/主体/结尾；检查 `#/recite?open=<id>` 深链。
 - **加策略长文**：`meta.js` 加 `str-05` 目录项 → 新建 `content/str-05.html` → 正文首段 `.article-lead`、`h2` 分节 → 构建后目录自动生成。
+- **改默写题库**：内容自动来自 `g1-start`～`g4-analysis`、`letter-templates`、`corpus`；增删原数据后题库自动变化，不另存副本；范围选项在 `data/dictation.js` 的 `DICTATION_SCOPES`。
 - **改官方定性**：找到原文 → 引用（标 A）→ 同步 `exams.js` 的 official/officialNote 与 `sources.js` 的未完成清单；两者不能互相矛盾。
 - **修渲染错误**：先看控制台与路由；常见原因是可选字段未判空、`corpus` 的 strategy 写成数组、`exam-texts` 与 `versions` 下标不匹配、图片路径写错。
 
@@ -492,9 +496,9 @@ python -m http.server --directory public
 
 改 `_config`、路由、schema、批量图片才 `npx hexo clean`；日常只 generate。
 
-**必查路由**：`#/today`、`#/recite`、`#/recite?g=letters`、`#/recite?open=invite`、`#/corpus`、`#/exams?year=2024`、`#/strategy/str-01`、`#/sources`。改哪页查哪页，另加一个入口。
+**必查路由**：`#/today`、`#/recite`、`#/recite?g=letters`、`#/recite?open=invite`、`#/dictation`、`#/dictation?scope=corpus%3Aharmony`、`#/corpus`、`#/exams?year=2024`、`#/strategy/str-01`、`#/sources`。改哪页查哪页，另加一个入口。
 
-**通过标准**：无“页面渲染失败 / 正文读取失败 / 正在铺开复习台 / undefined”；六类模板与 13 类应用文可见；策略长文能 fetch 且图片可见；语料搜索与槽位筛选正常；真题只显示 1 篇主范文、无四版切换；桌面 1440 与移动 520 无横向溢出（headless 的 390 实际视口约 518，截图右侧会被裁，不是布局问题）。
+**通过标准**：无“页面渲染失败 / 正文读取失败 / 正在铺开复习台 / undefined”；六类模板与 13 类应用文可见；默写卡能换题、答案折叠、范围切换正常；策略长文能 fetch 且图片可见；语料搜索与槽位筛选正常；真题只显示 1 篇主范文、无四版切换；桌面 1440 与移动 520 无横向溢出（headless 的 390 实际视口约 518，截图右侧会被裁，不是布局问题）。
 
 **缓存**：改 JS/CSS 时递增 `assets/js-vN` 或 `english.css?v=...`；只改数据文件通常不用 bump，但线上强缓存时也要改查询参数。
 
