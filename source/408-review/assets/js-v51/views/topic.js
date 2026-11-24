@@ -312,7 +312,7 @@ export async function hydrateTopicArticle(topicId) {
   if (!topic) return;
 
   try {
-    const res = await fetch(`/408-review/assets/content/${topicId}.html?v=20261124-2`, { cache: 'no-cache' });
+    const res = await fetch(`/408-review/assets/content/${topicId}.html?v=20261124-4`, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`article ${res.status}`);
     const html = await res.text();
     if (host.dataset.topicId !== topicId) return;
