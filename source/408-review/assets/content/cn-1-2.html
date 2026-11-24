@@ -1,4 +1,4 @@
-<div class="article-content">
+﻿<div class="article-content">
 <p>编码与调制都在解决“0/1 怎样变成波形”，但目标不同：基带编码把数字基带信号写成适合基带信道传输的电平/跳变；带通调制把基带信号搬到载波附近，适合无线、电话线等带通信道。</p>
 
 <details class="article-toc">
@@ -17,10 +17,10 @@
 <h2 id="enc-baseband">一、基带编码总览</h2>
 <p>基带编码（line coding）把数字基带信号的 0/1 映射成电平或跳变。好的编码要满足两件事：接收端能<strong>判位</strong>（区分 0/1），还能<strong>提取时钟</strong>（知道一个比特何时开始/结束）。</p>
 <figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="NRZ 与曼彻斯特编码对同一串比特的波形" data-src="/408-review/assets/img/cn-encoding-waveforms.svg" href="/408-review/assets/img/cn-encoding-waveforms.svg">
-<img alt="NRZ、NRZI、RZ、曼彻斯特、差分曼彻斯特五种编码波形对比" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-encoding-waveforms.svg"/>
+<a class="figure-link" data-action="zoom-image" data-caption="NRZ 与曼彻斯特编码对同一串比特的波形" data-src="/408-review/assets/img/cn-encoding-waveforms-v2.svg" href="/408-review/assets/img/cn-encoding-waveforms-v2.svg">
+<img alt="NRZ、NRZI、RZ、曼彻斯特、差分曼彻斯特五种编码波形对比" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-encoding-waveforms-v2.svg"/>
 </a>
-<figcaption>同一串比特的五种基带编码：NRZ 看整段电平，NRZI 看边界跳变，RZ 中途归零，曼彻斯特看中间跳变，差分曼彻斯特看起始边界。</figcaption>
+<figcaption>同一串比特的五种基带编码：NRZ 看整段电平，NRZI 看边界跳变，RZ 中途归零，曼彻斯特看中间跳变，差分曼彻斯特看起始边界。</figcaption><p><strong>读图关键：</strong>NRZ 行中间的虚线是零电平，高电平表示 1、低电平表示 0；RZ 的 0 是“先到低电平，再回到零”，1 是“先到高电平，再回到零”。不要把 RZ 的低电平画成一直贴着低电平不回零。</p>
 </figure>
 
 <h2 id="enc-nrz">二、NRZ 与 NRZI</h2>
@@ -105,3 +105,4 @@
 </ul>
 <p>收束：<strong>基带编码解决“怎么画”，带通调制解决“搬到哪个频段”，QAM 解决“一个码元塞几个 bit”</strong>；下一节用奈氏/香农给这些波形定上限。</p>
 </div>
+

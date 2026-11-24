@@ -26,7 +26,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v49/
+│   ├── js-v50/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -444,6 +444,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 已录入 91 道 OS 真题（原 71 道 + I/O 20 道），题库存量为 268；计算机网络 12 道在 `data/questions-cn.js`。I/O 题在 `data/questions-io.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` 到 `os-6`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加章节、在 `os.js` / `os-extra.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
 
