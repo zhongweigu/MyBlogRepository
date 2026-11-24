@@ -22,14 +22,17 @@
 <tr><td>介质访问控制</td><td>多个结点共享信道时，决定谁先发、冲突怎样处理</td></tr>
 </tbody>
 </table></div>
-<p>链路层是“结点到结点”，网络层才是“端到端”。链路层只保证相邻结点之间的一跳，不负责整条路径的可靠交付。</p><p><strong>信道类型</strong>分点对点和广播：点对点链路（如 PPP）只有两个端点，不需要介质访问控制；广播链路（如共享以太网、无线局域网）有多个站点共享信道，需要介质访问控制来决定谁先发。</p>
+<p>链路层是“结点到结点”，网络层才是“端到端”。链路层只保证相邻结点之间的一跳，不负责整条路径的可靠交付。这一点很重要：<mark>链路层做的是“这一跳别传错”，不是“从源到目的整条路都可靠”</mark>。</p>
+<p><strong>信道类型</strong>分点对点和广播：点对点链路（如 PPP）只有两个端点，不需要介质访问控制；广播链路（如共享以太网、无线局域网）有多个站点共享信道，需要介质访问控制来决定谁先发。所以同是“数据链路层”，PPP 和以太网要解决的问题并不完全相同。</p>
 
 <h2 id="dll-frame">二、帧与组帧</h2>
-<p>帧通常由<strong>首部 + 数据 + 尾部</strong>组成。数据字段长度受 MTU 限制；以太网 MTU 常为 1500B，不含帧头/帧尾。组帧要解决两个问题：</p>
+<p>帧通常由<strong>首部 + 数据 + 尾部</strong>组成。数据字段长度受 MTU 限制；以太网 MTU 常为 1500B，不含帧头/帧尾。可以把帧想成一个“信封”：首部写地址/控制信息，数据是信纸，尾部（如 FCS）用于校验。</p>
+<p>物理层只负责连续地送比特，它不会告诉接收端“这一帧到这里结束”。如果接收端不知道边界，就可能把上一帧的尾部当成下一帧的首部，整条链路的解析都会错位。组帧要解决两个问题：</p>
 <ul>
 <li><strong>定界</strong>：接收端怎样从连续比特流中找出帧边界；</li>
 <li><strong>透明传输</strong>：数据字段里出现与定界符相同的比特/字节时，不能误判为帧尾。</li>
 </ul>
+<p>“透明”不是“数据真的消失”，而是<mark>数据字段里出现任何比特组合，接收端都能原样还原，不会被误当成控制信息</mark>。这也是为什么需要填充/转义，而不是随便选一个特殊字符当帧尾。</p>
 
 <h2 id="dll-trans">三、四种透明传输方法</h2>
 <div class="article-table"><table>
@@ -41,6 +44,8 @@
 <tr><td>违规编码</td><td>用物理层不会出现的编码组合作为边界</td><td>不需要填充，但依赖具体编码</td></tr>
 </tbody>
 </table></div>
+<p>四种方法的核心区别是“<strong>按什么单位找边界</strong>”：字符计数按长度，字节填充按字节，零比特填充按比特，违规编码按物理层编码。考试里最容易混的是字节填充和零比特填充：前者面向字节（PPP），后者面向任意比特流（HDLC）。</p>
+<p><strong>字符计数法</strong>的隐患可以用一个例子说明：第一帧计数字段写错，接收端就会把第二帧的开头当成第一帧的剩余部分，之后每一帧都跟着错位，这叫“错误传播”。<strong>字节填充</strong>要在数据中遇到 0x7E/0x7D 时插入 0x7D；<strong>零比特填充</strong>则是在数据中每出现 5 个连续 1 后插入一个 0，接收端每看到 5 个连续 1 就删掉后面的 0，二者不能互换。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="帧定界、字节填充与零比特填充" data-src="/408-review/assets/img/cn-frame-transparency.svg" href="/408-review/assets/img/cn-frame-transparency.svg">
 <img alt="帧字段、字节填充和零比特填充示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-frame-transparency.svg"/>
@@ -49,15 +54,16 @@
 </figure>
 
 <h2 id="dll-ppp">四、PPP 帧与字节填充</h2>
-<p>PPP 是点对点协议，帧格式为：</p>
+<p>PPP 是点对点协议，用来在一条点对点链路上封装网络层数据。它的帧格式为：</p>
 <p><code>Flag(0x7E) | Address(0xFF) | Control(0x03) | Protocol | Information | FCS | Flag(0x7E)</code></p>
 <ul>
-<li>Flag 用 0x7E 标记帧开始/结束；</li>
-<li>Address/Control 在 PPP 中通常是固定值 0xFF/0x03；</li>
-<li>Protocol 标识网络层协议；Information 是数据；FCS 用 CRC 检错；</li>
-<li>数据中出现 0x7E 或 0x7D 时，用 0x7D 转义：0x7E→0x7D 0x5E，0x7D→0x7D 0x5D。</li>
+<li><strong>Flag = 0x7E</strong>：帧的开始/结束标志；连续两个 Flag 之间是一帧。</li>
+<li><strong>Address = 0xFF、Control = 0x03</strong>：PPP 的固定值，实际可扩展；</li>
+<li><strong>Protocol</strong>：标识 Information 里装的是 IPv4、IPv6 还是其他协议；</li>
+<li><strong>Information</strong>：网络层数据，长度可变；<strong>FCS</strong>：CRC 检错；</li>
+<li>数据中出现 0x7E 或 0x7D 时，用 0x7D 转义：<mark>0x7E→0x7D 0x5E，0x7D→0x7D 0x5D</mark>；接收端遇到 0x7D 就把下一字节与 0x20 异或还原。</li>
 </ul>
-<p>PPP 有检错（FCS），但默认<strong>不提供可靠重传</strong>；它不是“可靠传输协议”。PPP 还支持 LCP 链路控制、认证和多协议封装。</p>
+<p>PPP 有检错（FCS），但默认<mark>不提供可靠重传</mark>；它不是“可靠传输协议”。PPP 还支持 LCP 链路控制、认证（PAP/CHAP）和多协议封装。也就是说，PPP 负责“把包封成帧、检查这一跳有没有坏”，不负责“丢了就重发”；可靠传输要靠 TCP 等上层，或者额外的可靠机制。</p>
 
 <h2 id="dll-pitfalls">五、易错点与收束</h2>
 <ul>

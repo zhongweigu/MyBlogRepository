@@ -1,5 +1,6 @@
 <div class="article-content">
 <p>差错控制分两层：<strong>检错</strong>（发现错了，重传）和<strong>纠错</strong>（直接定位并改正）。奇偶校验、CRC 是常见检错码；海明码是常见纠错码，而海明距离给出“最多能检/纠多少错”的统一尺度。</p>
+<p>先想清楚一个前提：<mark>接收端不知道原始数据是什么</mark>，它只能根据“收到的码字是否像合法码字”来判断。合法码字之间隔得越远，某个码字被噪声推错几位后，越不容易“误判成另一个合法码字”。这就是海明距离的几何直觉。</p>
 
 <details class="article-toc">
 <summary>本页目录 <span>6 节</span></summary>
@@ -15,16 +16,18 @@
 
 <h2 id="err-parity">一、奇偶校验</h2>
 <p>在数据后增加 1 位校验位，使整个码字中 1 的个数为奇数（奇校验）或偶数（偶校验）。它只能发现<strong>奇数个比特</strong>同时出错，不能定位，也不能纠正；偶数个比特同时翻转时可能检不出。</p>
+<p>为什么偶数个错会漏掉？因为校验位只看“1 的总数的奇偶性”。如果两位同时从 0 变 1（或 1 变 0），1 的个数改变 2，奇偶性不变，校验位仍然“正确”。这就是奇偶校验只能做最便宜检查、不能做可靠保护的原因。</p>
 <p>二维奇偶校验把数据排成矩阵，每行每列都加校验位，可以发现并定位部分错误，但开销更大。</p>
 
 <h2 id="err-crc">二、CRC：模 2 除法</h2>
-<p>CRC 用一个<strong>生成多项式 G(x)</strong> 做模 2 除法（异或，不借位）：</p>
+<p>CRC 用一个<strong>生成多项式 G(x)</strong> 做模 2 除法（异或，不借位）。它把“数据 + 余数”构造成一个能被 G(x) 整除的多项式，接收端只要再除一次，看余数是否为 0。</p>
 <ol>
 <li>设 G(x) 的最高次数为 r，在数据后补 r 个 0；</li>
 <li>用 G(x) 对应的比特串除“数据 + r 个 0”；</li>
 <li>余数（r 位）就是 FCS，附在数据后面发送；</li>
 <li>接收端用同一个 G(x) 除“数据 + FCS”，余数为 0 则认为无错。</li>
 </ol>
+<p><strong>一个具体例子</strong>：数据 <code>1101</code>，G=<code>1011</code>（r=3）。先在数据后补 3 个 0，得到 <code>1101000</code>；用 <code>1011</code> 做模 2 除法，余数为 <code>001</code>；把余数回填，发送 <code>1101001</code>。接收端用同一个 <code>1011</code> 除 <code>1101001</code>，余数为 0，就认为没有检测到错误。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="CRC 发送端补零、模2除法求余数，接收端再除一次" data-src="/408-review/assets/img/cn-crc.svg" href="/408-review/assets/img/cn-crc.svg">
 <img alt="CRC 发送端与接收端的模2除法流程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-crc.svg"/>
@@ -41,6 +44,7 @@
 
 <h2 id="err-hamming">四、海明距离</h2>
 <p>两个等长码字 <code>x</code>、<code>y</code> 的<strong>海明距离</strong> <code>d(x,y)</code> 是它们对应位不同的个数。一个码的<strong>最小距离</strong> <code>d0</code> 是所有不同码字距离的最小值。</p>
+<p>把每个合法码字想成空间里的一个点，噪声把收到的码字推离原来的点。若两个码字距离为 d0，则以它们为球心、半径 t 的“错误球”要互不重叠，必须 <mark>2t+1 ≤ d0</mark>；只要求“不要推成另一个合法码字”，则半径 e 的球不碰到另一个球心即可，<mark>e+1 ≤ d0</mark>。</p>
 <p>例如：<code>x=00101101</code>，取反得到 <code>y=11010010</code>，逐位比较 8 位全不同，所以 <code>d(x,y)=8</code>。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="海明距离与检错/纠错半径：d0 越大，码字之间隔得越远" data-src="/408-review/assets/img/cn-hamming.svg" href="/408-review/assets/img/cn-hamming.svg">
@@ -59,7 +63,10 @@
 <tr><td>检测 e 并纠正 t（e≥t）</td><td><code>d0 ≥ e+t+1</code></td><td>既要区分 e 个错，又要能纠 t 个错</td></tr>
 </tbody>
 </table></div>
-<p><strong>(7,4) 海明码</strong>：4 个数据位，3 个校验位，总长 7 位，最小距离 3，可纠正 1 位错。校验位放在 1、2、4 号位置，分别负责一组位置的奇偶校验；接收端计算 syndrome，非 0 的位置就是出错位。</p>
+<p><strong>(7,4) 海明码</strong>：4 个数据位，3 个校验位，总长 7 位，最小距离 3，可纠正 1 位错。为什么校验位放在 1、2、4 号位置？因为 1、2、4 的二进制分别是 001、010、100，正好可以“按位”覆盖所有位置；每个数据位的位置编号都能拆成这几个校验位的组合。</p>
+<p>设数据位为 d1、d2、d3、d4，校验位为 p1、p2、p4，则：</p>
+<p><code>p1 = d1 ⊕ d2 ⊕ d4</code>，<code>p2 = d1 ⊕ d3 ⊕ d4</code>，<code>p4 = d2 ⊕ d3 ⊕ d4</code>。</p>
+<p>接收端重新计算三个校验方程，得到 syndrome（s1,s2,s4）。若全为 0，认为无错；若不全为 0，<mark>syndrome 的二进制值就是出错位的位置</mark>。例如 s1=1、s2=0、s4=1，二进制 101=5，说明第 5 位出错，取反即可。</p>
 <div class="article-table"><table>
 <thead><tr><th>位置</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
 <tbody>

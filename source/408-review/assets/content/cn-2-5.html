@@ -1,5 +1,6 @@
 <div class="article-content">
 <p>以太网是数据链路层的核心实例：固定格式的 MAC 帧、CSMA/CD 的共享式历史、交换机的自学习转发，以及用 VLAN/STP 把局域网做大。无线局域网 802.11 则用 CSMA/CA。</p>
+<p>这一节的主线是：<mark>帧决定“这一跳怎样交付”，交换表决定“从哪个端口出去”，VLAN 决定“哪些帧属于同一个广播域”，STP 决定“冗余链路中哪些端口暂时不用”</mark>。四件事各管一层，不要混在一起。</p>
 
 <details class="article-toc">
 <summary>本页目录 <span>7 节</span></summary>
@@ -26,7 +27,9 @@
 <tr><td>FCS</td><td>4B</td><td>CRC 检错</td></tr>
 </tbody>
 </table></div>
-<p>帧长范围 64–1518B（不含前导码）；802.1Q 加 4B 标签后最大 1522B。前导码 7B + SFD 1B 用于同步，不计入帧长。</p>
+<p>帧长范围 64–1518B（不含前导码）；802.1Q 加 4B 标签后最大 1522B。前导码 7B + SFD 1B 用于同步，<mark>不计入帧长</mark>。</p>
+<p>为什么数据字段最小是 46B？因为 CSMA/CD 要求最短帧 64B；目的/源/类型/FCS 共 18B，64−18=46。数据不足 46B 时，MAC 层要在数据字段后填充到 46B，接收端再根据上层协议长度把填充丢掉。</p>
+<p>“类型/长度”字段要看数值：大于 0x0600（1536）通常表示上层协议类型（如 0x0800 是 IPv4）；小于等于 1500 表示数据长度。这个字段是 Ethernet V2 和 802.3 兼容留下的设计。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="以太网 MAC 帧字段与 64B 最短帧" data-src="/408-review/assets/img/cn-ethernet-frame.svg" href="/408-review/assets/img/cn-ethernet-frame.svg">
 <img alt="以太网 MAC 帧字段：目的、源、类型、数据、FCS" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-ethernet-frame.svg"/>
@@ -36,16 +39,20 @@
 
 <h2 id="eth-mac">二、MAC 地址</h2>
 <p>MAC 地址 48 位，通常写成 6 组十六进制。前 24 位是厂商 OUI，后 24 位由厂商分配；全 1（FF-FF-FF-FF-FF-FF）是广播地址，第一字节最低位为 1 表示组播。</p>
+<p>第一字节还有两个标志位：<mark>最低位 I/G 表示单播/组播，次低位 U/L 表示全局/本地管理</mark>。所以看到 `01-00-5E-...` 这类地址，第一字节最低位是 1，说明是组播；不要把它当普通单播地址。</p>
 <p>MAC 地址是数据链路层地址，只在本地链路/广播域内使用；跨网段转发要靠 IP 路由。</p>
 
 <h2 id="eth-switch">三、交换机自学习</h2>
-<p>交换机收到帧后按“<strong>源 MAC 学习、目的 MAC 转发</strong>”工作：</p>
+<p>交换机收到帧后按“<strong>源 MAC 学习、目的 MAC 转发</strong>”工作。注意顺序：<mark>先学习源地址，再查目的地址</mark>。因为源地址告诉你“这台主机在哪个端口”，这个信息在转发当前帧时就要用到（尤其是目的端口未知时）。</p>
 <ol>
 <li>记录帧的源 MAC 与入端口到交换表（有老化时间）；</li>
 <li>查目的 MAC：若表中有且不是入端口，定向转发；</li>
 <li>若未知/广播/组播，向除入端口外的所有端口泛洪；</li>
 <li>目的主机回复后，交换机学习到它的端口，后续可定向转发。</li>
 </ol>
+<p>“泛洪”不是“永远广播”：它只发生在<strong>目的 MAC 未知、广播或组播</strong>时，而且不会从入端口发回去。已知目的 MAC 时，交换机只往对应端口转发，其他端口收不到，这就是交换机比 Hub 高效的原因。</p>
+<p>交换表项有<strong>老化时间</strong>：如果一台主机长时间不发帧，表项会被删除；下次再发给它时又要泛洪一次。这样主机换端口、拔掉后，旧表项不会永久误导转发。</p>
+<p>交换机每个端口是独立的<strong>冲突域</strong>，但默认所有端口仍在同一个<strong>广播域</strong>；只有 VLAN 才能把广播域切开。这一点是“交换机隔离冲突域，不隔离广播域”的完整说法。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="交换机自学习：先记录源 MAC，再查目的 MAC，未知则泛洪" data-src="/408-review/assets/img/cn-switch-learning.svg" href="/408-review/assets/img/cn-switch-learning.svg">
 <img alt="交换机四端口拓扑、交换表和泛洪/定向转发过程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-switch-learning.svg"/>
@@ -55,7 +62,14 @@
 <p>关键细节：普通二层交换机转发帧时<strong>不会写入自己的 MAC 作为源地址</strong>。因此当帧从交换机 1 进入交换机 2 时，交换机 2 记录的是“源主机 A 在它的端口 1”，而不是“交换机 1 在端口 1”。</p>
 
 <h2 id="eth-loop">四、环路与 STP</h2>
-<p>两台交换机之间若有多条冗余链路，广播帧会在环里反复兜圈，形成<strong>广播风暴</strong>，交换表也会被反复刷新。生成树协议 STP 通过 BPDU 选举根桥、根端口、指定端口，逻辑上阻塞部分冗余端口，形成无环树；物理链路仍然保留，故障时可切换。</p>
+<p>两台交换机之间若有多条冗余链路，广播帧会在环里反复兜圈，形成<strong>广播风暴</strong>，交换表也会被反复刷新（同一源 MAC 从不同端口出现，表项来回抖动）。生成树协议 STP 通过 BPDU 选举根桥、根端口、指定端口，逻辑上阻塞部分冗余端口，形成无环树；物理链路仍然保留，故障时可切换。</p>
+<p>STP 的三步可以这样理解：</p>
+<ol>
+<li><strong>选根桥</strong>：所有交换机比较桥 ID（优先级 + MAC），最小者成为根桥；</li>
+<li><strong>选根端口</strong>：每台非根交换机选一个到根桥路径开销最小的端口；</li>
+<li><strong>选指定端口</strong>：每条网段选一个负责转发的端口；剩下的冗余端口进入阻塞状态。</li>
+</ol>
+<p>阻塞端口不转发数据帧，但仍在听 BPDU；一旦拓扑变化，STP 重新计算，必要时把阻塞端口打开。所以它是<mark>逻辑断环</mark>，不是物理拔线。STP 收敛需要时间，期间可能短暂环路/中断；RSTP 是它的快速版本。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="交换机环路导致广播兜圈，STP 逻辑阻塞冗余端口" data-src="/408-review/assets/img/cn-vlan-stp.svg" href="/408-review/assets/img/cn-vlan-stp.svg">
 <img alt="两台交换机冗余链路形成环路，STP 阻塞其中一个端口" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-vlan-stp.svg"/>
@@ -64,12 +78,14 @@
 </figure>
 
 <h2 id="eth-vlan">五、VLAN 与 802.1Q</h2>
-<p>VLAN 把一个物理局域网划分成多个<strong>逻辑广播域</strong>。802.1Q 在以太网帧中插入 4B 标签：</p>
+<p>VLAN 把一个物理局域网划分成多个<strong>逻辑广播域</strong>。802.1Q 在以太网帧的源 MAC 之后、类型/长度之前插入 4B 标签：</p>
 <ul>
 <li>标签含 2B TPID（0x8100）、2B TCI；</li>
 <li>TCI 中 VID 占 12 位，可表示 4096 个 VLAN（0/4095 保留）；</li>
 <li>Access 口属于一个 VLAN，收发的帧通常不带标签；Trunk 口承载多个 VLAN，跨交换机时打标签。</li>
 </ul>
+<p>Access 口连接终端：交换机内部知道这个口属于 VLAN 10，收帧时给帧打上 VLAN 10 的标签，发帧时再把标签剥掉，终端感觉不到 VLAN。Trunk 口连接交换机/路由器：多个 VLAN 的帧都从这一根线过，必须保留标签，接收端才能知道它属于哪个 VLAN。</p>
+<p>VLAN 只隔离<strong>广播域</strong>，不自动隔离 IP 子网；不同 VLAN 之间要通信，仍要经过路由器或三层交换机做路由。也就是说，VLAN 是“二层分段”，不是“三层路由”的替代品。</p>
 <p>VLAN 隔离广播域，但不隔离 IP 子网间的路由；不同 VLAN 通信需要三层设备。</p>
 
 <h2 id="eth-wifi">六、802.11 无线局域网</h2>
@@ -85,7 +101,17 @@
 </tbody>
 </table></div>
 <p>To DS/From DS 决定 Address 1/2/3 分别代表 RA、TA、DA、SA 中的哪几个；基础设施模式下，终端经 AP 转发，地址字段比以太网多一层。</p>
-<p>无线不能像有线那样可靠地边发边听，所以用“预约 + 确认”减少冲突；隐藏终端问题靠 RTS/CTS 缓解。</p><figure class="article-figure">
+<div class="article-table"><table>
+<thead><tr><th>To DS / From DS</th><th>Address 1</th><th>Address 2</th><th>Address 3</th><th>场景</th></tr></thead>
+<tbody>
+<tr><td>0 / 0</td><td>DA</td><td>SA</td><td>BSSID</td><td>同一 BSS 内直接通信/管理帧</td></tr>
+<tr><td>1 / 0</td><td>BSSID（RA）</td><td>SA</td><td>DA</td><td>终端 → AP</td></tr>
+<tr><td>0 / 1</td><td>DA</td><td>BSSID（TA）</td><td>SA</td><td>AP → 终端</td></tr>
+<tr><td>1 / 1</td><td>RA</td><td>TA</td><td>DA</td><td>WDS/无线网桥（还有 Address 4=SA）</td></tr>
+</tbody>
+</table></div>
+<p>不要死记“Address 1 一定是目的地址”：<mark>Address 1 永远是“当前这一跳的接收者”</mark>，在终端→AP 的场景里它是 AP 的 BSSID，不一定是最终目的主机。To DS/From DS 就是用来判断“这一帧是进分布系统还是出分布系统”的。</p>
+<p>无线不能像有线那样可靠地边发边听，所以用“预约 + 确认”减少冲突；隐藏终端问题靠 RTS/CTS 缓解。所谓隐藏终端，是 A、C 都能和 AP 通信，但 A、C 彼此听不到；它们可能同时向 AP 发送而在 AP 处碰撞。RTS/CTS 让 AP 用 CTS 告诉周围“信道已被预约”，把这种碰撞提前挡掉。</p><figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="802.11 CSMA/CA：DIFS、退避、RTS/CTS、SIFS 与 ACK" data-src="/408-review/assets/img/cn-wifi-csma-ca.svg" href="/408-review/assets/img/cn-wifi-csma-ca.svg">
 <img alt="802.11 CSMA/CA 的帧交换时序" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-wifi-csma-ca.svg"/>
 </a>
