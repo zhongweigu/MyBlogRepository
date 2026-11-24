@@ -111,7 +111,7 @@ source/408-review/
 
 **A. 从站内帖子生成（推荐，适用于已有帖子）**
 
-`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线概念）、`coa-5-2`（总线结构/事务/定时）、`coa-6-1`（I/O 接口与端口）、`coa-6-2`（I/O 方式与 DMA）、`coa-6-3`（中断完整流程）和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6`、`os-3-1` 到 `os-3-5`、`os-4-1` 到 `os-4-4`、`os-5-1` 到 `os-5-9`、`os-6-1` 到 `os-6-9`、`cn-1-1` 到 `cn-1-4`、`ds-1-3` 是手写文件，脚本会跳过、不要覆盖：
+`scripts/build-review-content.py` 把源帖子按 `MAPPING` 里的标题片段切段，生成 46 篇长文 + 图片；`coa-4-3`（流水线）、`coa-4-4`（数据通路）、`coa-4-5`（微程序控制器）、`coa-4-6`（多处理器）、`coa-5-1`（总线概念）、`coa-5-2`（总线结构/事务/定时）、`coa-6-1`（I/O 接口与端口）、`coa-6-2`（I/O 方式与 DMA）、`coa-6-3`（中断完整流程）和 `os-1-1` 到 `os-1-5`、`os-2-1` 到 `os-2-6`、`os-3-1` 到 `os-3-5`、`os-4-1` 到 `os-4-4`、`os-5-1` 到 `os-5-9`、`os-6-1` 到 `os-6-9`、`cn-1-1` 到 `cn-1-6`、`ds-1-3` 是手写文件，脚本会跳过、不要覆盖：
 
 ```powershell
 python scripts/build-review-content.py
@@ -223,7 +223,7 @@ python scripts/build-review-content.py
 
 ### 3.7 复习库（术语 + 流程）与图解库
 
-- `data/review-cards.js`：当前 322 张术语卡 + 109 张流程卡，每张有 `id/question/answer/goal/checkpoints/source/aliases`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
+- `data/review-cards.js`：当前 335 张术语卡 + 111 张流程卡，每张有 `id/question/answer/goal/checkpoints/source/aliases`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
 - `data/review-terms.js` / `review-flows.js` 是迁移前历史数据，页面不再直接读取；不要在这两个文件里新增卡片。
 - `#/glossary` 现在是**完整复习库**：上面是术语库、下面是流程库，支持科目筛选和搜索；顶部导航标签为「复习库」。
 - 旧的 `data/glossary.js`（`CORE_TERMS` / 自动抽取）不再被页面使用，不要继续往里加；新词加到 `review-terms.js`。
@@ -252,7 +252,7 @@ python scripts/build-review-content.py
 
 - 今日页固定 **20 个术语 + 5 个流程**，不再按考点/复习进度出题。
 - 随机是**日期确定性随机**：用上海日期 `YYYY-MM-DD` 做种子，从 `data/review-cards.js` 洗牌；同一天多次打开内容相同，次日自动换一批。不要改成 `Math.random()`，否则每次刷新都变。
-- 卡片库 322 张术语卡 + 109 张流程卡；术语必须是一个明确概念（“最佳适应算法”“Belady 异常”），不能写“地址结构”“方法 3”这类歧义词。每张卡以问题开头，答案默认折叠。
+- 卡片库 335 张术语卡 + 111 张流程卡；术语必须是一个明确概念（“最佳适应算法”“Belady 异常”），不能写“地址结构”“方法 3”这类歧义词。每张卡以问题开头，答案默认折叠。
 - 不使用 `store.dailyQueue`、SRS、连续天数、已掌握标记；今日页不显示“开始复习/复习按钮”。
 - 不要加回：今日三件事、每日一题、每日一点 tab、复习指引、科目进度、热力图、7 天预测。
 - 改数量：`today.js` 的 `TERM_COUNT` / `FLOW_COUNT`。
@@ -326,7 +326,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 5. **写成学习卡**：背诵清单（能直接背的短句）→ 理解（推导、例子、表格、图）→ 考场答法（怎么开头、怎么收口、易错）。正文里**不放完整例题**。
 6. **题目入库**：能自动识别的走 `scripts/extract-questions.py`；裸题补到 `questions-manual-extra.js`。每题写 `topics`、答案和解析；解析最后一句尽量点出“这题在考哪个考点”。同时从正文里删掉这道题。
 7. **顺手更新复习库/图解**：新卡片加到 `review-cards.js`；新代表图加到 `DIAGRAMS`。
-8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 98 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
+8. **快速验证**：只查本次改动的 2~3 个页面 + 一个 390px 宽度，不必每次全量跑 100 个考点。改数据/图片时 `npx hexo generate` 即可；只有配置或缓存异常才 `clean`。推上去后只验一个入口 + 一个改动页。
 9. **提交**：源帖不改；只提交复习台、脚本和手册相关文件。
 
 ---
@@ -425,6 +425,8 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 | | `cn-1-2` | 编码与调制：从基带到带通 |
 | | `cn-1-3` | 信道极限速率：奈氏准则与香农定理 |
 | | `cn-1-4` | 物理层特性、传输介质与设备 |
+| | `cn-1-5` | 交换方式：电路、报文与分组 |
+| | `cn-1-6` | 性能指标：带宽、吞吐量与时延 |
 
 - 数据在 `data/os.js` 与 `data/os-extra.js`，由 `data/index.js` 并入 `TOPICS`；`meta.js` 的 `SUBJECTS.os`、`CHAPTERS` 的 `os-1` 到 `os-6` 已登记。
 - 长文手写在 `assets/content/os-1-1.html` 到 `os-6-9.html`，**不要**交给 `build-review-content.py` 生成，也不要从帖子切段。
@@ -434,7 +436,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - `os-2-1` 的七状态图是 `assets/img/os-process-state-7.svg`，固定 700px 宽、外包 `.state7-wrap` 横向滚动；手机不缩放文字。`os-2-2` 的内核级线程统一写 **KLT**（Kernel-Level Thread），不要写成 KST；图片 `os-klt.webp` 已裁掉原图底部的 KST 标题。
 - `os-3` 是从第二章同步互斥拆出的 **PV 专题**，不是教材第三章内存管理；`os-3-1` 讲三类模型与五步法，`os-3-2` / `os-3-3` / `os-3-4` 分别对应生产者-消费者、读者-写者、哲学家，`os-3-5` 收束做题策略。
 - `os-6` 是 I/O 专题：`os-6-1` 层次/控制器，`os-6-2` 查询/中断/DMA，`os-6-3` 中断/驱动，`os-6-4` 缓冲，`os-6-5` 分配/LUT/SPOOLing，`os-6-6` 磁盘结构与调度，`os-6-7` 格式化/分区/启动，`os-6-8` 七个完整流程，`os-6-9` 固态硬盘。图片在 `assets/img/os-io-*.png/svg` 与 `os-ssd-*.svg`；真题在 `questions-io.js`。
-- `cn-1` 是计算机网络物理层：`cn-1-1` 通信基础，`cn-1-2` 编码/调制，`cn-1-3` 奈氏/香农，`cn-1-4` 接口四特性/介质/中继器/Hub。数据在 `data/cn.js`，长文在 `content/cn-1-*.html`，卡片在 `review-cards-cn.js`，真题在 `questions-cn.js`。
+- `cn-1` 是计算机网络物理层：`cn-1-1` 通信基础，`cn-1-2` 编码/调制，`cn-1-3` 奈氏/香农，`cn-1-4` 接口四特性/介质/中继器/Hub，`cn-1-5` 三种交换，`cn-1-6` 性能指标/时延。数据在 `data/cn.js`，长文在 `content/cn-1-*.html`，卡片在 `review-cards-cn.js`，真题在 `questions-cn.js`。
 - `os-3` 的代码块用 `class="language-c"`，由 `extract-code.py` 收进代码库的「操作系统」章节；改 PV 代码后要重跑脚本。
 - `os-4` 是教材**第三章内存管理**，站点编号排在 PV 专题之后；图片在 `assets/textbook/`：`os-mem-paging.webp`、`os-mem-segmentation.webp`、`os-mem-segments.webp`（段页式的段内分页图）、`os-mem-segpage.webp`、`os-mem-partition-table.webp`、`os-mem-free-list.webp`，按段落插入。
 - `os-5` 文件管理图片在 `assets/textbook/`：`os-file-index.webp`、`os-file-index-seq.webp`、`os-file-contiguous.webp`、`os-file-implicit-link.webp`、`os-file-explicit-link.webp`、`os-file-single-index.webp`、`os-file-multi-index.webp`、`os-file-free-table.webp`、`os-file-free-list.webp`、`os-file-bitmap.webp`、`os-file-group-link.webp`、`os-file-hardlink.webp`、`os-file-softlink.webp`、`os-file-inode.webp`；布局/VFS/挂载图是 `assets/img/os-fs-layout.svg`、`os-vfs.svg`、`os-mount.svg`；本轮新增的图有 `ds-threaded-tree.svg`、`ds-graph-storage.svg`、`coa-hamming.svg`、`coa-memory-hierarchy.svg`、`coa-instruction-format.svg`。

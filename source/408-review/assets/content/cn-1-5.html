@@ -1,0 +1,68 @@
+<div class="article-content">
+<p>交换方式决定“数据从源到目的地，中间结点怎样转发”。三种经典方式：电路交换、报文交换、分组交换；它们的主要差别在“是否先建立独占通路”和“是否存储转发”。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#sw-circuit">一、电路交换</a></li>
+<li><a href="#sw-message">二、报文交换</a></li>
+<li><a href="#sw-packet">三、分组交换</a></li>
+<li><a href="#sw-timeline">四、三种方式的时延图</a></li>
+<li><a href="#sw-pitfalls">五、对比与易错点</a></li>
+</ul></div>
+</details>
+
+<h2 id="sw-circuit">一、电路交换</h2>
+<p>电路交换在通信前先<strong>建立一条端到端的独占通路</strong>，然后连续传输，最后释放连接。典型例子是传统电话网。</p>
+<ul>
+<li>建立阶段：逐段申请/预留链路资源；</li>
+<li>数据阶段：数据沿已建立的通路连续传输，中间结点通常不做存储转发；</li>
+<li>释放阶段：拆除通路，释放资源。</li>
+</ul>
+<p>优点：建立后传输时延稳定、按序到达、适合连续实时业务。缺点：建立时间长；通路空闲时资源也不能给别人用；突发数据的利用率低。</p>
+
+<h2 id="sw-message">二、报文交换</h2>
+<p>报文交换把整个报文作为一个单位，结点先<strong>收完整个报文</strong>，再根据目的地址转发给下一站。它不需要预先建立独占通路，但每一站都要存储转发。</p>
+<ul>
+<li>报文越长，单站存储/转发时间越长；</li>
+<li>对结点缓存要求高；</li>
+<li>不需要建立连接，链路可以统计复用。</li>
+</ul>
+<p>端到端时延近似为“各站接收整个报文的时间 + 各段传播时延 + 处理/排队时间”。报文交换没有“流水线”优势：前一站必须收完，后一站才能开始收。</p>
+
+<h2 id="sw-packet">三、分组交换</h2>
+<p>分组交换把报文切成较小的<strong>分组（packet）</strong>，每个分组带首部（目的地址、序号等），结点按分组存储转发。它是 Internet 的基础。</p>
+<ul>
+<li>小分组可以流水线：路由器转发第 1 个包时，后面第 2、3 个包可以继续到达；</li>
+<li>缓存需求比整个报文小，多个流可以统计复用；</li>
+<li>代价：首部开销、可能乱序、需要重组，拥塞时可能排队/丢包。</li>
+</ul>
+<p>分组交换的总时延不是简单“报文时延除以分组数”，要按“每个分组的发送/传播/排队”逐段累加；流水线只重叠不同分组，不消除单包的存储转发。</p>
+
+<h2 id="sw-timeline">四、三种方式的时延图</h2>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="电路交换、报文交换、分组交换的时延图：竖线是结点，向下是时间" data-src="/408-review/assets/img/cn-switching-delay.svg" href="/408-review/assets/img/cn-switching-delay.svg">
+<img alt="电路交换、报文交换和分组交换的时延对比图" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-switching-delay.svg"/>
+</a>
+<figcaption>电路交换先建立独占通路；报文交换整包逐站存储转发；分组交换把包流水线化，但每包仍要存储转发。</figcaption>
+</figure>
+<p>读图时先找三条竖线（H1、路由器、H2），再沿时间向下看：平行四边形表示“正在发送/传输一个单位”，水平错开表示传播，竖直堆叠表示排队/处理。</p>
+
+<h2 id="sw-pitfalls">五、对比与易错点</h2>
+<div class="article-table"><table>
+<thead><tr><th>维度</th><th>电路交换</th><th>报文交换</th><th>分组交换</th></tr></thead>
+<tbody>
+<tr><td>是否建立连接</td><td>是</td><td>否</td><td>否（虚电路方式例外）</td></tr>
+<tr><td>转发单位</td><td>连续比特流</td><td>整个报文</td><td>分组</td></tr>
+<tr><td>中间结点</td><td>通常不存储转发</td><td>存储转发整个报文</td><td>存储转发每个分组</td></tr>
+<tr><td>时延/资源</td><td>建立慢，传输稳定；空闲也占资源</td><td>大报文时延大，缓存要求高</td><td>可流水线、统计复用；有首部/乱序/拥塞</td></tr>
+<tr><td>典型场景</td><td>传统电话</td><td>早期电报/文件传送</td><td>Internet、以太网</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>“分组交换一定比报文交换快”</strong>：小报文/低负载时差距可能很小；分组有首部和处理开销。</li>
+<li><strong>“电路交换没有时延”</strong>：有建立、传播、发送时延；只是建立后路径独占、排队少。</li>
+<li><strong>“报文交换不需要缓存”</strong>：必须能存下整个报文。</li>
+<li><strong>“分组交换没有存储转发”</strong>：每个分组在每站仍要收完再转发，只是包之间可以流水线。</li>
+</ul>
+</div>

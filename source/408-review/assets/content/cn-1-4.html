@@ -2,14 +2,15 @@
 <p>物理层不只“画波形”，还要规定接口怎么接、信号走什么介质、用什么设备扩展距离。这一节把接口四特性、传输介质和中继器/集线器串起来。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>6 节</span></summary>
+<summary>本页目录 <span>7 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#phy-four">一、物理层四大特性</a></li>
 <li><a href="#phy-media">二、传输介质</a></li>
 <li><a href="#phy-repeater">三、中继器</a></li>
 <li><a href="#phy-hub">四、集线器 Hub</a></li>
 <li><a href="#phy-domain">五、冲突域、广播域与 5-4-3</a></li>
-<li><a href="#phy-pitfalls">六、易错点与收束</a></li>
+<li><a href="#phy-ethernet">六、以太网标准命名</a></li>
+<li><a href="#phy-pitfalls">七、易错点与收束</a></li>
 </ul></div>
 </details>
 
@@ -74,7 +75,25 @@
 </table></div>
 <p><strong>5-4-3 规则</strong>：早期 10Mb/s 以太网中，用 4 个中继器串联的 5 段通信介质，只有 3 段可以连接计算机。它是冲突域/时延限制的经验规则，现代交换式网络不再机械套用。</p>
 
-<h2 id="phy-pitfalls">六、易错点与收束</h2>
+<h2 id="phy-ethernet">六、以太网标准命名</h2>
+<p>以太网标准名通常写成 <code>10BaseT</code>、<code>100BaseTX</code>、<code>1000BaseSX</code> 这种形式，三段分别表示“速率 / 信号方式 / 介质”。</p>
+<div class="article-table"><table>
+<thead><tr><th>名称</th><th>速率</th><th>信号/介质</th><th>读法</th></tr></thead>
+<tbody>
+<tr><td>10Base5</td><td>10Mb/s</td><td>基带、粗同轴</td><td>10M、基带、粗缆（500m）</td></tr>
+<tr><td>10Base2</td><td>10Mb/s</td><td>基带、细同轴</td><td>10M、基带、细缆（约185m）</td></tr>
+<tr><td>10BaseT</td><td>10Mb/s</td><td>基带、双绞线</td><td>T=Twisted pair；约100m</td></tr>
+<tr><td>100BaseTX</td><td>100Mb/s</td><td>基带、双绞线</td><td>TX=双绞线（两对）</td></tr>
+<tr><td>100BaseFX</td><td>100Mb/s</td><td>基带、光纤</td><td>F=Fiber</td></tr>
+<tr><td>1000BaseT</td><td>1Gb/s</td><td>基带、双绞线</td><td>千兆双绞线</td></tr>
+<tr><td>1000BaseSX / LX</td><td>1Gb/s</td><td>基带、光纤</td><td>S=短波，L=长波</td></tr>
+<tr><td>10GBaseT / SR / LR</td><td>10Gb/s</td><td>双绞线 / 光纤</td><td>T 双绞线，S 短波，L 长波</td></tr>
+</tbody>
+</table></div>
+<p>读法：<strong>第一个数字</strong>是比特率（Mb/s 或 Gb/s，注意 1000Base 是 1Gb/s）；<strong>Base</strong> 表示基带传输（<strong>Broad</strong> 才是宽带）；<strong>后缀</strong>表示介质/波长：T=双绞线，F=光纤，S=短波，L=长波，X 是双绞线/光纤的细分代号。</p>
+<p>命名只说明标准的目标速率和介质类型，不保证实际吞吐量达到标称值；双绞线还有 Cat5e/Cat6 等类别，距离和速率要一起看。</p>
+
+<h2 id="phy-pitfalls">七、易错点与收束</h2>
 <ul>
 <li><strong>“中继器放大模拟信号”</strong>：中继器再生数字信号；放大器放大模拟信号。</li>
 <li><strong>“Hub 隔离冲突域”</strong>：Hub 所有端口在同一冲突域；交换机才隔离冲突域。</li>

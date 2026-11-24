@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 640" role="img" aria-label="处理、排队、发送、传播四种时延发生的位置">
+  <defs>
+    <marker id="dla" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1100" height="640" fill="#fffdf8"/>
+  <text x="550" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">四种时延发生的位置：节点内 vs 链路上</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <circle cx="190" cy="280" r="135" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="190" y="455" text-anchor="middle" font-weight="700">结点 A</text>
+
+    <rect x="105" y="230" width="110" height="75" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="160" y="272" text-anchor="middle">队列</text>
+    <rect x="235" y="250" width="35" height="40" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="252" y="275" text-anchor="middle" font-size="11">发送器</text>
+
+    <path d="M55 268 L105 268" stroke="#4d5b66" stroke-width="3" marker-end="url(#dla)"/>
+    <text x="55" y="250" font-size="12">到达的分组</text>
+    <path d="M270 270 L760 270" stroke="#4d5b66" stroke-width="7" marker-end="url(#dla)"/>
+    <text x="300" y="250" font-size="12">链路</text>
+
+    <rect x="760" y="230" width="230" height="75" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="875" y="272" text-anchor="middle">结点 B</text>
+
+    <text x="40" y="160" font-size="13">① 处理时延：查表/校验/选路</text>
+    <text x="40" y="182" font-size="13">② 排队时延：在队列里等发送</text>
+    <text x="40" y="204" font-size="13">都发生在结点内部</text>
+
+    <text x="280" y="140" font-size="13">③ 发送时延：把整帧推上链路</text>
+    <text x="280" y="162" font-size="13">= 帧长 / 发送速率</text>
+    <text x="280" y="184" font-size="12" fill="#b54b45">与链路长度无关</text>
+
+    <text x="500" y="140" font-size="13">④ 传播时延：信号在介质中走</text>
+    <text x="500" y="162" font-size="13">= 链路长度 / 传播速率</text>
+    <text x="500" y="184" font-size="12" fill="#b54b45">与帧长/发送速率无关</text>
+
+    <path d="M250 305 C300 390, 500 390, 650 305" stroke="#3f6f8a" stroke-width="2" fill="none" stroke-dasharray="6 4"/>
+    <text x="420" y="405" font-size="12" fill="#3f6f8a">传播时延在机器外部的链路上</text>
+
+    <rect x="45" y="480" width="1010" height="130" rx="4" fill="#fffdf8" stroke="#c9c0ae"/>
+    <text x="65" y="505" font-weight="700">总时延</text>
+    <text x="65" y="530" font-size="13">一个结点：处理 + 排队 + 发送 + 传播；端到端要沿路径把每段相加。</text>
+    <text x="65" y="553" font-size="13">发送时延 ∝ 帧长，反比于发送速率；传播时延 ∝ 距离，反比于传播速率，与帧长/速率无关。</text>
+    <text x="65" y="576" font-size="13" fill="#b54b45">排队时延可能趋于无穷；丢包是队列溢出的一种极端结果。</text>
+    <text x="65" y="598" font-size="12" fill="#6b777f">“提高发送速率就能减小总时延”只在发送时延占主导时成立；提高速率不会让信号在介质里跑得更快。</text>
+  </g>
+</svg>

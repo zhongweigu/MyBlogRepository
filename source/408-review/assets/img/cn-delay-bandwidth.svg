@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 650" role="img" aria-label="时延带宽积、吞吐量与利用率">
+  <defs>
+    <marker id="dba" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1080" height="650" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">时延带宽积、吞吐量与利用率</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">时延带宽积 = 传播时延 × 带宽</text>
+    <text x="45" y="100" font-size="12">把链路想成一根管道：长度是传播时延，截面是带宽，乘积就是“管道里能装多少 bit”。</text>
+    <rect x="70" y="130" width="640" height="65" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="390" y="168" text-anchor="middle">链路“管道”</text>
+    <g fill="#3f6f8a">
+      <rect x="85" y="145" width="14" height="20"/><rect x="115" y="145" width="14" height="20"/><rect x="145" y="145" width="14" height="20"/><rect x="175" y="145" width="14" height="20"/><rect x="205" y="145" width="14" height="20"/><rect x="235" y="145" width="14" height="20"/><rect x="265" y="145" width="14" height="20"/>
+    </g>
+    <text x="75" y="225" font-size="12">BDP = R × T_prop（bit）</text>
+    <text x="75" y="247" font-size="12">按 RTT 算：BDP_RTT = R × RTT（常用于窗口大小）</text>
+    <text x="75" y="269" font-size="12" fill="#b54b45">最短帧长：L_min = R × 2T_prop = R × RTT（CSMA/CD 要在冲突信号回来前仍在发送）</text>
+
+    <text x="770" y="75" font-weight="700">吞吐量被最窄处卡住</text>
+    <path d="M760 120 L940 120 L900 180 L800 180 Z" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="850" y="155" text-anchor="middle">瓶颈链路</text>
+    <path d="M760 200 L940 200 L900 250 L800 250 Z" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="850" y="230" text-anchor="middle">实际吞吐 ≤ min(带宽)</text>
+    <text x="770" y="285" font-size="12">上限是路径上的最小带宽；协议开销/冲突会让实际值更低。</text>
+
+    <text x="45" y="325" font-weight="700">利用率与排队时延</text>
+    <text x="45" y="350" font-size="13">U = 有效吞吐 / 链路带宽（或“忙时间 / 总时间”）</text>
+    <text x="45" y="375" font-size="13">D = D₀ / (1 − U)：U 越接近 1，排队时延越陡</text>
+    <line x1="70" y1="540" x2="550" y2="540" stroke="#4d5b66"/>
+    <line x1="70" y1="540" x2="70" y2="405" stroke="#4d5b66"/>
+    <text x="540" y="565" text-anchor="end" font-size="12">U</text>
+    <text x="50" y="410" font-size="12">D</text>
+    <path d="M80 530 C250 525, 390 505, 450 465 C490 435, 510 410, 520 405" fill="none" stroke="#b54b45" stroke-width="3"/>
+    <text x="300" y="500" font-size="12" fill="#b54b45">U 还远没到 1，时延已经开始上升</text>
+
+    <rect x="600" y="390" width="430" height="195" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="620" y="415" font-weight="700">做题顺序</text>
+    <text x="620" y="440" font-size="13">① 分清发送时延 L/R 与传播时延 d/v</text>
+    <text x="620" y="463" font-size="13">② 时延带宽积用传播时延（或 RTT）</text>
+    <text x="620" y="486" font-size="13">③ 吞吐量取路径最小带宽</text>
+    <text x="620" y="509" font-size="13">④ 利用率高时排队时延非线性上升</text>
+    <text x="620" y="532" font-size="12" fill="#b54b45">“速率高信号就跑得快”是错的：提高的是发送速率，不是传播速率。</text>
+  </g>
+</svg>

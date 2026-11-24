@@ -1,0 +1,100 @@
+<div class="article-content">
+<p>这一节把“快不快”拆成可计算的量：比特率、带宽、吞吐量、四种时延、时延带宽积、RTT 和信道利用率。关键不是背公式，而是知道每个量描述哪一层、发生在哪里。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>8 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#pf-rate">一、比特率与带宽</a></li>
+<li><a href="#pf-throughput">二、吞吐量</a></li>
+<li><a href="#pf-delay">三、四种时延</a></li>
+<li><a href="#pf-tx-prop">四、发送时延 vs 传播时延</a></li>
+<li><a href="#pf-queue">五、排队、处理与丢包</a></li>
+<li><a href="#pf-bdp">六、时延带宽积、RTT 与最短帧长</a></li>
+<li><a href="#pf-util">七、信道利用率与拥塞</a></li>
+<li><a href="#pf-pitfalls">八、单位与易错点</a></li>
+</ul></div>
+</details>
+
+<h2 id="pf-rate">一、比特率与带宽</h2>
+<p><strong>比特率</strong>是每秒发送的比特数（b/s）。<strong>带宽</strong>有两个语境：</p>
+<ul>
+<li>通信/信号语境：带宽是信道能通过的<strong>频率范围</strong>，单位 Hz；</li>
+<li>计算机网络语境：带宽常指链路的<strong>数据传输速率</strong>，单位 b/s。</li>
+</ul>
+<p>读题先看单位：Hz 是频带宽度，b/s 是速率。二者通过奈氏/香农发生联系，但不能直接画等号。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="四种时延发生的位置：结点内部队列/发送器 vs 外部链路" data-src="/408-review/assets/img/cn-delay-anatomy.svg" href="/408-review/assets/img/cn-delay-anatomy.svg">
+<img alt="处理、排队、发送、传播四种时延的位置示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-delay-anatomy.svg"/>
+</a>
+<figcaption>处理/排队在结点内部，发送在发送器，传播在机器外部的链路上；这张图是区分四种时延的基准图。</figcaption>
+</figure>
+
+<h2 id="pf-throughput">二、吞吐量</h2>
+<p><strong>吞吐量</strong>是单位时间内实际通过某个网络/链路的数据量（b/s 或 B/s）。它受路径上<strong>最窄的瓶颈链路</strong>限制：</p>
+<p>$$\text{吞吐量} \le \min(\text{路径上各段带宽})$$</p>
+<p>带宽是“理论上限”，吞吐量是“实际做到”。协议开销、冲突、排队、丢包重传都会让吞吐量低于带宽。多条流共享瓶颈时，每条流分到的吞吐量还会更小。</p>
+
+<h2 id="pf-delay">三、四种时延</h2>
+<div class="article-table"><table>
+<thead><tr><th>时延</th><th>公式/来源</th><th>发生在哪里</th><th>与什么有关</th></tr></thead>
+<tbody>
+<tr><td>处理时延</td><td>查表、校验、选路等</td><td>结点内部</td><td>CPU/协议/规则</td></tr>
+<tr><td>排队时延</td><td>等待发送的时间</td><td>结点内部队列</td><td>流量负载、调度；可能趋于无穷</td></tr>
+<tr><td>发送时延</td><td><code>L / R</code>（帧长/发送速率）</td><td>发送器</td><td>帧长、发送速率；与距离无关</td></tr>
+<tr><td>传播时延</td><td><code>d / v</code>（距离/传播速率）</td><td>机器外部链路</td><td>距离、介质；与帧长/发送速率无关</td></tr>
+</tbody>
+</table></div>
+<p>一个结点的总时延约为四者之和；端到端还要沿路径把每段相加。注意“发送时延”不是“传播时延”：前者是把比特推上链路，后者是比特在介质中走。</p>
+
+<h2 id="pf-tx-prop">四、发送时延 vs 传播时延</h2>
+<p>设帧长 L bit、发送速率 R b/s、链路长 d m、传播速率 v m/s：</p>
+<p>$$T_{tx}=\frac{L}{R},\qquad T_{prop}=\frac{d}{v}$$</p>
+<ul>
+<li><strong>发送时延与距离无关</strong>：链路再长，只要 L、R 不变，把帧推上链路的时间不变；</li>
+<li><strong>传播时延与帧长、发送速率无关</strong>：信号在介质中的速度由介质决定，和一次发多少比特无关；</li>
+<li>提高 R 只缩短发送时延，不会让信号在光纤/铜线中“跑得更快”；光纤的传播速率甚至可能略低于铜线。</li>
+</ul>
+<p>“提高发送速率就能减小总时延”只在<strong>发送时延占主导</strong>时成立；如果传播时延/排队时延占主导，提高 R 的效果很小。</p>
+
+<h2 id="pf-queue">五、排队、处理与丢包</h2>
+<p>处理时延和排队时延都发生在结点内部：分组到达后先查表/校验（处理），再进入输出队列等待发送（排队）。</p>
+<ul>
+<li>排队时延取决于到达速率与输出速率的相对关系；负载接近链路容量时，排队时延会急剧上升；</li>
+<li>队列长度有限，队列满后新到的分组被丢弃，<strong>丢包是排队时延趋于无穷的极端表现</strong>；</li>
+<li>处理时延通常较小，但在复杂查表/深度包检测时会显著。</li>
+</ul>
+
+<h2 id="pf-bdp">六、时延带宽积、RTT 与最短帧长</h2>
+<p><strong>时延带宽积</strong>（bandwidth-delay product, BDP）是“管道里能装多少比特”：</p>
+<p>$$BDP = T_{prop}\times R \quad (\text{bit})$$</p>
+<p>它又称“以比特为单位的链路长度”。若用往返时延 RTT 计算，数值会大一倍（忽略处理/排队）：</p>
+<p>$$BDP_{RTT}=RTT\times R$$</p>
+<p>讨论发送窗口大小时通常用后者：窗口至少覆盖一个 RTT 的“在途比特”，链路才不容易空等。</p>
+<p><strong>最短帧长</strong>：在 CSMA/CD 共享以太网中，发送方必须在冲突信号返回前仍在发送，才能检测到冲突。因此：</p>
+<p>$$L_{min}=R\times 2T_{prop}=R\times RTT$$</p>
+<p>10Mb/s 以太网、往返传播时延约 51.2μs 时，最短帧长为 512bit=64B。这个 64B 是“最短帧长”的经典来源，不是随便规定的。</p>
+
+<h2 id="pf-util">七、信道利用率与拥塞</h2>
+<p><strong>信道利用率</strong>是有效传输时间占观察时间的比例，也可写成“有效吞吐/带宽”：</p>
+<p>$$U=\frac{\text{有效吞吐}}{\text{链路带宽}}\quad\text{或}\quad U=\frac{T_{tx}}{T_{tx}+T_{idle}}$$</p>
+<p>排队时延与利用率不是线性关系。一个常用的简化模型是：</p>
+<p>$$D=\frac{D_0}{1-U}$$</p>
+<p>其中 D₀ 是空闲时的服务时延。U 接近 1 时，分母趋近 0，时延急剧上升。这说明“链路还远没跑满”时，时延就已经开始变差，也是拥塞控制要提前介入的原因。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="时延带宽积、吞吐量瓶颈和利用率-时延曲线" data-src="/408-review/assets/img/cn-delay-bandwidth.svg" href="/408-review/assets/img/cn-delay-bandwidth.svg">
+<img alt="时延带宽积管道、吞吐量瓶颈和利用率时延曲线" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-delay-bandwidth.svg"/>
+</a>
+<figcaption>BDP 是管道体积；吞吐量被最窄链路卡住；利用率接近 1 时排队时延非线性上升。</figcaption>
+</figure>
+
+<h2 id="pf-pitfalls">八、单位与易错点</h2>
+<ul>
+<li><strong>速率用十进制、数据量用二进制</strong>：通信速率常按 1kb/s=1000b/s，数据量常按 1KB=1024B；通信领域“千”用小写 k。读题看单位，别把 KB 和 kb 混用。</li>
+<li><strong>“高速链路比特跑得更快”</strong>：错；提高的是发送速率，传播速率由介质决定。</li>
+<li><strong>“发送时延与距离有关”</strong>：错；发送时延只取决于 L 和 R。</li>
+<li><strong>“传播时延与帧长有关”</strong>：错；传播时延只取决于 d 和 v。</li>
+<li><strong>“排队时延有上限”</strong>：队列满会丢包；排队时延可以趋于无穷，丢包是其极端表现。</li>
+<li><strong>“吞吐量等于带宽”</strong>：带宽是上限，吞吐量还要受瓶颈、协议开销、冲突、重传影响。</li>
+<li><strong>BDP 用 RTT 还是单向传播时延</strong>：看题目问“管道长度”还是“窗口至少多大”；后者常用 RTT。</li>
+</ul>
+</div>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650" role="img" aria-label="16-QAM 星座图">
+  <rect width="900" height="650" fill="#fffdf8"/>
+  <text x="450" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">QAM：幅度和相位一起编码</text>
+  <g font-family="sans-serif" font-size="13" fill="#24313a">
+    <text x="45" y="75">16-QAM 星座图（示意）：16 个点 = 16 种状态，每码元 4 bit</text>
+    <line x1="150" y1="360" x2="750" y2="360" stroke="#4d5b66"/>
+    <line x1="450" y1="110" x2="450" y2="610" stroke="#4d5b66"/>
+    <text x="760" y="356">I（同相）</text>
+    <text x="458" y="112">Q（正交）</text>
+    <g fill="#e9f2f6" stroke="#3f6f8a">
+      <circle cx="270" cy="240" r="10"/><circle cx="360" cy="240" r="10"/><circle cx="450" cy="240" r="10"/><circle cx="540" cy="240" r="10"/>
+      <circle cx="270" cy="300" r="10"/><circle cx="360" cy="300" r="10"/><circle cx="450" cy="300" r="10"/><circle cx="540" cy="300" r="10"/>
+      <circle cx="270" cy="360" r="10"/><circle cx="360" cy="360" r="10"/><circle cx="450" cy="360" r="10"/><circle cx="540" cy="360" r="10"/>
+      <circle cx="270" cy="420" r="10"/><circle cx="360" cy="420" r="10"/><circle cx="450" cy="420" r="10"/><circle cx="540" cy="420" r="10"/>
+    </g>
+    <circle cx="360" cy="300" r="13" fill="#f3e6e6" stroke="#b54b45" stroke-width="2"/>
+    <text x="380" y="292" fill="#b54b45">一个星座点</text>
+    <text x="120" y="585" font-size="12">点到原点距离 ↔ 幅度；与 I 轴夹角 ↔ 相位</text>
+    <text x="120" y="608" font-size="12" fill="#52605a">相邻点越密，越容易被噪声判错；阶数越高，每码元 bit 越多但抗噪越差。</text>
+    <rect x="45" y="100" width="180" height="75" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="125" font-weight="700">每码元比特数</text>
+    <text x="65" y="150" font-size="18">log₂M</text>
+    <text x="65" y="168" font-size="12">M = 星座点数</text>
+  </g>
+</svg>
