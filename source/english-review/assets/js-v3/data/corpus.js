@@ -41,8 +41,8 @@ export const CORPUS = [
         ["fostering neighborhood ties and mutual support", "加强邻里间的联系与相互支持"],
       ],
       strategy: [
-        { zh: "以人民为中心的发展思想", en: "people-centered development" },
-        { zh: "保障和改善民生", en: "improving people's well-being" },
+        { zh: "以人民为中心的发展思想", en: "a people-centered development philosophy" },
+        { zh: "保障和改善民生", en: "ensuring and improving people's well-being" },
         {
           zh: "幼有所育、学有所教、劳有所得、病有所医、老有所养、住有所居、弱有所扶",
           en: "the seven guarantees for people's well-being",
@@ -56,13 +56,13 @@ export const CORPUS = [
             ["弱有所扶", "support for vulnerable groups"],
           ],
         },
-        { zh: "健全社会保障体系", en: "strengthening social security" },
-        { zh: "医疗卫生、健康中国建设", en: "building a healthy China" },
+        { zh: "健全社会保障体系", en: "improving the social security system" },
+        { zh: "医疗卫生、健康中国建设", en: "improving healthcare and building a healthy China" },
         { zh: "采取惠民措施，解决群众急难愁盼问题", en: "addressing people's pressing needs" },
         { zh: "让发展成果更多更公平惠及全体人民", en: "sharing development gains more equitably" },
         { zh: "平安中国建设", en: "building a safer China" },
         { zh: "城乡融合和区域协调发展", en: "integrated urban-rural and coordinated regional development" },
-        { zh: "全面推进乡村振兴", en: "rural revitalization" },
+        { zh: "全面推进乡村振兴", en: "comprehensively advancing rural revitalization" },
         {
           zh: "乡村产业、人才、文化、生态、组织振兴",
           en: "the five dimensions of rural revitalization",
@@ -78,7 +78,7 @@ export const CORPUS = [
         { zh: "宜居、韧性、智慧城市", en: "building livable, resilient and smart cities" },
         { zh: "人与自然和谐共生", en: "harmony between humanity and nature" },
         { zh: "生态文明建设", en: "ecological civilization" },
-        { zh: "绿水青山就是金山银山", en: "valuing nature as an economic asset" },
+        { zh: "绿水青山就是金山银山", en: "lucid waters and lush mountains are invaluable assets" },
         { zh: "发展方式绿色转型", en: "a green transition" },
         { zh: "环境污染防治", en: "pollution prevention and control" },
         { zh: "现代环境治理体系", en: "modern environmental governance" },
@@ -133,7 +133,7 @@ export const CORPUS = [
         { zh: "推进高质量发展", en: "high-quality development" },
         { zh: "扩大内需", en: "expanding domestic demand" },
         { zh: "全体人民共同富裕", en: "common prosperity for all" },
-        { zh: "完善分配制度", en: "improving income distribution" },
+        { zh: "完善分配制度", en: "improving the income distribution system" },
         {
           zh: "构建新发展格局，推动高质量发展",
           en: "a new development pattern and high-quality development",
@@ -142,7 +142,7 @@ export const CORPUS = [
             ["高质量发展", "high-quality development"],
           ],
         },
-        { zh: "建设现代化经济体系", en: "a modern economy" },
+        { zh: "建设现代化经济体系", en: "building a modern economic system" },
         { zh: "科教兴国", en: "invigorating China through science and education" },
         { zh: "人才强国", en: "building national strength through talent development" },
         { zh: "创新驱动发展", en: "innovation-driven development" },
@@ -161,14 +161,14 @@ export const CORPUS = [
         { zh: "完善科技创新体系", en: "strengthening the innovation system" },
         {
           zh: "新型工业化；制造、质量、航天、交通、网络强国及数字中国",
-          en: "new industrialization and national strength in manufacturing, quality, space, transport and cyberspace",
+          en: "new industrialization; strength in manufacturing, quality, aerospace, transport and cyberspace; and a digital China",
           subs: [
             ["新型工业化", "new industrialization"],
             ["制造强国", "manufacturing strength"],
             ["质量强国", "quality improvement"],
             ["航天强国", "a strong space sector"],
             ["交通强国", "a strong transport sector"],
-            ["网络强国", "national cyber capability"],
+            ["网络强国", "a strong cyber nation"],
             ["数字中国", "building a digital China"],
           ],
         },
@@ -180,7 +180,7 @@ export const CORPUS = [
             ["数实融合", "integrating digital and real economies"],
           ],
         },
-        { zh: "现代化基础设施体系", en: "modern infrastructure development" },
+        { zh: "现代化基础设施体系", en: "a modern infrastructure system" },
         { zh: "教育普及", en: "expanding access to education" },
         { zh: "现代化产业体系", en: "a modern industrial system" },
       ],
@@ -248,16 +248,16 @@ export const CORPUS = [
             ["全面发展", "fostering well-rounded development"],
           ],
         },
-        { zh: "全民终身学习的学习型社会", en: "building a learning society" },
+        { zh: "全民终身学习的学习型社会", en: "a learning society with lifelong learning for all" },
         { zh: "文化自信自强", en: "cultural confidence and strength" },
-        { zh: "国家文化数字化", en: "cultural digitalization" },
+        { zh: "国家文化数字化", en: "national cultural digitalization" },
         { zh: "繁荣文化事业与文化产业", en: "developing cultural services and industries" },
-        { zh: "传承中华优秀传统文化", en: "preserving China's cultural heritage" },
+        { zh: "传承中华优秀传统文化", en: "carrying forward China's fine traditional culture" },
         { zh: "中华文明传播力影响力", en: "enhancing Chinese civilization's reach and influence" },
-        { zh: "讲好中国故事、传播好中国声音", en: "sharing China's stories and perspectives" },
+        { zh: "讲好中国故事、传播好中国声音", en: "telling China's stories well and making its voice heard" },
         { zh: "文化和旅游深度融合", en: "integrating culture and tourism" },
         { zh: "物质文明和精神文明相协调", en: "balanced material and cultural-ethical progress" },
-        { zh: "良好网络生态", en: "a sound online environment" },
+        { zh: "良好网络生态", en: "a sound online ecosystem" },
         { zh: "文明交流互鉴", en: "mutual learning through exchanges among civilizations" },
       ],
       change: [
@@ -283,7 +283,7 @@ export const CORPUS = [
         ["persist through obstacles and refine their skills consistently", "坚持不懈地克服困难，并持续提升自己的技能"],
       ],
       outcome: [
-        ["professional competence and career fulfillment", "专业能力和职业成就"],
+        ["professional competence and career fulfillment", "专业能力与职业成就感"],
         ["tangible achievements and growing capabilities", "切实的成果和不断增强的能力"],
         ["expertise and sustained progress", "专业造诣与持续进步"],
       ],
@@ -307,14 +307,14 @@ export const CORPUS = [
         { zh: "劳动者权益保障", en: "protecting workers' rights" },
         {
           zh: "劳动、奋斗、奉献、创造、勤俭节约精神",
-          en: "a spirit of hard work, dedication, creativity and thrift",
+          en: "a spirit of hard work, striving, dedication, creativity and thrift",
           subs: [
-            ["劳动、奋斗与奉献", "a spirit of hard work and dedication"],
+            ["劳动、奋斗与奉献", "a spirit of hard work, striving and dedication"],
             ["创造精神", "a spirit of innovation"],
             ["勤俭节约", "diligence and thrift"],
           ],
         },
-        { zh: "科学家精神与优良学风", en: "scientific ethos and academic integrity" },
+        { zh: "科学家精神与优良学风", en: "the spirit of scientists and a sound academic atmosphere" },
         { zh: "谦虚谨慎、艰苦奋斗", en: "humility, prudence and hard work" },
       ],
       change: [
@@ -351,7 +351,7 @@ export const CORPUS = [
       capacity: [
         ["show empathy and build warm connections across differences", "展现同理心，并跨越差异建立深厚联系"],
         ["volunteer and help vulnerable groups", "参与志愿服务并帮助弱势群体"],
-        ["practice compassion and contribute to community welfare", "培养慈悲之心，并为社区福祉做出贡献"],
+        ["practice compassion and contribute to community welfare", "践行仁爱，并为社区福祉做出贡献"],
       ],
       effect: [
         ["reducing isolation and encouraging mutual assistance", "减少孤立状态，鼓励相互帮助"],
@@ -361,7 +361,7 @@ export const CORPUS = [
       strategy: [
         {
           zh: "中华传统美德与家庭家教家风",
-          en: "traditional Chinese virtues and family values",
+          en: "traditional Chinese virtues, family education and family traditions",
           subs: [
             ["传统美德", "the cultivation of traditional virtues"],
             ["家庭家教家风", "strengthening family education and traditions"],
@@ -404,7 +404,7 @@ export const CORPUS = [
       ],
       capacity: [
         ["balance personal aspirations with national needs", "在个人抱负与国家需求之间取得平衡"],
-        ["embrace cultural heritage and develop national consciousness", "传承文化遗产并增强民族意识"],
+        ["carry forward cultural heritage and develop national consciousness", "传承文化遗产并增强民族意识"],
         ["contribute to nation-building and collective progress", "为国家建设与集体进步作出贡献"],
       ],
       effect: [
@@ -432,7 +432,7 @@ export const CORPUS = [
       change: [
         ["cultural traditions revive and patriotic sentiment strengthens", "文化传统得以复兴，爱国情感也愈发强烈"],
         ["national pride translates into concrete civic action", "民族自豪感会转化为具体的公民行动"],
-        ["younger generations embrace heritage with fresh enthusiasm", "年轻一代以全新的热情来传承传统"],
+        ["younger generations carry forward traditions with fresh enthusiasm", "年轻一代以全新的热情来传承传统"],
       ],
     },
   },

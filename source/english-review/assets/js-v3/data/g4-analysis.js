@@ -95,7 +95,7 @@ export const GROUP = {
       hint: "适用：政策与国家层面，接【相关领域】【相关战略】【社会变化】",
       items: [
         { en: "National policies on 【相关领域】 likewise focus on [[empowering individuals]] to 【个人能力/行为】.", zh: "国家在【相关领域】方面的政策，同样着重使个人能够【个人能力/行为】。", use: "政策承接", src: "A" },
-        { en: "This is [[in line with]] national strategies for 【相关战略】: as this principle takes root, 【社会变化】.", zh: "这与国家在【相关战略】方面的战略相契合：随着这一理念扎根，【社会变化】。", use: "战略契合", src: "A" },
+        { en: "This is [[in line with]] national strategies for 【相关战略】: as this principle takes root, 【社会变化】.", zh: "这与国家在【相关战略】方面的部署相契合：随着这一理念扎根，【社会变化】。", use: "战略契合", src: "A" },
         { en: "Governments have a role to play in [[creating conditions]] rather than dictating choices.", zh: "政府的作用在于创造条件，而不是规定选择。", use: "政府定位", src: "C" },
         { en: "Policies that [[reward]] good practice often work better than those that punish bad behaviour.", zh: "奖励良好做法的政策，往往比惩罚不良行为的政策更有效。", use: "政策取向", src: "C" },
         { en: "When institutions [[set an example]], citizens are far more willing to follow.", zh: "当机构以身作则时，民众更愿意跟随。", use: "自上而下", src: "C" },

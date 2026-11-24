@@ -92,7 +92,7 @@ export const GROUP = {
       items: [
         { en: "At a desk, a girl who is [[working attentively]] wants to finish early.", zh: "书桌前，一个认真工作的女孩希望尽早完成任务。", use: "写认真一方", src: "A" },
         { en: "A boy [[sits back]] at another desk, saying that he will not start until the last minute.", zh: "另一个男孩靠坐在桌旁，说自己不到最后一刻不会动手。", use: "写拖延一方", src: "A" },
-        { en: "On the left, a young man [[checks his phone]] at the table; on the right, his parents talk in silence.", zh: "左边，一个年轻人在餐桌旁看手机；右边，他的父母沉默地交谈。", use: "左右图对照", src: "C" },
+        { en: "On the left, a young man [[checks his phone]] at the table; on the right, his parents sit in silence.", zh: "左边，一个年轻人在餐桌旁看手机；右边，他的父母沉默地坐着。", use: "左右图对照", src: "C" },
         { en: "In the first picture, the couple look happy, whereas in the second they [[sit apart]] in silence.", zh: "第一幅图里，这对夫妇看起来很开心；第二幅图里，他们却沉默地分开坐着。", use: "写态度变化", src: "C" },
         { en: "Compared with the crowded street outside, the small bookstore [[feels quiet and peaceful]].", zh: "与外面拥挤的街道相比，这家小书店显得安静而平和。", use: "写内外反差", src: "C" },
         { en: "The wide shot shows a busy playground, while the close-up [[focuses on]] a lonely boy in the corner.", zh: "全景展示了一个热闹的操场，而特写则聚焦角落里一个孤独的男孩。", use: "群像与特写", src: "C" },

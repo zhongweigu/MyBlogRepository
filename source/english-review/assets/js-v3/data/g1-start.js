@@ -13,7 +13,7 @@ export const GROUP = {
       name: "图画 · 单人/单主体",
       hint: "适用：画面只有一个主要人物或主体，没有对比",
       items: [
-        { en: "Though deceptively simple, this [[scene]] conveys a meaningful message: [[description]].", zh: "尽管画面看似简单，却传递出深刻的寓意：【描述】。", use: "图画总起", src: "A" },
+        { en: "Though deceptively simple, this [[scene]] conveys a [[meaningful message]]: 【描述】.", zh: "尽管画面看似简单，却传递出深刻的寓意：【描述】。", use: "图画总起", src: "A" },
         { en: "The picture shows [[a young man at work]], with his eyes fixed on the screen.", zh: "图中一名年轻人正在工作，两眼紧盯屏幕。", use: "主体描写", src: "C" },
         { en: "Small as it is, the drawing captures [[a moment of quiet concentration]] that many viewers recognise.", zh: "画面虽小，却捕捉到许多观者都熟悉的专注时刻。", use: "画面概括", src: "C" },
         { en: "What the artist stresses is not the setting but [[the spirit of persistence]] behind it.", zh: "作者强调的不是场景，而是画面背后的坚持精神。", use: "寓意提炼", src: "C" },
