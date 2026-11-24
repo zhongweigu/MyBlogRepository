@@ -1,0 +1,63 @@
+<div class="article-content">
+<p>可靠传输要解决“帧丢了/错了怎么办、发送方发太快怎么办”。停等、GBN、SR 是三种经典滑动窗口协议；窗口大小、序号位数和确认方式决定效率与复杂度。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#arq-stop">一、停等协议</a></li>
+<li><a href="#arq-gbn">二、GBN：回退 N</a></li>
+<li><a href="#arq-sr">三、SR：选择重传</a></li>
+<li><a href="#arq-util">四、窗口与信道利用率</a></li>
+<li><a href="#arq-pitfalls">五、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="arq-stop">一、停等协议</h2>
+<p>发送方发一帧后停下，等待接收方的 ACK；超时未收到就重传。用 1 位序号（0/1）区分新帧和重复帧。</p>
+<ul>
+<li>正常：发 0 → 等 ACK0 → 发 1 → 等 ACK1；</li>
+<li>帧丢失/出错：超时重传；</li>
+<li>ACK 丢失：发送方重传，接收方收到重复帧后丢弃并重发 ACK。</li>
+</ul>
+<p>停等简单，但RTT 大、速率高时信道利用率很低。</p>
+
+<h2 id="arq-gbn">二、GBN：回退 N</h2>
+<p>发送窗口 &gt; 1，接收窗口 = 1。接收方只按序接收，用<strong>累积确认</strong>（ACK n 表示 n 及之前的帧都收到）。</p>
+<ul>
+<li>发送方可连续发多个帧，不必每帧都停；</li>
+<li>某帧超时，重传该帧及其后所有未确认帧；</li>
+<li>接收端遇到乱序帧直接丢弃，所以叫“回退 N”。</li>
+<li>序号 n 位时，发送窗口 ≤ 2^n − 1。</li>
+</ul>
+
+<h2 id="arq-sr">三、SR：选择重传</h2>
+<p>发送窗口和接收窗口都 &gt; 1。接收方可以缓存乱序到达的帧，只重传出错/丢失的那一帧。</p>
+<ul>
+<li>逐帧确认，接收窗口内的乱序帧先缓存；</li>
+<li>缺失帧到达后，接收窗口向前滑动并交付；</li>
+<li>序号 n 位时，窗口 ≤ 2^(n−1)（发送/接收窗口通常相同）。</li>
+</ul>
+<p>SR 效率高，但接收端缓存和排序逻辑更复杂。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="停等、GBN、SR 的发送/接收窗口与重传范围" data-src="/408-review/assets/img/cn-arq-windows.svg" href="/408-review/assets/img/cn-arq-windows.svg">
+<img alt="停等、GBN、选择重传的窗口和重传示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-arq-windows.svg"/>
+</a>
+<figcaption>停等窗口 1；GBN 接收窗口 1、出错回退；SR 缓存乱序帧、只重传出错帧。</figcaption>
+</figure>
+
+<h2 id="arq-util">四、窗口与信道利用率</h2>
+<p>停等协议的简化利用率：</p>
+<p>$$U=\frac{T_D}{T_D+RTT+T_A}$$</p>
+<p>其中 T_D 是发送一帧的时间，T_A 是 ACK 发送时间，RTT 是往返传播时延。RTT 越大，停等利用率越低。</p>
+<p>滑动窗口相当于“流水线”：窗口足够大时，发送方在等待 ACK 期间还能继续发，利用率可接近 1。窗口大小受序号位数约束：GBN 为 2^n−1，SR 为 2^(n−1)。</p>
+
+<h2 id="arq-pitfalls">五、易错点与收束</h2>
+<ul>
+<li><strong>“GBN 接收窗口等于发送窗口”</strong>：GBN 接收窗口为 1，只按序接收。</li>
+<li><strong>“SR 不需要缓存”</strong>：SR 必须缓存乱序帧。</li>
+<li><strong>“窗口越大越好”</strong>：受序号空间限制，过大导致新旧帧混淆。</li>
+<li><strong>“停等不需要序号”</strong>：至少需要 1 位序号来识别重复帧。</li>
+<li><strong>“GBN 的累积确认表示所有帧都正确”</strong>：它表示到该序号为止都收到，但不代表后面没有出错。</li>
+</ul>
+<p>收束：<strong>停等用时间换简单，GBN 用重传换秩序，SR 用缓存换效率</strong>；窗口大小由序号位数决定。</p>
+</div>

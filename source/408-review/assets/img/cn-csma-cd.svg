@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 700" role="img" aria-label="CSMA/CD 最坏冲突检测时间与最短帧长">
+  <defs>
+    <marker id="cda2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4d5b66"/></marker>
+    <marker id="cdb2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1080" height="700" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">CSMA/CD：最坏冲突检测时间为什么是 2τ</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="80" y="90" font-weight="700">A</text><text x="900" y="90" font-weight="700">D</text>
+    <line x1="120" y1="85" x2="880" y2="85" stroke="#4d5b66" stroke-width="4"/>
+    <text x="500" y="75" text-anchor="middle" font-size="12">最远两个站点，单程传播时延 τ</text>
+
+    <line x1="140" y1="130" x2="140" y2="380" stroke="#3f6f8a" stroke-width="2"/>
+    <line x1="860" y1="130" x2="860" y2="380" stroke="#3f6f8a" stroke-width="2"/>
+    <text x="140" y="405" text-anchor="middle">A 时间</text><text x="860" y="405" text-anchor="middle">D 时间</text>
+
+    <rect x="140" y="150" width="720" height="28" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="500" y="169" text-anchor="middle" font-size="12">A 开始发送，信号向 D 传播（τ）</text>
+    <path d="M140 210 L860 210" stroke="#3f6f8a" stroke-width="2" marker-end="url(#cda2)"/>
+    <text x="500" y="200" text-anchor="middle" font-size="12">t=0：A 的第一个比特出发</text>
+
+    <rect x="140" y="245" width="720" height="28" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="500" y="264" text-anchor="middle" font-size="12">D 在 τ 前一刻开始发送 → 冲突</text>
+    <path d="M860 300 L140 300" stroke="#b54b45" stroke-width="2" marker-end="url(#cdb2)"/>
+    <text x="500" y="290" text-anchor="middle" font-size="12">碰撞信号返回 A（再 τ）</text>
+
+    <text x="500" y="340" text-anchor="middle" font-size="13" fill="#b54b45">A 在 t≈2τ 才检测到冲突；帧必须还没发完。</text>
+    <text x="500" y="365" text-anchor="middle" font-size="13">所以发送时延 L/R ≥ 2τ</text>
+
+    <rect x="45" y="435" width="470" height="95" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="460" font-weight="700">最短帧长</text>
+    <text x="65" y="485" font-size="16" font-family="serif">L_min = 2τ × R</text>
+    <text x="65" y="510" font-size="12">10Mb/s 以太网：2τ=51.2μs，L_min=512bit=64B</text>
+
+    <rect x="545" y="435" width="490" height="95" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="565" y="460" font-weight="700">二进制指数退避</text>
+    <text x="565" y="485" font-size="13">第 i 次冲突：从 {0,…,2^i−1} 取 k，等 k×512 bit 时间</text>
+    <text x="565" y="508" font-size="12">i&gt;10 后范围不再翻倍；16 次冲突后丢弃</text>
+
+    <text x="45" y="575" font-weight="700">流程</text>
+    <text x="45" y="600" font-size="13">先听后发 → 边发边听 → 冲突则停止并发 jam → 退避重试；全双工交换式以太网不需要 CD。</text>
+    <text x="45" y="625" font-size="12" fill="#6b777f">“帧越短越好”是错的：短于 L_min 可能在检测到冲突前就发完。</text>
+    <text x="45" y="655" font-size="12" fill="#b54b45">最短帧长是从目的地址到 FCS 的 64B，不含前导码/SFD。</text>
+  </g>
+</svg>

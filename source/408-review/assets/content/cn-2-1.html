@@ -1,0 +1,70 @@
+<div class="article-content">
+<p>数据链路层把物理层送来的比特流组织成“帧”，并在相邻结点之间完成定界、差错检测、流量控制和介质访问控制。它管的是<strong>一段链路</strong>，不是端到端。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>5 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#dll-func">一、链路层的四个基本功能</a></li>
+<li><a href="#dll-frame">二、帧与组帧</a></li>
+<li><a href="#dll-trans">三、四种透明传输方法</a></li>
+<li><a href="#dll-ppp">四、PPP 帧与字节填充</a></li>
+<li><a href="#dll-pitfalls">五、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<h2 id="dll-func">一、链路层的四个基本功能</h2>
+<div class="article-table"><table>
+<thead><tr><th>功能</th><th>做什么</th></tr></thead>
+<tbody>
+<tr><td>成帧/定界</td><td>把比特流切成帧，标出帧头、帧尾，接收端知道一帧从哪开始、到哪结束</td></tr>
+<tr><td>差错控制</td><td>用奇偶校验、CRC 等发现传输错误；必要时配合重传</td></tr>
+<tr><td>流量控制</td><td>让发送方不要淹没接收方；停等、滑动窗口</td></tr>
+<tr><td>介质访问控制</td><td>多个结点共享信道时，决定谁先发、冲突怎样处理</td></tr>
+</tbody>
+</table></div>
+<p>链路层是“结点到结点”，网络层才是“端到端”。链路层只保证相邻结点之间的一跳，不负责整条路径的可靠交付。</p><p><strong>信道类型</strong>分点对点和广播：点对点链路（如 PPP）只有两个端点，不需要介质访问控制；广播链路（如共享以太网、无线局域网）有多个站点共享信道，需要介质访问控制来决定谁先发。</p>
+
+<h2 id="dll-frame">二、帧与组帧</h2>
+<p>帧通常由<strong>首部 + 数据 + 尾部</strong>组成。数据字段长度受 MTU 限制；以太网 MTU 常为 1500B，不含帧头/帧尾。组帧要解决两个问题：</p>
+<ul>
+<li><strong>定界</strong>：接收端怎样从连续比特流中找出帧边界；</li>
+<li><strong>透明传输</strong>：数据字段里出现与定界符相同的比特/字节时，不能误判为帧尾。</li>
+</ul>
+
+<h2 id="dll-trans">三、四种透明传输方法</h2>
+<div class="article-table"><table>
+<thead><tr><th>方法</th><th>做法</th><th>优点/局限</th></tr></thead>
+<tbody>
+<tr><td>字符计数法</td><td>帧头用一个计数字段记录帧长</td><td>实现简单；计数字段出错会导致后续帧全部错位</td></tr>
+<tr><td>字节填充</td><td>用特殊字节定界；数据中出现定界/转义字节时，在前面插入 ESC</td><td>适合面向字节的协议（PPP）</td></tr>
+<tr><td>零比特填充</td><td>用 01111110 定界；数据中每出现 5 个连续 1 就插入一个 0</td><td>适合任意比特流（HDLC）</td></tr>
+<tr><td>违规编码</td><td>用物理层不会出现的编码组合作为边界</td><td>不需要填充，但依赖具体编码</td></tr>
+</tbody>
+</table></div>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="帧定界、字节填充与零比特填充" data-src="/408-review/assets/img/cn-frame-transparency.svg" href="/408-review/assets/img/cn-frame-transparency.svg">
+<img alt="帧字段、字节填充和零比特填充示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-frame-transparency.svg"/>
+</a>
+<figcaption>透明传输的目标：无论数据里出现什么比特/字节，接收端都能正确找到帧边界。</figcaption>
+</figure>
+
+<h2 id="dll-ppp">四、PPP 帧与字节填充</h2>
+<p>PPP 是点对点协议，帧格式为：</p>
+<p><code>Flag(0x7E) | Address(0xFF) | Control(0x03) | Protocol | Information | FCS | Flag(0x7E)</code></p>
+<ul>
+<li>Flag 用 0x7E 标记帧开始/结束；</li>
+<li>Address/Control 在 PPP 中通常是固定值 0xFF/0x03；</li>
+<li>Protocol 标识网络层协议；Information 是数据；FCS 用 CRC 检错；</li>
+<li>数据中出现 0x7E 或 0x7D 时，用 0x7D 转义：0x7E→0x7D 0x5E，0x7D→0x7D 0x5D。</li>
+</ul>
+<p>PPP 有检错（FCS），但默认<strong>不提供可靠重传</strong>；它不是“可靠传输协议”。PPP 还支持 LCP 链路控制、认证和多协议封装。</p>
+
+<h2 id="dll-pitfalls">五、易错点与收束</h2>
+<ul>
+<li><strong>“链路层负责端到端可靠传输”</strong>：错；链路层只保证相邻结点，端到端由传输层负责。</li>
+<li><strong>“PPP 是可靠传输协议”</strong>：PPP 只检错，默认不重传。</li>
+<li><strong>“字节填充和零比特填充一样”</strong>：前者按字节转义，后者按比特插 0。</li>
+<li><strong>“帧越长越好”</strong>：受 MTU、缓存和差错重传代价限制。</li>
+</ul>
+<p>收束：<strong>链路层先解决“怎样切帧、怎样透明传”，再解决“错了怎么办、发太快怎么办、共享信道谁先发”。</strong></p>
+</div>

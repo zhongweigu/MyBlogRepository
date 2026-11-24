@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 480" role="img" aria-label="以太网MAC帧字段">
+  <rect width="1080" height="480" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">以太网 V2 MAC 帧：从目的地址到 FCS</text>
+  <g font-family="sans-serif" font-size="13" fill="#24313a">
+    <g>
+      <rect x="45" y="90" width="110" height="60" fill="#e9f2f6" stroke="#4d7f95"/><text x="100" y="116" text-anchor="middle">目的 MAC</text><text x="100" y="136" text-anchor="middle">6B</text>
+      <rect x="155" y="90" width="110" height="60" fill="#e9f2f6" stroke="#4d7f95"/><text x="210" y="116" text-anchor="middle">源 MAC</text><text x="210" y="136" text-anchor="middle">6B</text>
+      <rect x="265" y="90" width="100" height="60" fill="#f7ecd9" stroke="#a8782c"/><text x="315" y="116" text-anchor="middle">类型/长度</text><text x="315" y="136" text-anchor="middle">2B</text>
+      <rect x="365" y="90" width="400" height="60" fill="#eef3e4" stroke="#6f8f45"/><text x="565" y="116" text-anchor="middle">数据</text><text x="565" y="136" text-anchor="middle">46–1500B</text>
+      <rect x="765" y="90" width="100" height="60" fill="#f3e6e6" stroke="#a85a5a"/><text x="815" y="116" text-anchor="middle">FCS</text><text x="815" y="136" text-anchor="middle">4B</text>
+    </g>
+    <text x="45" y="185">前导码 7B + SFD 1B 用于同步，<strong>不计入帧长</strong>；帧长从目的 MAC 算到 FCS。</text>
+    <text x="45" y="212">最短 64B：数据不足 46B 时填充；最大 1518B；802.1Q 加 4B 标签后最大 1522B。</text>
+
+    <rect x="45" y="260" width="990" height="80" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="285" font-weight="700">MAC 地址</text>
+    <text x="65" y="309" font-size="13">48 位，前 24 位 OUI，后 24 位厂商分配；全 1 为广播，第一字节最低位为 1 表示组播。</text>
+    <text x="65" y="330" font-size="12" fill="#52605a">MAC 地址只在本地链路/广播域使用；跨网段转发靠 IP 路由。</text>
+
+    <text x="45" y="390" font-weight="700">读图</text>
+    <text x="45" y="415" font-size="13">“64B 最短帧”是 CSMA/CD 检测冲突的要求；不是以太网帧“只能 64B”，最大可到 1518B。</text>
+    <text x="45" y="440" font-size="12" fill="#b54b45">不要把前导码/SFD 算进 64B，也不要把 VLAN 标签漏掉。</text>
+  </g>
+</svg>

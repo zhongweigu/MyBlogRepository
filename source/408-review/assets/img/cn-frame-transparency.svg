@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 720" role="img" aria-label="PPP 帧、字节填充和零比特填充">
+  <rect width="1080" height="720" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">帧定界与透明传输：数据里出现定界符怎么办</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">PPP 帧格式</text>
+    <g font-size="12">
+      <rect x="55" y="95" width="70" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="90" y="122" text-anchor="middle">0x7E</text>
+      <rect x="125" y="95" width="55" height="45" fill="#f7f5ee" stroke="#c9c0ae"/><text x="152" y="122" text-anchor="middle">FF</text>
+      <rect x="180" y="95" width="55" height="45" fill="#f7f5ee" stroke="#c9c0ae"/><text x="207" y="122" text-anchor="middle">03</text>
+      <rect x="235" y="95" width="100" height="45" fill="#f7ecd9" stroke="#a8782c"/><text x="285" y="122" text-anchor="middle">Protocol</text>
+      <rect x="335" y="95" width="360" height="45" fill="#eef3e4" stroke="#6f8f45"/><text x="515" y="122" text-anchor="middle">Information（变长）</text>
+      <rect x="695" y="95" width="90" height="45" fill="#f3e6e6" stroke="#a85a5a"/><text x="740" y="122" text-anchor="middle">FCS</text>
+      <rect x="785" y="95" width="70" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="820" y="122" text-anchor="middle">0x7E</text>
+    </g>
+    <text x="55" y="165" font-size="12">Flag 定界；Address/Control 通常固定为 FF/03；FCS 检错，默认不重传。</text>
+
+    <text x="45" y="210" font-weight="700">字节填充（PPP）</text>
+    <text x="45" y="238">数据中的 0x7E、0x7D 会与定界/转义冲突，前面插入 0x7D：</text>
+    <text x="45" y="264" font-family="monospace">0x7E → 0x7D 0x5E</text>
+    <text x="45" y="288" font-family="monospace">0x7D → 0x7D 0x5D</text>
+    <text x="45" y="312" font-size="12">接收端看到 0x7D 就把下一个字节“还原”。</text>
+
+    <text x="600" y="210" font-weight="700">零比特填充（HDLC）</text>
+    <text x="600" y="238">定界符：0 1 1 1 1 1 1 0</text>
+    <text x="600" y="264">数据中每出现 5 个连续 1，就插入一个 0：</text>
+    <text x="600" y="292" font-family="monospace">11111 → 111110</text>
+    <text x="600" y="316" font-family="monospace">01111110 只在边界出现</text>
+    <text x="600" y="340" font-size="12">接收端每收到 5 个 1，就删掉后面的 0。</text>
+
+    <rect x="45" y="380" width="990" height="115" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="405" font-weight="700">四种透明传输</text>
+    <text x="65" y="430" font-size="13">字符计数：头部写帧长；计数错会导致后续帧错位。</text>
+    <text x="65" y="453" font-size="13">字节填充：ESC 转义，适合面向字节的 PPP。</text>
+    <text x="65" y="476" font-size="13">零比特填充：每 5 个 1 插 0，适合任意比特流（HDLC）。</text>
+    <text x="65" y="496" font-size="12" fill="#52605a">违规编码：用物理层不会出现的编码组合当边界，依赖具体编码。</text>
+
+    <text x="45" y="545" font-weight="700">为什么不能直接用“长度”或“特殊字符”？</text>
+    <text x="45" y="570">长度字段出错会连带后续帧；特殊字符可能出现在数据里；填充就是让“数据里的定界符”失去定界含义。</text>
+    <text x="45" y="595" font-size="12" fill="#6b777f">透明传输 = 数据字段可以任意出现 0/1 或字节，接收端仍能正确切帧。</text>
+    <text x="45" y="635" font-weight="700">PPP 与 HDLC</text>
+    <text x="45" y="660" font-size="13">PPP 面向字节、用字节填充；HDLC 面向比特、用零比特填充。PPP 有 FCS 检错，但默认不做可靠重传。</text>
+    <text x="45" y="690" font-size="12" fill="#b54b45">“PPP 是可靠传输协议”是常见错误；可靠性要靠上层（如 TCP）或额外机制。</text>
+  </g>
+</svg>

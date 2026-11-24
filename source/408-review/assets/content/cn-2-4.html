@@ -1,0 +1,84 @@
+<div class="article-content">
+<p>共享信道要回答“谁先发、冲突怎么办”。静态划分把信道预先分给各方；随机访问让各方竞争；轮询/令牌用集中或令牌控制访问。以太网用 CSMA/CD，无线局域网用 CSMA/CA。</p>
+
+<details class="article-toc">
+<summary>本页目录 <span>7 节</span></summary>
+<div class="toc"><ul>
+<li><a href="#mac-static">一、静态划分信道</a></li>
+<li><a href="#mac-aloha">二、ALOHA</a></li>
+<li><a href="#mac-csma">三、CSMA 与坚持策略</a></li>
+<li><a href="#mac-cd">四、CSMA/CD</a></li>
+<li><a href="#mac-min">五、最短帧长与二进制退避</a></li>
+<li><a href="#mac-ca">六、CSMA/CA 与轮询</a></li>
+<li><a href="#mac-pitfalls">七、易错点与收束</a></li>
+</ul></div>
+</details>
+
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="介质访问控制的三类方法：静态划分、随机访问、轮询/令牌" data-src="/408-review/assets/img/cn-mac-taxonomy.svg" href="/408-review/assets/img/cn-mac-taxonomy.svg">
+<img alt="介质访问控制方法分类：静态划分、随机访问、轮询/令牌" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-mac-taxonomy.svg"/>
+</a>
+<figcaption>静态划分用预留，随机访问用竞争，轮询/令牌用控制；CSMA/CD 和 CSMA/CA 属于随机访问。</figcaption>
+</figure>
+<h2 id="mac-static">一、静态划分信道</h2>
+<ul>
+<li><strong>FDM</strong>：按频率划分，每路占用不同频段；</li>
+<li><strong>TDM</strong>：按时间划分，每路占用不同时隙；</li>
+<li><strong>WDM</strong>：按波长划分（光纤）；</li>
+<li><strong>CDM/CDMA</strong>：用正交码区分用户，所有用户同时同频发送。</li>
+</ul>
+<p>静态划分适合固定、连续的业务；轻负载时资源浪费，重负载时排队/时延仍可能上升。</p>
+
+<h2 id="mac-aloha">二、ALOHA</h2>
+<p>ALOHA 是“想发就发”：有帧就发送，冲突后随机等待再重发。纯 ALOHA 最大吞吐约 <strong>18.4%</strong>；时隙 ALOHA 把发送对齐到时隙，最大吞吐约 <strong>36.8%</strong>。</p>
+<p>ALOHA 不需要监听，冲突概率高；它适合负载轻、突发性强的场景，是现代随机接入的思想起点。</p>
+
+<h2 id="mac-csma">三、CSMA 与坚持策略</h2>
+<p>CSMA（载波监听多路访问）先监听信道，再决定是否发送：</p>
+<ul>
+<li><strong>1-坚持</strong>：空闲就立即发；忙则持续监听，一旦空闲就发。冲突概率较高；</li>
+<li><strong>非坚持</strong>：忙则随机等待一段时间再监听，减少冲突但增加空闲；</li>
+<li><strong>p-坚持</strong>：空闲时以概率 p 发送，以 1−p 推迟，折中。</li>
+</ul>
+<p>监听不能完全避免冲突：信号传播需要时间，两个站点可能同时听到“空闲”后一起发送。</p>
+
+<h2 id="mac-cd">四、CSMA/CD</h2>
+<p>CSMA/CD = 载波监听 + 多路访问 + <strong>冲突检测</strong>：</p>
+<ol>
+<li>先听后发：信道忙则等待；</li>
+<li>边发边听：发送过程中持续检测冲突；</li>
+<li>检测到冲突立即停止，发送干扰信号，随机退避后重试；</li>
+<li>冲突次数越多，退避范围越大。</li>
+</ol>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="CSMA/CD 的监听、冲突检测与最坏情况 2τ" data-src="/408-review/assets/img/cn-csma-cd.svg" href="/408-review/assets/img/cn-csma-cd.svg">
+<img alt="CSMA/CD 先听后发、边发边听和最坏冲突检测时间" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-csma-cd.svg"/>
+</a>
+<figcaption>最远两个站点 A、D 的最坏情况：A 的信号到 D 后 D 才发，冲突信号再回到 A，需 2τ。</figcaption>
+</figure>
+<p>CSMA/CD 用于共享式以太网；全双工交换式以太网每条链路点对点，不需要冲突检测。</p>
+
+<h2 id="mac-min">五、最短帧长与二进制退避</h2>
+<p>发送方必须在<strong>冲突信号返回之前仍在发送</strong>，否则帧已经发完，无法检测到冲突。最坏情况下冲突检测时间为 <strong>2τ</strong>（τ 为最远站点间单程传播时延），因此：</p>
+<p>$$L_{min}=2\tau\times R$$</p>
+<p>10Mb/s 以太网 2τ=51.2μs，所以 L_min=512bit=64B。帧太短会在检测到冲突前发送完毕，CSMA/CD 失效。</p>
+<p><strong>二进制指数退避</strong>：第 i 次冲突后，从 {0,1,…,2^i−1} 中随机取 k，等待 k×512 比特时间；i 超过 10 后范围不再翻倍，16 次冲突后丢弃。冲突越多，退避窗口越大，降低再次碰撞概率。</p>
+
+<h2 id="mac-ca">六、CSMA/CA 与轮询</h2>
+<p>无线局域网不能可靠地“边发边听”，因此 802.11 使用 <strong>CSMA/CA</strong>：先监听，空闲等待 DIFS，再随机退避；接收方回 ACK；必要时用 RTS/CTS 预约信道，缓解隐藏终端。</p>
+<ul>
+<li>DIFS：分布式协调功能帧间间隔；SIFS：短帧间间隔，优先级更高；</li>
+<li>ACK：链路层确认，告诉发送方帧已收到；</li>
+<li>RTS/CTS：先预约，减少长帧冲突；</li>
+<li>轮询/令牌：主结点轮询或令牌依次传递，避免竞争，适合重负载/确定性时延。</li>
+</ul>
+
+<h2 id="mac-pitfalls">七、易错点与收束</h2>
+<ul>
+<li><strong>“CSMA/CD 用于无线”</strong>：无线用 CSMA/CA；无线难以边发边听。</li>
+<li><strong>“最短帧长与传播时延无关”</strong>：L_min=2τR，τ 是单程传播时延。</li>
+<li><strong>“ALOHA 最大吞吐 100%”</strong>：纯 ALOHA 约 18.4%，时隙 ALOHA 约 36.8%。</li>
+<li><strong>“监听就能完全避免冲突”</strong>：传播时延导致同时听到空闲，仍可能碰撞。</li>
+</ul>
+<p>收束：<strong>静态划分用“预留”换稳定，随机访问用“竞争”换灵活，轮询/令牌用“控制”换确定性</strong>；以太网选 CSMA/CD，无线选 CSMA/CA。</p>
+</div>

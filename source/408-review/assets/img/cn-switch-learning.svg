@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 650" role="img" aria-label="以太网交换机自学习与泛洪">
+  <defs>
+    <marker id="swla" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#3f6f8a"/></marker>
+    <marker id="swlb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#b54b45"/></marker>
+  </defs>
+  <rect width="1100" height="650" fill="#fffdf8"/>
+  <text x="550" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">交换机自学习：先记源 MAC，再查目的 MAC</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="450" y="250" width="180" height="90" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="540" y="285" text-anchor="middle" font-weight="700">交换机</text>
+    <text x="540" y="310" text-anchor="middle" font-size="12">4 个端口</text>
+
+    <circle cx="170" cy="160" r="28" fill="#eef3e4" stroke="#6f8f45"/><text x="170" y="166" text-anchor="middle">A</text>
+    <circle cx="170" cy="440" r="28" fill="#eef3e4" stroke="#6f8f45"/><text x="170" y="446" text-anchor="middle">C</text>
+    <circle cx="900" cy="160" r="28" fill="#f7ecd9" stroke="#a8782c"/><text x="900" y="166" text-anchor="middle">B</text>
+    <circle cx="900" cy="440" r="28" fill="#f7ecd9" stroke="#a8782c"/><text x="900" y="446" text-anchor="middle">D</text>
+
+    <path d="M198 175 L450 270" stroke="#3f6f8a" stroke-width="2" marker-end="url(#swla)"/>
+    <path d="M198 425 L450 320" stroke="#3f6f8a" stroke-width="2" marker-end="url(#swla)"/>
+    <path d="M630 270 L872 175" stroke="#3f6f8a" stroke-width="2" marker-end="url(#swla)"/>
+    <path d="M630 320 L872 425" stroke="#3f6f8a" stroke-width="2" marker-end="url(#swla)"/>
+    <text x="320" y="210" font-size="12">端口1</text>
+    <text x="320" y="410" font-size="12">端口3</text>
+    <text x="700" y="210" font-size="12">端口2</text>
+    <text x="700" y="410" font-size="12">端口4</text>
+
+    <rect x="55" y="510" width="420" height="110" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="75" y="535" font-weight="700">交换表（学习后）</text>
+    <text x="75" y="560" font-size="13">MAC A → 端口 1</text>
+    <text x="75" y="583" font-size="13">MAC B → 端口 2</text>
+    <text x="75" y="606" font-size="12" fill="#52605a">表项有老化时间；源 MAC 学习，目的 MAC 转发。</text>
+
+    <text x="520" y="520" font-weight="700">A→B 的第一帧</text>
+    <text x="520" y="545">1. 记录“A 在端口1”；</text>
+    <text x="520" y="568">2. 表中没有 B → 向其他端口泛洪；</text>
+    <text x="520" y="591">3. B 收到并回复，交换机记录“B 在端口2”；</text>
+    <text x="520" y="614">4. 之后 A→B 直接转发到端口2。</text>
+
+    <text x="45" y="95" font-size="12" fill="#52605a">未知目的/广播 → 泛洪；已知目的 → 定向转发；入端口不转发。</text>
+  </g>
+</svg>

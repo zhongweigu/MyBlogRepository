@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-label="介质访问控制方法分类">
+  <rect width="1080" height="620" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">介质访问控制：预留、竞争还是轮询</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <rect x="430" y="70" width="220" height="55" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="540" y="104" text-anchor="middle" font-weight="700">介质访问控制</text>
+
+    <rect x="60" y="180" width="250" height="55" rx="4" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="185" y="214" text-anchor="middle" font-weight="700">静态划分</text>
+    <rect x="415" y="180" width="250" height="55" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="540" y="214" text-anchor="middle" font-weight="700">随机访问</text>
+    <rect x="770" y="180" width="250" height="55" rx="4" fill="#f3e6e6" stroke="#a85a5a"/>
+    <text x="895" y="214" text-anchor="middle" font-weight="700">轮询/令牌</text>
+
+    <path d="M500 125 L185 180" stroke="#4d5b66" stroke-width="2"/>
+    <path d="M540 125 L540 180" stroke="#4d5b66" stroke-width="2"/>
+    <path d="M580 125 L895 180" stroke="#4d5b66" stroke-width="2"/>
+
+    <text x="60" y="275" font-weight="700">FDM / TDM / WDM / CDM</text>
+    <text x="60" y="300" font-size="12">频段/时隙/波长/正交码固定分配</text>
+    <text x="60" y="324" font-size="12">适合连续业务；轻负载浪费</text>
+
+    <text x="415" y="275" font-weight="700">ALOHA / CSMA / CSMA-CD / CA</text>
+    <text x="415" y="300" font-size="12">想发就发 / 先听后发 / 边发边听 / 预约+确认</text>
+    <text x="415" y="324" font-size="12">突发数据灵活；冲突/退避开销</text>
+
+    <text x="770" y="275" font-weight="700">轮询 / 令牌传递</text>
+    <text x="770" y="300" font-size="12">主结点依次询问；令牌按序传递</text>
+    <text x="770" y="324" font-size="12">重负载/确定性时延；令牌维护复杂</text>
+
+    <rect x="45" y="375" width="990" height="80" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="400" font-weight="700">CSMA/CD 与 CSMA/CA 的分工</text>
+    <text x="65" y="424" font-size="13">有线共享以太网：能边发边听，用 CSMA/CD；无线：难以可靠检测冲突，用 CSMA/CA + ACK/RTS-CTS。</text>
+    <text x="65" y="446" font-size="12" fill="#52605a">全双工交换式以太网每条链路点对点，不需要 CSMA/CD。</text>
+
+    <text x="45" y="510" font-weight="700">一句话</text>
+    <text x="45" y="535" font-size="13">静态划分用“预留”换稳定；随机访问用“竞争”换灵活；轮询/令牌用“控制”换确定性。</text>
+    <text x="45" y="565" font-size="12" fill="#6b777f">没有一种方法在所有负载下都最优；看业务是否突发、是否需要确定性时延。</text>
+  </g>
+</svg>

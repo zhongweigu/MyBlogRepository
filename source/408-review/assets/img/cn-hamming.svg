@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-label="海明距离、检错半径和纠错半径">
+  <rect width="1080" height="620" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">海明距离：码字之间隔多远，决定能检/纠多少错</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="80" font-weight="700">两个码字的距离</text>
+    <text x="45" y="108" font-family="monospace">x = 0 0 1 0 1 1 0 1</text>
+    <text x="45" y="132" font-family="monospace">y = 1 1 0 1 0 0 1 0</text>
+    <text x="45" y="156" font-size="13">逐位比较，不同位有 8 个 → d(x,y)=8。</text>
+
+    <text x="600" y="80" font-weight="700">最小距离 d0</text>
+    <text x="600" y="108">一个码中任意两个不同码字距离的最小值。</text>
+    <text x="600" y="132">d0 越大，合法码字之间隔得越远。</text>
+
+    <line x1="240" y1="250" x2="700" y2="250" stroke="#4d5b66" stroke-dasharray="5 4"/>
+    <circle cx="240" cy="250" r="58" fill="#e9f2f6" stroke="#4d7f95"/>
+    <circle cx="700" cy="250" r="58" fill="#eef3e4" stroke="#6f8f45"/>
+    <text x="240" y="256" text-anchor="middle" font-weight="700">码字 A</text>
+    <text x="700" y="256" text-anchor="middle" font-weight="700">码字 B</text>
+    <text x="470" y="225" text-anchor="middle">d0</text>
+    <path d="M298 250 L642 250" stroke="#4d5b66" stroke-width="2"/>
+    <text x="470" y="290" text-anchor="middle" font-size="12">半径 t 的“错误球”</text>
+
+    <text x="45" y="380" font-weight="700">检错与纠错条件</text>
+    <text x="45" y="407">检测 e 个错误：d0 ≥ e + 1</text>
+    <text x="45" y="432">纠正 t 个错误：d0 ≥ 2t + 1</text>
+    <text x="45" y="457">检测 e 并纠正 t（e≥t）：d0 ≥ e + t + 1</text>
+    <text x="45" y="485" font-size="12" fill="#52605a">d0=3：可纠 1 位错，或检 2 位错；d0=4：可检 3 位错，或纠 1 位错。</text>
+
+    <rect x="600" y="355" width="430" height="135" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="620" y="380" font-weight="700">为什么是 2t+1</text>
+    <text x="620" y="405" font-size="13">两个码字各画一个半径 t 的球；</text>
+    <text x="620" y="428" font-size="13">球不重叠，才能唯一纠到自己的码字。</text>
+    <text x="620" y="451" font-size="13">球心距离至少 2t+1。</text>
+    <text x="620" y="474" font-size="12" fill="#b54b45">检错只要求“不落到另一个码字”，所以 e+1。</text>
+
+    <text x="45" y="550" font-weight="700">(7,4) 海明码</text>
+    <text x="45" y="575">4 数据位 + 3 校验位，d0=3，可纠 1 位错；校验位放在 1、2、4 位。</text>
+    <text x="45" y="600" font-size="12" fill="#6b777f"> syndrome 非 0 的位置就是出错位；加总校验位可区分单错/双错。</text>
+  </g>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 650" role="img" aria-label="VLAN 802.1Q 标签与 STP 逻辑断环">
+  <defs>
+    <marker id="vla" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1080" height="650" fill="#fffdf8"/>
+  <text x="540" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">VLAN 划分广播域，STP 逻辑断环</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="80" font-weight="700">A. 802.1Q 标签（4B）</text>
+    <g font-size="12">
+      <rect x="55" y="100" width="120" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="115" y="127" text-anchor="middle">TPID 0x8100</text>
+      <rect x="175" y="100" width="90" height="45" fill="#f7ecd9" stroke="#a8782c"/><text x="220" y="127" text-anchor="middle">PCP 3b</text>
+      <rect x="265" y="100" width="70" height="45" fill="#f7f5ee" stroke="#c9c0ae"/><text x="300" y="127" text-anchor="middle">DEI 1b</text>
+      <rect x="335" y="100" width="180" height="45" fill="#eef3e4" stroke="#6f8f45"/><text x="425" y="127" text-anchor="middle">VID 12b</text>
+    </g>
+    <text x="55" y="170" font-size="12">VID 12 位 → 最多 4096 个 VLAN（0/4095 保留）。</text>
+    <text x="55" y="193" font-size="12">Access 口属于一个 VLAN；Trunk 口承载多个 VLAN，跨交换机打标签。</text>
+
+    <text x="560" y="80" font-weight="700">B. 二层环路与 STP</text>
+    <rect x="600" y="120" width="130" height="55" fill="#e9f2f6" stroke="#4d7f95"/><text x="665" y="152" text-anchor="middle">交换机1</text>
+    <rect x="850" y="120" width="130" height="55" fill="#e9f2f6" stroke="#4d7f95"/><text x="915" y="152" text-anchor="middle">交换机2</text>
+    <path d="M730 135 L850 135" stroke="#3f6f8a" stroke-width="2" marker-end="url(#vla)"/>
+    <path d="M730 160 L850 160" stroke="#3f6f8a" stroke-width="2" marker-end="url(#vla)"/>
+    <text x="790" y="120" text-anchor="middle" font-size="11">两条冗余链路</text>
+    <line x1="790" y1="185" x2="790" y2="245" stroke="#b54b45" stroke-width="3"/>
+    <text x="790" y="220" text-anchor="middle" font-size="12" fill="#b54b45">阻塞一条</text>
+    <text x="600" y="285" font-size="12">广播帧在环里兜圈 → 广播风暴；STP 选根桥/根端口/指定端口，阻塞冗余端口。</text>
+    <text x="600" y="308" font-size="12" fill="#52605a">物理链路仍在，故障时可切换；STP 是逻辑断环。</text>
+
+    <rect x="45" y="350" width="990" height="95" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="375" font-weight="700">VLAN 的边界</text>
+    <text x="65" y="399" font-size="13">VLAN 隔离广播域，但不自动隔离 IP 子网；不同 VLAN 通信需要三层设备（路由器/三层交换机）。</text>
+    <text x="65" y="422" font-size="12" fill="#52605a">同一 VLAN 可跨多台交换机（Trunk 打标签），不同 VLAN 的广播不会互相传播。</text>
+
+    <text x="45" y="495" font-weight="700">交换机 vs Hub</text>
+    <text x="45" y="520" font-size="13">Hub：物理层、泛洪、所有端口同一冲突域、半双工。</text>
+    <text x="45" y="544" font-size="13">交换机：数据链路层、按 MAC 定向转发、每端口一个冲突域、可全双工；默认不隔离广播域。</text>
+    <text x="45" y="575" font-size="12" fill="#b54b45">“交换机每个端口一个广播域”是错的；VLAN 才划分广播域。</text>
+    <text x="45" y="610" font-size="12" fill="#6b777f">普通二层交换机转发帧时不写入自己的 MAC；对端看到的是源主机 MAC。</text>
+  </g>
+</svg>
