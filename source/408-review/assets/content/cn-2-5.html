@@ -140,7 +140,74 @@
 <p>为什么 RTS 的 Duration 要包含这么多？因为 RTS 是第一个预约帧，它必须把“后面整个交换过程”都算进去，其他站才会一直回避到 ACK 结束。CTS 是 AP 对 RTS 的回应，它只需要覆盖“CTS 之后到 ACK 结束”；DATA 的 Duration 只覆盖“DATA 之后到 ACK 结束”。</p>
 <p><strong>RTS/CTS 解决隐藏终端</strong>：A、C 都能和 AP 通信，但彼此听不到；如果同时发，会在 AP 处碰撞。A 先发 RTS，AP 回 CTS；C 听到 CTS 后按 NAV 推迟，冲突就被提前避开。RTS/CTS 不是强制的，帧很短时可能不用，因为 RTS/CTS 本身也有开销。</p>
 
-<h3 id="wifi-address">6.5 802.11 帧的地址字段</h3>
+<h3 id="wifi-special">6.5 特殊情况与易错点</h3>
+<p>下面这些不是“基本流程”的重复，而是考试里最容易把规则套错的地方。</p>
+
+<h4>6.5.1 DIFS 或退避过程中信道变忙</h4>
+<div class="article-table"><table>
+<thead><tr><th>所处阶段</th><th>信道变忙后的处理</th></tr></thead>
+<tbody>
+<tr><td>等待 DIFS</td><td>停止等待；信道重新空闲后，重新等<mark class="exam-key">完整 DIFS</mark></td></tr>
+<tr><td>随机退避</td><td><mark class="exam-key">冻结退避计时器，保留剩余时间</mark></td></tr>
+<tr><td>退避恢复</td><td>信道重新空闲后，先等完整 DIFS，再继续剩余退避时间</td></tr>
+</tbody>
+</table></div>
+<p>例：A 随机选了 5 个时隙，已经减了 2 个，此时信道变忙。正确处理是<strong>冻结，剩 3 个时隙</strong>；信道重新空闲后，先等 DIFS，再继续退避 3 个时隙。<mark>不是重新随机选 5 个时隙</mark>。</p>
+
+<h4>6.5.2 什么时候可以不使用随机退避</h4>
+<p>教材规则可以压缩成一句：<mark class="exam-key">当且仅当检测到信道空闲，且该数据帧是第一次发送时，才不使用退避算法；其余情况都要退避</mark>。</p>
+<div class="article-table"><table>
+<thead><tr><th>情况</th><th>是否退避</th></tr></thead>
+<tbody>
+<tr><td>信道空闲，数据帧第一次发送</td><td>不退避</td></tr>
+<tr><td>信道忙，数据帧第一次发送</td><td>要退避</td></tr>
+<tr><td>数据帧重传</td><td>要退避</td></tr>
+<tr><td>RTS 发送失败，重新竞争</td><td>要退避</td></tr>
+<tr><td>已建立 RTS/CTS/DATA/ACK 的连续交换</td><td>不再重新退避，帧间只等 SIFS</td></tr>
+</tbody>
+</table></div>
+<p>注意：第一次发送时信道忙，等信道空闲、等完 DIFS 后<strong>仍然要退避</strong>；“第一次发送”不是“永远不退避”。</p>
+
+<h4>6.5.3 RTS/CTS 过程中要不要重新退避</h4>
+<div class="article-table"><table>
+<thead><tr><th>帧</th><th>发送前等待</th><th>是否重新退避</th></tr></thead>
+<tbody>
+<tr><td>RTS</td><td>DIFS + 必要的随机退避</td><td>是，竞争信道</td></tr>
+<tr><td>CTS</td><td>SIFS</td><td>否</td></tr>
+<tr><td>DATA</td><td>SIFS</td><td>否</td></tr>
+<tr><td>ACK</td><td>SIFS</td><td>否</td></tr>
+</tbody>
+</table></div>
+<p>完整关系是 <code>RTS —SIFS→ CTS —SIFS→ DATA —SIFS→ ACK</code>。原因：<mark class="exam-key">SIFS 比 DIFS 短，正在进行的帧交换具有优先权</mark>，别的站不会在这个间隙插进来。</p>
+
+<h4>6.5.4 RTS/CTS 会不会被打断</h4>
+<p>正常情况下，遵守协议的普通竞争站听到 RTS/CTS 后会按 Duration 设置 NAV，在预约时间内推迟发送。所以一次已经建立的帧交换通常不会被打断。但“通常”不等于“绝对”：</p>
+<div class="article-table"><table>
+<thead><tr><th>特殊情况</th><th>可能结果</th></tr></thead>
+<tbody>
+<tr><td>RTS 发生冲突</td><td>接收方收不到 RTS</td></tr>
+<tr><td>CTS 丢失</td><td>发送方收不到 CTS</td></tr>
+<tr><td>DATA 受干扰</td><td>接收方收不到/收错 DATA</td></tr>
+<tr><td>ACK 丢失</td><td>发送方误以为 DATA 失败</td></tr>
+<tr><td>隐藏站没听到 RTS/CTS</td><td>仍可能在 AP 处碰撞</td></tr>
+<tr><td>无线信道严重干扰</td><td>控制帧/数据帧都可能丢失</td></tr>
+</tbody>
+</table></div>
+
+<h4>6.5.5 没收到 CTS 或 ACK 怎么办</h4>
+<p><strong>RTS 后没有 CTS</strong>：可能 RTS 丢了/冲突、AP 没收到、CTS 丢了。处理是 <mark class="exam-key">CTS 超时 → 判定失败 → 增大退避窗口 → 重新退避 → 重传 RTS</mark>。注意：重传的是 <strong>RTS</strong>，不是直接发 DATA。</p>
+<p><strong>DATA 后没有 ACK</strong>：可能 DATA 丢了/冲突、ACK 丢了/受干扰。处理是 <mark class="exam-key">ACK 超时 → 判定失败 → 增大退避窗口 → 重新退避 → 重传 DATA</mark>；如果原本使用 RTS/CTS，重传时通常重新进行 RTS/CTS 握手。</p>
+<p><strong>ACK 丢了，接收方会不会重复收数据？</strong>会可能收到重复 DATA，但不会重复向上层交付：B 用<mark class="exam-key">序列号 + Retry 标志</mark>识别重复帧，丢弃重复数据，并可以再回一个 ACK。<mark>没有收到 ACK，不代表接收方一定没有收到 DATA</mark>。</p>
+<p><strong>超过最大重试次数</strong>：放弃本次发送，向上层报告失败；不是无限重试。</p>
+
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="CSMA/CA 特殊情况：DIFS 被打断、退避冻结、CTS/ACK 超时与重复帧" data-src="/408-review/assets/img/cn-csma-ca-special.svg" href="/408-review/assets/img/cn-csma-ca-special.svg">
+<img alt="CSMA/CA 特殊情况的退避冻结、CTS 超时、ACK 超时和重复帧处理" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-csma-ca-special.svg"/>
+</a>
+<figcaption>上半部分：DIFS 被打断要重新等，退避只冻结不重选；下半部分：CTS 超时重传 RTS，ACK 超时重传 DATA。</figcaption>
+</figure>
+
+<h3 id="wifi-address">6.6 802.11 帧的地址字段</h3>
 <p>802.11 帧有多个地址字段（RA/TA/DA/SA），具体取决于 To DS/From DS 标志：</p>
 <div class="article-table"><table>
 <thead><tr><th>To DS / From DS</th><th>Address 1</th><th>Address 2</th><th>Address 3</th><th>场景</th></tr></thead>
