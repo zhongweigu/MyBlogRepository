@@ -10,7 +10,7 @@
 <li><a href="#eth-switch">三、交换机自学习</a></li>
 <li><a href="#eth-loop">四、环路与 STP</a></li>
 <li><a href="#eth-vlan">五、VLAN 与 802.1Q</a></li>
-<li><a href="#eth-wifi">六、802.11 无线局域网</a></li>
+<li><a href="#eth-wifi">六、802.11 与 CSMA/CA</a></li>
 <li><a href="#eth-pitfalls">七、易错点与收束</a></li>
 </ul></div>
 </details>
@@ -27,8 +27,8 @@
 <tr><td>FCS</td><td>4B</td><td>CRC 检错</td></tr>
 </tbody>
 </table></div>
-<p>帧长范围 64–1518B（不含前导码）；802.1Q 加 4B 标签后最大 1522B。前导码 7B + SFD 1B 用于同步，<mark>不计入帧长</mark>。</p>
-<p>为什么数据字段最小是 46B？因为 CSMA/CD 要求最短帧 64B；目的/源/类型/FCS 共 18B，64−18=46。数据不足 46B 时，MAC 层要在数据字段后填充到 46B，接收端再根据上层协议长度把填充丢掉。</p>
+<p>帧长范围 <mark class="exam-key">64–1518B</mark>（不含前导码）；802.1Q 加 4B 标签后最大 1522B。前导码 7B + SFD 1B 用于同步，<mark>不计入帧长</mark>。</p>
+<p>为什么数据字段最小是 46B？因为 CSMA/CD 要求<mark class="exam-key">最短帧 64B</mark>；目的/源/类型/FCS 共 18B，64−18=46。数据不足 46B 时，MAC 层要在数据字段后填充到 46B，接收端再根据上层协议长度把填充丢掉。</p>
 <p>“类型/长度”字段要看数值：大于 0x0600（1536）通常表示上层协议类型（如 0x0800 是 IPv4）；小于等于 1500 表示数据长度。这个字段是 Ethernet V2 和 802.3 兼容留下的设计。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="以太网 MAC 帧字段与 64B 最短帧" data-src="/408-review/assets/img/cn-ethernet-frame.svg" href="/408-review/assets/img/cn-ethernet-frame.svg">
@@ -38,7 +38,7 @@
 </figure>
 
 <h2 id="eth-mac">二、MAC 地址</h2>
-<p>MAC 地址 48 位，通常写成 6 组十六进制。前 24 位是厂商 OUI，后 24 位由厂商分配；全 1（FF-FF-FF-FF-FF-FF）是广播地址，第一字节最低位为 1 表示组播。</p>
+<p>MAC 地址 <mark class="exam-key">48 位</mark>，通常写成 6 组十六进制。前 24 位是厂商 OUI，后 24 位由厂商分配；全 1（FF-FF-FF-FF-FF-FF）是广播地址，第一字节最低位为 1 表示组播。</p>
 <p>第一字节还有两个标志位：<mark>最低位 I/G 表示单播/组播，次低位 U/L 表示全局/本地管理</mark>。所以看到 `01-00-5E-...` 这类地址，第一字节最低位是 1，说明是组播；不要把它当普通单播地址。</p>
 <p>MAC 地址是数据链路层地址，只在本地链路/广播域内使用；跨网段转发要靠 IP 路由。</p>
 
@@ -81,26 +81,67 @@
 <p>VLAN 把一个物理局域网划分成多个<strong>逻辑广播域</strong>。802.1Q 在以太网帧的源 MAC 之后、类型/长度之前插入 4B 标签：</p>
 <ul>
 <li>标签含 2B TPID（0x8100）、2B TCI；</li>
-<li>TCI 中 VID 占 12 位，可表示 4096 个 VLAN（0/4095 保留）；</li>
+<li>TCI 中 VID 占 <mark class="exam-key">12 位</mark>，可表示 4096 个 VLAN（0/4095 保留）；</li>
 <li>Access 口属于一个 VLAN，收发的帧通常不带标签；Trunk 口承载多个 VLAN，跨交换机时打标签。</li>
 </ul>
 <p>Access 口连接终端：交换机内部知道这个口属于 VLAN 10，收帧时给帧打上 VLAN 10 的标签，发帧时再把标签剥掉，终端感觉不到 VLAN。Trunk 口连接交换机/路由器：多个 VLAN 的帧都从这一根线过，必须保留标签，接收端才能知道它属于哪个 VLAN。</p>
 <p>VLAN 只隔离<strong>广播域</strong>，不自动隔离 IP 子网；不同 VLAN 之间要通信，仍要经过路由器或三层交换机做路由。也就是说，VLAN 是“二层分段”，不是“三层路由”的替代品。</p>
 <p>VLAN 隔离广播域，但不隔离 IP 子网间的路由；不同 VLAN 通信需要三层设备。</p>
 
-<h2 id="eth-wifi">六、802.11 无线局域网</h2>
-<p>802.11 使用 CSMA/CA：监听信道，空闲等待 DIFS，随机退避；接收方回 ACK；可选 RTS/CTS 预约。无线帧有多个地址字段（RA/TA/DA/SA），具体取决于 To DS/From DS 标志。</p><div class="article-table"><table>
-<thead><tr><th>字段</th><th>长度</th><th>作用</th></tr></thead>
+<h2 id="eth-wifi">六、802.11 与 CSMA/CA</h2>
+<p>802.11 无线局域网不能照搬 CSMA/CD。有线站点可以比较“自己发的信号”和“收到的信号”来检测冲突；无线发送时，自己的发射信号会淹没接收信号，远近效应、隐藏终端也让“边发边听”不可靠。因此 802.11 用 <strong>CSMA/CA</strong>：<mark>尽量避开冲突，再用 ACK 确认</mark>。</p>
+<p>802.11 有两种协调方式：<strong>DCF</strong>（分布式协调功能，默认，靠竞争）和 <strong>PCF</strong>（点协调功能，AP 集中轮询，可选，实际很少用）。下面讲的是 DCF。</p>
+
+<h3 id="wifi-ifs">6.1 IFS：为什么“空闲”还要再等</h3>
+<p>如果多个站同时听到“信道空闲”就立刻发，还是会一起撞。802.11 在“监听空闲”之后再加一段<strong>帧间间隔 IFS</strong>，用不同的等待长度区分优先级：</p>
+<div class="article-table"><table>
+<thead><tr><th>IFS</th><th>长短</th><th>用在哪里</th></tr></thead>
 <tbody>
-<tr><td>Frame Control</td><td>2B</td><td>类型/子类型、To DS/From DS、更多分片、重试、功率管理等</td></tr>
-<tr><td>Duration/ID</td><td>2B</td><td>预约信道时间（NAV）</td></tr>
-<tr><td>Address 1/2/3</td><td>各 6B</td><td>接收/发送/过滤地址；Address 4 在 WDS 中使用</td></tr>
-<tr><td>Sequence Control</td><td>2B</td><td>分片号 + 序号</td></tr>
-<tr><td>Frame Body</td><td>变长</td><td>数据或管理信息</td></tr>
-<tr><td>FCS</td><td>4B</td><td>CRC 检错</td></tr>
+<tr><td><strong>SIFS</strong>（短帧间间隔）</td><td>最短</td><td>ACK、CTS、分片后的数据等“必须马上回应”的帧</td></tr>
+<tr><td><strong>PIFS</strong>（点协调 IFS）</td><td>中等</td><td>PCF 中 AP 轮询</td></tr>
+<tr><td><strong>DIFS</strong>（分布式协调 IFS）</td><td>最长</td><td>DCF 下普通数据帧/管理帧的竞争</td></tr>
 </tbody>
 </table></div>
-<p>To DS/From DS 决定 Address 1/2/3 分别代表 RA、TA、DA、SA 中的哪几个；基础设施模式下，终端经 AP 转发，地址字段比以太网多一层。</p>
+<p>关系是 <mark class="exam-key">SIFS &lt; PIFS &lt; DIFS</mark>。为什么 SIFS 最短？因为 ACK/CTS 是对上一帧的立即响应，必须比别的站的新数据更早抢到信道；如果大家都等 DIFS，ACK 就可能被新数据压住。</p>
+<p>注意：<strong>IFS 不是“随机退避”</strong>。IFS 是固定的优先级间隔；随机退避是在 IFS 之后、为了错开多个竞争站而再加的随机等待。</p>
+
+<h3 id="wifi-flow">6.2 一次 DCF 发送的完整流程</h3>
+<ol>
+<li><strong>监听</strong>：如果信道忙，继续听；如果空闲，先等一个 <strong>DIFS</strong>（确保信道持续空闲）。</li>
+<li><strong>首次发送</strong>：如果这是第一次尝试，且 DIFS 期间信道一直空闲，可以直接发送整个数据帧。否则进入退避。</li>
+<li><strong>随机退避</strong>：从 [0, CW] 里随机选一个退避值（单位是时隙）；每经过一个空闲时隙减 1；如果信道变忙，<strong>冻结</strong>计数器，等信道再次空闲并持续 DIFS 后继续减；减到 0 才发送。</li>
+<li><strong>RTS/CTS（可选）</strong>：先发 RTS 预约信道，AP 回 CTS；周围站听到后按 Duration 设置 NAV，主动推迟发送。</li>
+<li><strong>DATA</strong>：发送数据帧；接收方正确收到后，等 <strong>SIFS</strong> 回 <strong>ACK</strong>。</li>
+<li><strong>失败重试</strong>：发送方在超时前没收到 ACK，就认为失败；把竞争窗口 CW 增大（二进制指数退避），重新选退避值再试；超过重试上限就丢弃。</li>
+</ol>
+<p>这里有一个容易错的细节：<mark>退避计数器只在信道空闲时递减，信道忙时冻结，不是清零</mark>。这样多个站不会因为一次忙就全部重新随机，能保持相对的排队顺序。</p>
+
+<h3 id="wifi-arq">6.3 什么是 ARQ</h3>
+<p><strong><mark class="exam-key">ARQ（Automatic Repeat reQuest，自动重传请求）</mark></strong>是一类“确认 + 超时 + 重传”的可靠传输机制：接收方正确收到就回 ACK；发送方等不到 ACK 就重传。停等、GBN、SR 都是 ARQ 的不同实现。</p>
+<p>802.11 的数据帧使用<strong>停等式链路层 ARQ</strong>：发一个数据帧，等一个 ACK；ACK 超时/丢失就重传。它和 TCP 的 ARQ 不是同一层：<mark>802.11 的 ACK 是链路层确认，只保证“这一跳/这个帧”被收到，不代表端到端应用数据已经可靠交付</mark>。</p>
+
+<h3 id="wifi-nav">6.4 NAV、RTS/CTS 与 Duration 字段</h3>
+<p>无线还有一套“<mark class="exam-key">虚拟载波监听</mark>”：帧头里的 <strong>Duration（持续时间）</strong>字段告诉周围站“信道还要被占用多久”。收到帧的站把这个时间写入自己的 <strong><mark class="exam-key">NAV（Network Allocation Vector，网络分配向量）</mark></strong>；NAV 没减到 0 之前，即使物理层听到空闲，也不发送。这样不用真的听完整帧，就能提前避开。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="802.11 CSMA/CA 的 DIFS、SIFS、RTS/CTS、DATA、ACK 与 NAV 时间轴" data-src="/408-review/assets/img/cn-wifi-csma-ca-v2.svg" href="/408-review/assets/img/cn-wifi-csma-ca-v2.svg">
+<img alt="802.11 CSMA/CA 完整时序：DIFS、RTS、SIFS、CTS、DATA、ACK、NAV" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-wifi-csma-ca-v2.svg"/>
+</a>
+<figcaption>图中紫色条是 NAV：收到 RTS/CTS/DATA 的站分别按帧里的 Duration 回避到 ACK 结束；SIFS 出现在 RTS→CTS、CTS→DATA、DATA→ACK 之间。</figcaption>
+</figure>
+<p><strong>Duration 到底包含什么？</strong>记住“从当前帧结束，到 ACK 结束”：</p>
+<div class="article-table"><table>
+<thead><tr><th>帧</th><th>Duration 覆盖</th></tr></thead>
+<tbody>
+<tr><td>RTS</td><td><mark class="exam-key">SIFS + CTS + SIFS + DATA + SIFS + ACK</mark></td></tr>
+<tr><td>CTS</td><td><mark class="exam-key">SIFS + DATA + SIFS + ACK</mark></td></tr>
+<tr><td>DATA</td><td><mark class="exam-key">SIFS + ACK</mark></td></tr>
+</tbody>
+</table></div>
+<p>为什么 RTS 的 Duration 要包含这么多？因为 RTS 是第一个预约帧，它必须把“后面整个交换过程”都算进去，其他站才会一直回避到 ACK 结束。CTS 是 AP 对 RTS 的回应，它只需要覆盖“CTS 之后到 ACK 结束”；DATA 的 Duration 只覆盖“DATA 之后到 ACK 结束”。</p>
+<p><strong>RTS/CTS 解决隐藏终端</strong>：A、C 都能和 AP 通信，但彼此听不到；如果同时发，会在 AP 处碰撞。A 先发 RTS，AP 回 CTS；C 听到 CTS 后按 NAV 推迟，冲突就被提前避开。RTS/CTS 不是强制的，帧很短时可能不用，因为 RTS/CTS 本身也有开销。</p>
+
+<h3 id="wifi-address">6.5 802.11 帧的地址字段</h3>
+<p>802.11 帧有多个地址字段（RA/TA/DA/SA），具体取决于 To DS/From DS 标志：</p>
 <div class="article-table"><table>
 <thead><tr><th>To DS / From DS</th><th>Address 1</th><th>Address 2</th><th>Address 3</th><th>场景</th></tr></thead>
 <tbody>
@@ -111,13 +152,6 @@
 </tbody>
 </table></div>
 <p>不要死记“Address 1 一定是目的地址”：<mark>Address 1 永远是“当前这一跳的接收者”</mark>，在终端→AP 的场景里它是 AP 的 BSSID，不一定是最终目的主机。To DS/From DS 就是用来判断“这一帧是进分布系统还是出分布系统”的。</p>
-<p>无线不能像有线那样可靠地边发边听，所以用“预约 + 确认”减少冲突；隐藏终端问题靠 RTS/CTS 缓解。所谓隐藏终端，是 A、C 都能和 AP 通信，但 A、C 彼此听不到；它们可能同时向 AP 发送而在 AP 处碰撞。RTS/CTS 让 AP 用 CTS 告诉周围“信道已被预约”，把这种碰撞提前挡掉。</p><figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="802.11 CSMA/CA：DIFS、退避、RTS/CTS、SIFS 与 ACK" data-src="/408-review/assets/img/cn-wifi-csma-ca.svg" href="/408-review/assets/img/cn-wifi-csma-ca.svg">
-<img alt="802.11 CSMA/CA 的帧交换时序" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-wifi-csma-ca.svg"/>
-</a>
-<figcaption>无线用 CSMA/CA：先等 DIFS、随机退避，必要时 RTS/CTS 预约，接收方用 SIFS 优先回 ACK。</figcaption>
-</figure>
-
 
 <h2 id="eth-pitfalls">七、易错点与收束</h2>
 <ul>

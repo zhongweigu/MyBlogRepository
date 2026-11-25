@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-label="802.11 CSMA/CA 的 DIFS、SIFS、RTS/CTS、DATA、ACK 与 NAV">
+  <defs>
+    <marker id="wca" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1200" height="760" fill="#fffdf8"/>
+  <text x="600" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">802.11 CSMA/CA：IFS、RTS/CTS、NAV 与 ACK 的完整时序</text>
+  <g font-family="sans-serif" font-size="13" fill="#24313a">
+    <text x="40" y="82" font-weight="700">A（发送）</text>
+    <text x="40" y="230" font-weight="700">AP（接收）</text>
+
+    <line x1="40" y1="120" x2="1140" y2="120" stroke="#4d5b66"/>
+    <line x1="40" y1="270" x2="1140" y2="270" stroke="#4d5b66"/>
+
+    <!-- A row -->
+    <rect x="70" y="95" width="70" height="25" fill="#f7f5ee" stroke="#c9c0ae"/><text x="105" y="112" text-anchor="middle" font-size="11">DIFS</text>
+    <rect x="140" y="95" width="80" height="25" fill="#e9f2f6" stroke="#4d7f95"/><text x="180" y="112" text-anchor="middle" font-size="11">RTS</text>
+    <rect x="220" y="95" width="40" height="25" fill="#f7f5ee" stroke="#c9c0ae"/><text x="240" y="112" text-anchor="middle" font-size="10">SIFS</text>
+    <rect x="260" y="95" width="60" height="25" fill="#eef3e4" stroke="#6f8f45"/><text x="290" y="112" text-anchor="middle" font-size="11">CTS</text>
+    <rect x="320" y="95" width="40" height="25" fill="#f7f5ee" stroke="#c9c0ae"/><text x="340" y="112" text-anchor="middle" font-size="10">SIFS</text>
+    <rect x="360" y="95" width="180" height="25" fill="#f7ecd9" stroke="#a8782c"/><text x="450" y="112" text-anchor="middle" font-size="11">DATA</text>
+    <rect x="540" y="95" width="40" height="25" fill="#f7f5ee" stroke="#c9c0ae"/><text x="560" y="112" text-anchor="middle" font-size="10">SIFS</text>
+    <rect x="580" y="95" width="60" height="25" fill="#f3e6e6" stroke="#a85a5a"/><text x="610" y="112" text-anchor="middle" font-size="11">收 ACK</text>
+    <rect x="640" y="95" width="70" height="25" fill="#f7f5ee" stroke="#c9c0ae"/><text x="675" y="112" text-anchor="middle" font-size="11">DIFS</text>
+    <rect x="710" y="95" width="90" height="25" fill="#e9e3f3" stroke="#7b5aa6"/><text x="755" y="112" text-anchor="middle" font-size="11">CW / 退避</text>
+
+    <!-- AP row -->
+    <rect x="140" y="245" width="80" height="25" fill="#e9f2f6" stroke="#4d7f95"/><text x="180" y="262" text-anchor="middle" font-size="11">收 RTS</text>
+    <rect x="220" y="245" width="40" height="25" fill="#f7f5ee" stroke="#c9c0ae"/><text x="240" y="262" text-anchor="middle" font-size="10">SIFS</text>
+    <rect x="260" y="245" width="60" height="25" fill="#eef3e4" stroke="#6f8f45"/><text x="290" y="262" text-anchor="middle" font-size="11">CTS</text>
+    <rect x="320" y="245" width="40" height="25" fill="#f7f5ee" stroke="#c9c0ae"/><text x="340" y="262" text-anchor="middle" font-size="10">SIFS</text>
+    <rect x="360" y="245" width="180" height="25" fill="#f7ecd9" stroke="#a8782c"/><text x="450" y="262" text-anchor="middle" font-size="11">收 DATA</text>
+    <rect x="540" y="245" width="40" height="25" fill="#f7f5ee" stroke="#c9c0ae"/><text x="560" y="262" text-anchor="middle" font-size="10">SIFS</text>
+    <rect x="580" y="245" width="60" height="25" fill="#f3e6e6" stroke="#a85a5a"/><text x="610" y="262" text-anchor="middle" font-size="11">发 ACK</text>
+
+    <!-- NAV bars -->
+    <text x="40" y="350" font-weight="700" fill="#b54b45">其他站</text>
+    <text x="40" y="372" font-size="11">收到 RTS</text>
+    <rect x="220" y="355" width="420" height="26" fill="#e8d7ea" stroke="#8e5d8e"/>
+    <text x="430" y="373" text-anchor="middle" font-size="11">NAV(RTS)：到 ACK 结束</text>
+
+    <text x="40" y="415" font-size="11">收到 CTS</text>
+    <rect x="320" y="400" width="320" height="26" fill="#e8d7ea" stroke="#8e5d8e"/>
+    <text x="480" y="418" text-anchor="middle" font-size="11">NAV(CTS)：到 ACK 结束</text>
+
+    <text x="40" y="458" font-size="11">收到 DATA</text>
+    <rect x="540" y="443" width="100" height="26" fill="#e8d7ea" stroke="#8e5d8e"/>
+    <text x="590" y="461" text-anchor="middle" font-size="10">NAV(DATA)</text>
+
+    <!-- duration formulas -->
+    <rect x="45" y="500" width="1110" height="95" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="525" font-weight="700">Duration 字段里填什么</text>
+    <text x="65" y="548" font-size="12">RTS 的 Duration = SIFS + CTS + SIFS + DATA + SIFS + ACK（从 RTS 结束到 ACK 结束）</text>
+    <text x="65" y="570" font-size="12">CTS 的 Duration = SIFS + DATA + SIFS + ACK（从 CTS 结束到 ACK 结束）</text>
+    <text x="65" y="592" font-size="12">DATA 的 Duration = SIFS + ACK（从 DATA 结束到 ACK 结束）</text>
+
+    <text x="45" y="635" font-weight="700">IFS 的位置与长短</text>
+    <text x="45" y="659" font-size="12">SIFS（最短）用于 ACK、CTS 等立即响应；PIFS（中等）用于 PCF；DIFS（最长）用于普通数据竞争。SIFS &lt; PIFS &lt; DIFS。</text>
+    <text x="45" y="683" font-size="12">收到 RTS/CTS/DATA 的站，按帧里的 Duration 设置 NAV；NAV 未减到 0 前，即使物理信道空闲也不发送。</text>
+    <text x="45" y="710" font-size="12" fill="#b54b45">NAV 是“虚拟载波监听”，解决隐藏终端：不是真去听完整帧，而是按 Duration 主动回避。</text>
+
+    <text x="45" y="745" font-size="11" fill="#6b777f">时间轴不按真实比例；重点是各帧的先后关系、SIFS 的位置，以及 NAV 覆盖到哪一段。</text>
+  </g>
+</svg>

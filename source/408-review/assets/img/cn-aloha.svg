@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" role="img" aria-label="纯ALOHA与时隙ALOHA的发送和脆弱期">
+  <defs>
+    <marker id="ala" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1100" height="620" fill="#fffdf8"/>
+  <text x="550" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">ALOHA：不监听，发了再说；时隙化只改“什么时候能开始发”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 纯 ALOHA</text>
+    <text x="45" y="98" font-size="12">任何时刻都能开始发送；一个帧的脆弱期是前后各一个帧时，共 2T。</text>
+    <line x1="45" y1="140" x2="1030" y2="140" stroke="#4d5b66"/>
+    <text x="35" y="145" text-anchor="end" font-size="12">站1</text>
+    <text x="35" y="205" text-anchor="end" font-size="12">站2</text>
+    <rect x="160" y="120" width="160" height="30" fill="#e9f2f6" stroke="#4d7f95"/><text x="240" y="140" text-anchor="middle" font-size="12">帧1</text>
+    <rect x="250" y="185" width="160" height="30" fill="#f3e6e6" stroke="#a85a5a"/><text x="330" y="205" text-anchor="middle" font-size="12">帧2（重叠→冲突）</text>
+    <line x1="80" y1="240" x2="400" y2="240" stroke="#b54b45" stroke-dasharray="5 4"/>
+    <text x="240" y="260" text-anchor="middle" font-size="12" fill="#b54b45">脆弱期 2T：任何与帧1重叠的帧都会撞</text>
+    <text x="45" y="295" font-size="12">最大吞吐：S = G·e^(−2G)，G=0.5 时 S≈18.4%。</text>
+
+    <text x="45" y="345" font-weight="700">B. 时隙 ALOHA</text>
+    <text x="45" y="368" font-size="12">时间切成 T 长的时隙，帧只能在时隙开始时发送；脆弱期缩短为 T。</text>
+    <line x1="45" y1="410" x2="1030" y2="410" stroke="#4d5b66"/>
+    <g stroke="#c9c0ae" stroke-dasharray="4 4">
+      <line x1="160" y1="390" x2="160" y2="470"/><line x1="240" y1="390" x2="240" y2="470"/><line x1="320" y1="390" x2="320" y2="470"/><line x1="400" y1="390" x2="400" y2="470"/>
+    </g>
+    <rect x="160" y="390" width="160" height="30" fill="#e9f2f6" stroke="#4d7f95"/><text x="240" y="410" text-anchor="middle" font-size="12">帧1</text>
+    <rect x="320" y="390" width="160" height="30" fill="#eef3e4" stroke="#6f8f45"/><text x="400" y="410" text-anchor="middle" font-size="12">帧2（下一时隙）</text>
+    <line x1="80" y1="470" x2="320" y2="470" stroke="#b54b45" stroke-dasharray="5 4"/>
+    <text x="200" y="490" text-anchor="middle" font-size="12" fill="#b54b45">脆弱期 T：只和“同一时隙”的帧撞</text>
+    <text x="45" y="525" font-size="12">最大吞吐：S = G·e^(−G)，G=1 时 S≈36.8%。</text>
+
+    <rect x="45" y="555" width="1010" height="40" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="580" font-size="12">为什么时隙化能翻倍：把“任意时刻开始”改成“只能在边界开始”，碰撞窗口从 2T 缩到 T。</text>
+  </g>
+</svg>

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 520" role="img" aria-label="轮询访问与令牌环的基本思想">
+  <defs>
+    <marker id="pta" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4d5b66"/></marker>
+  </defs>
+  <rect width="1060" height="520" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">轮询访问：集中轮询与令牌传递</text>
+  <g font-family="sans-serif" font-size="13" fill="#24313a">
+    <text x="45" y="75" font-weight="700">A. 轮询（主从）</text>
+    <rect x="60" y="110" width="150" height="55" rx="4" fill="#e9f2f6" stroke="#4d7f95"/>
+    <text x="135" y="143" text-anchor="middle" font-weight="700">主结点</text>
+    <g>
+      <rect x="40" y="230" width="90" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="85" y="255" text-anchor="middle">从 1</text>
+      <rect x="150" y="230" width="90" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="195" y="255" text-anchor="middle">从 2</text>
+      <rect x="260" y="230" width="90" height="40" fill="#eef3e4" stroke="#6f8f45"/><text x="305" y="255" text-anchor="middle">从 3</text>
+    </g>
+    <path d="M100 165 L70 230" stroke="#4d5b66" stroke-width="1.5" marker-end="url(#pta)"/>
+    <path d="M135 165 L195 230" stroke="#4d5b66" stroke-width="1.5" marker-end="url(#pta)"/>
+    <path d="M170 165 L290 230" stroke="#4d5b66" stroke-width="1.5" marker-end="url(#pta)"/>
+    <text x="35" y="315" font-size="12">主结点依次问“你有数据吗？”；被问到的站才能发。</text>
+    <text x="35" y="338" font-size="12">无冲突、可给优先级；轮询本身有开销，主结点是单点。</text>
+
+    <text x="545" y="75" font-weight="700">B. 令牌环</text>
+    <g>
+      <circle cx="720" cy="145" r="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="720" y="150" text-anchor="middle">1</text>
+      <circle cx="880" cy="145" r="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="880" y="150" text-anchor="middle">2</text>
+      <circle cx="880" cy="285" r="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="880" y="290" text-anchor="middle">3</text>
+      <circle cx="720" cy="285" r="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="720" y="290" text-anchor="middle">4</text>
+    </g>
+    <path d="M758 145 L842 145" stroke="#4d5b66" stroke-width="2" marker-end="url(#pta)"/>
+    <path d="M880 183 L880 247" stroke="#4d5b66" stroke-width="2" marker-end="url(#pta)"/>
+    <path d="M842 285 L758 285" stroke="#4d5b66" stroke-width="2" marker-end="url(#pta)"/>
+    <path d="M720 247 L720 183" stroke="#4d5b66" stroke-width="2" marker-end="url(#pta)"/>
+    <rect x="655" y="365" width="300" height="55" rx="4" fill="#f7ecd9" stroke="#a8782c"/>
+    <text x="675" y="388" font-weight="700">令牌 = 发送许可证</text>
+    <text x="675" y="408" font-size="12">拿到令牌才能发；发完把令牌传给下一站。</text>
+    <text x="545" y="455" font-size="12">没有令牌的站只能等；重负载下无冲突、时延可控。</text>
+    <text x="545" y="478" font-size="12">令牌丢失/重复需要监控站恢复；轻负载时令牌空转有开销。</text>
+
+    <rect x="45" y="430" width="430" height="60" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="453" font-weight="700">共同点</text>
+    <text x="65" y="475" font-size="12">都避免随机竞争；一个集中控制，一个分布式传递许可。</text>
+  </g>
+</svg>

@@ -34,7 +34,7 @@
 
 
 <h2 id="enc-man">三、曼彻斯特与差分曼彻斯特</h2>
-<p><strong>曼彻斯特编码</strong>：每个比特的中间必有一次跳变，既传数据又传时钟。常见两种相反约定：</p>
+<p><strong>曼彻斯特编码</strong>：<mark class="exam-key">每个比特的中间必有一次跳变</mark>，既传数据又传时钟。常见两种相反约定：</p>
 <ul>
 <li>约定 A：向下跳变表示 1，向上跳变表示 0；</li>
 <li>约定 B：向下跳变表示 0，向上跳变表示 1。IEEE 802.3 10BaseT 常用这一种。</li>
@@ -97,7 +97,7 @@
 
 <h2 id="enc-pitfalls">七、易错点与收束</h2>
 <ul>
-<li><strong>“曼彻斯特的波特率等于比特率”</strong>：错；10BaseT 是 10Mb/s、20MBaud。</li>
+<li><strong>“曼彻斯特的波特率等于比特率”</strong>：错；10BaseT 是 <mark class="exam-key">10Mb/s、20MBaud</mark>。</li>
 <li><strong>“NRZI 的 1 一定跳变”</strong>：不同教材约定可能相反；看题目定义。</li>
 <li><strong>“QAM 只调相位”</strong>：QAM 同时调幅度和相位；只调相位是 PSK。</li>
 <li><strong>“一个码元只能带 1 bit”</strong>：V 种状态可带 log2V bit；QAM-16 一码元 4 bit。</li>

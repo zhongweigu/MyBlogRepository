@@ -57,13 +57,13 @@
 <p>PPP 是点对点协议，用来在一条点对点链路上封装网络层数据。它的帧格式为：</p>
 <p><code>Flag(0x7E) | Address(0xFF) | Control(0x03) | Protocol | Information | FCS | Flag(0x7E)</code></p>
 <ul>
-<li><strong>Flag = 0x7E</strong>：帧的开始/结束标志；连续两个 Flag 之间是一帧。</li>
+<li><mark class="exam-key"><strong>Flag = 0x7E</strong></mark>：帧的开始/结束标志；连续两个 Flag 之间是一帧。</li>
 <li><strong>Address = 0xFF、Control = 0x03</strong>：PPP 的固定值，实际可扩展；</li>
 <li><strong>Protocol</strong>：标识 Information 里装的是 IPv4、IPv6 还是其他协议；</li>
 <li><strong>Information</strong>：网络层数据，长度可变；<strong>FCS</strong>：CRC 检错；</li>
 <li>数据中出现 0x7E 或 0x7D 时，用 0x7D 转义：<mark>0x7E→0x7D 0x5E，0x7D→0x7D 0x5D</mark>；接收端遇到 0x7D 就把下一字节与 0x20 异或还原。</li>
 </ul>
-<p>PPP 有检错（FCS），但默认<mark>不提供可靠重传</mark>；它不是“可靠传输协议”。PPP 还支持 LCP 链路控制、认证（PAP/CHAP）和多协议封装。也就是说，PPP 负责“把包封成帧、检查这一跳有没有坏”，不负责“丢了就重发”；可靠传输要靠 TCP 等上层，或者额外的可靠机制。</p>
+<p>PPP 有检错（FCS），但默认<mark class="exam-key">不提供可靠重传</mark>；它不是“可靠传输协议”。PPP 还支持 LCP 链路控制、认证（PAP/CHAP）和多协议封装。也就是说，PPP 负责“把包封成帧、检查这一跳有没有坏”，不负责“丢了就重发”；可靠传输要靠 TCP 等上层，或者额外的可靠机制。</p>
 
 <h2 id="dll-pitfalls">五、易错点与收束</h2>
 <ul>

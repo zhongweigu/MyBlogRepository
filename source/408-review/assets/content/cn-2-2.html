@@ -58,9 +58,9 @@
 <div class="article-table"><table>
 <thead><tr><th>目标</th><th>条件</th><th>直觉</th></tr></thead>
 <tbody>
-<tr><td>检测 e 个错误</td><td><code>d0 ≥ e+1</code></td><td>错误后不会落到另一个合法码字上</td></tr>
-<tr><td>纠正 t 个错误</td><td><code>d0 ≥ 2t+1</code></td><td>以码字为中心、半径 t 的球互不重叠</td></tr>
-<tr><td>检测 e 并纠正 t（e≥t）</td><td><code>d0 ≥ e+t+1</code></td><td>既要区分 e 个错，又要能纠 t 个错</td></tr>
+<tr><td>检测 e 个错误</td><td><mark class="exam-key"><code>d0 ≥ e+1</code></mark></td><td>错误后不会落到另一个合法码字上</td></tr>
+<tr><td>纠正 t 个错误</td><td><mark class="exam-key"><code>d0 ≥ 2t+1</code></mark></td><td>以码字为中心、半径 t 的球互不重叠</td></tr>
+<tr><td>检测 e 并纠正 t（e≥t）</td><td><mark class="exam-key"><code>d0 ≥ e+t+1</code></mark></td><td>既要区分 e 个错，又要能纠 t 个错</td></tr>
 </tbody>
 </table></div>
 <p><strong>(7,4) 海明码</strong>：4 个数据位，3 个校验位，总长 7 位，最小距离 3，可纠正 1 位错。为什么校验位放在 1、2、4 号位置？因为 1、2、4 的二进制分别是 001、010、100，正好可以“按位”覆盖所有位置；每个数据位的位置编号都能拆成这几个校验位的组合。</p>
