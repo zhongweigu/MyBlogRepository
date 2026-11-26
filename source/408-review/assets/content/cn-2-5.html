@@ -90,7 +90,21 @@
 
 <h2 id="eth-wifi">六、802.11 与 CSMA/CA</h2>
 <p>802.11 无线局域网不能照搬 CSMA/CD。有线站点可以比较“自己发的信号”和“收到的信号”来检测冲突；无线发送时，自己的发射信号会淹没接收信号，远近效应、隐藏终端也让“边发边听”不可靠。因此 802.11 用 <strong>CSMA/CA</strong>：<mark>尽量避开冲突，再用 ACK 确认</mark>。</p>
-<p>802.11 有两种协调方式：<strong>DCF</strong>（分布式协调功能，默认，靠竞争）和 <strong>PCF</strong>（点协调功能，AP 集中轮询，可选，实际很少用）。下面讲的是 DCF。</p>
+<h3 id="wifi-coordination">DCF 与 PCF 先分清</h3>
+<p>802.11 的 MAC 有两种协调方式：<strong>DCF</strong>（Distributed Coordination Function，分布式协调功能）和 <strong>PCF</strong>（Point Coordination Function，点协调功能）。名字里的“分布式/点”说的是<mark class="exam-key">谁来控制信道访问</mark>，不是“有没有 AP”。</p>
+<div class="article-table"><table>
+<thead><tr><th></th><th>DCF（分布式协调）</th><th>PCF（点协调）</th></tr></thead>
+<tbody>
+<tr><td>控制方式</td><td>没有中心控制，各站自己竞争</td><td>AP 充当点协调器，集中轮询</td></tr>
+<tr><td>基本机制</td><td>CSMA/CA + DIFS + 随机退避</td><td>AP 用 PIFS 抢到信道，在 CFP 内依次 poll 各站</td></tr>
+<tr><td>默认/可选</td><td><mark class="exam-key">默认方式</mark></td><td><mark class="exam-key">可选方式，实际很少用</mark></td></tr>
+<tr><td>适合</td><td>分布式、突发数据、ad hoc/基础设施网</td><td>需要较确定时延的轮询业务</td></tr>
+<tr><td>代价</td><td>竞争/碰撞/退避开销</td><td>AP 复杂、轮询开销、依赖 AP 集中控制</td></tr>
+</tbody>
+</table></div>
+<p>DCF 是“大家抢”：监听、等 DIFS、随机退避，谁先抢到谁发。PCF 是“AP 点名”：AP 在无竞争期（CFP）里依次问各站“你要不要发”，被点到的站才能在 SIFS 后发。PCF 用 <strong>PIFS</strong>（比 DIFS 短）让 AP 在普通站之前抢到信道；PCF 不是所有设备都实现，考试里通常只要求知道它是“AP 集中轮询的可选方式”。</p>
+<p>更完整地说，PCF 把时间组织成“超帧”：AP 用 Beacon 宣告无竞争期（CFP）开始，然后用 CF-Poll 依次点名；被点到的站在 SIFS 后发送；AP 用 CF-End 结束 CFP，之后大家回到 DCF 的竞争期（CP）。所以 <mark class="exam-key">DCF 和 PCF 可以在同一个 BSS 里交替出现</mark>，不是二选一把另一种关掉。</p>
+<p>下面重点讲默认的 DCF；PCF 的细节知道“AP 轮询、无竞争期、PIFS 优先”即可。</p>
 
 <h3 id="wifi-ifs">6.1 IFS：为什么“空闲”还要再等</h3>
 <p>如果多个站同时听到“信道空闲”就立刻发，还是会一起撞。802.11 在“监听空闲”之后再加一段<strong>帧间间隔 IFS</strong>，用不同的等待长度区分优先级：</p>
@@ -126,18 +140,27 @@
 <a class="figure-link" data-action="zoom-image" data-caption="802.11 CSMA/CA 的 DIFS、SIFS、RTS/CTS、DATA、ACK 与 NAV 时间轴" data-src="/408-review/assets/img/cn-wifi-csma-ca-v2.svg" href="/408-review/assets/img/cn-wifi-csma-ca-v2.svg">
 <img alt="802.11 CSMA/CA 完整时序：DIFS、RTS、SIFS、CTS、DATA、ACK、NAV" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-wifi-csma-ca-v2.svg"/>
 </a>
-<figcaption>图中紫色条是 NAV：收到 RTS/CTS/DATA 的站分别按帧里的 Duration 回避到 ACK 结束；SIFS 出现在 RTS→CTS、CTS→DATA、DATA→ACK 之间。</figcaption>
+<figcaption>图中紫色条是 NAV：Duration 从当前帧结束起算，收到 RTS/CTS/DATA 的站分别按帧里的值回避到 ACK 结束；SIFS 出现在 RTS→CTS、CTS→DATA、DATA→ACK 之间。</figcaption>
 </figure>
 <p><strong>Duration 到底包含什么？</strong>记住“从当前帧结束，到 ACK 结束”：</p>
 <div class="article-table"><table>
-<thead><tr><th>帧</th><th>Duration 覆盖</th></tr></thead>
+<thead><tr><th>帧</th><th>Duration 字段（从当前帧结束算）</th></tr></thead>
 <tbody>
 <tr><td>RTS</td><td><mark class="exam-key">SIFS + CTS + SIFS + DATA + SIFS + ACK</mark></td></tr>
 <tr><td>CTS</td><td><mark class="exam-key">SIFS + DATA + SIFS + ACK</mark></td></tr>
 <tr><td>DATA</td><td><mark class="exam-key">SIFS + ACK</mark></td></tr>
 </tbody>
 </table></div>
-<p>为什么 RTS 的 Duration 要包含这么多？因为 RTS 是第一个预约帧，它必须把“后面整个交换过程”都算进去，其他站才会一直回避到 ACK 结束。CTS 是 AP 对 RTS 的回应，它只需要覆盖“CTS 之后到 ACK 结束”；DATA 的 Duration 只覆盖“DATA 之后到 ACK 结束”。</p>
+<p><strong>确认一个最容易错的地方：Duration 不是“当前帧的总时长”，而是“从当前帧结束，到 ACK 结束的剩余时间”。</strong></p>
+<p>所以：</p>
+<ul>
+<li>RTS 的 Duration 里要算 DATA，因为 DATA 是 RTS <strong>之后</strong>才发的未来帧；</li>
+<li>CTS 的 Duration 里也要算 DATA，因为 DATA 是 CTS <strong>之后</strong>才发的；</li>
+<li>DATA 的 Duration <strong>不算 DATA 自己</strong>，因为 DATA 正在发；它只预约 DATA 结束之后的 <code>SIFS + ACK</code>。</li>
+</ul>
+<p>这不是漏写，而是 Duration 字段的定义决定的：<mark class="exam-key">它从“当前帧结束”开始计时，当前帧本身已经过去了，不能再算进去</mark>。如果把 DATA 自己的时间也算进 DATA 的 Duration，其他站反而会多回避一个 DATA 的时间。</p>
+<p>如果图上把 NAV 条画在 DATA 帧内部、从 DATA 开始一直覆盖到 ACK，视觉上当然包含了 DATA 的剩余部分；但 <strong>Duration 字段的数值仍然是 SIFS+ACK</strong>，因为 NAV 计数器是在 DATA 结束后才开始按这个值倒计时的。两种画法不矛盾，关键看“从哪个时刻开始算”。</p>
+<p>为什么 RTS 要算这么多？因为 RTS 是第一个预约帧，它必须把“后面整个交换过程”都算进去，其他站才会一直回避到 ACK 结束。CTS 是 AP 对 RTS 的回应，它只需要覆盖“CTS 之后到 ACK 结束”；DATA 的 Duration 只覆盖“DATA 之后到 ACK 结束”。</p>
 <p><strong>RTS/CTS 解决隐藏终端</strong>：A、C 都能和 AP 通信，但彼此听不到；如果同时发，会在 AP 处碰撞。A 先发 RTS，AP 回 CTS；C 听到 CTS 后按 NAV 推迟，冲突就被提前避开。RTS/CTS 不是强制的，帧很短时可能不用，因为 RTS/CTS 本身也有开销。</p>
 
 <h3 id="wifi-special">6.5 特殊情况与易错点</h3>

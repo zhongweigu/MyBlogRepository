@@ -58,6 +58,6 @@
     <text x="45" y="683" font-size="12">收到 RTS/CTS/DATA 的站，按帧里的 Duration 设置 NAV；NAV 未减到 0 前，即使物理信道空闲也不发送。</text>
     <text x="45" y="710" font-size="12" fill="#b54b45">NAV 是“虚拟载波监听”，解决隐藏终端：不是真去听完整帧，而是按 Duration 主动回避。</text>
 
-    <text x="45" y="745" font-size="11" fill="#6b777f">时间轴不按真实比例；重点是各帧的先后关系、SIFS 的位置，以及 NAV 覆盖到哪一段。</text>
+    <text x="45" y="745" font-size="11" fill="#6b777f">时间轴不按真实比例；Duration 从“当前帧结束”算起，不含当前帧本身。</text>
   </g>
 </svg>

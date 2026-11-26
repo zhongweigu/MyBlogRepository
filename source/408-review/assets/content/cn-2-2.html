@@ -1,6 +1,6 @@
 <div class="article-content">
-<p>差错控制分两层：<strong>检错</strong>（发现错了，重传）和<strong>纠错</strong>（直接定位并改正）。奇偶校验、CRC 是常见检错码；海明码是常见纠错码，而海明距离给出“最多能检/纠多少错”的统一尺度。</p>
-<p>先想清楚一个前提：<mark>接收端不知道原始数据是什么</mark>，它只能根据“收到的码字是否像合法码字”来判断。合法码字之间隔得越远，某个码字被噪声推错几位后，越不容易“误判成另一个合法码字”。这就是海明距离的几何直觉。</p>
+<p>差错控制只有两条路：<strong>检错</strong>——发现错了，让发送方重传；<strong>纠错</strong>——直接判断哪一位错了并改过来。奇偶校验、CRC 是检错；海明码是纠错；海明距离则是判断“这个码最多能检/纠多少错”的尺子。</p>
+<p>先记住一个前提：<mark>接收端不知道发送方原来发的是什么</mark>。它只能看“收到的码字像不像一个合法码字”。合法码字之间隔得越远，噪声把某个码字推错几位后，越不容易被误认成另一个合法码字。</p>
 
 <details class="article-toc">
 <summary>本页目录 <span>6 节</span></summary>
@@ -15,24 +15,33 @@
 </details>
 
 <h2 id="err-parity">一、奇偶校验</h2>
-<p>在数据后增加 1 位校验位，使整个码字中 1 的个数为奇数（奇校验）或偶数（偶校验）。它只能发现<strong>奇数个比特</strong>同时出错，不能定位，也不能纠正；偶数个比特同时翻转时可能检不出。</p>
-<p>为什么偶数个错会漏掉？因为校验位只看“1 的总数的奇偶性”。如果两位同时从 0 变 1（或 1 变 0），1 的个数改变 2，奇偶性不变，校验位仍然“正确”。这就是奇偶校验只能做最便宜检查、不能做可靠保护的原因。</p>
-<p>二维奇偶校验把数据排成矩阵，每行每列都加校验位，可以发现并定位部分错误，但开销更大。</p>
+<p>在数据后加 1 位校验位，让整个码字中 1 的个数为奇数（奇校验）或偶数（偶校验）。接收端数一下 1 的个数，就能发现“奇偶性不对”。</p>
+<p>它很像“数人数”：约定房间里人数必须是偶数，如果最后数出来是奇数，就知道有人进出过。但它只知道“总人数奇偶不对”，<strong>不知道是谁进出</strong>，也不知道有几个人同时进出。</p>
+<p>所以奇偶校验只能发现<strong>奇数个比特</strong>同时出错；如果两位同时翻转，1 的个数改变 2，奇偶性不变，就检不出来。它不能定位，也不能纠正。</p>
 
 <h2 id="err-crc">二、CRC：模 2 除法</h2>
-<p>CRC 用一个<strong>生成多项式 G(x)</strong> 做模 2 除法（异或，不借位）。它把“数据 + 余数”构造成一个能被 G(x) 整除的多项式，接收端只要再除一次，看余数是否为 0。</p>
+<p>CRC 可以想成“发送前先做一道除法，把余数附在数据后面”。双方约定一个除数——<strong>生成多项式 G(x)</strong>；发送方用 G 除数据，余数就是 FCS；接收方再除一次，看余数是否为 0。</p>
+<p>这里的除法是<strong>模 2 除法</strong>：只做异或，不借位。它不关心商是多少，只关心余数。</p>
 <ol>
-<li>设 G(x) 的最高次数为 r，在数据后补 r 个 0；</li>
-<li>用 G(x) 对应的比特串除“数据 + r 个 0”；</li>
-<li>余数（r 位）就是 FCS，附在数据后面发送；</li>
-<li>接收端用同一个 G(x) 除“数据 + FCS”，余数为 0 则认为无错。</li>
+<li>看 G 的最高次数 r，在数据后补 r 个 0；</li>
+<li>用 G 对应的比特串除“数据 + r 个 0”；</li>
+<li>除到余数不足 r 位，左边补 0，得到 r 位 FCS；</li>
+<li>把 FCS 替换到刚才补的 0 上发送；接收端用同一个 G 除“数据 + FCS”，余数为 0 就认为没有检测到错误。</li>
 </ol>
-<p><strong>一个具体例子</strong>：数据 <code>1101</code>，G=<code>1011</code>（r=3）。先在数据后补 3 个 0，得到 <code>1101000</code>；用 <code>1011</code> 做模 2 除法，余数为 <code>001</code>；把余数回填，发送 <code>1101001</code>。接收端用同一个 <code>1011</code> 除 <code>1101001</code>，余数为 0，就认为没有检测到错误。</p>
+<p><strong>手算提示</strong>：从最高位开始，当前位是 1 就拿 G 去异或，当前位是 0 就跳过；每异或一次，最高位一定变 0，然后看下一位。不要用普通除法借位。</p>
+<p><strong>一个具体例子</strong>：数据 <code>1101</code>，G=<code>1011</code>（r=3）。</p>
+<ul>
+<li>补 3 个 0：<code>1101000</code>；</li>
+<li>用 <code>1011</code> 做模 2 除法，余数 <code>001</code>；</li>
+<li>回填余数，发送 <code>1101001</code>；</li>
+<li>接收端用 <code>1011</code> 除 <code>1101001</code>，余数为 0。</li>
+</ul>
+<p>为什么余数为 0 就认为没错？因为发送方构造的“数据 + FCS”本来就能被 G 整除；传输中如果某些位翻转，相当于又加了一个“错误多项式”。只要这个错误不是 G 的倍数，余数就会变成非 0。</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="CRC 发送端补零、模2除法求余数，接收端再除一次" data-src="/408-review/assets/img/cn-crc.svg" href="/408-review/assets/img/cn-crc.svg">
 <img alt="CRC 发送端与接收端的模2除法流程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-crc.svg"/>
 </a>
-<figcaption>CRC 只做检错；余数非 0 说明传输/存储过程中出现了可检测的错误。</figcaption>
+<figcaption>CRC 只做检错；余数非 0 说明检测到了错误，但不负责告诉你哪一位错。</figcaption>
 </figure>
 
 <h2 id="err-crc-power">三、CRC 能检测什么</h2>
@@ -41,32 +50,37 @@
 <li>若 G(x) 含因子 (x+1)，可以检测奇数个比特错误；</li>
 <li>CRC 不能保证 100% 检出，仍有漏检概率；它是检错码，不是纠错码。</li>
 </ul>
+<p>一句话：<mark class="exam-key">CRC 擅长发现“成串出错”，但不负责纠正；发现错误后通常交给重传。</mark></p>
 
 <h2 id="err-hamming">四、海明距离</h2>
-<p>两个等长码字 <code>x</code>、<code>y</code> 的<strong>海明距离</strong> <code>d(x,y)</code> 是它们对应位不同的个数。一个码的<strong>最小距离</strong> <code>d0</code> 是所有不同码字距离的最小值。</p>
-<p>把每个合法码字想成空间里的一个点，噪声把收到的码字推离原来的点。若两个码字距离为 d0，则以它们为球心、半径 t 的“错误球”要互不重叠，必须 <mark>2t+1 ≤ d0</mark>；只要求“不要推成另一个合法码字”，则半径 e 的球不碰到另一个球心即可，<mark>e+1 ≤ d0</mark>。</p>
-<p>例如：<code>x=00101101</code>，取反得到 <code>y=11010010</code>，逐位比较 8 位全不同，所以 <code>d(x,y)=8</code>。</p>
+<p>两个等长码字 <code>x</code>、<code>y</code> 的<strong>海明距离</strong> <code>d(x,y)</code>，就是逐位比较后<strong>不同的位数</strong>。也可以理解成“从 x 变成 y 至少要翻转几位”。</p>
+<p>例如 <code>x=00101101</code>，把每一位取反得到 <code>y=11010010</code>，8 位全不同，所以距离是 8。</p>
+<p>一个码有很多合法码字。把任意两个不同合法码字的距离都算一遍，其中<strong>最小的那个</strong>叫<strong>最小距离 d0</strong>。d0 越大，合法码字之间隔得越远，抗错能力越强。</p>
+<p>把每个合法码字想成空间里的一个点，噪声把收到的码字推离原来的点，形成一个“错误球”：</p>
+<ul>
+<li><strong>检错</strong>：只要错误球不碰到另一个合法码字，就能发现“这不是原来的码字”。所以半径 e 的球不能到达另一个球心：<mark class="exam-key">d0 ≥ e+1</mark>。</li>
+<li><strong>纠错</strong>：还要能判断“它原来属于哪个码字”。两个码字的错误球不能重叠，所以 <mark class="exam-key">d0 ≥ 2t+1</mark>。</li>
+<li><strong>同时检 e 纠 t</strong>（e≥t）：既要留出检测的距离，又要留出纠错的距离，所以 <mark class="exam-key">d0 ≥ e+t+1</mark>。</li>
+</ul>
+<p>用具体数字记：</p>
+<div class="article-table"><table>
+<thead><tr><th>d0</th><th>能纠 t</th><th>能检 e</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>1</td><td>2</td><td>纠 1 位，或检 2 位；不能同时纠 2 位</td></tr>
+<tr><td>4</td><td>1</td><td>3</td><td>纠 1 位，或检 3 位</td></tr>
+<tr><td>5</td><td>2</td><td>4</td><td>纠 2 位，或检 4 位</td></tr>
+</tbody>
+</table></div>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="海明距离与检错/纠错半径：d0 越大，码字之间隔得越远" data-src="/408-review/assets/img/cn-hamming.svg" href="/408-review/assets/img/cn-hamming.svg">
 <img alt="海明距离、最小距离和检错纠错半径示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-hamming.svg"/>
 </a>
-<figcaption>检错看“错误球”会不会碰到另一个码字；纠错还要求错误球互不重叠。</figcaption>
+<figcaption>检错看“错误球会不会碰到另一个码字”；纠错还要求错误球互不重叠。</figcaption>
 </figure>
 
 <h2 id="err-code">五、海明码与纠错能力</h2>
-<p>设码的最小距离为 <code>d0</code>：</p>
-<div class="article-table"><table>
-<thead><tr><th>目标</th><th>条件</th><th>直觉</th></tr></thead>
-<tbody>
-<tr><td>检测 e 个错误</td><td><mark class="exam-key"><code>d0 ≥ e+1</code></mark></td><td>错误后不会落到另一个合法码字上</td></tr>
-<tr><td>纠正 t 个错误</td><td><mark class="exam-key"><code>d0 ≥ 2t+1</code></mark></td><td>以码字为中心、半径 t 的球互不重叠</td></tr>
-<tr><td>检测 e 并纠正 t（e≥t）</td><td><mark class="exam-key"><code>d0 ≥ e+t+1</code></mark></td><td>既要区分 e 个错，又要能纠 t 个错</td></tr>
-</tbody>
-</table></div>
-<p><strong>(7,4) 海明码</strong>：4 个数据位，3 个校验位，总长 7 位，最小距离 3，可纠正 1 位错。为什么校验位放在 1、2、4 号位置？因为 1、2、4 的二进制分别是 001、010、100，正好可以“按位”覆盖所有位置；每个数据位的位置编号都能拆成这几个校验位的组合。</p>
-<p>设数据位为 d1、d2、d3、d4，校验位为 p1、p2、p4，则：</p>
-<p><code>p1 = d1 ⊕ d2 ⊕ d4</code>，<code>p2 = d1 ⊕ d3 ⊕ d4</code>，<code>p4 = d2 ⊕ d3 ⊕ d4</code>。</p>
-<p>接收端重新计算三个校验方程，得到 syndrome（s1,s2,s4）。若全为 0，认为无错；若不全为 0，<mark>syndrome 的二进制值就是出错位的位置</mark>。例如 s1=1、s2=0、s4=1，二进制 101=5，说明第 5 位出错，取反即可。</p>
+<p><strong>(7,4) 海明码</strong>是最常考的例子：4 个数据位 + 3 个校验位 = 7 位，最小距离 d0=3，所以<mark class="exam-key">只能纠 1 位错，或检 2 位错</mark>。不要把它记成“能纠 2 位”。</p>
+<p>三个校验位放在第 1、2、4 位，因为 1、2、4 的二进制是 001、010、100，正好对应三个校验位；每个位置编号都可以拆成这三个二进制位的组合。位置表如下：</p>
 <div class="article-table"><table>
 <thead><tr><th>位置</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
 <tbody>
@@ -76,6 +90,10 @@
 <tr><td>p4 校验</td><td></td><td></td><td></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
 </tbody>
 </table></div>
+<p>把“校验位 + 它负责的数据位”异或起来，令结果为 0，就得到三个校验方程：</p>
+<p><code>p1 = d1 ⊕ d2 ⊕ d4</code>，<code>p2 = d1 ⊕ d3 ⊕ d4</code>，<code>p4 = d2 ⊕ d3 ⊕ d4</code>。</p>
+<p>接收端重新算这三个方程，得到三个“校验结果”s1、s2、s4。全 0 表示没检测到错；不全为 0 时，<mark class="exam-key">把 s1s2s4 当成二进制数，它的值就是出错位的位置</mark>。例如 s1=1、s2=0、s4=1，二进制 101=5，说明第 5 位出错，取反即可。</p>
+<p>为什么只能纠 1 位？因为 3 个校验位只能表示 7 种“非零位置”（1–7），再加“无错”正好 8 种状态；如果同时错 2 位，syndrome 可能对应到另一个位置，无法区分。要纠更多位，需要更多校验位/更强的码。</p>
 
 <h2 id="err-pitfalls">六、易错点与收束</h2>
 <ul>
@@ -83,6 +101,7 @@
 <li><strong>“d0=3 能纠 3 位错”</strong>：d0=3 只能纠 1 位错（2t+1≤3）。</li>
 <li><strong>“奇偶校验能检测所有错误”</strong>：偶数个比特同时翻转可能检不出。</li>
 <li><strong>“海明距离就是码长”</strong>：距离是比较两个码字得到的，不是单个码字的长度。</li>
+<li><strong>“海明码能同时纠 2 位、检 2 位”</strong>：d0=3 时只能纠 1 位，或检 2 位；要同时纠 2 位，需要 d0≥5。</li>
 </ul>
-<p>收束：<strong>检错码看“能不能发现”，纠错码看“能不能定位”；d0 是统一尺子，CRC 是检错工具，海明码是纠错工具。</strong></p>
+<p>收束：<strong>奇偶校验数 1 的个数；CRC 用模 2 除法看余数；海明距离量“码字隔多远”；海明码用 syndrome 指出错位。</strong> 四件事分别对应“最便宜的检错、常用的检错、能力的尺子、具体的纠错”。</p>
 </div>
