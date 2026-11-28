@@ -67,10 +67,10 @@
 <h2 id="arq-slide">五、窗口推进与时序图</h2>
 <p>先看窗口本身怎样向前滑动：</p>
 <figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="停止等待、GBN、SR 的 W_T/W_R 大小与窗口推进" data-src="/408-review/assets/img/cn-arq-window-slide.svg" href="/408-review/assets/img/cn-arq-window-slide.svg">
-<img alt="三种ARQ的发送窗口和接收窗口推进图" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-arq-window-slide.svg"/>
+<a class="figure-link" data-action="zoom-image" data-caption="停止等待、GBN、SR 的 W_T/W_R 大小与窗口推进" data-src="/408-review/assets/img/cn-arq-window-slide-v2.svg" href="/408-review/assets/img/cn-arq-window-slide-v2.svg">
+<img alt="三种ARQ的发送窗口和接收窗口推进图" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-arq-window-slide-v2.svg"/>
 </a>
-<figcaption>停止等待窗口 1+1；GBN 接收窗口 1、累积确认直接跳窗口；SR 接收窗口可缓存乱序帧、逐帧推进。</figcaption>
+<figcaption>图把“发送窗口”和“接收窗口”分成两行：蓝色是发送窗口，绿色是接收窗口，灰色是窗口外；停止等待 1+1；GBN 接收窗口 1、累积确认直接跳窗口；SR 接收窗口可缓存乱序帧、逐帧推进。</figcaption>
 </figure>
 
 <p>再对照时序看“丢帧、丢 ACK、重传”分别发生什么：</p>
