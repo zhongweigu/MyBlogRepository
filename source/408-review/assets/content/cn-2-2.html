@@ -81,111 +81,93 @@
 </ul>
 <p>一句话：<mark class="exam-key">CRC 擅长发现“成串出错”，发现后交给重传，不负责纠正。</mark></p>
 
-<h2 id="err-hamming">四、海明距离与检错/纠错能力</h2>
-<p>两个等长码字的<strong>海明距离</strong>，就是逐位比较后<strong>不同的位数</strong>，也就是“从 A 变成 B 至少要翻转几位”。</p>
-<p>一个码里有很多合法码字；任意两个合法码字距离的<strong>最小值</strong>，叫<strong>最小距离 d0</strong>（码距）。d0 越大，合法码字之间隔得越远。</p>
-
-<h3 id="hamming-detect">4.1 检错：d0 ≥ e+1</h3>
-<p>如果两个合法码字至少差 d0 位，那么只错 e 位时，只要 <code>e &lt; d0</code>，就不可能把 A 错成另一个合法码字 B。因此能检测 e 位错的条件是：</p>
-<p><mark class="exam-key"><code>d0 ≥ e+1</code></mark></p>
-
-<h3 id="hamming-correct">4.2 纠错：d0 ≥ 2t+1</h3>
-<p>纠错要求“收到的码字离哪个合法码字最近，就判成哪个”。如果 A、B 距离太近，一个同时离 A、B 都不超过 t 的码字就会出现，无法唯一判断。要保证这种情况不发生，必须：</p>
-<p><mark class="exam-key"><code>d0 ≥ 2t+1</code></mark></p>
-<p>直观记：纠 t 位需要“两边各留 t 位的间隔”，再加 1 位把两边分开。</p>
-
-<h3 id="hamming-both">4.3 同时检 e 纠 t：d0 ≥ e+t+1</h3>
-<p>如果既要纠正 t 位，又要发现 e 位（e≥t），需要更大的距离：</p>
-<p><mark class="exam-key"><code>d0 ≥ e+t+1</code></mark></p>
-<p>可以理解为：先留出 t 位用于纠错，再留出 e 位用于检测，最后加 1 位把“可纠区域”和“另一个码字”分开。</p>
-
-<div class="article-table"><table>
-<thead><tr><th>d0</th><th>能检测 e</th><th>能纠正 t</th><th>补充</th></tr></thead>
-<tbody>
-<tr><td>1</td><td>0</td><td>0</td><td>任何一位错都可能变成另一个合法码字</td></tr>
-<tr><td>2</td><td>1</td><td>0</td><td>能发现 1 位错，但不能定位</td></tr>
-<tr><td>3</td><td>2</td><td>1</td><td>纠 1 位，或检 2 位；不能同时检 2 纠 1</td></tr>
-<tr><td>4</td><td>3</td><td>1</td><td>可纠 1；也可同时检 2 纠 1（2+1+1=4）</td></tr>
-<tr><td>5</td><td>4</td><td>2</td><td>可纠 2；也可检 3 纠 1 等</td></tr>
-</tbody>
-</table></div>
-<p>注意：<mark class="exam-key">同一个 d0 下，检错位数和纠错位数是“可以互相换算”的，不是同时取最大值。</mark> d0=4 时，你可以选择“检 3 位”，也可以选择“纠 1 位并检 2 位”，但不能说“既能纠 2 位又能检 3 位”。</p>
+<h2 id="err-hamming">四、海明距离：只看图里的重点</h2>
+<p>两个等长码字的<strong>海明距离 L</strong>，就是逐位比较后<strong>不同的位数</strong>。一个码里任意两个合法码字距离的最小值，就是码的最小海明距离。</p>
+<p>记 <strong>D</strong> 为能检测的错误位数，<strong>C</strong> 为能纠正的错误位数，图中给出的关系是：</p>
+<p><mark class="exam-key"><code>L − 1 = D + C　（D ≥ C）</code></mark></p>
+<p>记住图里的三句话：</p>
+<ul>
+<li>海明距离越大，检测和纠错能力越强；</li>
+<li>海明距离为 3 的码，可以<strong>检测 2bit 错误，或者纠正 1bit 错误</strong>；</li>
+<li>L 的求法：两段等长二进制码字，对应位上不同的位数。</li>
+</ul>
 <figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="海明距离 d0 与检错/纠错能力的关系" data-src="/408-review/assets/img/cn-hamming-v2.svg" href="/408-review/assets/img/cn-hamming-v2.svg">
-<img alt="海明距离与检错纠错能力的关系" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-hamming-v2.svg"/>
+<a class="figure-link" data-action="zoom-image" data-caption="海明距离 L 的定义与 L-1=D+C 的关系" data-src="/408-review/assets/img/cn-hamming-distance-user.png" href="/408-review/assets/img/cn-hamming-distance-user.png">
+<img alt="海明距离 L、L-1=D+C、D为检测位数、C为纠错位数" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-hamming-distance-user.png"/>
 </a>
-<figcaption>只看两个码字至少差几位，以及三个不等式。</figcaption>
+<figcaption>图里的重点：L 是码字之间不同的位数；L−1=D+C（D≥C）；L=3 时检测 2bit 或纠正 1bit。</figcaption>
 </figure>
 
 <h2 id="err-code">五、海明码：位数、位置、编码与定位</h2>
+<p>设数据位有 <code>m</code> 位，校验位有 <code>p</code> 位。校验位要能表示“没有错”以及“每一位出错”的位置，所以：</p>
+<p><mark class="exam-key"><code>2^p − 1 ≥ p + m</code></mark></p>
+<p>例：数据 <code>m=4</code>，取 <code>p=3</code>：<code>2³−1=7</code>，而 <code>p+m=3+4=7</code>，刚好够。所以 (7,4) 海明码是 <strong>4 个数据位 + 3 个校验位</strong>。</p>
 
-<h3 id="hamming-bits">5.1 校验位有几位</h3>
-<p>设数据位有 k 位，校验位有 r 位，总长 n=k+r。r 位校验结果（syndrome）要能表示：</p>
-<ul>
-<li>没有错：1 种；</li>
-<li>某一位错：n 种可能位置；</li>
-</ul>
-<p>所以必须 <mark class="exam-key"><code>2^r ≥ k+r+1</code></mark>。这就是“校验位位数”的确定公式。</p>
-<p>例如 k=4：r=3 时，<code>2^3=8</code>，而 <code>k+r+1=4+3+1=8</code>，刚好够；所以 (7,4) 海明码是 4 个数据位 + 3 个校验位。</p>
-
-<h3 id="hamming-pos">5.2 校验位放哪里</h3>
-<p>校验位放在<strong>2 的幂次位置</strong>：1、2、4、8……；数据位填剩下的位置。以 (7,4) 为例：</p>
+<h3 id="hamming-pos">5.1 校验位放在哪里</h3>
+<p>校验位放在 2 的幂次位置：<strong>1、2、4、8……</strong>；数据位填剩下的位置。以 (7,4) 为例：</p>
 <div class="article-table"><table>
 <thead><tr><th>位置</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
 <tbody>
 <tr><td>二进制</td><td>001</td><td>010</td><td>011</td><td>100</td><td>101</td><td>110</td><td>111</td></tr>
-<tr><td>内容</td><td>p1</td><td>p2</td><td>d1</td><td>p4</td><td>d2</td><td>d3</td><td>d4</td></tr>
+<tr><td>内容</td><td>p1</td><td>p2</td><td>d1</td><td>p3</td><td>d2</td><td>d3</td><td>d4</td></tr>
 </tbody>
 </table></div>
-<p>每个校验位负责“位置二进制中某一位为 1”的那些位置：</p>
+<p>第 k 个校验位 <code>P_k</code> 放在位置 <code>2^(k−1)</code>，它负责<strong>所有“位置编号的二进制第 k 位为 1”的位置</strong>：</p>
 <ul>
-<li>p1 负责 bit0=1：位置 1、3、5、7；</li>
-<li>p2 负责 bit1=1：位置 2、3、6、7；</li>
-<li>p4 负责 bit2=1：位置 4、5、6、7。</li>
+<li><code>P1</code>（位置 1）：负责二进制第 1 位为 1 的位置 → 1、3、5、7；</li>
+<li><code>P2</code>（位置 2）：负责二进制第 2 位为 1 的位置 → 2、3、6、7；</li>
+<li><code>P3</code>（位置 4）：负责二进制第 3 位为 1 的位置 → 4、5、6、7。</li>
 </ul>
+<p>图中把位置 4 的校验位写作 <code>p3</code>，就是第三个校验位，不要误以为它一定在第 3 位。</p>
 
-<h3 id="hamming-encode">5.3 码字怎么得到</h3>
-<p>下面用<strong>奇校验</strong>（与示例图一致）：每组中 1 的个数为奇数。把校验位也算进组内，令异或结果为 1，得到：</p>
-<p><code>p1 = 1 ⊕ d1 ⊕ d2 ⊕ d4</code></p>
-<p><code>p2 = 1 ⊕ d1 ⊕ d3 ⊕ d4</code></p>
-<p><code>p4 = 1 ⊕ d2 ⊕ d3 ⊕ d4</code></p>
-<p>例：数据 <code>d1d2d3d4 = 1010</code>。</p>
+<h3 id="hamming-encode">5.2 码字怎么得到</h3>
+<p>看题目要求奇校验还是偶校验：给校验位赋值，使该组 1 的个数满足奇数/偶数。以图中<strong>数据 1010、奇校验</strong>为例：</p>
 <ul>
-<li><code>p1 = 1⊕1⊕0⊕0 = 0</code>；</li>
-<li><code>p2 = 1⊕1⊕1⊕0 = 1</code>；</li>
-<li><code>p4 = 1⊕0⊕1⊕0 = 0</code>；</li>
-<li>按位置排：<code>0 1 1 0 0 1 0</code>，即码字 <code>0110010</code>。</li>
+<li>P1 组（1,3,5,7）已有 1、0、0，要凑成奇数个 1，P1 填 0；</li>
+<li>P2 组（2,3,6,7）已有 1、1、0，要凑成奇数个 1，P2 填 1；</li>
+<li>P3 组（4,5,6,7）已有 0、1、0，要凑成奇数个 1，P3 填 0。</li>
 </ul>
+<p>按位置排：</p>
+<pre><code class="language-text">位置：1 2 3 4 5 6 7
+内容：0 1 1 0 0 1 0
+码字：0110010</code></pre>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="(7,4) 海明码完整流程：1010 编码为 0110010，第5位出错后 syndrome=101" data-src="/408-review/assets/img/cn-hamming-code-user.png" href="/408-review/assets/img/cn-hamming-code-user.png">
+<img alt="海明码编码与检错流程：位置、三组校验、码字、第5位出错、syndrome" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-hamming-code-user.png"/>
+</a>
+<figcaption>按图走一遍：数据 1010 → 码字 0110010；第 5 位 0→1 后，重新分组得到 S3S2S1=101=5，定位第 5 位。</figcaption>
+</figure>
 
-<h3 id="hamming-decode">5.4 收到后怎么算，结果对应什么</h3>
-<p>接收端重新算三个校验组，得到 <code>s4 s2 s1</code>（从高到低）：</p>
+<h3 id="hamming-decode">5.3 收到后怎么检错、怎么定位</h3>
+<p>接收端按同样的三组重新检查奇偶性：</p>
+<ul>
+<li>该组仍满足奇/偶校验：<code>S_k=0</code>；</li>
+<li>该组不满足：<code>S_k=1</code>。</li>
+</ul>
+<p>把结果写成 <code>S_3 S_2 S_1</code>（从高到低），再转成十进制：</p>
 <ul>
 <li><code>000</code>：没有检测到错；</li>
-<li>非 0：把 <code>s4s2s1</code> 当二进制数，数值就是<strong>出错位的位置</strong>；</li>
+<li>非 0：数值就是<strong>出错位的位置</strong>；</li>
 <li>翻转该位即可纠正。</li>
 </ul>
-<p>例：发送 <code>0110010</code>，传输中第 5 位由 0 变成 1，收到 <code>0110110</code>。重新算：</p>
-<pre><code class="language-text">s1 = 第1,3,5,7位异或 = 0⊕1⊕1⊕0 = 0（偶，奇校验应得1）→ 错
-s2 = 第2,3,6,7位异或 = 1⊕1⊕1⊕0 = 1（奇，正常）→ 不错
-s4 = 第4,5,6,7位异或 = 0⊕1⊕1⊕0 = 0（偶，奇校验应得1）→ 错
+<p>以图中第 5 位出错为例：收到的码字是 <code>0110110</code>。三组检查后：</p>
+<pre><code class="language-text">P1 组不满足 → S1 = 1
+P2 组满足   → S2 = 0
+P3 组不满足 → S3 = 1
 
-s4 s2 s1 = 101 = 5
-→ 第 5 位出错，取反</code></pre>
-<p>所以结果是：<mark class="exam-key">syndrome 的二进制值 = 出错位编号；000 表示无错。</mark> 这也解释了为什么校验位要放在 1、2、4 位：位置编号的二进制位正好对应三个校验组。</p>
-<figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="(7,4) 海明码：数据 1010 编码为 0110010，第 5 位出错后 syndrome=101" data-src="/408-review/assets/img/cn-hamming-example.svg" href="/408-review/assets/img/cn-hamming-example.svg">
-<img alt="海明码 1010 的编码、出错和 syndrome 定位示例" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-hamming-example.svg"/>
-</a>
-<figcaption>用奇校验：数据 1010 → 码字 0110010；第 5 位 0→1 后，s4s2s1=101=5，定位到第 5 位。</figcaption>
-</figure><p><strong>能力边界</strong>：(7,4) 海明码 d0=3，只能纠 1 位错，或检 2 位错；如果同时错 2 位，syndrome 可能指向一个错误位置，导致“越纠越错”。要既纠 1 位又检 2 位，需要扩展海明码（增加总校验位）。</p>
+S3 S2 S1 = 101 = 5
+→ 第 5 位出错，取反得到 0110010</code></pre>
+<p><mark class="exam-key">S_k=1 表示第 k 组出错；S3S2S1 的十进制值就是出错位编号。</mark> 这也解释了为什么校验位要放在 1、2、4 位：位置编号的二进制位正好对应三个校验组。</p>
+
+<p><strong>能力边界</strong>：(7,4) 海明码 L=3，只能纠 1 位错，或检 2 位错；同时错 2 位可能被误纠，不能当成“能纠 2 位”。</p>
 
 <h2 id="err-pitfalls">六、易错点与收束</h2>
 <ul>
 <li><strong>“CRC 的商要发送”</strong>：错；发送的是“数据 + 余数”，商不发送。</li>
 <li><strong>“CRC 能纠错”</strong>：CRC 码本身可具备纠错能力，但数据链路层只用它检错；出错直接丢弃/重传。</li>
-<li><strong>“d0=3 能纠 3 位错”</strong>：d0=3 只能纠 1 位错（2t+1≤3）。</li>
-<li><strong>“d0=4 能同时纠 2 检 3”</strong>：不能；d0=4 可纠 1，或检 3，或检 2 纠 1，不能同时取最大。</li>
-<li><strong>“海明码能纠 2 位”</strong>：(7,4) 海明码只能纠 1 位；纠 2 位需要 d0≥5。</li>
+<li><strong>“L=3 能纠 3 位错”</strong>：L=3 只能纠 1 位，或检 2 位。</li>
+<li><strong>“L=4 能同时纠 2 检 3”</strong>：不能；L 越大能力越强，但检测和纠错要按 L−1=D+C 分配。</li>
+<li><strong>“海明码能纠 2 位”</strong>：(7,4) 海明码 L=3，只能纠 1 位或检 2 位。</li>
 </ul>
 <p>收束：<strong>CRC 是“补零、除 G、取余数、再除验证”；海明距离是“码字之间至少差几位”；海明码是“用 r 位 syndrome 指出错位”。</strong> 三件事分别对应：检错工具、能力尺子、纠错实现。</p>
 </div>

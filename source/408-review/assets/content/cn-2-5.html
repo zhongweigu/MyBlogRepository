@@ -155,7 +155,12 @@
 <tr><td>CTS</td><td>Frame Control + Duration + RA + FCS</td><td>2+2+6+4 = 14B</td></tr>
 </tbody>
 </table></div>
-<p>RA 是接收方地址，TA 是发送方地址；Duration 就是下面要填的预约时间。</p>
+<p>RA 是接收方地址，TA 是发送方地址；Duration 就是下面要填的预约时间。</p><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="RTS 20B 与 CTS 14B 的帧格式" data-src="/408-review/assets/img/cn-rts-cts-frame.svg" href="/408-review/assets/img/cn-rts-cts-frame.svg">
+<img alt="RTS和CTS帧格式：帧控制、持续期、地址、FCS" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-rts-cts-frame.svg"/>
+</a>
+<figcaption>RTS：帧控制 2B + 持续期 2B + RA 6B + TA 6B + FCS 4B = 20B；CTS：帧控制 2B + 持续期 2B + RA 6B + FCS 4B = 14B。</figcaption>
+</figure>
 <p><strong>Duration 到底包含什么？</strong>记住“从当前帧结束，到 ACK 结束”：</p>
 <div class="article-table"><table>
 <thead><tr><th>帧</th><th>Duration 字段（从当前帧结束算）</th></tr></thead>
