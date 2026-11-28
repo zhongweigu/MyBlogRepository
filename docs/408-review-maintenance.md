@@ -26,7 +26,7 @@ source/408-review/
 ├── index.html                     # 壳、主题启动；公式/图表库按需加载
 ├── assets/
 │   ├── css/app.css                # 设计系统 + 长文排版 + 今日页
-│   ├── js-v58/
+│   ├── js-v59/
 │   │   ├── app.js                 # 路由、动作、渲染入口
 │   │   ├── store.js               # localStorage 进度 / dailyQueue
 │   │   ├── article.js             # MathJax / Mermaid 按需增强
@@ -223,7 +223,7 @@ python scripts/build-review-content.py
 
 ### 3.7 复习库（术语 + 流程）与图解库
 
-- `data/review-cards.js`：当前 364 张术语卡 + 118 张流程卡，每张有 `id/question/answer/goal/checkpoints/source/aliases`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
+- `data/review-cards.js`：当前 365 张术语卡 + 118 张流程卡，每张有 `id/question/answer/goal/checkpoints/source/aliases`；术语必须是一个明确概念，不能写“地址结构”“方法 3”这类歧义词。
 - `data/review-terms.js` / `review-flows.js` 是迁移前历史数据，页面不再直接读取；不要在这两个文件里新增卡片。
 - `#/glossary` 现在是**完整复习库**：上面是术语库、下面是流程库，支持科目筛选和搜索；顶部导航标签为「复习库」。
 - 旧的 `data/glossary.js`（`CORE_TERMS` / 自动抽取）不再被页面使用，不要继续往里加；新词加到 `review-terms.js`。
@@ -252,7 +252,7 @@ python scripts/build-review-content.py
 
 - 今日页固定 **20 个术语 + 5 个流程**，不再按考点/复习进度出题。
 - 随机是**日期确定性随机**：用上海日期 `YYYY-MM-DD` 做种子，从 `data/review-cards.js` 洗牌；同一天多次打开内容相同，次日自动换一批。不要改成 `Math.random()`，否则每次刷新都变。
-- 卡片库 364 张术语卡 + 118 张流程卡；术语必须是一个明确概念（“最佳适应算法”“Belady 异常”），不能写“地址结构”“方法 3”这类歧义词。每张卡以问题开头，答案默认折叠。
+- 卡片库 365 张术语卡 + 118 张流程卡；术语必须是一个明确概念（“最佳适应算法”“Belady 异常”），不能写“地址结构”“方法 3”这类歧义词。每张卡以问题开头，答案默认折叠。
 - 不使用 `store.dailyQueue`、SRS、连续天数、已掌握标记；今日页不显示“开始复习/复习按钮”。
 - 不要加回：今日三件事、每日一题、每日一点 tab、复习指引、科目进度、热力图、7 天预测。
 - 改数量：`today.js` 的 `TERM_COUNT` / `FLOW_COUNT`。
@@ -449,6 +449,7 @@ Netlify 由 `npm run netlify`（`hexo clean && hexo generate`）构建，发布 
 - 已录入 91 道 OS 真题（原 71 道 + I/O 20 道），题库存量为 268；计算机网络 12 道在 `data/questions-cn.js`。I/O 题在 `data/questions-io.js`，以后补 OS 真题时，`subject: 'os'`，`chapter: 'os-1'` 到 `os-6`，`topics` 指向对应考点。
 - 后续加 OS 章节：在 `meta.js` 加章节、在 `os.js` / `os-extra.js` 加 `order` 唯一的考点、写 `content/os-*.html`；不要改已有 id。
 - 写作遵守 `AGENTS.md` 第 22 节「知识库编写原则」：先框架后细节，讲原理、做对比、写边界，不写成知识点罗列。
+
 
 
 

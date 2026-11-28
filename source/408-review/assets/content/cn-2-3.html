@@ -1,69 +1,102 @@
 <div class="article-content">
-<p>可靠传输要解决两个问题：<strong>帧丢了/错了怎么办</strong>，以及<strong>发送方发太快、接收方处理不过来怎么办</strong>。前者靠确认、超时和重传，后者靠流量控制/滑动窗口。停等、GBN、SR 是三种经典滑动窗口协议；窗口大小、序号位数和确认方式决定效率与复杂度。</p>
-<p>先建立一个直觉：<mark>发送窗口 = 发送方“已发出但还没被确认”的帧集合</mark>；窗口越大，发送方能连续发越多帧，流水线越深。但序号只有 n 位，窗口不能无限大，否则新旧帧可能用同一个序号，接收端分不清“新帧”和“重传的旧帧”。</p>
+<p>三种 ARQ 都可以从“窗口”理解：<strong>发送窗口 W_T</strong> 是发送方允许“已发出但还没被确认”的帧集合；<strong>接收窗口 W_R</strong> 是接收方允许接收的帧集合。窗口的起点随着 ACK 前移，这就是“滑动窗口”。</p>
+<p>n 位序号能表示 <code>0～2^n−1</code> 个编号。窗口不能无限大，否则新旧帧会用到同一个序号，接收方分不清“新帧”和“重传的旧帧”。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>5 节</span></summary>
+<summary>本页目录 <span>6 节</span></summary>
 <div class="toc"><ul>
-<li><a href="#arq-stop">一、停等协议</a></li>
-<li><a href="#arq-gbn">二、GBN：回退 N</a></li>
-<li><a href="#arq-sr">三、SR：选择重传</a></li>
-<li><a href="#arq-util">四、窗口与信道利用率</a></li>
-<li><a href="#arq-pitfalls">五、易错点与收束</a></li>
+<li><a href="#arq-window">一、先看窗口：三种 ARQ 总表</a></li>
+<li><a href="#arq-stop">二、停止等待</a></li>
+<li><a href="#arq-gbn">三、后退 N 帧（GBN）</a></li>
+<li><a href="#arq-sr">四、选择重传（SR）</a></li>
+<li><a href="#arq-slide">五、窗口推进与时序图</a></li>
+<li><a href="#arq-pitfalls">六、窗口大小总结与易错点</a></li>
 </ul></div>
 </details>
 
-<h2 id="arq-stop">一、停等协议</h2>
-<p>发送方发一帧后停下，等待接收方的 ACK；超时未收到就重传。用 1 位序号（0/1）区分新帧和重复帧。</p>
-<ul>
-<li>正常：发 0 → 等 ACK0 → 发 1 → 等 ACK1；</li>
-<li>帧丢失/出错：超时重传；</li>
-<li>ACK 丢失：发送方重传，接收方收到重复帧后丢弃并重发 ACK。</li>
-</ul>
-<p>停等简单，但 RTT 大、速率高时信道利用率很低。可以把它想成“寄一封信，必须等回信才能寄下一封”：信件在路上的时间远大于写信时间，邮局大部分时间是空的。</p>
-<p>停等还有两个细节：<mark>ACK 丢失时发送方会重传，接收方必须能识别重复帧</mark>；用 1 位序号 0/1 就够，因为“上一帧的 ACK”和“下一帧的数据”可以区分。若没有序号，接收方收到重复帧会误当成新数据。</p>
+<h2 id="arq-window">一、先看窗口：三种 ARQ 总表</h2>
+<div class="article-table"><table>
+<thead><tr><th>协议</th><th>发送窗口 W_T</th><th>接收窗口 W_R</th><th>序号</th><th>核心规则</th></tr></thead>
+<tbody>
+<tr><td>停止等待</td><td>1</td><td>1</td><td>1 bit（0/1）</td><td>发一帧，等一个 ACK</td></tr>
+<tr><td>GBN</td><td>&gt;1</td><td>1</td><td>n bit</td><td>累积确认，出错回退</td></tr>
+<tr><td>SR</td><td>&gt;1</td><td>&gt;1</td><td>n bit</td><td>逐帧确认，缓存乱序，只重传出错帧</td></tr>
+</tbody>
+</table></div>
+<p>核心约束：<mark class="exam-key"><code>W_T + W_R ≤ 2^n</code></mark>。不同协议只是在这个约束下取不同的窗口。</p>
 
-<h2 id="arq-gbn">二、GBN：回退 N</h2>
-<p>发送窗口 &gt; 1，接收窗口 = 1。接收方只按序接收，用<strong>累积确认</strong>（ACK n 表示 n 及之前的帧都收到）。</p>
+<h2 id="arq-stop">二、停止等待</h2>
+<p><strong>窗口：</strong><code>W_T=1，W_R=1</code>。发送方发一帧后必须停下，等收到 ACK 才能发下一帧；接收方一次只收一帧。</p>
+<p><strong>编号：</strong>只需 <strong>1 bit 序号</strong>（0/1）。因为发送方同一时刻只有一帧在途，接收方只需区分“新帧”和“上一帧的重复”。</p>
 <ul>
-<li>发送方可连续发多个帧，不必每帧都停；</li>
-<li>某帧超时，重传该帧及其后所有未确认帧；</li>
-<li>接收端遇到乱序帧直接丢弃，所以叫“回退 N”。</li>
-<li>序号 n 位时，发送窗口 ≤ <mark class="exam-key">2^n − 1</mark>。</li>
+<li><strong>数据帧出错或丢失</strong>：发送方为数据帧设置计时器；长时间没收到确认，就自动重传。</li>
+<li><strong>确认帧出错或丢失</strong>：发送方同样超时重传；接收方收到重复帧后<strong>丢弃重复帧，并重新发送 ACK</strong>，不会重复交付给上层。</li>
 </ul>
-<p>为什么是 2^n−1 而不是 2^n？如果窗口等于 2^n，发送方发完 0…2^n−1 后，ACK 全丢，又重发 0；接收方刚收完旧 0…2^n−1，无法判断新到的 0 是新帧还是旧帧的重传。留一个序号不用，接收方就能用“窗口位置”区分。</p>
+<p>窗口推进：初始发送窗口 [0]、接收窗口 [0]；收到 ACK0 后，两者都推进到 [1]。每收一个 ACK，窗口向前 1 格。</p>
+<p>停止等待简单，但没有流水线：RTT 大、速率高时，信道大部分时间在等 ACK，利用率低。</p>
 
-<h2 id="arq-sr">三、SR：选择重传</h2>
-<p>发送窗口和接收窗口都 &gt; 1。接收方可以缓存乱序到达的帧，只重传出错/丢失的那一帧。</p>
+<h2 id="arq-gbn">三、后退 N 帧（GBN）</h2>
+<p><strong>窗口：</strong><code>W_R=1，W_T&gt;1</code>。发送方可以连续发送窗口内的多个帧；接收方只按序接收，乱序帧直接丢弃。</p>
+<p><strong>编号：</strong>n bit 序号，<mark class="exam-key"><code>W_T ≤ 2^n − 1</code></mark>。留一个序号不用，接收方才能区分“新帧”和“重传的旧帧”。</p>
 <ul>
-<li>逐帧确认，接收窗口内的乱序帧先缓存；</li>
-<li>缺失帧到达后，接收窗口向前滑动并交付；</li>
-<li>序号 n 位时，窗口 ≤ <mark class="exam-key">2^(n−1)</mark>（发送/接收窗口通常相同）。</li>
+<li>发送窗口内的帧可以连续发送，不必每帧都停；</li>
+<li>接收方只按序收，收到乱序帧就丢弃；</li>
+<li><strong>累积确认</strong>：接收方连续收到后，只需返回最大连续帧的 ACK。例如 ACK1 表示 0、1 都收到；</li>
+<li>为防止 ACK 丢失，接收方可以重复发送最近一次成功的 ACK，催促发送方继续；</li>
+<li>通常只为<strong>最早未确认帧</strong>设置一个计时器；它超时，就重传该帧及其之后<strong>所有已发送但未确认</strong>的帧。</li>
 </ul>
-<p>SR 效率高，但接收端缓存和排序逻辑更复杂。它适合<mark>误码率较高、RTT 较大、带宽时延积大</mark>的链路：如果每次出错都回退一大段，重传代价太高。</p>
-<p>SR 的窗口为什么是 2^(n−1)？发送窗口和接收窗口加起来不能超过序号空间 2^n，否则新旧窗口会重叠；通常两边取一样大，于是各占一半。</p>
+<p>窗口推进：发送窗口 [0,1,2,3]，收到 ACK1 后，累积确认 0、1，窗口起点直接跳到 2，变成 [2,3,4,5]；接收窗口始终只跟着“下一个期望帧”走。</p>
+<p>GBN 的优点是接收端简单、不需要缓存乱序帧；缺点是出错时可能重传一大段，浪费带宽。</p>
+
+<h2 id="arq-sr">四、选择重传（SR）</h2>
+<p><strong>窗口：</strong><code>W_T&gt;1，W_R&gt;1</code>。接收方可以接收并缓存“失序但正确到达、且落在接收窗口内”的帧。</p>
+<p><strong>编号与约束：</strong></p>
+<ul>
+<li>n bit 序号；</li>
+<li><mark class="exam-key"><code>W_T + W_R ≤ 2^n</code></mark>，且 <code>W_R ≤ W_T</code>；</li>
+<li>常取 <code>W_T = W_R = 2^(n−1)</code>，两边各占序号空间一半。</li>
+</ul>
+<ul>
+<li>只重传出错或超时的数据帧，不重传它后面的正确帧；</li>
+<li>接收方必须有和接收窗口一样大的缓冲区，暂存乱序帧；</li>
+<li>每个未确认帧有独立的计时器；</li>
+<li>如果收到错帧，可以立即返回 <strong>NAK</strong>，让发送方马上重传，不必等到超时。</li>
+</ul>
+<p>窗口推进：初始发送/接收窗口都是 [0,1,2,3]；0、1 被确认，2 丢失，3 被缓存。接收窗口仍覆盖 2、3，但不交付 3；2 到达后，接收方按序交付 2、3，窗口一起向前推进。</p>
+
+<h2 id="arq-slide">五、窗口推进与时序图</h2>
+<p>先看窗口本身怎样向前滑动：</p>
 <figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="停等、GBN、SR 的发送/接收窗口与重传范围" data-src="/408-review/assets/img/cn-arq-windows.svg" href="/408-review/assets/img/cn-arq-windows.svg">
-<img alt="停等、GBN、选择重传的窗口和重传示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-arq-windows.svg"/>
+<a class="figure-link" data-action="zoom-image" data-caption="停止等待、GBN、SR 的 W_T/W_R 大小与窗口推进" data-src="/408-review/assets/img/cn-arq-window-slide.svg" href="/408-review/assets/img/cn-arq-window-slide.svg">
+<img alt="三种ARQ的发送窗口和接收窗口推进图" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-arq-window-slide.svg"/>
 </a>
-<figcaption>停等窗口 1；GBN 接收窗口 1、出错回退；SR 缓存乱序帧、只重传出错帧。</figcaption>
+<figcaption>停止等待窗口 1+1；GBN 接收窗口 1、累积确认直接跳窗口；SR 接收窗口可缓存乱序帧、逐帧推进。</figcaption>
 </figure>
 
-<h2 id="arq-util">四、窗口与信道利用率</h2>
-<p>停等协议的简化利用率：</p>
-<p><code>U = T_D / (T_D + RTT + T_A)</code></p>
-<p>其中 T_D 是发送一帧的时间，T_A 是 ACK 发送时间，RTT 是往返传播时延。RTT 越大，停等利用率越低。</p>
-<p><strong>代入一组数</strong>：帧长 1000bit，速率 1Mb/s，T_D=1ms；RTT=20ms，忽略 T_A。则 U=1/(1+20)≈4.76%。也就是说，链路只有不到 5% 的时间在发数据，其余都在等 ACK。若窗口能开到 21 帧，发送方在等 ACK 时继续发，U 才可能接近 100%。</p>
-<p>滑动窗口相当于“流水线”：窗口足够大时，发送方在等待 ACK 期间还能继续发，利用率可接近 1。更准确地说，<mark>窗口至少要有“RTT 内能发出的帧数”那么多</mark>，才能把链路填满；这个帧数约等于 `(RTT × R)/L`，也就是带宽时延积除以帧长。</p>
-<p>但窗口不能只按利用率开大：GBN 受 2^n−1 限制，SR 受 2^(n−1) 限制；序号位数不够时，必须降低窗口或增加序号位数。</p>
+<p>再对照时序看“丢帧、丢 ACK、重传”分别发生什么：</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="停止等待、GBN、SR 的数据传输与重传时序" data-src="/408-review/assets/img/cn-arq-timelines.svg" href="/408-review/assets/img/cn-arq-timelines.svg">
+<img alt="停止等待、GBN、SR的时序和重传" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-arq-timelines.svg"/>
+</a>
+<figcaption>停止等待：数据丢失超时重传，ACK 丢失导致重复帧；GBN：2 丢失后重传 2、3；SR：3 先缓存，NAK2 后只重传 2。</figcaption>
+</figure>
 
-<h2 id="arq-pitfalls">五、易错点与收束</h2>
+<h2 id="arq-pitfalls">六、窗口大小总结与易错点</h2>
+<p>记住一条主线：<mark class="exam-key">所有 ARQ 都受 <code>W_T + W_R ≤ 2^n</code> 约束</mark>。</p>
+<div class="article-table"><table>
+<thead><tr><th>协议</th><th>W_T</th><th>W_R</th><th>由总约束得到</th></tr></thead>
+<tbody>
+<tr><td>停止等待</td><td>1</td><td>1</td><td>1+1=2=2^1，n=1</td></tr>
+<tr><td>GBN</td><td>≤2^n−1</td><td>1</td><td>W_T+1≤2^n</td></tr>
+<tr><td>SR</td><td>≤2^n−W_R</td><td>≤W_T</td><td>常取 W_T=W_R=2^(n−1)</td></tr>
+</tbody>
+</table></div>
 <ul>
-<li><strong>“GBN 接收窗口等于发送窗口”</strong>：GBN 接收窗口为 1，只按序接收。</li>
-<li><strong>“SR 不需要缓存”</strong>：SR 必须缓存乱序帧。</li>
-<li><strong>“窗口越大越好”</strong>：受序号空间限制，过大导致新旧帧混淆。</li>
-<li><strong>“停等不需要序号”</strong>：至少需要 1 位序号来识别重复帧。</li>
-<li><strong>“GBN 的累积确认表示所有帧都正确”</strong>：它表示到该序号为止都收到，但不代表后面没有出错。</li>
+<li><strong>“GBN 接收窗口等于发送窗口”</strong>：错；GBN 的 W_R 始终为 1。</li>
+<li><strong>“SR 不需要缓存”</strong>：错；SR 必须缓存乱序帧，缓冲区至少等于 W_R。</li>
+<li><strong>“窗口越大越好”</strong>：错；受 W_T+W_R≤2^n 限制，过大会新旧序号混淆。</li>
+<li><strong>“停等不需要序号”</strong>：错；至少 1 bit 用来识别重复帧。</li>
+<li><strong>“GBN 的累积确认表示后面都对”</strong>：错；只表示到该序号为止都收到，后面仍可能丢。</li>
 </ul>
-<p>收束：<strong>停等用时间换简单，GBN 用重传换秩序，SR 用缓存换效率</strong>；窗口大小由序号位数决定。</p>
+<p>收束：<strong>停等用 1+1 换简单；GBN 用 W_R=1 换接收端简单、用回退换秩序；SR 用缓存和独立计时器换效率。</strong></p>
 </div>
