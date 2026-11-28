@@ -3,14 +3,15 @@
 <p>n 位序号能表示 <code>0～2^n−1</code> 个编号。窗口不能无限大，否则新旧帧会用到同一个序号，接收方分不清“新帧”和“重传的旧帧”。</p>
 
 <details class="article-toc">
-<summary>本页目录 <span>6 节</span></summary>
+<summary>本页目录 <span>7 节</span></summary>
 <div class="toc"><ul>
 <li><a href="#arq-window">一、先看窗口：三种 ARQ 总表</a></li>
 <li><a href="#arq-stop">二、停止等待</a></li>
 <li><a href="#arq-gbn">三、后退 N 帧（GBN）</a></li>
 <li><a href="#arq-sr">四、选择重传（SR）</a></li>
-<li><a href="#arq-slide">五、窗口推进与时序图</a></li>
-<li><a href="#arq-pitfalls">六、窗口大小总结与易错点</a></li>
+<li><a href="#arq-util">五、信道利用率</a></li>
+<li><a href="#arq-slide">六、窗口推进与时序图</a></li>
+<li><a href="#arq-pitfalls">七、窗口大小总结与易错点</a></li>
 </ul></div>
 </details>
 
@@ -64,7 +65,28 @@
 </ul>
 <p>窗口推进：初始发送/接收窗口都是 [0,1,2,3]；0、1 被确认，2 丢失，3 被缓存。接收窗口仍覆盖 2、3，但不交付 3；2 到达后，接收方按序交付 2、3，窗口一起向前推进。</p>
 
-<h2 id="arq-slide">五、窗口推进与时序图</h2>
+<h2 id="arq-util">五、信道利用率</h2>
+<p>先看一个发送周期：发送方从开始发送数据，到收到确认帧为止。这个周期由三部分组成：</p>
+<ul>
+<li><strong>T_D</strong>：发送一个数据帧的时间，<code>T_D = L / C</code>（L 是帧长，C 是发送速率）；</li>
+<li><strong>RTT</strong>：往返传播时延；</li>
+<li><strong>T_A</strong>：发送确认帧的时间。很多题目忽略 T_A，或把它并入 RTT。</li>
+</ul>
+<p>一个周期为 <code>T = T_D + RTT + T_A</code>，真正用来发送有效数据的时间是 T_D，所以：</p>
+<p><mark class="exam-key"><code>U = T_D / (T_D + RTT + T_A) = (L/C) / T</code></mark></p>
+<p>如果忽略 T_A，就是 <code>U = T_D/(T_D+RTT)</code>。U 越接近 1，信道越忙；U 越小，说明大量时间在等确认。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="信道利用率：T_D、RTT、T_A 与发送周期的关系" data-src="/408-review/assets/img/cn-utilization-user.png" href="/408-review/assets/img/cn-utilization-user.png">
+<img alt="发送周期由数据发送时间T_D、往返时延RTT和确认发送时间T_A组成，U=T_D/(T_D+RTT+T_A)" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-utilization-user.png"/>
+</a>
+<figcaption>图里的口径：T_D 是发送数据的时间，RTT 是往返传播时延，T_A 是确认帧发送时间；分子只放有效数据发送时间 T_D。</figcaption>
+</figure>
+<p>滑动窗口把多个 T_D 放进一个 RTT 里，所以：</p>
+<p><code>U ≈ min(1, W_T × T_D / (T_D + RTT + T_A))</code></p>
+<p>窗口足够大时 U 可以接近 1；窗口不够时，发送方发完窗口内帧就要停下等 ACK。注意：<mark class="exam-key">帧长越短，T_D 越小；同样的 RTT 下要填满链路，就需要更大的窗口</mark>。所以题目给“帧长范围”时，若要求在整个范围内都能达到高利用率，应按最短帧（最不利情况）估算序号位数。</p>
+<p><strong>结合 2012 第 24 题</strong>：128B、16kb/s、RTT=540ms、确认帧等长，T_D=T_A=64ms，所需窗口约 <code>(64+540+64)/64≈10.44</code>，即 11 帧；GBN 的 n 位序号最多 2^n−1 帧，n=3 只有 7 帧，不够，n=4 有 15 帧，所以至少 <mark class="exam-key">4 位</mark>。只用 512B 算会得到 3 位，但没有覆盖题目给出的 128B 最短帧；按最短帧这个需要窗口最大的情况取，答案为 4 位。</p>
+
+<h2 id="arq-slide">六、窗口推进与时序图</h2>
 <p>先看窗口本身怎样向前滑动：</p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="停止等待、GBN、SR 的 W_T/W_R 大小与窗口推进" data-src="/408-review/assets/img/cn-arq-window-slide-v2.svg" href="/408-review/assets/img/cn-arq-window-slide-v2.svg">
@@ -81,7 +103,7 @@
 <figcaption>停止等待：数据丢失超时重传，ACK 丢失导致重复帧；GBN：2 丢失后重传 2、3；SR：3 先缓存，NAK2 后只重传 2。</figcaption>
 </figure>
 
-<h2 id="arq-pitfalls">六、窗口大小总结与易错点</h2>
+<h2 id="arq-pitfalls">七、窗口大小总结与易错点</h2>
 <p>记住一条主线：<mark class="exam-key">所有 ARQ 都受 <code>W_T + W_R ≤ 2^n</code> 约束</mark>。</p>
 <div class="article-table"><table>
 <thead><tr><th>协议</th><th>W_T</th><th>W_R</th><th>由总约束得到</th></tr></thead>
