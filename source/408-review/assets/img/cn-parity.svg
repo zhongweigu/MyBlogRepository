@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-label="奇校验和偶校验的校验位">
+  <rect width="960" height="360" fill="#fffdf8"/>
+  <text x="480" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">奇偶校验：只加 1 位，让 1 的个数满足奇/偶</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="85" font-weight="700">数据 1011（3 个 1）</text>
+
+    <text x="45" y="135" font-weight="700">奇校验</text>
+    <g font-size="14">
+      <rect x="110" y="110" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="137" y="136" text-anchor="middle">1</text>
+      <rect x="165" y="110" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="192" y="136" text-anchor="middle">0</text>
+      <rect x="220" y="110" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="247" y="136" text-anchor="middle">1</text>
+      <rect x="275" y="110" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="302" y="136" text-anchor="middle">1</text>
+      <rect x="330" y="110" width="55" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="357" y="136" text-anchor="middle" font-weight="700">0</text>
+    </g>
+    <text x="405" y="136" font-size="13">3 个 1 已经是奇数，校验位填 0</text>
+
+    <text x="45" y="215" font-weight="700">偶校验</text>
+    <g font-size="14">
+      <rect x="110" y="190" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="137" y="216" text-anchor="middle">1</text>
+      <rect x="165" y="190" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="192" y="216" text-anchor="middle">0</text>
+      <rect x="220" y="190" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="247" y="216" text-anchor="middle">1</text>
+      <rect x="275" y="190" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="302" y="216" text-anchor="middle">1</text>
+      <rect x="330" y="190" width="55" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="357" y="216" text-anchor="middle" font-weight="700">1</text>
+    </g>
+    <text x="405" y="216" font-size="13">要凑成偶数，校验位填 1 → 总共 4 个 1</text>
+
+    <text x="45" y="275" font-size="13">奇校验：整个码字中 1 的个数为奇数；偶校验：1 的个数为偶数。</text>
+    <text x="45" y="300" font-size="13" fill="#b54b45">只能发现奇数个比特错；如果两位同时翻转，1 的个数改变 2，奇偶性不变，检不出。</text>
+    <text x="45" y="330" font-size="12" fill="#6b777f">它不能定位，也不能纠错；优点是只加 1 位，开销最小。</text>
+  </g>
+</svg>

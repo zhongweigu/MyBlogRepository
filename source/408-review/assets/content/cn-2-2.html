@@ -16,7 +16,12 @@
 
 <h2 id="err-parity">一、奇偶校验</h2>
 <p>在数据后加 1 位校验位，让整个码字中 1 的个数为奇数（奇校验）或偶数（偶校验）。接收端数 1 的个数，奇偶性不对就报错。</p>
-<p>它只能发现<strong>奇数个比特</strong>同时出错；两位同时翻转，1 的个数改变 2，奇偶性不变，就检不出来。它不能定位，也不能纠正。</p>
+<p>它只能发现<strong>奇数个比特</strong>同时出错；两位同时翻转，1 的个数改变 2，奇偶性不变，就检不出来。它不能定位，也不能纠正。</p><figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="奇校验与偶校验：数据 1011 的校验位分别取 0/1" data-src="/408-review/assets/img/cn-parity.svg" href="/408-review/assets/img/cn-parity.svg">
+<img alt="奇校验和偶校验示例" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-parity.svg"/>
+</a>
+<figcaption>数据 1011 有 3 个 1：奇校验补 0（保持奇数个 1），偶校验补 1（凑成偶数个 1）。</figcaption>
+</figure>
 
 <h2 id="err-crc">二、CRC：生成多项式与校验码</h2>
 <p>CRC 的核心不是“背公式”，而是<strong>双方约定一个除数，发送方把余数附在数据后面，接收方再除一次看余数</strong>。</p>
@@ -59,7 +64,8 @@
 <pre><code class="language-text">1101001 ÷ 1011，余数 = 000</code></pre>
 <p>余数为 0，表示<strong>没有检测到错误</strong>；余数非 0，表示检测到错误，通常丢弃/重传。</p>
 <p>为什么？发送方构造的“数据 + FCS”本来就能被 G 整除；传输中若某些位翻转，相当于又叠加了一个“错误多项式”。只要错误不是 G 的倍数，余数就会变成非 0。</p>
-<p><strong>但余数为 0 不等于绝对没出错</strong>：如果错误多项式恰好是 G 的倍数，就会漏检。CRC 是检错码，不是纠错码。</p>
+<p><strong>但余数为 0 不等于绝对没出错</strong>：如果错误多项式恰好是 G 的倍数，就会漏检。</p>
+<p>这里要区分“码的能力”和“链路层的用法”：<mark class="exam-key">CRC 码本身在原理上可以用于纠错，但数据链路层只用它做检错；检测到错误就丢弃/重传，不做纠错。</mark></p>
 <figure class="article-figure">
 <a class="figure-link" data-action="zoom-image" data-caption="CRC 发送端补零、模2除法求余数，接收端再除一次" data-src="/408-review/assets/img/cn-crc.svg" href="/408-review/assets/img/cn-crc.svg">
 <img alt="CRC 发送端与接收端的模2除法流程" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-crc.svg"/>
@@ -71,7 +77,7 @@
 <ul>
 <li>r 次生成多项式可以检测所有长度 ≤r 的突发错误；</li>
 <li>若 G(x) 含因子 (x+1)，可以检测奇数个比特错误；</li>
-<li>CRC 不能保证 100% 检出，仍有漏检概率；它是检错码，不是纠错码。</li>
+<li>CRC 不能保证 100% 检出，仍有漏检概率；数据链路层只使用它的检错功能，出错直接丢弃/重传。</li>
 </ul>
 <p>一句话：<mark class="exam-key">CRC 擅长发现“成串出错”，发现后交给重传，不负责纠正。</mark></p>
 
@@ -139,16 +145,16 @@
 </ul>
 
 <h3 id="hamming-encode">5.3 码字怎么得到</h3>
-<p>用偶校验，令每个校验组中 1 的个数为偶数，得到：</p>
-<p><code>p1 = d1 ⊕ d2 ⊕ d4</code></p>
-<p><code>p2 = d1 ⊕ d3 ⊕ d4</code></p>
-<p><code>p4 = d2 ⊕ d3 ⊕ d4</code></p>
-<p>例：数据 <code>d1d2d3d4 = 1011</code>。</p>
+<p>下面用<strong>奇校验</strong>（与示例图一致）：每组中 1 的个数为奇数。把校验位也算进组内，令异或结果为 1，得到：</p>
+<p><code>p1 = 1 ⊕ d1 ⊕ d2 ⊕ d4</code></p>
+<p><code>p2 = 1 ⊕ d1 ⊕ d3 ⊕ d4</code></p>
+<p><code>p4 = 1 ⊕ d2 ⊕ d3 ⊕ d4</code></p>
+<p>例：数据 <code>d1d2d3d4 = 1010</code>。</p>
 <ul>
-<li><code>p1 = 1⊕0⊕1 = 0</code>；</li>
-<li><code>p2 = 1⊕1⊕1 = 1</code>；</li>
-<li><code>p4 = 0⊕1⊕1 = 0</code>；</li>
-<li>按位置排：<code>0 1 1 0 0 1 1</code>，即码字 <code>0110011</code>。</li>
+<li><code>p1 = 1⊕1⊕0⊕0 = 0</code>；</li>
+<li><code>p2 = 1⊕1⊕1⊕0 = 1</code>；</li>
+<li><code>p4 = 1⊕0⊕1⊕0 = 0</code>；</li>
+<li>按位置排：<code>0 1 1 0 0 1 0</code>，即码字 <code>0110010</code>。</li>
 </ul>
 
 <h3 id="hamming-decode">5.4 收到后怎么算，结果对应什么</h3>
@@ -158,20 +164,25 @@
 <li>非 0：把 <code>s4s2s1</code> 当二进制数，数值就是<strong>出错位的位置</strong>；</li>
 <li>翻转该位即可纠正。</li>
 </ul>
-<p>例：发送 <code>0110011</code>，传输中第 5 位翻转，收到 <code>0110111</code>。重新算：</p>
-<pre><code class="language-text">s1 = 第1,3,5,7位异或 = 0⊕1⊕1⊕1 = 1
-s2 = 第2,3,6,7位异或 = 1⊕1⊕1⊕1 = 0
-s4 = 第4,5,6,7位异或 = 0⊕1⊕1⊕1 = 1
+<p>例：发送 <code>0110010</code>，传输中第 5 位由 0 变成 1，收到 <code>0110110</code>。重新算：</p>
+<pre><code class="language-text">s1 = 第1,3,5,7位异或 = 0⊕1⊕1⊕0 = 0（偶，奇校验应得1）→ 错
+s2 = 第2,3,6,7位异或 = 1⊕1⊕1⊕0 = 1（奇，正常）→ 不错
+s4 = 第4,5,6,7位异或 = 0⊕1⊕1⊕0 = 0（偶，奇校验应得1）→ 错
 
 s4 s2 s1 = 101 = 5
 → 第 5 位出错，取反</code></pre>
 <p>所以结果是：<mark class="exam-key">syndrome 的二进制值 = 出错位编号；000 表示无错。</mark> 这也解释了为什么校验位要放在 1、2、4 位：位置编号的二进制位正好对应三个校验组。</p>
-<p><strong>能力边界</strong>：(7,4) 海明码 d0=3，只能纠 1 位错，或检 2 位错；如果同时错 2 位，syndrome 可能指向一个错误位置，导致“越纠越错”。要既纠 1 位又检 2 位，需要扩展海明码（增加总校验位）。</p>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="(7,4) 海明码：数据 1010 编码为 0110010，第 5 位出错后 syndrome=101" data-src="/408-review/assets/img/cn-hamming-example.svg" href="/408-review/assets/img/cn-hamming-example.svg">
+<img alt="海明码 1010 的编码、出错和 syndrome 定位示例" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-hamming-example.svg"/>
+</a>
+<figcaption>用奇校验：数据 1010 → 码字 0110010；第 5 位 0→1 后，s4s2s1=101=5，定位到第 5 位。</figcaption>
+</figure><p><strong>能力边界</strong>：(7,4) 海明码 d0=3，只能纠 1 位错，或检 2 位错；如果同时错 2 位，syndrome 可能指向一个错误位置，导致“越纠越错”。要既纠 1 位又检 2 位，需要扩展海明码（增加总校验位）。</p>
 
 <h2 id="err-pitfalls">六、易错点与收束</h2>
 <ul>
 <li><strong>“CRC 的商要发送”</strong>：错；发送的是“数据 + 余数”，商不发送。</li>
-<li><strong>“CRC 能纠错”</strong>：CRC 通常只检错；纠错要靠重传或额外纠错码。</li>
+<li><strong>“CRC 能纠错”</strong>：CRC 码本身可具备纠错能力，但数据链路层只用它检错；出错直接丢弃/重传。</li>
 <li><strong>“d0=3 能纠 3 位错”</strong>：d0=3 只能纠 1 位错（2t+1≤3）。</li>
 <li><strong>“d0=4 能同时纠 2 检 3”</strong>：不能；d0=4 可纠 1，或检 3，或检 2 纠 1，不能同时取最大。</li>
 <li><strong>“海明码能纠 2 位”</strong>：(7,4) 海明码只能纠 1 位；纠 2 位需要 d0≥5。</li>

@@ -47,10 +47,22 @@
 <p>四种方法的核心区别是“<strong>按什么单位找边界</strong>”：字符计数按长度，字节填充按字节，零比特填充按比特，违规编码按物理层编码。考试里最容易混的是字节填充和零比特填充：前者面向字节（PPP），后者面向任意比特流（HDLC）。</p>
 <p><strong>字符计数法</strong>的隐患可以用一个例子说明：第一帧计数字段写错，接收端就会把第二帧的开头当成第一帧的剩余部分，之后每一帧都跟着错位，这叫“错误传播”。<strong>字节填充</strong>要在数据中遇到 0x7E/0x7D 时插入 0x7D；<strong>零比特填充</strong>则是在数据中每出现 5 个连续 1 后插入一个 0，接收端每看到 5 个连续 1 就删掉后面的 0，二者不能互换。</p>
 <figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="帧定界、字节填充与零比特填充" data-src="/408-review/assets/img/cn-frame-transparency.svg" href="/408-review/assets/img/cn-frame-transparency.svg">
-<img alt="帧字段、字节填充和零比特填充示意" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-frame-transparency.svg"/>
+<a class="figure-link" data-action="zoom-image" data-caption="字符计数法：计数字段写错会导致后续帧错位" data-src="/408-review/assets/img/cn-char-count.svg" href="/408-review/assets/img/cn-char-count.svg">
+<img alt="字符计数法的计数字段示例" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-char-count.svg"/>
 </a>
-<figcaption>透明传输的目标：无论数据里出现什么比特/字节，接收端都能正确找到帧边界。</figcaption>
+<figcaption>字符计数法：帧头计数字段告诉接收端这一帧有多少字节；计数字段一错，后面全部错位。</figcaption>
+</figure>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="字节填充：SOH/EOT/ESC 出现在数据中时加 ESC" data-src="/408-review/assets/img/cn-byte-stuffing.svg" href="/408-review/assets/img/cn-byte-stuffing.svg">
+<img alt="字节填充示例：特殊字节前插入 ESC" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-byte-stuffing.svg"/>
+</a>
+<figcaption>字节填充：数据里的 SOH/EOT/ESC 前插入 ESC，接收端按 ESC 还原。</figcaption>
+</figure>
+<figure class="article-figure">
+<a class="figure-link" data-action="zoom-image" data-caption="零比特填充：每 5 个连续 1 后插入 0" data-src="/408-review/assets/img/cn-bit-stuffing.svg" href="/408-review/assets/img/cn-bit-stuffing.svg">
+<img alt="零比特填充示例：每五个连续1后插入0" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-bit-stuffing.svg"/>
+</a>
+<figcaption>零比特填充：发送端每 5 个连续 1 后插 0，接收端每 5 个连续 1 后删 0；定界符只出现在帧边界。</figcaption>
 </figure>
 
 <h2 id="dll-ppp">四、PPP 帧与字节填充</h2>

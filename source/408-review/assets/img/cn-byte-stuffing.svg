@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" role="img" aria-label="字节填充：帧定界符出现在数据中时加 ESC">
+  <rect width="1120" height="520" fill="#fffdf8"/>
+  <text x="560" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">字节填充：数据里的 SOH/EOT/ESC 前面加 ESC</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="80" font-weight="700">原始数据（SOH 开头、EOT 结尾，中间出现了定界符）</text>
+    <g font-size="12">
+      <rect x="55" y="100" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="90" y="125" text-anchor="middle">SOH</text>
+      <rect x="125" y="100" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="152" y="125" text-anchor="middle">A</text>
+      <rect x="180" y="100" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="207" y="125" text-anchor="middle">EOT</text>
+      <rect x="235" y="100" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="262" y="125" text-anchor="middle">SOH</text>
+      <rect x="290" y="100" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="317" y="125" text-anchor="middle">ESC</text>
+      <rect x="345" y="100" width="55" height="40" fill="#e9f2f6" stroke="#4d7f95"/><text x="372" y="125" text-anchor="middle">SOH</text>
+      <rect x="400" y="100" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="435" y="125" text-anchor="middle">EOT</text>
+    </g>
+
+    <text x="45" y="205" font-weight="700">发送到链路上的帧（特殊字节前插入 ESC）</text>
+    <g font-size="12">
+      <rect x="55" y="225" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="90" y="250" text-anchor="middle">SOH</text>
+      <rect x="125" y="225" width="95" height="40" fill="#f3e6e6" stroke="#b54b45"/><text x="172" y="250" text-anchor="middle">ESC EOT</text>
+      <rect x="220" y="225" width="95" height="40" fill="#f3e6e6" stroke="#b54b45"/><text x="267" y="250" text-anchor="middle">ESC SOH</text>
+      <rect x="315" y="225" width="95" height="40" fill="#f3e6e6" stroke="#b54b45"/><text x="362" y="250" text-anchor="middle">ESC ESC</text>
+      <rect x="410" y="225" width="95" height="40" fill="#f3e6e6" stroke="#b54b45"/><text x="457" y="250" text-anchor="middle">ESC SOH</text>
+      <rect x="505" y="225" width="70" height="40" fill="#f7ecd9" stroke="#a8782c"/><text x="540" y="250" text-anchor="middle">EOT</text>
+    </g>
+    <text x="45" y="300" font-size="12" fill="#52605a">接收端看到 ESC，就知道下一个字节是普通数据，不是定界符；把 ESC 去掉即可还原。</text>
+
+    <rect x="45" y="335" width="1030" height="100" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="360" font-weight="700">为什么不能直接发 SOH/EOT</text>
+    <text x="65" y="384" font-size="13">数据字段里可能本来就有和帧头/帧尾相同的字节；如果直接发，接收端会把它误认成“帧结束”。</text>
+    <text x="65" y="407" font-size="13">字节填充用 ESC 转义：ESC + 原字节；接收端按 ESC 还原。这就是“透明传输”。</text>
+    <text x="65" y="428" font-size="12" fill="#b54b45">注意：ESC 自己也要转义，所以出现 ESC 时发“ESC ESC”。</text>
+
+    <text x="45" y="480" font-size="12" fill="#6b777f">PPP 的字节填充也是同一思想，只是用 0x7D 作为转义字节。</text>
+  </g>
+</svg>

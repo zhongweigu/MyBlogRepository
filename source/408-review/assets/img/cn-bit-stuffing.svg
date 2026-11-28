@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 340" role="img" aria-label="零比特填充：每五个连续1后插入一个0">
+  <rect width="1100" height="340" fill="#fffdf8"/>
+  <text x="550" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">零比特填充：数据里每出现 5 个连续 1，就插入一个 0</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <text x="45" y="80" font-weight="700">原始数据（含长串连续 1，容易和定界符混淆）</text>
+    <g font-size="13">
+      <rect x="55" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="75" y="125" text-anchor="middle">0</text>
+      <rect x="95" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="115" y="125" text-anchor="middle">1</text>
+      <rect x="135" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="155" y="125" text-anchor="middle">1</text>
+      <rect x="175" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="195" y="125" text-anchor="middle">1</text>
+      <rect x="215" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="235" y="125" text-anchor="middle">1</text>
+      <rect x="255" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="275" y="125" text-anchor="middle">1</text>
+      <rect x="295" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="315" y="125" text-anchor="middle">1</text>
+      <rect x="335" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="355" y="125" text-anchor="middle">1</text>
+      <rect x="375" y="100" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="395" y="125" text-anchor="middle">0</text>
+      <text x="430" y="125" font-size="12">← 连续 1 太多，需要填充</text>
+    </g>
+
+    <text x="45" y="185" font-weight="700">发送到链路上的数据（橙色 0 是插入的）</text>
+    <g font-size="13">
+      <rect x="55" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="75" y="230" text-anchor="middle">0</text>
+      <rect x="95" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="115" y="230" text-anchor="middle">1</text>
+      <rect x="135" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="155" y="230" text-anchor="middle">1</text>
+      <rect x="175" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="195" y="230" text-anchor="middle">1</text>
+      <rect x="215" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="235" y="230" text-anchor="middle">1</text>
+      <rect x="255" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="275" y="230" text-anchor="middle">1</text>
+      <rect x="295" y="205" width="40" height="38" fill="#ffd9b0" stroke="#b54b45"/><text x="315" y="230" text-anchor="middle" font-weight="700">0</text>
+      <rect x="335" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="355" y="230" text-anchor="middle">1</text>
+      <rect x="375" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="395" y="230" text-anchor="middle">1</text>
+      <rect x="415" y="205" width="40" height="38" fill="#e9f2f6" stroke="#4d7f95"/><text x="435" y="230" text-anchor="middle">0</text>
+      <text x="470" y="230" font-size="12">← 插入 0 后，数据里不会再出现 6 个连续 1</text>
+    </g>
+    <text x="45" y="285" font-size="12" fill="#52605a">接收端每收到 5 个连续 1，就删掉后面的 0，恢复原数据；定界符 01111110 只出现在帧边界。</text>
+    <text x="45" y="310" font-size="12" fill="#b54b45">HDLC 使用零比特填充；PPP 是面向字节的，使用字节填充，两种不要混。</text>
+  </g>
+</svg>

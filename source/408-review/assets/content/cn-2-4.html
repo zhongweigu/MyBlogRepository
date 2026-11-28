@@ -9,7 +9,7 @@
 <li><a href="#mac-aloha">二、ALOHA</a></li>
 <li><a href="#mac-csma">三、CSMA 与坚持策略</a></li>
 <li><a href="#mac-cd">四、CSMA/CD</a></li>
-<li><a href="#mac-min">五、最短帧长与二进制退避</a></li>
+<li><a href="#mac-min">五、最短帧长、参数与退避</a></li>
 <li><a href="#mac-ca">六、CSMA/CA 概览与轮询</a></li>
 <li><a href="#mac-pitfalls">七、易错点与收束</a></li>
 </ul></div>
@@ -87,60 +87,78 @@
 </table></div>
 <p>注意：<mark>“先听”减少的是“明知忙还发”的冲突，不是所有冲突</mark>。两个站点可能几乎同时听到空闲，然后同时开始发送；信号传播到对方需要时间，等它们发现冲突时，冲突已经发生了。</p>
 
-<h2 id="mac-cd">四、CSMA/CD</h2>
-<p><strong>CSMA/CD = 载波监听 + 多路访问 + 冲突检测</strong>。它不是“听了就不会撞”，而是“听了再发，发的时候还继续听，撞了马上停”。共享式以太网用的就是这套规则。</p>
+<h2 id="mac-cd">四、CSMA/CD：基本思想与争用期</h2>
 
-<h3 id="mac-cd-why">4.1 三个动作分别在解决什么</h3>
+<h3 id="mac-cd-idea">4.1 基本思想与工作流程</h3>
+<p>CSMA/CD 可以压缩成四句话：<mark class="exam-key">先听后发、边听边发、冲突停发、随机重发</mark>。</p>
 <ol>
-<li><strong>先听后发（listen before talk）</strong>：发送前先听信道。如果已经有站点在发，就暂时不发，避免主动去破坏别人的帧。</li>
-<li><strong>边发边听（listen while talking）</strong>：发送过程中继续监听。因为信号传播有时延，发送前听到空闲，并不代表发送过程中不会有人也开始发；只有<mark>边发边听</mark>，才能在冲突发生的当时发现它。</li>
-<li><strong>冲突后退避（back off）</strong>：检测到冲突后立即停止，发一个短暂的 jam（干扰）信号，让网络上其他站点也明确知道“发生了冲突”，然后随机等待一段时间再重试。继续把已经损坏的帧发完没有意义，只会浪费信道。</li>
+<li><strong>先听后发</strong>：发送前先监听信道。如果已经有站点在发，就等它发完，避免主动撞上去。</li>
+<li><strong>边听边发</strong>：开始发送后仍继续监听。因为信号传播需要时间，“发送前听到空闲”不代表发送过程中不会有人也开始发；只有边发边听，才能在冲突发生时发现。</li>
+<li><strong>冲突停发</strong>：一旦检测到冲突，立即停止发送当前帧。继续发一个已经损坏的帧没有意义，只会占用信道。</li>
+<li><strong>随机重发</strong>：停止后发一个短暂的干扰信号（jam），让其他站也确认发生冲突；然后按退避算法随机等待，再重新监听、重试。</li>
 </ol>
-<p>这里的关键是：<mark>“检测冲突”要求发送方在冲突信号返回时仍然在发送</mark>。如果帧已经发完，发送方不再监听，就会误以为发送成功；这就是最短帧长存在的原因。</p>
+<p>所以 CSMA/CD 不是“听了就不会撞”，而是“<mark>听了再发，发的时候还听，撞了马上停</mark>”。</p>
 
-<h3 id="mac-cd-collision">4.2 为什么“先听”仍然会撞</h3>
-<p>假设 A、D 是共享总线上相距最远的两个站点，单程传播时延为 τ。A 在 t=0 开始发送，信号要经过 τ 才能到达 D。就在 A 的信号到达 D 之前的一瞬间，D 监听信道，发现<strong>自己这里</strong>还没有信号，于是也开始发送。</p>
-<p>此时 A 和 D 都认为自己“听过了，信道空闲”，但两个信号会在链路上某处相遇并叠加，发生冲突。这个例子说明：<mark>载波监听只能感知本地此刻的忙闲，不能预知“正在路上”的信号</mark>。传播时延越大，这个“听错”的窗口越宽。</p>
-
-<h3 id="mac-cd-worst">4.3 最坏情况为什么是 2τ</h3>
-<p>要让 CSMA/CD 在任何情况下都能检测到冲突，必须考虑<strong>最坏情况</strong>：距离最远的两个站点 A、D，且 D 在“A 的信号刚好到达前”开始发送。</p>
-<ol>
-<li>t=0：A 开始发送第一个比特，信号向 D 传播，经过 τ 到达 D；</li>
-<li>t≈τ⁻：D 在 A 的信号到达前监听，认为信道空闲，开始发送；</li>
-<li>t≈τ：A 的信号与 D 的信号在 D 附近相遇，发生碰撞；D 立刻检测到冲突；</li>
-<li>碰撞后的错误信号从 D 向 A 传播，再经过 τ 回到 A；</li>
-<li>t≈2τ：A 收到被破坏的信号，检测到冲突。</li>
-</ol>
-<p>所以 A 从开始发送到“确知没有冲突”的时间窗口是 <mark class="exam-key">2τ（往返传播时延）</mark>。这就是以太网的<strong>争用期</strong>（slot time）。A 必须在这整段时间内都还在发送，才能接收到冲突信号；如果提前发完，就会漏检。</p>
+<h3 id="mac-cd-worst">4.2 什么是争用期，为什么是 2τ</h3>
+<p><strong>争用期</strong>是发送方从开始发送，到“能够确认没有发生冲突”的最长时间。它要按最坏情况算：</p>
+<ul>
+<li>共享总线上相距最远的两个站 A、D，单程传播时延为 τ；</li>
+<li>A 在 t=0 开始发送，信号经过 τ 才能到达 D；</li>
+<li>D 在 A 的信号到达前的一瞬间监听，发现自己这里空闲，也开始发送；</li>
+<li>两个信号在 D 附近碰撞，碰撞后的错误信号再从 D 返回 A，又需要 τ；</li>
+<li>A 在约 2τ 时才收到错误信号，检测到冲突。</li>
+</ul>
+<p>因此：</p>
+<p><mark class="exam-key">争用期 = 2τ（往返传播时延）</mark></p>
+<p>为什么不是 τ？因为 A 不仅要等自己的信号传到最远站，还要等冲突信号从最远站传回来；这是“一个来回”。</p>
 <figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="CSMA/CD 的监听、冲突检测与最坏情况 2τ" data-src="/408-review/assets/img/cn-csma-cd.svg" href="/408-review/assets/img/cn-csma-cd.svg">
-<img alt="CSMA/CD 先听后发、边发边听和最坏冲突检测时间" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-csma-cd.svg"/>
+<a class="figure-link" data-action="zoom-image" data-caption="CSMA/CD 最坏情况：A 的信号到 D 后 D 才发，冲突信号再回到 A，需 2τ" data-src="/408-review/assets/img/cn-csma-cd.svg" href="/408-review/assets/img/cn-csma-cd.svg">
+<img alt="CSMA/CD 最坏冲突检测时间 2τ" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-csma-cd.svg"/>
 </a>
-<figcaption>最远两个站点 A、D 的最坏情况：A 的信号到 D 后 D 才发，冲突信号再回到 A，需 2τ。图中把“A 发送”“D 发送”“冲突返回”分开画，是为了看清时间先后。</figcaption>
+<figcaption>最远站点 A、D 的最坏情况；争用期 2τ 是检测冲突的时间窗口。</figcaption>
 </figure>
 
-<h3 id="mac-cd-jam">4.4 检测到冲突之后做什么</h3>
-<p>站点检测到冲突后，不会继续把当前帧发完，而是：</p>
+<h2 id="mac-min">五、最短帧长、参数与退避</h2>
+
+<h3 id="mac-cd-minframe">5.1 最短帧长怎么算，为什么</h3>
+<p>发送方必须在冲突信号返回之前<strong>仍在发送</strong>，否则帧已经发完、不再监听，就会漏检冲突。设帧长 L（bit）、发送速率 R（b/s），发送时延为 L/R，则必须：</p>
+<p><mark class="exam-key"><code>L/R ≥ 2τ</code>，所以 <code>L_min = 2τ × R</code></mark></p>
+<p><strong>10Mb/s 以太网</strong>的争用期是 51.2μs：</p>
+<pre><code class="language-text">L_min = 2τ × R
+     = 51.2μs × 10Mb/s
+     = 512bit
+     = 64B</code></pre>
+<p>所以 10Mb/s 以太网的最短帧长是 <mark class="exam-key">64B</mark>。这个 64B 是从<strong>目的 MAC 地址到 FCS</strong>，不含前导码/SFD；数据不足 46B 时要填充，加上 6+6+2+4=18B 的首尾，正好 64B。</p>
+<p>换个角度记：<mark class="exam-key">在 10Mb/s 以太网中，争用期内正好能发 512bit，也就是 64B；如果 64B 内没有检测到冲突，说明最坏冲突窗口已经过去，之后不会再发生冲突，因此最短帧长定为 64B</mark>。如果帧只有 40B，发送时延只有 32μs，小于 51.2μs，可能在冲突信号回来前就发完了，CSMA/CD 就失效。</p>
+
+<h3 id="mac-cd-params">5.2 以太网参数</h3>
+<div class="article-table"><table>
+<thead><tr><th>参数</th><th>10Mb/s 以太网</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td>争用期 2τ</td><td><mark class="exam-key">51.2μs</mark></td><td>最坏冲突检测时间</td></tr>
+<tr><td>争用期内可发送</td><td><mark class="exam-key">512bit = 64B</mark></td><td>最短帧长的来源</td></tr>
+<tr><td>最短帧长</td><td><mark class="exam-key">64B</mark></td><td>小于它要填充</td></tr>
+<tr><td>帧间最小间隔</td><td><mark class="exam-key">9.6μs = 96bit 发送时间</mark></td><td>发送前信道需保持空闲的最短时间</td></tr>
+</tbody>
+</table></div>
+<p>因此“检测信道”不是“看到空闲就立刻发”，而是：<mark class="exam-key">信道在 9.6μs（96 个比特时间）内保持空闲，才开始发送</mark>。这段时间让接收方有时间处理上一帧，也防止一个站连续霸占信道。</p>
+
+<h3 id="mac-cd-backoff">5.3 退避算法</h3>
+<p>发生第 i 次冲突后：</p>
 <ol>
-<li><strong>立即停止</strong>发送当前帧；</li>
-<li>发送<strong>jam 信号</strong>（人为的干扰信号），保证网络上其他站点也能可靠地检测到冲突；</li>
-<li>进入<strong>二进制指数退避</strong>，随机等待若干时间；</li>
-<li>退避结束后重新监听，信道空闲再尝试发送。</li>
+<li>令 <code>k = min(i, 10)</code>；</li>
+<li>从整数集合 <code>{0, 1, 2, …, 2^k−1}</code> 中随机选一个数 r；</li>
+<li>等待 <code>r × 2τ</code> 的退避时间；10Mb/s 以太网中 <code>2τ=51.2μs</code>，即等 <code>r×51.2μs</code>；</li>
+<li>退避结束后重新监听，信道空闲再发；连续冲突 16 次后丢弃该帧并报告。</li>
 </ol>
-<p>为什么不能“撞了还继续发”？因为冲突已经破坏了帧，继续发只会占用信道；越早停止，信道越早空出来给别的站点重试。</p>
+<p>所以“退避时间”不是固定值，而是<strong>随机选出的 r 个争用期</strong>。冲突越多，k 越大，可选范围越大，降低再次碰撞的概率。</p>
+<p>易错：这里的 <code>k</code> 是“重传次数”截断到 10，不是帧长；<code>r</code> 是随机整数，不是固定的 1。</p>
 
-<h3 id="mac-cd-domain">4.5 冲突域与全双工</h3>
-<p>CSMA/CD 只在<strong>共享介质</strong>中有意义：多个站点连在同一根总线/同一个 Hub 上，彼此竞争同一个信道，构成一个<strong>冲突域</strong>。Hub 的所有端口在同一个冲突域里；交换机的每个端口是一个独立的冲突域。</p>
-<p>当以太网变成<strong>全双工交换式</strong>后，每条链路上只有两个端点，发送和接收各有一对线，站点不需要和任何人竞争，也就不会发生冲突，CSMA/CD 可以关闭。所以：<mark>“共享式以太网用 CSMA/CD，全双工交换式以太网不用”</mark>。</p>
+<h3 id="mac-cd-jam">5.4 强化碰撞</h3>
+<p>检测到冲突后，发送方还要继续发送一段<strong>人为干扰信号（jam）</strong>：10Mb/s 以太网通常发 <mark class="exam-key">32bit</mark>，100Mb/s 以太网可发 <mark class="exam-key">48bit</mark>。目的是让网络上所有相关站点都可靠地检测到冲突，避免有的站只收到很弱的冲突信号而漏判。</p>
 
-<h2 id="mac-min">五、最短帧长与二进制退避</h2>
-<p>由 4.3 可知，发送方必须在 2τ 内持续发送，才能等到冲突信号返回。设帧长为 L（bit），发送速率为 R（b/s），发送时延为 L/R，则必须：</p>
-<p><mark class="exam-key"><code>L/R ≥ 2τ</code>，即 <code>L ≥ 2τ × R</code></mark>。</p>
-<p>因此：<mark class="exam-key"><code>L_min = 2τ × R</code></mark>。这个帧长是<strong>从目的 MAC 地址到 FCS</strong> 的长度，不含前导码/SFD。</p>
-<p>10Mb/s 以太网的争用期 2τ=51.2μs，所以 <mark class="exam-key">L_min=51.2×10⁻⁶×10⁷=512bit=64B</mark>。反过来，如果帧只有 40B，发送时延只有 32μs，小于 51.2μs；发送方可能在冲突信号回来之前就发完了，无法检测冲突，CSMA/CD 就失效了。</p>
-<p>数据字段不足 46B 时，MAC 层要<strong>填充</strong>到 46B，加上 6+6+2+4=18B 的首尾，<mark class="exam-key">正好 64B</mark>。以太网还有<strong>最小帧间隔</strong> 96 个比特时间，让接收方有时间处理上一帧。</p>
-<p><strong>二进制指数退避（truncated binary exponential backoff）</strong>：第 i 次冲突后，从 {0,1,…,2^i−1} 中随机取一个整数 k，等待 k×512 个比特时间；i 超过 10 后，范围不再翻倍（最多 1024 个时隙）；连续 16 次冲突后丢弃该帧并报告。冲突越多，退避窗口越大，降低“刚退避完又撞上”的概率。</p>
-<p>这里有两个容易混的点：<mark>争用期 2τ 是“检测冲突的时间窗口”，退避时隙是“撞了之后等多久”</mark>；前者由传播时延决定，后者由冲突次数决定。</p>
+<h3 id="mac-cd-gap">5.5 帧间最小间隔</h3>
+<p>一个帧发完后，不能立刻发下一帧；要等 <mark class="exam-key">96 个比特时间</mark>。10Mb/s 下就是 <mark class="exam-key">9.6μs</mark>。所以发送前的判断是：<strong>若信道在 9.6μs 内保持空闲，则开始发送；否则继续等待。</strong></p>
 
 <h2 id="mac-ca">六、CSMA/CA 概览与轮询</h2>
 <p>无线局域网不能照搬 CSMA/CD。有线站点可以比较“自己发的信号”和“收到的信号”来检测冲突；无线发送时，自己的发射信号会淹没接收信号，而且远近效应、隐藏终端让“边发边听”很不可靠。因此 802.11 改用 <strong>CSMA/CA（冲突避免）</strong>。</p>

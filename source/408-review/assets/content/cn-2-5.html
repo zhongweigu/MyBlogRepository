@@ -106,7 +106,11 @@
 <p>更完整地说，PCF 把时间组织成“超帧”：AP 用 Beacon 宣告无竞争期（CFP）开始，然后用 CF-Poll 依次点名；被点到的站在 SIFS 后发送；AP 用 CF-End 结束 CFP，之后大家回到 DCF 的竞争期（CP）。所以 <mark class="exam-key">DCF 和 PCF 可以在同一个 BSS 里交替出现</mark>，不是二选一把另一种关掉。</p>
 <p>下面重点讲默认的 DCF；PCF 的细节知道“AP 轮询、无竞争期、PIFS 优先”即可。</p>
 
-<h3 id="wifi-ifs">6.1 IFS：为什么“空闲”还要再等</h3>
+<h3 id="wifi-arq">6.1 引入 ARQ：802.11 的确认重传</h3>
+<p><strong><mark class="exam-key">ARQ（Automatic Repeat reQuest，自动重传请求）</mark></strong>是一类“确认 + 超时 + 重传”的可靠传输机制：接收方正确收到就回 ACK；发送方等不到 ACK 就重传。停等、GBN、SR 都是 ARQ 的不同实现。</p>
+<p>802.11 的数据帧使用<strong>停等式链路层 ARQ</strong>：发一个数据帧，等一个 ACK；ACK 超时/丢失就重传。它和 TCP 的 ARQ 不是同一层：<mark>802.11 的 ACK 是链路层确认，只保证“这一跳/这个帧”被收到，不代表端到端应用数据已经可靠交付</mark>。</p>
+
+<h3 id="wifi-ifs">6.2 IFS：为什么“空闲”还要再等</h3>
 <p>如果多个站同时听到“信道空闲”就立刻发，还是会一起撞。802.11 在“监听空闲”之后再加一段<strong>帧间间隔 IFS</strong>，用不同的等待长度区分优先级：</p>
 <div class="article-table"><table>
 <thead><tr><th>IFS</th><th>长短</th><th>用在哪里</th></tr></thead>
@@ -119,29 +123,39 @@
 <p>关系是 <mark class="exam-key">SIFS &lt; PIFS &lt; DIFS</mark>。为什么 SIFS 最短？因为 ACK/CTS 是对上一帧的立即响应，必须比别的站的新数据更早抢到信道；如果大家都等 DIFS，ACK 就可能被新数据压住。</p>
 <p>注意：<strong>IFS 不是“随机退避”</strong>。IFS 是固定的优先级间隔；随机退避是在 IFS 之后、为了错开多个竞争站而再加的随机等待。</p>
 
-<h3 id="wifi-flow">6.2 一次 DCF 发送的完整流程</h3>
+<h3 id="wifi-flow">6.3 一次 DCF 发送的完整流程</h3>
+<p>把 DCF 的 CSMA/CA 压缩成三条规则：</p>
 <ol>
-<li><strong>监听</strong>：如果信道忙，继续听；如果空闲，先等一个 <strong>DIFS</strong>（确保信道持续空闲）。</li>
-<li><strong>首次发送</strong>：如果这是第一次尝试，且 DIFS 期间信道一直空闲，可以直接发送整个数据帧。否则进入退避。</li>
-<li><strong>随机退避</strong>：从 [0, CW] 里随机选一个退避值（单位是时隙）；每经过一个空闲时隙减 1；如果信道变忙，<strong>冻结</strong>计数器，等信道再次空闲并持续 DIFS 后继续减；减到 0 才发送。</li>
-<li><strong>RTS/CTS（可选）</strong>：先发 RTS 预约信道，AP 回 CTS；周围站听到后按 Duration 设置 NAV，主动推迟发送。</li>
-<li><strong>DATA</strong>：发送数据帧；接收方正确收到后，等 <strong>SIFS</strong> 回 <strong>ACK</strong>。</li>
-<li><strong>失败重试</strong>：发送方在超时前没收到 ACK，就认为失败；把竞争窗口 CW 增大（二进制指数退避），重新选退避值再试；超过重试上限就丢弃。</li>
+<li><strong>可以直接发送的情况</strong>：如果检测到信道空闲，而且这是<strong>第一次尝试发送</strong>（不属于下面三种例外），就等待一个 <strong>DIFS</strong>；DIFS 期间信道持续空闲，则立即发送整个数据帧，<mark class="exam-key">不进入随机退避</mark>。</li>
+<li><strong>三种必须退避的例外</strong>：
+  <ul>
+  <li>① 这是<strong>重传</strong>，不是第一次发送；</li>
+  <li>② 这是第一次发送，但发送前<strong>检测到信道忙</strong>；</li>
+  <li>③ 已经<strong>收到 ACK、要发送下一个数据帧</strong>。</li>
+  </ul>
+  出现任一情况，设置退避计时器：信道忙时<strong>冻结</strong>；只有信道连续空闲一个 <strong>DIFS</strong> 后才恢复计时；计时减到 0 时立即发送。</li>
+<li><strong>确认之后</strong>：发送方收到 ACK，说明这一帧成功；如果还有下一帧要发，<strong>回到步骤 2</strong>（仍要退避）。如果没收到 ACK，增大竞争窗口 CW，再回到步骤 2 重新退避重试。</li>
 </ol>
-<p>这里有一个容易错的细节：<mark>退避计数器只在信道空闲时递减，信道忙时冻结，不是清零</mark>。这样多个站不会因为一次忙就全部重新随机，能保持相对的排队顺序。</p>
-
-<h3 id="wifi-arq">6.3 什么是 ARQ</h3>
-<p><strong><mark class="exam-key">ARQ（Automatic Repeat reQuest，自动重传请求）</mark></strong>是一类“确认 + 超时 + 重传”的可靠传输机制：接收方正确收到就回 ACK；发送方等不到 ACK 就重传。停等、GBN、SR 都是 ARQ 的不同实现。</p>
-<p>802.11 的数据帧使用<strong>停等式链路层 ARQ</strong>：发一个数据帧，等一个 ACK；ACK 超时/丢失就重传。它和 TCP 的 ARQ 不是同一层：<mark>802.11 的 ACK 是链路层确认，只保证“这一跳/这个帧”被收到，不代表端到端应用数据已经可靠交付</mark>。</p>
+<p>所以“第一次发送”不是“永远不退避”：<mark class="exam-key">只有“第一次发送 + 信道空闲 + DIFS 持续空闲”三者同时满足，才可以不退避</mark>；第一次发送但当时信道忙，等空闲后仍然要退避。</p>
+<p>RTS/CTS 是可选的预约机制：需要时先发 RTS，AP 回 CTS，周围站按 Duration 设置 NAV；RTS/CTS/DATA/ACK 之间的帧间间隔用 <strong>SIFS</strong>，不再重新退避。</p>
 
 <h3 id="wifi-nav">6.4 NAV、RTS/CTS 与 Duration 字段</h3>
 <p>无线还有一套“<mark class="exam-key">虚拟载波监听</mark>”：帧头里的 <strong>Duration（持续时间）</strong>字段告诉周围站“信道还要被占用多久”。收到帧的站把这个时间写入自己的 <strong><mark class="exam-key">NAV（Network Allocation Vector，网络分配向量）</mark></strong>；NAV 没减到 0 之前，即使物理层听到空闲，也不发送。这样不用真的听完整帧，就能提前避开。</p>
 <figure class="article-figure">
-<a class="figure-link" data-action="zoom-image" data-caption="802.11 CSMA/CA 的 DIFS、SIFS、RTS/CTS、DATA、ACK 与 NAV 时间轴" data-src="/408-review/assets/img/cn-wifi-csma-ca-v2.svg" href="/408-review/assets/img/cn-wifi-csma-ca-v2.svg">
-<img alt="802.11 CSMA/CA 完整时序：DIFS、RTS、SIFS、CTS、DATA、ACK、NAV" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-wifi-csma-ca-v2.svg"/>
+<a class="figure-link" data-action="zoom-image" data-caption="802.11 CSMA/CA 的 DIFS、SIFS、RTS/CTS、DATA、ACK 与 NAV 时间轴" data-src="/408-review/assets/img/cn-wifi-csma-ca-v3.svg" href="/408-review/assets/img/cn-wifi-csma-ca-v3.svg">
+<img alt="802.11 CSMA/CA 完整时序：DIFS、RTS、SIFS、CTS、DATA、ACK、NAV" class="article-img" decoding="async" loading="lazy" src="/408-review/assets/img/cn-wifi-csma-ca-v3.svg"/>
 </a>
 <figcaption>图中紫色条是 NAV：Duration 从当前帧结束起算，收到 RTS/CTS/DATA 的站分别按帧里的值回避到 ACK 结束；SIFS 出现在 RTS→CTS、CTS→DATA、DATA→ACK 之间。</figcaption>
 </figure>
+<p><strong>RTS/CTS 帧格式</strong>（控制帧，短小，只负责预约）：</p>
+<div class="article-table"><table>
+<thead><tr><th>帧</th><th>字段</th><th>长度</th></tr></thead>
+<tbody>
+<tr><td>RTS</td><td>Frame Control + Duration + RA + TA + FCS</td><td>2+2+6+6+4 = 20B</td></tr>
+<tr><td>CTS</td><td>Frame Control + Duration + RA + FCS</td><td>2+2+6+4 = 14B</td></tr>
+</tbody>
+</table></div>
+<p>RA 是接收方地址，TA 是发送方地址；Duration 就是下面要填的预约时间。</p>
 <p><strong>Duration 到底包含什么？</strong>记住“从当前帧结束，到 ACK 结束”：</p>
 <div class="article-table"><table>
 <thead><tr><th>帧</th><th>Duration 字段（从当前帧结束算）</th></tr></thead>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 340" role="img" aria-label="字符计数法的计数字段">
+  <rect width="1060" height="340" fill="#fffdf8"/>
+  <text x="530" y="32" text-anchor="middle" font-family="serif" font-size="24" font-weight="700" fill="#24313a">字符计数法：帧头用一个数，告诉接收端“这一帧有几个字节”</text>
+  <g font-family="sans-serif" font-size="14" fill="#24313a">
+    <g font-size="13">
+      <rect x="50" y="85" width="60" height="45" fill="#f7ecd9" stroke="#a8782c"/><text x="80" y="112" text-anchor="middle">5</text>
+      <rect x="110" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="140" y="112" text-anchor="middle">1</text>
+      <rect x="170" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="200" y="112" text-anchor="middle">2</text>
+      <rect x="230" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="260" y="112" text-anchor="middle">3</text>
+      <rect x="290" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="320" y="112" text-anchor="middle">4</text>
+
+      <rect x="400" y="85" width="60" height="45" fill="#f7ecd9" stroke="#a8782c"/><text x="430" y="112" text-anchor="middle">4</text>
+      <rect x="460" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="490" y="112" text-anchor="middle">5</text>
+      <rect x="520" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="550" y="112" text-anchor="middle">6</text>
+      <rect x="580" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="610" y="112" text-anchor="middle">7</text>
+
+      <rect x="700" y="85" width="60" height="45" fill="#f7ecd9" stroke="#a8782c"/><text x="730" y="112" text-anchor="middle">4</text>
+      <rect x="760" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="790" y="112" text-anchor="middle">8</text>
+      <rect x="820" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="850" y="112" text-anchor="middle">9</text>
+      <rect x="880" y="85" width="60" height="45" fill="#e9f2f6" stroke="#4d7f95"/><text x="910" y="112" text-anchor="middle">A</text>
+    </g>
+
+    <path d="M50 155 Q150 190 350 155" fill="none" stroke="#a8782c" stroke-width="2"/>
+    <text x="200" y="205" text-anchor="middle">第1帧：5 个字符（含计数字段）</text>
+    <path d="M400 155 Q490 190 640 155" fill="none" stroke="#a8782c" stroke-width="2"/>
+    <text x="520" y="205" text-anchor="middle">第2帧：4 个字符</text>
+    <path d="M700 155 Q790 190 940 155" fill="none" stroke="#a8782c" stroke-width="2"/>
+    <text x="820" y="205" text-anchor="middle">第3帧：4 个字符</text>
+
+    <rect x="45" y="240" width="970" height="55" rx="4" fill="#f7f5ee" stroke="#c9c0ae"/>
+    <text x="65" y="263" font-weight="700">优点与致命问题</text>
+    <text x="65" y="285" font-size="12">实现简单；但计数字段一旦出错，接收端会按错误长度切帧，后续所有帧跟着错位（错误传播）。</text>
+  </g>
+</svg>
